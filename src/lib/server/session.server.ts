@@ -11,4 +11,5 @@ export type SessionData = {
 export const useAppSession = () =>
   useSession<SessionData>({
     password: process.env.SESSION_SECRET!,
+    maxAge: 60 * 60 * 24 * 30, // 30 days
   })
