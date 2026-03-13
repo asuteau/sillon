@@ -1,6 +1,10 @@
 # Sillon
 
-Personal vinyl record collection app, connected to Discogs.
+A personal app to browse and rediscover my vinyl record collection.
+
+Built because no existing app felt right — too cluttered, too slow, not designed
+for the moment of standing in front of your records and picking something to play.
+The name comes from the groove cut into a vinyl record.
 
 ## Stack
 
@@ -14,17 +18,18 @@ Personal vinyl record collection app, connected to Discogs.
 
 ## Features
 
-- Browse and search your Discogs collection
-- Wantlist with seller cross-referencing
-- Progressive cover art loading
+- Browse your Discogs collection with fast virtualized scrolling
+- Progressive cover art loading (color → thumbnail → HD)
 - Animated vinyl record detail view
-- Random pick — ephemeral full-screen experience to pick an album to listen to
-- PWA — installable, works offline
+- Wantlist with followed seller cross-referencing
+- **Surprise me** — a full-screen random pick experience
+- PWA — installable on mobile, works offline while crate digging
 - Dark / light / system theme
 
 ## Status
 
-Active development. See [`docs/roadmap.md`](docs/roadmap.md) for the phased plan.
+Active development — migrated from Remix to TanStack Start.
+See [`docs/roadmap.md`](docs/roadmap.md) for the full phased plan.
 
 ## Development
 
