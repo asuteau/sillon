@@ -1,8 +1,8 @@
 import { getRecentAdditions } from '#/lib/recentAdditions'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
-const collectionQueryOptions = queryOptions({
+export const collectionQueryOptions = queryOptions({
   queryKey: ['collection', { perPage: 20 }],
   queryFn: () => getRecentAdditions({ data: { perPage: 20 } }),
 })
@@ -31,8 +31,10 @@ function Collection() {
         <ul className="flex flex-col gap-3">
           {data.map((release, index) => (
             <li key={release.instance_id}>
-              <div
-                className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3"
+              <Link
+                to="/collection/$id"
+                params={{ id: String(release.id) }}
+                className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
                 style={{ animationDelay: `${index * 60}ms` }}
               >
                 <img
@@ -53,7 +55,7 @@ function Collection() {
                     {new Date(release.date_added).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                 </div>
-              </div>
+              </Link>
             </li>
           ))}
         </ul>
