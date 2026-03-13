@@ -1,13 +1,10 @@
-import { records } from '#/mocks/records'
+import { getRecentAdditions } from '#/lib/recentAdditions'
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 const collectionQueryOptions = queryOptions({
-  queryKey: ['collection'],
-  queryFn: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 300))
-    return records
-  },
+  queryKey: ['collection', { perPage: 20 }],
+  queryFn: () => getRecentAdditions({ data: { perPage: 20 } }),
 })
 
 export const Route = createFileRoute('/_authenticated/collection')({
@@ -28,35 +25,39 @@ function Collection() {
         </h1>
       </header>
 
-      <ul className="flex flex-col gap-3">
-        {data.map((record, index) => (
-          <li key={record.id}>
-            <Link
-              to="/collection/$id"
-              params={{ id: record.id }}
-              className="island-shell feature-card rise-in flex items-center justify-between rounded-2xl px-6 py-4 no-underline"
-              style={{ animationDelay: `${index * 60}ms` }}
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-semibold text-(--sea-ink)">
-                  {record.title}
-                </span>
-                <span className="text-sm text-(--sea-ink-soft)">
-                  {record.artist}
-                </span>
+      {data.length === 0 ? (
+        <p className="text-(--sea-ink-soft)">No records in your collection yet.</p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {data.map((release, index) => (
+            <li key={release.instance_id}>
+              <div
+                className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3"
+                style={{ animationDelay: `${index * 60}ms` }}
+              >
+                <img
+                  src={release.basic_information.thumb}
+                  alt={release.basic_information.title}
+                  className="h-12 w-12 rounded-lg object-cover shrink-0"
+                />
+                <div className="flex flex-1 items-center justify-between">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-semibold text-(--sea-ink)">
+                      {release.basic_information.title}
+                    </span>
+                    <span className="text-sm text-(--sea-ink-soft)">
+                      {release.basic_information.artists[0]?.name}
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-(--sea-ink-soft)">
+                    {new Date(release.date_added).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="font-mono text-xs text-(--sea-ink-soft)">
-                  {record.year}
-                </span>
-                <span className="text-(--lagoon-deep) opacity-50 transition-opacity group-hover:opacity-100">
-                  →
-                </span>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   )
 }

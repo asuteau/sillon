@@ -30,7 +30,9 @@ export type CollectionRelease = {
   }
 }
 
-export const getRecentAdditions = createServerFn().handler(async () => {
+export const getRecentAdditions = createServerFn()
+  .inputValidator((data: { perPage?: number } | undefined) => data ?? {})
+  .handler(async ({ data }) => {
   const { useAppSession } = await import('./server/session.server')
   const session = await useAppSession()
 
@@ -39,8 +41,9 @@ export const getRecentAdditions = createServerFn().handler(async () => {
 
   const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
   const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+  const perPage = data.perPage ?? 10
 
-  const url = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases?sort=added&sort_order=desc&per_page=10`
+  const url = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases?sort=added&sort_order=desc&per_page=${perPage}`
 
   const response = await fetch(url, {
     headers: {
@@ -60,6 +63,6 @@ export const getRecentAdditions = createServerFn().handler(async () => {
     throw new Error(`Discogs collection fetch failed: ${response.status}`)
   }
 
-  const data = (await response.json()) as { releases: CollectionRelease[] }
-  return data.releases
+  const json = (await response.json()) as { releases: CollectionRelease[] }
+  return json.releases
 })
