@@ -75,7 +75,7 @@ function About() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-(--line) py-3 no-underline last:border-0 hover:-translate-y-px"
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-(--line) py-3 no-underline last:border-0 hover:-translate-y-px"
               >
                 <span className="font-semibold text-(--sea-ink)">{name}</span>
                 <span className="text-sm text-(--sea-ink-soft)">
