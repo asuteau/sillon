@@ -9,19 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CollectionIdRouteImport } from './routes/collection_.$id'
+import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as AuthenticatedCollectionRouteImport } from './routes/_authenticated/collection'
+import { Route as AuthenticatedCollectionIdRouteImport } from './routes/_authenticated/collection_.$id'
 
-const CollectionRoute = CollectionRouteImport.update({
-  id: '/collection',
-  path: '/collection',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -29,60 +32,116 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CollectionIdRoute = CollectionIdRouteImport.update({
-  id: '/collection_/$id',
-  path: '/collection/$id',
+const AuthLogoutRoute = AuthLogoutRouteImport.update({
+  id: '/auth/logout',
+  path: '/auth/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedCollectionRoute = AuthenticatedCollectionRouteImport.update({
+  id: '/collection',
+  path: '/collection',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedCollectionIdRoute =
+  AuthenticatedCollectionIdRouteImport.update({
+    id: '/collection_/$id',
+    path: '/collection/$id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/collection': typeof CollectionRoute
-  '/collection/$id': typeof CollectionIdRoute
+  '/collection': typeof AuthenticatedCollectionRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/collection/$id': typeof AuthenticatedCollectionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/collection': typeof CollectionRoute
-  '/collection/$id': typeof CollectionIdRoute
+  '/collection': typeof AuthenticatedCollectionRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/collection/$id': typeof AuthenticatedCollectionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
-  '/collection': typeof CollectionRoute
-  '/collection_/$id': typeof CollectionIdRoute
+  '/_authenticated/collection': typeof AuthenticatedCollectionRoute
+  '/auth/callback': typeof AuthCallbackRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/_authenticated/collection_/$id': typeof AuthenticatedCollectionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/collection' | '/collection/$id'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/collection'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/collection/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/collection' | '/collection/$id'
-  id: '__root__' | '/' | '/about' | '/collection' | '/collection_/$id'
+  to:
+    | '/'
+    | '/about'
+    | '/collection'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/collection/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/about'
+    | '/_authenticated/collection'
+    | '/auth/callback'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/_authenticated/collection_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AboutRoute: typeof AboutRoute
-  CollectionRoute: typeof CollectionRoute
-  CollectionIdRoute: typeof CollectionIdRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthLogoutRoute: typeof AuthLogoutRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/collection': {
-      id: '/collection'
-      path: '/collection'
-      fullPath: '/collection'
-      preLoaderRoute: typeof CollectionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -92,21 +151,65 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/collection_/$id': {
-      id: '/collection_/$id'
+    '/auth/logout': {
+      id: '/auth/logout'
+      path: '/auth/logout'
+      fullPath: '/auth/logout'
+      preLoaderRoute: typeof AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/collection': {
+      id: '/_authenticated/collection'
+      path: '/collection'
+      fullPath: '/collection'
+      preLoaderRoute: typeof AuthenticatedCollectionRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/collection_/$id': {
+      id: '/_authenticated/collection_/$id'
       path: '/collection/$id'
       fullPath: '/collection/$id'
-      preLoaderRoute: typeof CollectionIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedCollectionIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedCollectionRoute: typeof AuthenticatedCollectionRoute
+  AuthenticatedCollectionIdRoute: typeof AuthenticatedCollectionIdRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedCollectionRoute: AuthenticatedCollectionRoute,
+  AuthenticatedCollectionIdRoute: AuthenticatedCollectionIdRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AboutRoute: AboutRoute,
-  CollectionRoute: CollectionRoute,
-  CollectionIdRoute: CollectionIdRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthLogoutRoute: AuthLogoutRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

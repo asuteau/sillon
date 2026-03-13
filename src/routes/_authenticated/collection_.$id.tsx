@@ -13,7 +13,7 @@ const recordQueryOptions = (id: string) =>
     },
   })
 
-export const Route = createFileRoute('/collection_/$id')({
+export const Route = createFileRoute('/_authenticated/collection_/$id')({
   loader: ({ context: { queryClient }, params: { id } }) =>
     queryClient.ensureQueryData(recordQueryOptions(id)),
   component: RecordDetail,

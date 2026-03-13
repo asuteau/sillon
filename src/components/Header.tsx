@@ -1,7 +1,12 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useMatch } from '@tanstack/react-router'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
+  const user = useMatch({
+    from: '__root__',
+    select: (match) => match.context.user,
+  })
+
   return (
     <header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) px-4 backdrop-blur-lg">
       <nav className="page-wrap flex flex-wrap items-center gap-x-3 gap-y-2 py-3 sm:py-4">
@@ -16,13 +21,15 @@ export default function Header() {
         </h2>
 
         <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:w-auto sm:flex-nowrap sm:pb-0">
-          <Link
-            to="/collection"
-            className="nav-link"
-            activeProps={{ className: 'nav-link is-active' }}
-          >
-            Collection
-          </Link>
+          {user && (
+            <Link
+              to="/collection"
+              className="nav-link"
+              activeProps={{ className: 'nav-link is-active' }}
+            >
+              Collection
+            </Link>
+          )}
           <Link
             to="/about"
             className="nav-link"
@@ -32,8 +39,23 @@ export default function Header() {
           </Link>
         </div>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-3">
           <ThemeToggle />
+          {user ? (
+            <a
+              href="/auth/logout"
+              className="rounded-full border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-sm font-semibold text-(--sea-ink) no-underline transition hover:bg-(--lagoon)/10"
+            >
+              {user.username} · Logout
+            </a>
+          ) : (
+            <a
+              href="/auth/login"
+              className="rounded-full border border-[rgba(50,143,151,0.4)] bg-[rgba(79,184,178,0.14)] px-3 py-1.5 text-sm font-semibold text-(--lagoon-deep) no-underline transition hover:bg-[rgba(79,184,178,0.24)]"
+            >
+              Connect with Discogs
+            </a>
+          )}
         </div>
       </nav>
     </header>

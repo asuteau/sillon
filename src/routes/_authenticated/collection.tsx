@@ -10,7 +10,7 @@ const collectionQueryOptions = queryOptions({
   },
 })
 
-export const Route = createFileRoute('/collection')({
+export const Route = createFileRoute('/_authenticated/collection')({
   loader: ({ context: { queryClient } }) =>
     queryClient.ensureQueryData(collectionQueryOptions),
   component: Collection,
