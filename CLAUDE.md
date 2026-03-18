@@ -15,5 +15,5 @@ Phase 1 — scaffold only, no UI dependencies yet.
 ## Important conventions
 
 - Server-only code: `*.server.ts` suffix
-- Session via `vinxi/http` useSession, token never exposed client-side
+- Session via `@tanstack/react-start/server` useSession, token never exposed client-side
 - pnpm only

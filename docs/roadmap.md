@@ -45,30 +45,81 @@ pnpm add zod
 
 Framer Motion, Geist, lucide-react, shadcn, TanStack Virtual → added when needed (Phases 3 and 4).
 
-### 1.3 Target file structure
+### 1.3 Disable file-based routing
+
+In `app.config.ts`, opt out of the automatic file-based router:
+
+```ts
+import { defineConfig } from '@tanstack/start/config'
+
+export default defineConfig({
+  routers: {
+    client: {
+      entry: './src/entry.client.tsx',
+    },
+  },
+})
+```
+
+### 1.4 Target file structure
 
 ```
 src/
   routes/
-    __root.tsx                    ← QueryClientProvider
-    _authenticated.tsx            ← OAuth guard (beforeLoad) — empty for now
-    _authenticated/
-      index.tsx                   ← placeholder "Dashboard"
-      collection.tsx              ← placeholder
-      wantlist.tsx                ← placeholder
-      search.tsx                  ← placeholder
-      profile.tsx                 ← placeholder
+    root.tsx                       ← root route + global layout only
+    router.tsx                     ← declarative route tree assembly
+  features/                        ← domain logic, organized by feature
     auth/
-      login.tsx                   ← placeholder
-      callback.tsx                ← placeholder
-  lib/
-    server/
-      session.server.ts           ← prepared in Phase 2
+      auth.routes.tsx              ← placeholder
+    collection/
+      collection.routes.tsx        ← placeholder
+    search/
+      search.routes.tsx            ← placeholder
+    wantlist/
+      wantlist.routes.tsx          ← placeholder
+    profile/
+      profile.routes.tsx           ← placeholder
+  services/                        ← external connections, cross-feature
+    session.server.ts              ← prepared in Phase 2
+  shared/                          ← consumed everywhere, belongs to no feature
+    components/                    ← flat for now, subfolders added if needed
+    hooks/
+    utils/
   styles/
-    globals.css                   ← Tailwind base only, tokens in Phase 4
+    globals.css                    ← Tailwind base only, tokens in Phase 4
 ```
 
-### 1.4 QueryClient setup in `__root.tsx`
+### 1.5 Router setup (`src/routes/router.tsx`)
+
+```ts
+import {
+  createRouter,
+  createRootRoute,
+  createRoute,
+} from '@tanstack/react-router'
+import { rootRoute } from './root'
+import { authRoutes } from '../features/auth/auth.routes'
+import { collectionRoutes } from '../features/collection/collection.routes'
+import { searchRoutes } from '../features/search/search.routes'
+import { wantlistRoutes } from '../features/wantlist/wantlist.routes'
+import { profileRoutes } from '../features/profile/profile.routes'
+
+const routeTree = rootRoute.addChildren([
+  authRoutes,
+  collectionRoutes,
+  searchRoutes,
+  wantlistRoutes,
+  profileRoutes,
+])
+
+export const router = createRouter({
+  routeTree,
+  context: { queryClient },
+  defaultPreload: 'intent',
+})
+```
+
+### 1.6 QueryClient setup in `src/routes/root.tsx`
 
 ```ts
 const queryClient = new QueryClient({
@@ -85,6 +136,7 @@ const queryClient = new QueryClient({
 ### ✅ Exit criteria
 
 - `pnpm dev` → app boots without error
+- File-based routing disabled, declarative router in place
 - Navigation between placeholder routes without error
 - TanStack Devtools visible in dev
 - No UI dependencies installed
@@ -104,10 +156,10 @@ DISCOGS_CONSUMER_SECRET=xxx
 SESSION_SECRET=xxx          # min 32 chars, random
 ```
 
-### 2.2 Session server (`lib/server/session.server.ts`)
+### 2.2 Session server (`services/session.server.ts`)
 
 ```ts
-import { useSession } from 'vinxi/http'
+import { useSession } from '@tanstack/react-start/server'
 
 export const getSession = () =>
   useSession({
@@ -171,14 +223,23 @@ await session.clear()
 throw redirect({ href: '/auth/login' })
 ```
 
-### 2.4 Route guard (`_authenticated.tsx`)
+### 2.4 Route guard (`src/routes/authenticated.tsx`)
+
+In declarative routing, the guard is a **layout route** with no path — just a `beforeLoad` that protects all its children.
 
 ```ts
-export const Route = createFileRoute('/_authenticated')({
-  beforeLoad: async ({ context }) => {
+// src/routes/authenticated.tsx
+import { createRoute, redirect } from '@tanstack/react-router'
+import { rootRoute } from './root'
+import { getSession } from '../services/session.server'
+
+export const authenticatedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'authenticated', // no path — layout route only
+  beforeLoad: async () => {
     const session = await getSession()
     if (!session.data.accessToken) {
-      throw redirect({ to: '/auth/login' })
+      throw redirect({ to: '/login' })
     }
     return {
       user: {
@@ -191,41 +252,123 @@ export const Route = createFileRoute('/_authenticated')({
 })
 ```
 
+Each protected feature declares `authenticatedRoute` as its parent — the guard runs automatically for all children:
+
+```ts
+// features/collection/collection.routes.tsx
+import { authenticatedRoute } from '../../routes/authenticated'
+
+const collectionIndexRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/collection',
+  component: CollectionPage,
+})
+
+const collectionDetailRoute = createRoute({
+  getParentRoute: () => authenticatedRoute,
+  path: '/collection/$id',
+  component: CollectionDetailPage,
+})
+
+export const collectionRoutes = [collectionIndexRoute, collectionDetailRoute]
+```
+
+Auth routes (login, callback) declare `rootRoute` as parent directly — no guard:
+
+```ts
+// features/auth/auth.routes.tsx
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/login',
+  component: LoginPage,
+})
+```
+
+Final assembly in `src/routes/router.tsx`:
+
+```ts
+const routeTree = rootRoute.addChildren([
+  authenticatedRoute.addChildren([
+    ...collectionRoutes,
+    ...searchRoutes,
+    ...wantlistRoutes,
+    ...profileRoutes,
+  ]),
+  ...authRoutes,
+])
+```
+
 ### ✅ Exit criteria
 
 - Full login → callback → dashboard flow without error
 - Token never visible client-side (check Network tab)
 - Page refresh → session persisted
 - Logout working
+- Unauthenticated access to any protected route redirects to `/login`
 
 ---
 
 ## Phase 3 — Core Features
 
-### 3.1 Query options (`lib/queries/`)
+### 3.1 Query options
+
+Query options are co-located with their feature, alongside the model and schema:
+
+```
+src/
+  features/
+    collection/
+      collection.schema.ts   ← Zod schema (raw Discogs shape)
+      collection.model.ts    ← applicative entity + toRecord() mapping
+      collection.queries.ts  ← queryOptions, schema → model
+      collection.utils.ts    ← pure transformations (unit testable)
+      components/
+    search/
+      search.schema.ts
+      search.model.ts
+      search.queries.ts
+    wantlist/
+      wantlist.schema.ts
+      wantlist.model.ts
+      wantlist.queries.ts
+  services/
+    discogs.server.ts        ← fetch wrapper + OAuth signing
+    deezer.server.ts         ← HD cover art fetch
+    session.server.ts        ← session management
+```
 
 ```ts
-// collectionQueries.ts
+// features/collection/collection.queries.ts
 export const collectionQueryOptions = (username: string) =>
   infiniteQueryOptions({
     queryKey: ['collection', username],
-    queryFn: ({ pageParam = 1 }) =>
-      fetchCollection({ data: { username, page: pageParam } }),
+    queryFn: ({ pageParam = 1 }) => {
+      const raw = await fetchCollection({ data: { username, page: pageParam } })
+      return {
+        ...raw,
+        releases: raw.releases.map(toRecord), // schema → model at the boundary
+      }
+    },
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.pages
         ? last.pagination.page + 1
         : undefined,
-    staleTime: 1000 * 60 * 10, // 10min
+    staleTime: 1000 * 60 * 10,
   })
 
-// releaseQueries.ts
+// features/collection/collection.queries.ts
 export const releaseQueryOptions = (releaseId: string) =>
   queryOptions({
     queryKey: ['release', releaseId],
-    queryFn: () => fetchRelease({ data: releaseId }),
+    queryFn: () => fetchRelease({ data: releaseId }).then(toRecord),
     staleTime: Infinity, // release is immutable
   })
+```
 
+Cover art (Deezer) lives in its own feature query since it's a separate concern:
+
+```ts
+// features/collection/collection.queries.ts
 export const coverArtQueryOptions = (
   releaseId: string,
   title: string,
@@ -285,12 +428,33 @@ Prefetch on hover over master cards.
 
 Same as Collection but different data source. Share components.
 
+### 3.7 File & folder conventions
+
+| What                        | Where                         | Example                            |
+| --------------------------- | ----------------------------- | ---------------------------------- |
+| Root layout                 | `routes/root.tsx`             | global layout, QueryClientProvider |
+| Route tree                  | `routes/router.tsx`           | declarative assembly               |
+| Feature routes              | `features/{name}/`            | `collection.routes.tsx`            |
+| Raw API schema              | `features/{name}/`            | `collection.schema.ts`             |
+| Applicative model + mapping | `features/{name}/`            | `collection.model.ts`              |
+| Query options               | `features/{name}/`            | `collection.queries.ts`            |
+| Pure utils                  | `features/{name}/`            | `collection.utils.ts`              |
+| Feature components          | `features/{name}/components/` | `CollectionGrid.tsx`               |
+| External services           | `services/`                   | `discogs.server.ts`                |
+| Shared components           | `shared/components/`          | shadcn + custom primitives         |
+| Shared hooks                | `shared/hooks/`               | `useLocalStorage.ts`               |
+| Shared utils                | `shared/utils/`               | generic pure functions             |
+
+**Suffix rule**: one file per responsibility → use suffix (e.g. `collection.model.ts`).
+If a responsibility grows beyond one file → promote to a subfolder (e.g. `queries/`).
+
 ### ✅ Exit criteria
 
 - Collection loads + smooth virtualized scroll
 - Collection → detail → back navigation is instant (cache)
 - Search working in 2 steps
 - HD cover visible on detail page
+- All features follow the schema → model → query pattern
 
 ---
 
@@ -332,12 +496,12 @@ Fonts are self-hosted — place `.woff2` files in `public/fonts/` and declare th
 
 ### 4.2 Theme system
 
-`ThemeProvider` in `src/lib/theme.tsx`, mounted in `__root.tsx` wrapping `QueryClientProvider`.
+`ThemeProvider` in `src/shared/hooks/theme.ts`, mounted in `__root.tsx` wrapping `QueryClientProvider`.
 
 Three modes: `'light' | 'dark' | 'system'`. Default: `'system'` (follows `prefers-color-scheme`).
 
 ```tsx
-// src/lib/theme.tsx
+// src/shared/hooks/theme.ts
 type Theme = 'light' | 'dark' | 'system'
 
 // SSR-safe, fully typed — no raw localStorage access, no unsafe cast
