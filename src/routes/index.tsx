@@ -1,16 +1,22 @@
 import { getRecentAdditions } from '#/lib/recentAdditions'
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
+export const recentAdditionsQueryOptions = queryOptions({
+  queryKey: ['collection', { perPage: 10 }],
+  queryFn: () => getRecentAdditions({ data: { perPage: 10 } }),
+})
+
 export const Route = createFileRoute('/')({
-  loader: async ({ context }) => {
-    if (!context.user) return null
-    return getRecentAdditions()
+  loader: async ({ context: { user, queryClient } }) => {
+    if (!user) return null
+    return queryClient.ensureQueryData(recentAdditionsQueryOptions)
   },
   component: App,
 })
 
 function App() {
-  const data = Route.useLoaderData()
+  const { data } = useSuspenseQuery(recentAdditionsQueryOptions)
 
   if (data === null) {
     return (
@@ -23,8 +29,9 @@ function App() {
             Every record you own, beautifully organized.
           </h1>
           <p className="mb-10 max-w-xl text-base text-(--sea-ink-soft) sm:text-lg">
-            Sillon syncs your Discogs collection and pairs it with high-definition
-            artwork from Deezer — all in one quiet, distraction-free place.
+            Sillon syncs your Discogs collection and pairs it with
+            high-definition artwork from Deezer — all in one quiet,
+            distraction-free place.
           </p>
           <a
             href="/auth/login"
@@ -46,11 +53,13 @@ function App() {
         </h1>
       </header>
 
-      {data.length === 0 ? (
-        <p className="text-(--sea-ink-soft)">No records in your collection yet.</p>
+      {data.releases.length === 0 ? (
+        <p className="text-(--sea-ink-soft)">
+          No records in your collection yet.
+        </p>
       ) : (
         <ul className="flex flex-col gap-3">
-          {data.map((release, index) => (
+          {data.releases.map((release, index) => (
             <li key={release.instance_id}>
               <div
                 className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3"
@@ -62,17 +71,21 @@ function App() {
                   className="h-12 w-12 rounded-lg object-cover shrink-0"
                 />
                 <div className="flex flex-1 items-center justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-(--sea-ink)">
-                    {release.basic_information.title}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-semibold text-(--sea-ink)">
+                      {release.basic_information.title}
+                    </span>
+                    <span className="text-sm text-(--sea-ink-soft)">
+                      {release.basic_information.artists[0]?.name}
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-(--sea-ink-soft)">
+                    {new Date(release.date_added).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
                   </span>
-                  <span className="text-sm text-(--sea-ink-soft)">
-                    {release.basic_information.artists[0]?.name}
-                  </span>
-                </div>
-                <span className="font-mono text-xs text-(--sea-ink-soft)">
-                  {new Date(release.date_added).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
                 </div>
               </div>
             </li>
