@@ -30,20 +30,28 @@ export type CollectionRelease = {
   }
 }
 
+export type CollectionPage = {
+  releases: CollectionRelease[]
+  pagination: { page: number; pages: number; items: number }
+}
+
 export const getRecentAdditions = createServerFn()
-  .inputValidator((data: { perPage?: number } | undefined) => data ?? {})
+  .inputValidator((data: { perPage?: number; page?: number } | undefined) => data ?? {})
   .handler(async ({ data }) => {
   const { useAppSession } = await import('./server/session.server')
   const session = await useAppSession()
 
   const { accessToken, accessTokenSecret, discogsUsername } = session.data
-  if (!accessToken || !accessTokenSecret || !discogsUsername) return []
+  if (!accessToken || !accessTokenSecret || !discogsUsername) {
+    return { releases: [], pagination: { page: 1, pages: 1, items: 0 } } as CollectionPage
+  }
 
   const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
   const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
   const perPage = data.perPage ?? 10
+  const page = data.page ?? 1
 
-  const url = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases?sort=added&sort_order=desc&per_page=${perPage}`
+  const url = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases?sort=added&sort_order=desc&per_page=${perPage}&page=${page}`
 
   const response = await fetch(url, {
     headers: {
@@ -63,6 +71,16 @@ export const getRecentAdditions = createServerFn()
     throw new Error(`Discogs collection fetch failed: ${response.status}`)
   }
 
-  const json = (await response.json()) as { releases: CollectionRelease[] }
-  return json.releases
+  const json = (await response.json()) as {
+    releases: CollectionRelease[]
+    pagination: { page: number; pages: number; items: number; per_page: number }
+  }
+  return {
+    releases: json.releases,
+    pagination: {
+      page: json.pagination.page,
+      pages: json.pagination.pages,
+      items: json.pagination.items,
+    },
+  } as CollectionPage
 })
