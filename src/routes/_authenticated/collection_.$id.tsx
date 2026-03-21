@@ -1,17 +1,17 @@
 import { collectionQueryOptions } from '#/routes/_authenticated/collection'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/collection_/$id')({
   loader: ({ context: { queryClient } }) =>
-    queryClient.ensureQueryData(collectionQueryOptions),
+    queryClient.prefetchInfiniteQuery(collectionQueryOptions),
   component: RecordDetail,
 })
 
 function RecordDetail() {
   const { id } = Route.useParams()
-  const { data } = useSuspenseQuery(collectionQueryOptions)
-  const release = data.find((r) => r.id === Number(id))
+  const { data } = useSuspenseInfiniteQuery(collectionQueryOptions)
+  const release = data.pages.flatMap((p) => p.releases).find((r) => r.id === Number(id))
 
   return (
     <main className="page-wrap px-4 pb-8 pt-14">
