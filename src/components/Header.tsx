@@ -1,4 +1,6 @@
 import { Link, useMatch } from '@tanstack/react-router'
+import { LogOut } from 'lucide-react'
+import ShuffleButton from './ShuffleButton'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
@@ -20,7 +22,7 @@ export default function Header() {
           </Link>
         </h2>
 
-        <div className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:w-auto sm:flex-nowrap sm:pb-0">
+        <div className="hidden w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:flex sm:w-auto sm:flex-nowrap sm:pb-0">
           {user && (
             <Link
               to="/collection"
@@ -40,13 +42,16 @@ export default function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-3">
+          {user && <ShuffleButton />}
           <ThemeToggle />
           {user ? (
             <a
               href="/auth/logout"
-              className="rounded-full border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-sm font-semibold text-(--sea-ink) no-underline transition hover:bg-(--lagoon)/10"
+              className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-sm font-semibold text-(--sea-ink) no-underline transition hover:bg-(--lagoon)/10"
+              aria-label={`Logout ${user.username}`}
             >
-              {user.username} · Logout
+              <LogOut className="h-4 w-4 sm:hidden" />
+              <span className="hidden sm:inline">{user.username} · Logout</span>
             </a>
           ) : (
             <a

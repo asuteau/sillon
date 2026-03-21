@@ -1,13 +1,19 @@
 import { getRecentAdditions } from '#/lib/recentAdditions'
-import { infiniteQueryOptions, useSuspenseInfiniteQuery } from '@tanstack/react-query'
+import {
+  infiniteQueryOptions,
+  useSuspenseInfiniteQuery,
+} from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
 export const collectionQueryOptions = infiniteQueryOptions({
   queryKey: ['collection', { perPage: 20 }],
-  queryFn: ({ pageParam }) => getRecentAdditions({ data: { perPage: 20, page: pageParam } }),
+  queryFn: ({ pageParam }) =>
+    getRecentAdditions({ data: { perPage: 20, page: pageParam } }),
   initialPageParam: 1,
   getNextPageParam: (last) =>
-    last.pagination.page < last.pagination.pages ? last.pagination.page + 1 : undefined,
+    last.pagination.page < last.pagination.pages
+      ? last.pagination.page + 1
+      : undefined,
 })
 
 export const Route = createFileRoute('/_authenticated/collection')({
@@ -32,7 +38,9 @@ function Collection() {
       </header>
 
       {releases.length === 0 ? (
-        <p className="text-(--sea-ink-soft)">No records in your collection yet.</p>
+        <p className="text-(--sea-ink-soft)">
+          No records in your collection yet.
+        </p>
       ) : (
         <>
           <ul className="flex flex-col gap-3">
@@ -59,7 +67,10 @@ function Collection() {
                       </span>
                     </div>
                     <span className="font-mono text-xs text-(--sea-ink-soft)">
-                      {new Date(release.date_added).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {new Date(release.date_added).toLocaleDateString(
+                        'en-GB',
+                        { day: 'numeric', month: 'short', year: 'numeric' },
+                      )}
                     </span>
                   </div>
                 </Link>

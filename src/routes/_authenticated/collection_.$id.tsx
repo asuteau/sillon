@@ -11,7 +11,9 @@ export const Route = createFileRoute('/_authenticated/collection_/$id')({
 function RecordDetail() {
   const { id } = Route.useParams()
   const { data } = useSuspenseInfiniteQuery(collectionQueryOptions)
-  const release = data.pages.flatMap((p) => p.releases).find((r) => r.id === Number(id))
+  const release = data.pages
+    .flatMap((p) => p.releases)
+    .find((r) => r.id === Number(id))
 
   return (
     <main className="page-wrap px-4 pb-8 pt-14">
@@ -25,7 +27,10 @@ function RecordDetail() {
       {!release ? (
         <p className="text-(--sea-ink-soft)">Release not found.</p>
       ) : (
-        <article className="island-shell rise-in relative overflow-hidden rounded-4xl px-6 py-10 sm:px-10 sm:py-14" style={{ animationDelay: '60ms' }}>
+        <article
+          className="island-shell rise-in relative overflow-hidden rounded-4xl px-6 py-10 sm:px-10 sm:py-14"
+          style={{ animationDelay: '60ms' }}
+        >
           <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.32),transparent_66%)]" />
           <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
 
@@ -38,7 +43,9 @@ function RecordDetail() {
 
             <div className="flex flex-col gap-4">
               <p className="island-kicker">
-                {release.basic_information.artists.map((a) => a.name).join(', ')}
+                {release.basic_information.artists
+                  .map((a) => a.name)
+                  .join(', ')}
               </p>
               <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink) sm:text-5xl">
                 {release.basic_information.title}
