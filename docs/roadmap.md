@@ -45,81 +45,51 @@ pnpm add zod
 
 Framer Motion, Geist, lucide-react, shadcn, TanStack Virtual → added when needed (Phases 3 and 4).
 
-### 1.3 Disable file-based routing
-
-In `app.config.ts`, opt out of the automatic file-based router:
-
-```ts
-import { defineConfig } from '@tanstack/start/config'
-
-export default defineConfig({
-  routers: {
-    client: {
-      entry: './src/entry.client.tsx',
-    },
-  },
-})
-```
-
-### 1.4 Target file structure
+### 1.3 Target file structure
 
 ```
 src/
   routes/
-    root.tsx                       ← root route + global layout only
-    router.tsx                     ← declarative route tree assembly
-  features/                        ← domain logic, organized by feature
+    __root.tsx                    ← QueryClientProvider, global layout
+    _authenticated.tsx            ← OAuth guard (beforeLoad)
+    _authenticated/
+      index.tsx                   ← Dashboard
+      collection.tsx              ← Collection list
+      collection.$id.tsx          ← Release detail
+      wantlist.tsx
+      search.tsx
+      profile.tsx
     auth/
-      auth.routes.tsx              ← placeholder
+      login.tsx
+      callback.tsx
+  features/                       ← domain logic, organized by feature
     collection/
-      collection.routes.tsx        ← placeholder
+      collection.schema.ts
+      collection.model.ts
+      collection.queries.ts
+      collection.utils.ts
+      components/
     search/
-      search.routes.tsx            ← placeholder
     wantlist/
-      wantlist.routes.tsx          ← placeholder
-    profile/
-      profile.routes.tsx           ← placeholder
-  services/                        ← external connections, cross-feature
-    session.server.ts              ← prepared in Phase 2
-  shared/                          ← consumed everywhere, belongs to no feature
-    components/                    ← flat for now, subfolders added if needed
+    auth/
+  services/                       ← external connections, cross-feature
+    session.server.ts             ← prepared in Phase 2
+    discogs.server.ts
+    deezer.server.ts
+  shared/                         ← consumed everywhere, belongs to no feature
+    components/                   ← flat for now, subfolders added if needed
     hooks/
     utils/
   styles/
-    globals.css                    ← Tailwind base only, tokens in Phase 4
+    globals.css                   ← Tailwind base only, tokens in Phase 4
 ```
 
-### 1.5 Router setup (`src/routes/router.tsx`)
+File-based routing is kept as recommended by TanStack — the code-gen provides
+full type-safety on `Link`, `navigate`, and route params with no extra effort.
+Feature logic (schema, model, queries, utils, components) lives in `features/`.
+Route files stay in `routes/` and contain only routing concerns.
 
-```ts
-import {
-  createRouter,
-  createRootRoute,
-  createRoute,
-} from '@tanstack/react-router'
-import { rootRoute } from './root'
-import { authRoutes } from '../features/auth/auth.routes'
-import { collectionRoutes } from '../features/collection/collection.routes'
-import { searchRoutes } from '../features/search/search.routes'
-import { wantlistRoutes } from '../features/wantlist/wantlist.routes'
-import { profileRoutes } from '../features/profile/profile.routes'
-
-const routeTree = rootRoute.addChildren([
-  authRoutes,
-  collectionRoutes,
-  searchRoutes,
-  wantlistRoutes,
-  profileRoutes,
-])
-
-export const router = createRouter({
-  routeTree,
-  context: { queryClient },
-  defaultPreload: 'intent',
-})
-```
-
-### 1.6 QueryClient setup in `src/routes/root.tsx`
+### 1.4 QueryClient setup in `__root.tsx`
 
 ```ts
 const queryClient = new QueryClient({
@@ -136,7 +106,6 @@ const queryClient = new QueryClient({
 ### ✅ Exit criteria
 
 - `pnpm dev` → app boots without error
-- File-based routing disabled, declarative router in place
 - Navigation between placeholder routes without error
 - TanStack Devtools visible in dev
 - No UI dependencies installed
@@ -159,7 +128,7 @@ SESSION_SECRET=xxx          # min 32 chars, random
 ### 2.2 Session server (`services/session.server.ts`)
 
 ```ts
-import { useSession } from '@tanstack/react-start/server'
+import { useSession } from 'vinxi/http'
 
 export const getSession = () =>
   useSession({
@@ -223,23 +192,21 @@ await session.clear()
 throw redirect({ href: '/auth/login' })
 ```
 
-### 2.4 Route guard (`src/routes/authenticated.tsx`)
+### 2.4 Route guard (`routes/_authenticated.tsx`)
 
-In declarative routing, the guard is a **layout route** with no path — just a `beforeLoad` that protects all its children.
+`_authenticated.tsx` is a layout route — no UI, just a `beforeLoad` that protects
+all routes nested under `_authenticated/`.
 
 ```ts
-// src/routes/authenticated.tsx
-import { createRoute, redirect } from '@tanstack/react-router'
-import { rootRoute } from './root'
-import { getSession } from '../services/session.server'
+// routes/_authenticated.tsx
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { getSession } from '~/services/session.server'
 
-export const authenticatedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  id: 'authenticated', // no path — layout route only
+export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async () => {
     const session = await getSession()
     if (!session.data.accessToken) {
-      throw redirect({ to: '/login' })
+      throw redirect({ to: '/auth/login' })
     }
     return {
       user: {
@@ -252,51 +219,9 @@ export const authenticatedRoute = createRoute({
 })
 ```
 
-Each protected feature declares `authenticatedRoute` as its parent — the guard runs automatically for all children:
-
-```ts
-// features/collection/collection.routes.tsx
-import { authenticatedRoute } from '../../routes/authenticated'
-
-const collectionIndexRoute = createRoute({
-  getParentRoute: () => authenticatedRoute,
-  path: '/collection',
-  component: CollectionPage,
-})
-
-const collectionDetailRoute = createRoute({
-  getParentRoute: () => authenticatedRoute,
-  path: '/collection/$id',
-  component: CollectionDetailPage,
-})
-
-export const collectionRoutes = [collectionIndexRoute, collectionDetailRoute]
-```
-
-Auth routes (login, callback) declare `rootRoute` as parent directly — no guard:
-
-```ts
-// features/auth/auth.routes.tsx
-const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/login',
-  component: LoginPage,
-})
-```
-
-Final assembly in `src/routes/router.tsx`:
-
-```ts
-const routeTree = rootRoute.addChildren([
-  authenticatedRoute.addChildren([
-    ...collectionRoutes,
-    ...searchRoutes,
-    ...wantlistRoutes,
-    ...profileRoutes,
-  ]),
-  ...authRoutes,
-])
-```
+Any route file placed under `routes/_authenticated/` is automatically protected —
+no additional setup needed. Auth routes (`login.tsx`, `callback.tsx`) sit outside
+`_authenticated/` and are publicly accessible.
 
 ### ✅ Exit criteria
 
@@ -430,23 +355,200 @@ Same as Collection but different data source. Share components.
 
 ### 3.7 File & folder conventions
 
-| What                        | Where                         | Example                            |
-| --------------------------- | ----------------------------- | ---------------------------------- |
-| Root layout                 | `routes/root.tsx`             | global layout, QueryClientProvider |
-| Route tree                  | `routes/router.tsx`           | declarative assembly               |
-| Feature routes              | `features/{name}/`            | `collection.routes.tsx`            |
-| Raw API schema              | `features/{name}/`            | `collection.schema.ts`             |
-| Applicative model + mapping | `features/{name}/`            | `collection.model.ts`              |
-| Query options               | `features/{name}/`            | `collection.queries.ts`            |
-| Pure utils                  | `features/{name}/`            | `collection.utils.ts`              |
-| Feature components          | `features/{name}/components/` | `CollectionGrid.tsx`               |
-| External services           | `services/`                   | `discogs.server.ts`                |
-| Shared components           | `shared/components/`          | shadcn + custom primitives         |
-| Shared hooks                | `shared/hooks/`               | `useLocalStorage.ts`               |
-| Shared utils                | `shared/utils/`               | generic pure functions             |
+| What                        | Where                         | Example                    |
+| --------------------------- | ----------------------------- | -------------------------- |
+| Route files                 | `routes/`                     | `collection.$id.tsx`       |
+| Auth guard                  | `routes/_authenticated.tsx`   | layout route, no UI        |
+| Protected routes            | `routes/_authenticated/`      | auto-protected by guard    |
+| Raw API schema              | `features/{name}/`            | `collection.schema.ts`     |
+| Applicative model + mapping | `features/{name}/`            | `collection.model.ts`      |
+| Query options               | `features/{name}/`            | `collection.queries.ts`    |
+| Pure utils                  | `features/{name}/`            | `collection.utils.ts`      |
+| Feature components          | `features/{name}/components/` | `CollectionGrid.tsx`       |
+| External services           | `services/`                   | `discogs.server.ts`        |
+| Shared components           | `shared/components/`          | shadcn + custom primitives |
+| Shared hooks                | `shared/hooks/`               | `useLocalStorage.ts`       |
+| Shared utils                | `shared/utils/`               | generic pure functions     |
+
+**Routing**: file-based routing kept as recommended by TanStack — full type-safety
+on `Link`, `navigate`, and params via code-gen. Route files contain only routing
+concerns (loader, search params, component import). All logic lives in `features/`.
 
 **Suffix rule**: one file per responsibility → use suffix (e.g. `collection.model.ts`).
 If a responsibility grows beyond one file → promote to a subfolder (e.g. `queries/`).
+
+### 3.8 Testing setup — Vitest
+
+#### Installation
+
+```bash
+pnpm add -D vitest @vitest/ui jsdom \
+  @testing-library/react @testing-library/jest-dom \
+  msw
+```
+
+```ts
+// vitest.config.ts
+import { defineConfig } from 'vitest/config'
+
+export default defineConfig({
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+  },
+})
+```
+
+```ts
+// src/test/setup.ts
+import '@testing-library/jest-dom'
+import { server } from './mocks/server'
+
+beforeAll(() => server.listen())
+afterEach(() => server.resetHandlers())
+afterAll(() => server.close())
+```
+
+#### Test strategy by layer
+
+| Layer                                   | What to test                                               | Tools                      |
+| --------------------------------------- | ---------------------------------------------------------- | -------------------------- |
+| `features/{name}/collection.utils.ts`   | Pure transformation functions — no mocks needed            | Vitest only                |
+| `features/{name}/collection.schema.ts`  | Zod schema accepts real API payloads, rejects invalid ones | Vitest + JSON fixtures     |
+| `features/{name}/collection.queries.ts` | queryFn maps API response to model correctly               | Vitest + QueryClient + msw |
+| `shared/hooks/`                         | Hook behavior across renders                               | Vitest + renderHook        |
+
+**Not tested**: route files (no logic), services (covered by query tests via msw), UI components (high maintenance cost, low value for a personal app).
+
+#### Layer examples
+
+**Utils — zero mock, highest value**
+
+```ts
+// features/collection/collection.utils.test.ts
+describe('toRecord', () => {
+  it('maps primary artist correctly', () => {
+    expect(toRecord(rawFixture).artist).toBe('Portishead')
+  })
+
+  it('falls back to Unknown when artists is empty', () => {
+    expect(toRecord({ ...rawFixture, artists: [] }).artist).toBe('Unknown')
+  })
+
+  it('returns null year when missing', () => {
+    expect(toRecord({ ...rawFixture, year: undefined }).year).toBeNull()
+  })
+})
+```
+
+**Schema — validate against real API fixtures**
+
+```ts
+// features/collection/collection.schema.test.ts
+describe('DiscogsReleaseSchema', () => {
+  it('accepts a valid Discogs release payload', () => {
+    expect(() => DiscogsReleaseSchema.parse(realApiFixture)).not.toThrow()
+  })
+
+  it('rejects payload missing required id', () => {
+    expect(() => DiscogsReleaseSchema.parse({ title: 'test' })).toThrow()
+  })
+})
+```
+
+**Queries — msw intercepts the fetch**
+
+```ts
+// features/collection/collection.queries.test.ts
+import { setupServer } from 'msw/node'
+import { http, HttpResponse } from 'msw'
+
+const server = setupServer(
+  http.get(
+    'https://api.discogs.com/users/:username/collection/folders/0/releases',
+    () => HttpResponse.json(collectionFixture),
+  ),
+)
+
+it('maps API response to Record[] via queryFn', async () => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  const data = await queryClient.fetchInfiniteQuery(
+    collectionQueryOptions('testuser'),
+  )
+  expect(data.pages[0].releases[0]).toMatchObject({ artist: 'Portishead' })
+})
+```
+
+**Hooks**
+
+```ts
+// shared/hooks/useLocalStorage.test.ts
+it('persists value and survives re-render', () => {
+  const { result } = renderHook(() => useLocalStorage('key', 'default'))
+  act(() => result.current[1]('new value'))
+  expect(result.current[0]).toBe('new value')
+})
+
+it('returns defaultValue when key is absent', () => {
+  const { result } = renderHook(() => useLocalStorage('missing', 'fallback'))
+  expect(result.current[0]).toBe('fallback')
+})
+```
+
+#### Test fixtures
+
+Store real API response snapshots in `src/test/fixtures/`:
+
+```
+src/test/
+  setup.ts
+  fixtures/
+    discogs-release.json       ← real response from GET /releases/{id}
+    discogs-collection.json    ← real response from GET /collection page 1
+    deezer-search.json
+  mocks/
+    server.ts                  ← msw server setup
+    handlers.ts                ← msw route handlers
+```
+
+**Capture method — Network tab (recommended)**
+
+Do not log responses from code. Use the browser DevTools Network tab instead —
+it gives the exact raw JSON the API returns, before any transformation.
+
+For each endpoint:
+
+1. Navigate to the relevant page in the app (dev mode, authenticated)
+2. Open DevTools → Network tab → filter by Fetch/XHR
+3. Find the Discogs or Deezer request
+4. Click the request → Response tab → right-click → "Copy response"
+5. Paste into the corresponding fixture file
+
+Capture all fixtures in a single dev session:
+
+| Fixture file              | Endpoint                                                     |
+| ------------------------- | ------------------------------------------------------------ |
+| `discogs-collection.json` | `GET /users/{username}/collection/folders/0/releases?page=1` |
+| `discogs-release.json`    | `GET /releases/{id}`                                         |
+| `discogs-masters.json`    | `GET /database/search?type=master&q=...`                     |
+| `discogs-versions.json`   | `GET /masters/{id}/versions?format=Vinyl`                    |
+| `deezer-search.json`      | `GET /search?q=...`                                          |
+
+These fixtures reflect what the API actually returns for your account and data —
+including optional fields and edge cases the official docs don't always mention.
+
+#### Priority order
+
+```
+1. collection.utils.ts    ← as soon as toRecord() exists
+2. collection.schema.ts   ← with real JSON fixtures
+3. shared/hooks/          ← useLocalStorage, useMediaQuery, useTheme
+4. collection.queries.ts  ← after msw is set up
+5. other features         ← same pattern, feature by feature
+```
 
 ### ✅ Exit criteria
 
@@ -455,6 +557,7 @@ If a responsibility grows beyond one file → promote to a subfolder (e.g. `quer
 - Search working in 2 steps
 - HD cover visible on detail page
 - All features follow the schema → model → query pattern
+- Vitest configured, utils and schema tests passing for collection feature
 
 ---
 
@@ -806,22 +909,79 @@ return isMobile ? (
 
 ## Phase 5 — Secondary Features
 
-### 5.1 Quick add to collection / wantlist
+### 5.1 Collection mutations — add & remove
 
-Optimistic mutations:
+Mutations against a paginated infinite query require targeted cache updates rather than full invalidation. Invalidating the entire infinite query cache would refetch all loaded pages from page 1 — slow and disruptive.
+
+**Principle**
+
+```
+Add    → optimistic update on page 0 only + invalidate page 0 to reconcile
+Remove → optimistic filter across all pages, no invalidation needed
+Edit   → setQueryData targeted at the single item, no invalidation
+Full invalidation → last resort only (e.g. full Discogs sync)
+```
+
+**Add to collection**
 
 ```ts
 useMutation({
-  mutationFn: addToCollection,
-  onMutate: async () => {
-    await queryClient.cancelQueries({ queryKey: ['collection', 'count'] })
-    const prev = queryClient.getQueryData(['collection', 'count'])
-    queryClient.setQueryData(['collection', 'count'], (n: number) => n + 1)
-    return { prev }
+  mutationFn: (releaseId: string) => addToCollection(releaseId),
+  onMutate: async (releaseId) => {
+    await queryClient.cancelQueries({ queryKey: ['collection', username] })
+    const previous = queryClient.getQueryData(['collection', username])
+
+    // Inject new item at the top of page 0
+    queryClient.setQueryData(['collection', username], (old: InfiniteData) => ({
+      ...old,
+      pages: [
+        {
+          ...old.pages[0],
+          releases: [newOptimisticRecord(releaseId), ...old.pages[0].releases],
+        },
+        ...old.pages.slice(1),
+      ],
+    }))
+
+    return { previous }
   },
-  onError: (_, __, ctx) =>
-    queryClient.setQueryData(['collection', 'count'], ctx?.prev),
-  onSettled: () => queryClient.invalidateQueries({ queryKey: ['collection'] }),
+  onError: (_, __, ctx) => {
+    queryClient.setQueryData(['collection', username], ctx?.previous)
+  },
+  onSettled: () => {
+    // Reconcile page 0 only — other pages are unaffected
+    queryClient.invalidateQueries({
+      queryKey: ['collection', username],
+      refetchPage: (_, index) => index === 0,
+    })
+  },
+})
+```
+
+**Remove from collection**
+
+```ts
+useMutation({
+  mutationFn: (releaseId: string) => removeFromCollection(releaseId),
+  onMutate: async (releaseId) => {
+    await queryClient.cancelQueries({ queryKey: ['collection', username] })
+    const previous = queryClient.getQueryData(['collection', username])
+
+    // Filter removed item across all loaded pages
+    queryClient.setQueryData(['collection', username], (old: InfiniteData) => ({
+      ...old,
+      pages: old.pages.map((page) => ({
+        ...page,
+        releases: page.releases.filter((r) => r.id !== releaseId),
+      })),
+    }))
+
+    return { previous }
+  },
+  onError: (_, __, ctx) => {
+    queryClient.setQueryData(['collection', username], ctx?.previous)
+  },
+  // No invalidation — cache already reflects reality
 })
 ```
 
@@ -838,29 +998,87 @@ useMutation({
 
 ### 5.4 Random pick — "Surprise me"
 
-**Concept**: a single shuffle button accessible from the dashboard and collection.
-Triggers a 2-3 second ephemeral full-screen experience, then opens the detail sheet of the randomly picked album.
+**Concept**: a shuffle button in the dashboard header. Fetches a truly random record from the full Discogs collection (not just loaded pages), then displays it in a `RecordSpotlight` component. The user can pick again without closing or navigating away.
 
-**Trigger**: discreet shuffle icon in the header (dashboard + collection). No dedicated view — this is a _moment_, not a page.
+**Trigger**: `Shuffle` icon (lucide-react) in the dashboard header. Always enabled — no dependency on collection cache state.
 
-**Animation sequence**:
+**Fetch strategy**: 2 lightweight requests regardless of collection size:
 
-1. Black overlay rises from the bottom (spring, 300ms)
-2. Collection covers scroll in a fast cascade (stagger, like a wheel)
-3. Progressive slowdown over ~1 second
-4. One cover asserts itself at the center, vinyl slides out of sleeve (animated SVG)
-5. 400ms micro-pause on the result
-6. Detail sheet opens on top → overlay withdraws
+1. `GET /collection?per_page=1` → get `pagination.items` (total count)
+2. `GET /collection?page={random}&per_page=1` → fetch the random item
 
-**Technical**:
+```ts
+// features/collection/collection.queries.ts
+export const randomRecordQueryOptions = (username: string) =>
+  queryOptions({
+    queryKey: ['collection', username, 'random'],
+    queryFn: () => fetchRandomRecord(username),
+    staleTime: 0, // always refetch — each pick must be unique
+    gcTime: 0, // no cache
+    enabled: false, // triggered manually on click only
+  })
+```
 
-- `Math.random()` on the TanStack Query collection cache → zero extra requests
-- Framer Motion: `useAnimate` to orchestrate the sequence, `staggerChildren` for scrolling
-- Same `VinylDisc.tsx` as the detail page, reused as-is
-- Accessible from any screen via a global component in `__root.tsx`
+**`RecordSpotlight` component** — displays the picked record without navigating away. User can pick again or navigate to the full detail page.
 
-**Priority**: after 5.1–5.3, before Phase 6. Simple to implement, high perceived value.
-The animation is the heart of it — budget a dedicated half-day to polish it.
+```
+Mobile  → full-screen Sheet from bottom (shadcn Sheet side="bottom")
+Desktop → Dialog (shadcn Dialog)
+```
+
+Early return pattern — specific case first, nominal case last:
+
+```tsx
+// shared/components/RecordSpotlight.tsx
+function RecordSpotlight({ record, onClose, onPickAgain }) {
+  const isMobile = useMediaQuery('(max-width: 768px)')
+
+  // Mobile: full-screen sheet
+  if (isMobile) {
+    return (
+      <Sheet open onOpenChange={onClose}>
+        <SheetContent side="bottom" className="h-[90dvh]">
+          <SpotlightContent
+            record={record}
+            onClose={onClose}
+            onPickAgain={onPickAgain}
+          />
+        </SheetContent>
+      </Sheet>
+    )
+  }
+
+  // Default: dialog
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <SpotlightContent
+          record={record}
+          onClose={onClose}
+          onPickAgain={onPickAgain}
+        />
+      </DialogContent>
+    </Dialog>
+  )
+}
+```
+
+**User flow**:
+
+```
+Tap Shuffle
+  → icon spins (~300ms fetch)
+  → RecordSpotlight opens
+      [cover · title · artist · year · label]
+      [Pick again 🔀]  [View in collection →]
+  → "Pick again" → refetch → same spotlight updates in place
+  → "View in collection" → navigate to /collection/$id → spotlight closes
+```
+
+**v1 (now)**: no animation — direct open on fetch result.
+**v2 (Phase 5.4 polish)**: animated roulette overlay before reveal, using the `sillon-pioche.jsx` prototype as reference. Logic unchanged — animation wraps the same fetch + open sequence.
+
+**Priority**: implement v1 now (simple, high value). Polish animation later as a dedicated half-day.
 
 ### ✅ Exit criteria
 
