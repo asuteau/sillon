@@ -125,7 +125,7 @@ export const handleOAuthCallback = createServerFn()
       requestTokenSecret: undefined,
     })
 
-    throw redirect({ to: '/collection' })
+    throw redirect({ to: '/' })
   })
 
 export const logoutUser = createServerFn().handler(async () => {
