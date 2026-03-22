@@ -1,5 +1,5 @@
 import { getRecentAdditions } from '#/lib/recentAdditions'
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const recentAdditionsQueryOptions = queryOptions({
@@ -16,9 +16,13 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-  const { data } = useSuspenseQuery(recentAdditionsQueryOptions)
+  const { user } = Route.useRouteContext()
+  const { data } = useQuery({
+    ...recentAdditionsQueryOptions,
+    enabled: !!user,
+  })
 
-  if (data === null) {
+  if (!user) {
     return (
       <main className="page-wrap px-4 pb-8 pt-14">
         <section className="island-shell rise-in relative overflow-hidden rounded-4xl px-6 py-16 sm:px-10 sm:py-24">
@@ -53,7 +57,7 @@ function App() {
         </h1>
       </header>
 
-      {data.releases.length === 0 ? (
+      {!data || data.releases.length === 0 ? (
         <p className="text-(--sea-ink-soft)">
           No records in your collection yet.
         </p>
