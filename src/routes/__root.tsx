@@ -8,13 +8,13 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import BottomNav from '../components/BottomNav'
-import Footer from '../components/Footer'
-import Header from '../components/Header'
+import BottomNav from '#/shared/components/BottomNav'
+import Footer from '#/shared/components/Footer'
+import Header from '#/shared/components/Header'
 
-import { DefaultCatchBoundary } from '#/components/DefaultCatchBoundary'
-import { getSessionUser } from '#/lib/sessionUser'
-import { NotFound } from '#/components/NotFound'
+import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
+import { getSessionUser } from '#/services/session'
+import { NotFound } from '#/shared/components/NotFound'
 import appCss from '../styles.css?url'
 
 type User = { username: string }

@@ -1,4 +1,8 @@
-import { collectionQueryOptions } from '#/routes/_authenticated/collection'
+import { collectionQueryOptions } from '#/features/collection/collection.queries'
+import {
+  formatArtists,
+  formatDateAdded,
+} from '#/features/collection/collection.utils'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
@@ -43,9 +47,7 @@ function RecordDetail() {
 
             <div className="flex flex-col gap-4">
               <p className="island-kicker">
-                {release.basic_information.artists
-                  .map((a) => a.name)
-                  .join(', ')}
+                {formatArtists(release.basic_information.artists)}
               </p>
               <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink) sm:text-5xl">
                 {release.basic_information.title}
@@ -60,13 +62,7 @@ function RecordDetail() {
                 )}
                 <div className="flex gap-3">
                   <dt>Added</dt>
-                  <dd>
-                    {new Date(release.date_added).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </dd>
+                  <dd>{formatDateAdded(release.date_added)}</dd>
                 </div>
               </dl>
             </div>

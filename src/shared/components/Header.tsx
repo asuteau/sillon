@@ -1,6 +1,6 @@
 import { Link, useMatch } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
-import ShuffleButton from './ShuffleButton'
+import ShuffleButton from '#/features/collection/components/ShuffleButton'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {

@@ -1,20 +1,9 @@
-import { getRecentAdditions } from '#/lib/recentAdditions'
-import {
-  infiniteQueryOptions,
-  useSuspenseInfiniteQuery,
-} from '@tanstack/react-query'
+import { collectionQueryOptions } from '#/features/collection/collection.queries'
+import { formatDateAdded } from '#/features/collection/collection.utils'
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
-export const collectionQueryOptions = infiniteQueryOptions({
-  queryKey: ['collection', { perPage: 20 }],
-  queryFn: ({ pageParam }) =>
-    getRecentAdditions({ data: { perPage: 20, page: pageParam } }),
-  initialPageParam: 1,
-  getNextPageParam: (last) =>
-    last.pagination.page < last.pagination.pages
-      ? last.pagination.page + 1
-      : undefined,
-})
+export { collectionQueryOptions }
 
 export const Route = createFileRoute('/_authenticated/collection')({
   loader: ({ context: { queryClient } }) =>
@@ -67,10 +56,7 @@ function Collection() {
                       </span>
                     </div>
                     <span className="font-mono text-xs text-(--sea-ink-soft)">
-                      {new Date(release.date_added).toLocaleDateString(
-                        'en-GB',
-                        { day: 'numeric', month: 'short', year: 'numeric' },
-                      )}
+                      {formatDateAdded(release.date_added)}
                     </span>
                   </div>
                 </Link>

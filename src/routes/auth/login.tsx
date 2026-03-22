@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { initiateOAuth } from '#/lib/oauthFns'
+import { initiateOAuth } from '#/services/discogs'
 
 export const Route = createFileRoute('/auth/login')({
   loader: async () => {

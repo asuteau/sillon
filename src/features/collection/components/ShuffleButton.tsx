@@ -1,16 +1,8 @@
-import { fetchRandomRecord } from '#/lib/recentAdditions'
-import { queryOptions, useQuery } from '@tanstack/react-query'
+import { randomRecordQueryOptions } from '#/features/collection/collection.queries'
+import { useQuery } from '@tanstack/react-query'
 import { Shuffle } from 'lucide-react'
 import { useState } from 'react'
 import RecordSpotlight from './RecordSpotlight'
-
-const randomRecordQueryOptions = queryOptions({
-  queryKey: ['collection', 'random'],
-  queryFn: () => fetchRandomRecord(),
-  staleTime: 0,
-  gcTime: 0,
-  enabled: false,
-})
 
 export default function ShuffleButton() {
   const [open, setOpen] = useState(false)

@@ -1,11 +1,9 @@
-import { getRecentAdditions } from '#/lib/recentAdditions'
-import { queryOptions, useQuery } from '@tanstack/react-query'
+import { recentAdditionsQueryOptions } from '#/features/collection/collection.queries'
+import { formatDateAdded } from '#/features/collection/collection.utils'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const recentAdditionsQueryOptions = queryOptions({
-  queryKey: ['collection', { perPage: 10 }],
-  queryFn: () => getRecentAdditions({ data: { perPage: 10 } }),
-})
+export { recentAdditionsQueryOptions }
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { user, queryClient } }) => {
@@ -84,11 +82,7 @@ function App() {
                     </span>
                   </div>
                   <span className="font-mono text-xs text-(--sea-ink-soft)">
-                    {new Date(release.date_added).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
+                    {formatDateAdded(release.date_added)}
                   </span>
                 </div>
               </div>
