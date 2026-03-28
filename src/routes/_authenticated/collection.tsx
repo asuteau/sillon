@@ -18,7 +18,7 @@ function Collection() {
   const releases = data.pages.flatMap((p) => p.releases)
 
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
+    <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
       <header className="mb-8">
         <p className="island-kicker mb-2">Vinyl</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">

@@ -44,7 +44,7 @@ const stack = [
 
 function About() {
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
+    <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
       <section className="island-shell rise-in relative overflow-hidden rounded-4xl px-6 py-10 sm:px-10 sm:py-14">
         <div className="pointer-events-none absolute -left-20 -top-24 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.32),transparent_66%)]" />
         <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
@@ -87,12 +87,20 @@ function About() {
         </ul>
       </section>
 
-      <p
-        className="rise-in mt-6 font-mono text-xs text-(--sea-ink-soft)"
-        style={{ animationDelay: '160ms' }}
-      >
-        v0.1.0 — active development
-      </p>
+      <div className="mt-6 flex flex-col items-center gap-2 sm:items-start">
+        <p
+          className="rise-in font-mono text-xs text-(--sea-ink-soft)"
+          style={{ animationDelay: '160ms' }}
+        >
+          v0.1.0 — active development
+        </p>
+        <p
+          className="island-kicker rise-in"
+          style={{ animationDelay: '200ms' }}
+        >
+          Built with ♥ for vinyl
+        </p>
+      </div>
     </main>
   )
 }

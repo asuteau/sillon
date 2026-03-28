@@ -22,7 +22,7 @@ function App() {
 
   if (!user) {
     return (
-      <main className="page-wrap px-4 pb-8 pt-14">
+      <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
         <section className="island-shell rise-in relative overflow-hidden rounded-4xl px-6 py-16 sm:px-10 sm:py-24">
           <div className="pointer-events-none absolute -left-20 -top-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(79,184,178,0.32),transparent_66%)]" />
           <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
@@ -47,7 +47,7 @@ function App() {
   }
 
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
+    <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
       <header className="mb-8">
         <p className="island-kicker mb-2">Vinyl</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
