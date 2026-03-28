@@ -1,7 +1,4 @@
-import {
-  fetchRandomRecord,
-  getRecentAdditions,
-} from '#/services/discogs'
+import { fetchRandomRecord, getRecentAdditions } from '#/services/discogs'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const recentAdditionsQueryOptions = queryOptions({
@@ -18,6 +15,8 @@ export const collectionQueryOptions = infiniteQueryOptions({
     last.pagination.page < last.pagination.pages
       ? last.pagination.page + 1
       : undefined,
+  staleTime: 10 * 60 * 1000,
+  refetchOnMount: false,
 })
 
 export const randomRecordQueryOptions = queryOptions({

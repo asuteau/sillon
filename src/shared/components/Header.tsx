@@ -1,6 +1,6 @@
+import ShuffleButton from '#/features/collection/components/ShuffleButton'
 import { Link, useMatch } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
-import ShuffleButton from '#/features/collection/components/ShuffleButton'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
@@ -24,13 +24,22 @@ export default function Header() {
 
         <div className="hidden w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:flex sm:w-auto sm:flex-nowrap sm:pb-0">
           {user && (
-            <Link
-              to="/collection"
-              className="nav-link"
-              activeProps={{ className: 'nav-link is-active' }}
-            >
-              Collection
-            </Link>
+            <>
+              <Link
+                to="/collection"
+                className="nav-link"
+                activeProps={{ className: 'nav-link is-active' }}
+              >
+                Collection
+              </Link>
+              <Link
+                to="/wantlist"
+                className="nav-link"
+                activeProps={{ className: 'nav-link is-active' }}
+              >
+                Wantlist
+              </Link>
+            </>
           )}
           <Link
             to="/about"
