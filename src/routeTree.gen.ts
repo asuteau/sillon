@@ -16,6 +16,7 @@ import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedWantlistRouteImport } from './routes/_authenticated/wantlist'
+import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedCollectionRouteImport } from './routes/_authenticated/collection'
 import { Route as AuthenticatedWantlistIdRouteImport } from './routes/_authenticated/wantlist_.$id'
 import { Route as AuthenticatedCollectionIdRouteImport } from './routes/_authenticated/collection_.$id'
@@ -54,6 +55,11 @@ const AuthenticatedWantlistRoute = AuthenticatedWantlistRouteImport.update({
   path: '/wantlist',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCollectionRoute = AuthenticatedCollectionRouteImport.update({
   id: '/collection',
   path: '/collection',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/collection': typeof AuthenticatedCollectionRoute
+  '/search': typeof AuthenticatedSearchRoute
   '/wantlist': typeof AuthenticatedWantlistRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/collection': typeof AuthenticatedCollectionRoute
+  '/search': typeof AuthenticatedSearchRoute
   '/wantlist': typeof AuthenticatedWantlistRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/about': typeof AboutRoute
   '/_authenticated/collection': typeof AuthenticatedCollectionRoute
+  '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/wantlist': typeof AuthenticatedWantlistRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/collection'
+    | '/search'
     | '/wantlist'
     | '/auth/callback'
     | '/auth/login'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/collection'
+    | '/search'
     | '/wantlist'
     | '/auth/callback'
     | '/auth/login'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/_authenticated/collection'
+    | '/_authenticated/search'
     | '/_authenticated/wantlist'
     | '/auth/callback'
     | '/auth/login'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWantlistRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/search': {
+      id: '/_authenticated/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/collection': {
       id: '/_authenticated/collection'
       path: '/collection'
@@ -229,6 +248,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCollectionRoute: typeof AuthenticatedCollectionRoute
+  AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedWantlistRoute: typeof AuthenticatedWantlistRoute
   AuthenticatedCollectionIdRoute: typeof AuthenticatedCollectionIdRoute
   AuthenticatedWantlistIdRoute: typeof AuthenticatedWantlistIdRoute
@@ -236,6 +256,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCollectionRoute: AuthenticatedCollectionRoute,
+  AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedWantlistRoute: AuthenticatedWantlistRoute,
   AuthenticatedCollectionIdRoute: AuthenticatedCollectionIdRoute,
   AuthenticatedWantlistIdRoute: AuthenticatedWantlistIdRoute,

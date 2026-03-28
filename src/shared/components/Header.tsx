@@ -38,6 +38,13 @@ export default function Header() {
           {user && (
             <>
               <Link
+                to="/search"
+                className="nav-link"
+                activeProps={{ className: 'nav-link is-active' }}
+              >
+                Search
+              </Link>
+              <Link
                 to="/collection"
                 className="nav-link gap-1.5"
                 activeProps={{ className: 'nav-link is-active gap-1.5' }}
