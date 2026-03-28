@@ -1,5 +1,19 @@
 import { fetchRandomRecord, getRecentAdditions } from './collection.api'
+import { createServerFn } from '@tanstack/react-start'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+
+const getCollectionCount = createServerFn().handler(async () => {
+  const { useAppSession } = await import('#/services/session.server')
+  const session = await useAppSession()
+  return session.data.numCollection ?? 0
+})
+
+export const collectionCountQueryOptions = (username: string) =>
+  queryOptions({
+    queryKey: ['collection', username, 'count'] as const,
+    queryFn: () => getCollectionCount(),
+    staleTime: Infinity,
+  })
 
 export const recentAdditionsQueryOptions = queryOptions({
   queryKey: ['collection', { perPage: 10 }],

@@ -1,4 +1,7 @@
+import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
 import ShuffleButton from '#/features/collection/components/ShuffleButton'
+import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
+import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
@@ -7,6 +10,15 @@ export default function Header() {
   const user = useMatch({
     from: '__root__',
     select: (match) => match.context.user,
+  })
+
+  const { data: collectionCount } = useQuery({
+    ...collectionCountQueryOptions(user?.username ?? ''),
+    enabled: !!user,
+  })
+  const { data: wantlistCount } = useQuery({
+    ...wantlistCountQueryOptions(user?.username ?? ''),
+    enabled: !!user,
   })
 
   return (
@@ -27,17 +39,27 @@ export default function Header() {
             <>
               <Link
                 to="/collection"
-                className="nav-link"
-                activeProps={{ className: 'nav-link is-active' }}
+                className="nav-link gap-1.5"
+                activeProps={{ className: 'nav-link is-active gap-1.5' }}
               >
                 Collection
+                {(collectionCount ?? 0) > 0 && (
+                  <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-0.5 text-[8px] font-bold leading-none text-(--chip-bg)">
+                    {collectionCount}
+                  </span>
+                )}
               </Link>
               <Link
                 to="/wantlist"
-                className="nav-link"
-                activeProps={{ className: 'nav-link is-active' }}
+                className="nav-link gap-1.5"
+                activeProps={{ className: 'nav-link is-active gap-1.5' }}
               >
                 Wantlist
+                {(wantlistCount ?? 0) > 0 && (
+                  <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-0.5 text-[8px] font-bold leading-none text-(--chip-bg)">
+                    {wantlistCount}
+                  </span>
+                )}
               </Link>
             </>
           )}

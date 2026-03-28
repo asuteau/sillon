@@ -11,6 +11,50 @@ import {
 
 const DISCOGS_AUTH_URL = 'https://www.discogs.com/oauth/authorize'
 
+const COUNTRY_CODES: Record<string, string> = {
+  france: 'FR',
+  'united states': 'US',
+  usa: 'US',
+  'united kingdom': 'GB',
+  uk: 'GB',
+  germany: 'DE',
+  japan: 'JP',
+  canada: 'CA',
+  australia: 'AU',
+  italy: 'IT',
+  spain: 'ES',
+  netherlands: 'NL',
+  belgium: 'BE',
+  sweden: 'SE',
+  switzerland: 'CH',
+  austria: 'AT',
+  poland: 'PL',
+  denmark: 'DK',
+  norway: 'NO',
+  finland: 'FI',
+  portugal: 'PT',
+  'new zealand': 'NZ',
+  brazil: 'BR',
+  argentina: 'AR',
+  mexico: 'MX',
+  india: 'IN',
+  china: 'CN',
+  'south korea': 'KR',
+  korea: 'KR',
+  russia: 'RU',
+  'south africa': 'ZA',
+}
+
+function parseCountry(location: string | undefined): string | null {
+  if (!location) return null
+  const parts = location.split(',').map((p) => p.trim().toLowerCase())
+  for (const part of [...parts].reverse()) {
+    const code = COUNTRY_CODES[part]
+    if (code) return code
+  }
+  return null
+}
+
 export const initiateOAuth = createServerFn().handler(async () => {
   const { useAppSession } = await import('#/services/session.server')
   const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
@@ -105,12 +149,49 @@ export const handleOAuthCallback = createServerFn()
       throw new Error(`Discogs identity failed: ${identityResponse.status}`)
     }
 
-    const identity = (await identityResponse.json()) as { username: string }
+    const identity = z
+      .object({ username: z.string() })
+      .parse(await identityResponse.json())
+
+    const profileResponse = await fetch(
+      `${DISCOGS_API}/users/${identity.username}`,
+      {
+        headers: {
+          Authorization: buildOAuthHeader({
+            oauth_consumer_key: consumerKey,
+            oauth_token: accessToken,
+            oauth_signature_method: 'PLAINTEXT',
+            oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+            oauth_nonce: nonce(),
+            oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+          }),
+          'User-Agent': 'Sillon/1.0',
+        },
+      },
+    )
+
+    if (!profileResponse.ok) {
+      throw new Error(`Discogs profile failed: ${profileResponse.status}`)
+    }
+
+    const ProfileSchema = z.object({
+      username: z.string(),
+      num_collection: z.number(),
+      num_wantlist: z.number(),
+      curr_abbr: z.string().optional(),
+      location: z.string().optional(),
+    })
+
+    const profile = ProfileSchema.parse(await profileResponse.json())
 
     await session.update({
       accessToken,
       accessTokenSecret,
       discogsUsername: identity.username,
+      numCollection: profile.num_collection,
+      numWantlist: profile.num_wantlist,
+      currency: profile.curr_abbr ?? 'EUR',
+      country: parseCountry(profile.location) ?? 'FR',
       requestToken: undefined,
       requestTokenSecret: undefined,
     })

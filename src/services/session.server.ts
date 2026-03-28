@@ -6,6 +6,10 @@ export type SessionData = {
   accessToken?: string
   accessTokenSecret?: string
   discogsUsername?: string
+  numCollection?: number
+  numWantlist?: number
+  currency?: string
+  country?: string
 }
 
 export const useAppSession = () =>

@@ -1,6 +1,20 @@
-import { infiniteQueryOptions } from '@tanstack/react-query'
+import { createServerFn } from '@tanstack/react-start'
+import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 import { getWantlist } from './wantlist.api'
+
+const getWantlistCount = createServerFn().handler(async () => {
+  const { useAppSession } = await import('#/services/session.server')
+  const session = await useAppSession()
+  return session.data.numWantlist ?? 0
+})
+
+export const wantlistCountQueryOptions = (username: string) =>
+  queryOptions({
+    queryKey: ['wantlist', username, 'count'] as const,
+    queryFn: () => getWantlistCount(),
+    staleTime: Infinity,
+  })
 
 export const wantlistQueryOptions = infiniteQueryOptions({
   queryKey: ['wantlist', { perPage: 20 }],
