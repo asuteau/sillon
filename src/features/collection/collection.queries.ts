@@ -1,9 +1,11 @@
-import { fetchRandomRecord, getRecentAdditions } from '#/services/discogs'
+import { fetchRandomRecord, getRecentAdditions } from './collection.api'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 
 export const recentAdditionsQueryOptions = queryOptions({
   queryKey: ['collection', { perPage: 10 }],
   queryFn: () => getRecentAdditions({ data: { perPage: 10 } }),
+  staleTime: 10 * 60 * 1000,
+  refetchOnMount: false,
 })
 
 export const collectionQueryOptions = infiniteQueryOptions({

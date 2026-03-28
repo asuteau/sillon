@@ -297,6 +297,14 @@ a {
   .nav-link::after {
     bottom: -4px;
   }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-link.is-active .nav-label {
+    display: inline;
+  }
 }
 
 .site-footer {

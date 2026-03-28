@@ -1,23 +1,13 @@
 import { createServerFn } from '@tanstack/react-start'
 
+import {
+  buildOAuthHeader,
+  DISCOGS_API,
+  nonce,
+  oauthSignature,
+} from '#/shared/utils/discogs-oauth'
+
 import type { WantlistPage } from './wantlist.schema'
-
-const DISCOGS_API = 'https://api.discogs.com'
-
-function buildOAuthHeader(params: Record<string, string>): string {
-  const entries = Object.entries(params)
-    .map(([k, v]) => `${k}="${v}"`)
-    .join(', ')
-  return `OAuth ${entries}`
-}
-
-function oauthSignature(consumerSecret: string, tokenSecret = ''): string {
-  return `${consumerSecret}&${tokenSecret}`
-}
-
-function nonce(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36)
-}
 
 export const getWantlist = createServerFn()
   .inputValidator(
