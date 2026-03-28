@@ -1,6 +1,6 @@
 import { wantlistQueryOptions } from '#/features/wantlist/wantlist.queries'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 
 export { wantlistQueryOptions }
 
@@ -40,8 +40,10 @@ function Wantlist() {
           <ul className="flex flex-col gap-3">
             {wants.map((want, index) => (
               <li key={want.id}>
-                <div
-                  className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3"
+                <Link
+                  to="/wantlist/$id"
+                  params={{ id: String(want.id) }}
+                  className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
                   style={{ animationDelay: `${index * 60}ms` }}
                 >
                   <img
@@ -62,7 +64,7 @@ function Wantlist() {
                       {formatDateAdded(want.date_added)}
                     </span>
                   </div>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>

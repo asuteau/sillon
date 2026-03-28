@@ -17,6 +17,7 @@ import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedWantlistRouteImport } from './routes/_authenticated/wantlist'
 import { Route as AuthenticatedCollectionRouteImport } from './routes/_authenticated/collection'
+import { Route as AuthenticatedWantlistIdRouteImport } from './routes/_authenticated/wantlist_.$id'
 import { Route as AuthenticatedCollectionIdRouteImport } from './routes/_authenticated/collection_.$id'
 
 const AboutRoute = AboutRouteImport.update({
@@ -58,6 +59,11 @@ const AuthenticatedCollectionRoute = AuthenticatedCollectionRouteImport.update({
   path: '/collection',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWantlistIdRoute = AuthenticatedWantlistIdRouteImport.update({
+  id: '/wantlist_/$id',
+  path: '/wantlist/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCollectionIdRoute =
   AuthenticatedCollectionIdRouteImport.update({
     id: '/collection_/$id',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/collection/$id': typeof AuthenticatedCollectionIdRoute
+  '/wantlist/$id': typeof AuthenticatedWantlistIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/collection/$id': typeof AuthenticatedCollectionIdRoute
+  '/wantlist/$id': typeof AuthenticatedWantlistIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/_authenticated/collection_/$id': typeof AuthenticatedCollectionIdRoute
+  '/_authenticated/wantlist_/$id': typeof AuthenticatedWantlistIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/logout'
     | '/collection/$id'
+    | '/wantlist/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/logout'
     | '/collection/$id'
+    | '/wantlist/$id'
   id:
     | '__root__'
     | '/'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/logout'
     | '/_authenticated/collection_/$id'
+    | '/_authenticated/wantlist_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -198,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCollectionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/wantlist_/$id': {
+      id: '/_authenticated/wantlist_/$id'
+      path: '/wantlist/$id'
+      fullPath: '/wantlist/$id'
+      preLoaderRoute: typeof AuthenticatedWantlistIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/collection_/$id': {
       id: '/_authenticated/collection_/$id'
       path: '/collection/$id'
@@ -212,12 +231,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCollectionRoute: typeof AuthenticatedCollectionRoute
   AuthenticatedWantlistRoute: typeof AuthenticatedWantlistRoute
   AuthenticatedCollectionIdRoute: typeof AuthenticatedCollectionIdRoute
+  AuthenticatedWantlistIdRoute: typeof AuthenticatedWantlistIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCollectionRoute: AuthenticatedCollectionRoute,
   AuthenticatedWantlistRoute: AuthenticatedWantlistRoute,
   AuthenticatedCollectionIdRoute: AuthenticatedCollectionIdRoute,
+  AuthenticatedWantlistIdRoute: AuthenticatedWantlistIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

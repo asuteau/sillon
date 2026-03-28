@@ -143,6 +143,8 @@ export type SessionData = {
   accessToken?: string
   accessTokenSecret?: string
   discogsUsername?: string
+  currency?: string // from Discogs curr_abbr — EUR, GBP, USD...
+  country?: string // parsed from Discogs location field
 }
 ```
 
@@ -180,6 +182,8 @@ export const handleCallback = createServerFn()
       accessToken,
       accessTokenSecret,
       discogsUsername: identity.username,
+      currency: identity.curr_abbr ?? 'EUR',
+      country: parseCountry(identity.location) ?? 'FR',
     })
     throw redirect({ href: '/' })
   })
@@ -213,6 +217,8 @@ export const Route = createFileRoute('/_authenticated')({
         username: session.data.discogsUsername!,
         accessToken: session.data.accessToken,
         accessTokenSecret: session.data.accessTokenSecret!,
+        currency: session.data.currency ?? 'EUR',
+        country: session.data.country ?? 'FR',
       },
     }
   },
@@ -348,6 +354,14 @@ URL state:
 ```
 
 Prefetch on hover over master cards.
+
+**Actions from search results** — the primary use case of search is finding a specific pressing and adding it to the collection or wantlist without leaving the view:
+
+- Each version row has two action buttons: **+ Collection** and **+ Wantlist**
+- Actions trigger the same optimistic mutations as the collection and wantlist features
+- Count badges in the bottom nav update immediately via `setQueryData`
+- If the release is already in the collection or wantlist, the corresponding button shows a checkmark and triggers removal instead (toggle behavior)
+- Use `useSuspenseQuery` with `releaseId` to check membership status before rendering the buttons — data comes from the collection/wantlist cache, no extra fetch if already loaded
 
 ### 3.6 Wantlist — `wantlist.tsx`
 
@@ -996,7 +1010,179 @@ useMutation({
 - In-app search bar → instant result from cache
 - Useful while crate digging (cf. PWA mobile)
 
-### 5.4 Random pick — "Surprise me"
+### 5.4 Find elsewhere — curated seller directory
+
+**Concept**: accessible from the release detail page, a ranked list of trusted external retailers where the user can search for the release. No scraping, no API calls — just pre-built search URLs opened in a new tab. The list is ranked based on user preferences (country, currency) and release metadata (genre).
+
+**Data model** — static file, no backend needed:
+
+```ts
+// src/data/sellers.ts
+type Seller = {
+  id: string
+  name: string
+  domain: string // used for favicon
+  url: (title: string, artist: string) => string
+  country: string // seller's country — 'FR' | 'GB' | 'DE' | ...
+  currency: string // 'EUR' | 'GBP' | 'USD' | ...
+  ships: string[] // ['worldwide'] or ['EU', 'GB', ...]
+  specialties: string[] // Discogs style tags — ['electronic', 'jazz', ...]
+}
+
+const SELLERS: Seller[] = [
+  {
+    id: 'boomkat',
+    name: 'Boomkat',
+    domain: 'boomkat.com',
+    url: (title, artist) =>
+      `https://boomkat.com/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
+    country: 'GB',
+    currency: 'GBP',
+    ships: ['worldwide'],
+    specialties: ['electronic', 'experimental', 'jazz', 'ambient'],
+  },
+  {
+    id: 'juno',
+    name: 'Juno Records',
+    domain: 'juno.co.uk',
+    url: (title, artist) =>
+      `https://www.juno.co.uk/search/?q=${encodeURIComponent(`${artist} ${title}`)}`,
+    country: 'GB',
+    currency: 'GBP',
+    ships: ['worldwide'],
+    specialties: ['electronic', 'dance', 'house', 'techno', 'drum-and-bass'],
+  },
+  {
+    id: 'decks',
+    name: 'Decks.de',
+    domain: 'decks.de',
+    url: (title, artist) =>
+      `https://www.decks.de/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
+    country: 'DE',
+    currency: 'EUR',
+    ships: ['EU', 'worldwide'],
+    specialties: ['electronic', 'dance', 'techno', 'house'],
+  },
+  {
+    id: 'norman',
+    name: 'Norman Records',
+    domain: 'normanrecords.com',
+    url: (title, artist) =>
+      `https://www.normanrecords.com/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
+    country: 'GB',
+    currency: 'GBP',
+    ships: ['worldwide'],
+    specialties: ['indie', 'alternative', 'electronic', 'experimental'],
+  },
+  {
+    id: 'clone',
+    name: 'Clone Records',
+    domain: 'clone.nl',
+    url: (title, artist) =>
+      `https://clone.nl/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
+    country: 'NL',
+    currency: 'EUR',
+    ships: ['worldwide'],
+    specialties: ['electronic', 'techno', 'house', 'electro'],
+  },
+  // add more as needed
+]
+```
+
+**Ranking algorithm** — pure function, fully testable:
+
+```ts
+// src/data/sellers.ts
+function rankSellers(
+  sellers: Seller[],
+  release: Record,
+  prefs: { country: string; currency: string },
+): Seller[] {
+  return [...sellers].sort((a, b) => {
+    let scoreA = 0
+    let scoreB = 0
+
+    // Same country as user → +3
+    if (a.country === prefs.country) scoreA += 3
+    if (b.country === prefs.country) scoreB += 3
+
+    // Same currency as user → +2
+    if (a.currency === prefs.currency) scoreA += 2
+    if (b.currency === prefs.currency) scoreB += 2
+
+    // Genre match with release styles → +1 per match
+    const styles = release.styles?.map((s) => s.toLowerCase()) ?? []
+    scoreA += styles.filter((s) => a.specialties.includes(s)).length
+    scoreB += styles.filter((s) => b.specialties.includes(s)).length
+
+    return scoreB - scoreA
+  })
+}
+```
+
+**Favicon — no logos, no trademark issues:**
+
+```tsx
+// Served by Google — no hosting, always up to date, zero legal risk
+<img
+  src={`https://www.google.com/s2/favicons?domain=${seller.domain}&sz=32`}
+  alt={seller.name}
+  width={16}
+  height={16}
+/>
+```
+
+**User preferences** — sourced directly from the Discogs profile at login, no manual setup needed:
+
+The `GET /users/{username}` endpoint exposes `curr_abbr` (ISO currency code) and `location` (free text). Both are captured at OAuth callback and stored in the session:
+
+```ts
+// services/discogs.server.ts — in handleCallback
+const identity = await fetchDiscogsIdentity(accessToken, accessTokenSecret)
+
+await session.update({
+  accessToken,
+  accessTokenSecret,
+  discogsUsername: identity.username,
+  currency: identity.curr_abbr ?? 'EUR', // clean ISO code — EUR, GBP, USD...
+  country: parseCountry(identity.location) ?? 'FR', // best-effort parse of free text
+})
+```
+
+`parseCountry` is a simple utility that extracts a country code from strings like `"Nantes, France"` → `"FR"`. The user can override both values in their profile settings if the detection is wrong.
+
+In `rankSellers`, country and currency come from the route context — no `useLocalStorage` needed:
+
+```ts
+const { user } = useRouteContext({ from: '/_authenticated' })
+
+const ranked = rankSellers(SELLERS, release, {
+  country: user.country,
+  currency: user.currency,
+})
+```
+
+**UI** — accessible from the release detail page, below the main metadata:
+
+```
+Find elsewhere
+
+  🟦 Boomkat          [Search →]   ← ranked #1 (GB + electronic match)
+  🟦 Norman Records   [Search →]
+  🟦 Juno Records     [Search →]
+  🟦 Decks.de         [Search →]
+  🟦 Clone Records    [Search →]
+```
+
+Each row opens the pre-built search URL in a new tab. No request is made by Sillon.
+
+**Legal note**: favicons served via Google's favicon service — Sillon hosts no brand assets. Add a footer disclaimer: _"Sillon is not affiliated with or endorsed by any of these retailers."_
+
+**Technical scope**: `src/data/sellers.ts` only — no new service, no API, no Supabase table. Pure static data + client-side ranking.
+
+**Priority**: after 5.3, before 5.5. Low implementation cost, high perceived value for crate diggers.
+
+### 5.5 Random pick — "Surprise me"
 
 **Concept**: a shuffle button in the dashboard header. Fetches a truly random record from the full Discogs collection (not just loaded pages), then displays it in a `RecordSpotlight` component. The user can pick again without closing or navigating away.
 
@@ -1084,6 +1270,7 @@ Tap Shuffle
 
 - Add/remove with optimistic feedback
 - Profile stats displayed
+- Find elsewhere accessible from release detail, ranked by user preferences
 - Random pick working with complete animation
 
 ---
