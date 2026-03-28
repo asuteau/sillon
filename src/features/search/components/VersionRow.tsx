@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { Check, Heart, Library } from 'lucide-react'
 
 import {
@@ -16,9 +17,10 @@ import type { VersionsPage } from '../search.schema'
 interface VersionRowProps {
   version: MasterVersion
   masterId: string
+  q: string
 }
 
-export function VersionRow({ version, masterId }: VersionRowProps) {
+export function VersionRow({ version, masterId, q }: VersionRowProps) {
   const queryClient = useQueryClient()
 
   const addToCollection = useAddToCollection()
@@ -86,29 +88,36 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
 
   return (
     <li className="island-shell rise-in flex items-center gap-3 rounded-2xl px-4 py-3">
-      {version.thumb ? (
-        <img
-          src={version.thumb}
-          alt=""
-          className="h-10 w-10 rounded-lg object-cover shrink-0"
-        />
-      ) : (
-        <div className="h-10 w-10 rounded-lg bg-(--chip-bg) shrink-0" />
-      )}
+      <Link
+        to="/search/$releaseId"
+        params={{ releaseId: String(version.id) }}
+        search={{ q, masterId }}
+        className="flex flex-1 items-center gap-3 min-w-0 no-underline"
+      >
+        {version.thumb ? (
+          <img
+            src={version.thumb}
+            alt=""
+            className="h-10 w-10 rounded-lg object-cover shrink-0"
+          />
+        ) : (
+          <div className="h-10 w-10 rounded-lg bg-(--chip-bg) shrink-0" />
+        )}
 
-      <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-        <span className="font-semibold text-(--sea-ink) truncate">
-          {version.country}
-          {version.year > 0 && (
-            <span className="font-mono text-xs text-(--sea-ink-soft) ml-2">
-              {version.year}
-            </span>
-          )}
-        </span>
-        <span className="text-xs text-(--sea-ink-soft) truncate">
-          {version.format}
-        </span>
-      </div>
+        <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+          <span className="font-semibold text-(--sea-ink) truncate">
+            {version.country}
+            {version.year > 0 && (
+              <span className="font-mono text-xs text-(--sea-ink-soft) ml-2">
+                {version.year}
+              </span>
+            )}
+          </span>
+          <span className="text-xs text-(--sea-ink-soft) truncate">
+            {version.format}
+          </span>
+        </div>
+      </Link>
 
       <div className="flex items-center gap-2 shrink-0">
         <button

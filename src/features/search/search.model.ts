@@ -1,4 +1,4 @@
-import type { MasterResult, Version } from './search.schema'
+import type { MasterResult, ReleaseDetail, Version } from './search.schema'
 
 export type Master = {
   id: number
@@ -17,6 +17,30 @@ export type MasterVersion = {
   format: string
   inCollection: number
   inWantlist: number
+}
+
+export type ReleaseDetailModel = {
+  id: number
+  title: string
+  year: number
+  country: string
+  artists: string[]
+  coverImage: string
+  formatName: string
+  formatText: string
+}
+
+export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
+  return {
+    id: raw.id,
+    title: raw.title,
+    year: raw.year,
+    country: raw.country ?? '',
+    artists: raw.artists.map((a) => a.name),
+    coverImage: raw.images?.[0]?.uri ?? '',
+    formatName: raw.formats?.[0]?.name ?? '',
+    formatText: raw.formats?.[0]?.text ?? '',
+  }
 }
 
 export function toMaster(raw: MasterResult): Master {

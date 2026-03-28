@@ -39,6 +39,25 @@ export const VersionsPageSchema = z.object({
   pagination: PaginationSchema,
 })
 
+export const ReleaseDetailSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  year: z.number(),
+  country: z.string().optional(),
+  artists: z.array(z.object({ name: z.string() })),
+  images: z.array(z.object({ uri: z.string() })).optional(),
+  formats: z
+    .array(
+      z.object({
+        name: z.string(),
+        qty: z.string(),
+        text: z.string().optional(),
+      }),
+    )
+    .optional(),
+})
+
+export type ReleaseDetail = z.infer<typeof ReleaseDetailSchema>
 export type MasterResult = z.infer<typeof MasterResultSchema>
 export type SearchPage = z.infer<typeof SearchPageSchema>
 export type Version = z.infer<typeof VersionSchema>

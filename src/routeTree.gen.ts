@@ -19,6 +19,7 @@ import { Route as AuthenticatedWantlistRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedCollectionRouteImport } from './routes/_authenticated/collection'
 import { Route as AuthenticatedWantlistIdRouteImport } from './routes/_authenticated/wantlist_.$id'
+import { Route as AuthenticatedSearchReleaseIdRouteImport } from './routes/_authenticated/search_.$releaseId'
 import { Route as AuthenticatedCollectionIdRouteImport } from './routes/_authenticated/collection_.$id'
 
 const AboutRoute = AboutRouteImport.update({
@@ -70,6 +71,12 @@ const AuthenticatedWantlistIdRoute = AuthenticatedWantlistIdRouteImport.update({
   path: '/wantlist/$id',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSearchReleaseIdRoute =
+  AuthenticatedSearchReleaseIdRouteImport.update({
+    id: '/search_/$releaseId',
+    path: '/search/$releaseId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedCollectionIdRoute =
   AuthenticatedCollectionIdRouteImport.update({
     id: '/collection_/$id',
@@ -87,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/collection/$id': typeof AuthenticatedCollectionIdRoute
+  '/search/$releaseId': typeof AuthenticatedSearchReleaseIdRoute
   '/wantlist/$id': typeof AuthenticatedWantlistIdRoute
 }
 export interface FileRoutesByTo {
@@ -99,6 +107,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/collection/$id': typeof AuthenticatedCollectionIdRoute
+  '/search/$releaseId': typeof AuthenticatedSearchReleaseIdRoute
   '/wantlist/$id': typeof AuthenticatedWantlistIdRoute
 }
 export interface FileRoutesById {
@@ -113,6 +122,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/_authenticated/collection_/$id': typeof AuthenticatedCollectionIdRoute
+  '/_authenticated/search_/$releaseId': typeof AuthenticatedSearchReleaseIdRoute
   '/_authenticated/wantlist_/$id': typeof AuthenticatedWantlistIdRoute
 }
 export interface FileRouteTypes {
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/logout'
     | '/collection/$id'
+    | '/search/$releaseId'
     | '/wantlist/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/logout'
     | '/collection/$id'
+    | '/search/$releaseId'
     | '/wantlist/$id'
   id:
     | '__root__'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/logout'
     | '/_authenticated/collection_/$id'
+    | '/_authenticated/search_/$releaseId'
     | '/_authenticated/wantlist_/$id'
   fileRoutesById: FileRoutesById
 }
@@ -236,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWantlistIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/search_/$releaseId': {
+      id: '/_authenticated/search_/$releaseId'
+      path: '/search/$releaseId'
+      fullPath: '/search/$releaseId'
+      preLoaderRoute: typeof AuthenticatedSearchReleaseIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/collection_/$id': {
       id: '/_authenticated/collection_/$id'
       path: '/collection/$id'
@@ -251,6 +271,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedWantlistRoute: typeof AuthenticatedWantlistRoute
   AuthenticatedCollectionIdRoute: typeof AuthenticatedCollectionIdRoute
+  AuthenticatedSearchReleaseIdRoute: typeof AuthenticatedSearchReleaseIdRoute
   AuthenticatedWantlistIdRoute: typeof AuthenticatedWantlistIdRoute
 }
 
@@ -259,6 +280,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedWantlistRoute: AuthenticatedWantlistRoute,
   AuthenticatedCollectionIdRoute: AuthenticatedCollectionIdRoute,
+  AuthenticatedSearchReleaseIdRoute: AuthenticatedSearchReleaseIdRoute,
   AuthenticatedWantlistIdRoute: AuthenticatedWantlistIdRoute,
 }
 

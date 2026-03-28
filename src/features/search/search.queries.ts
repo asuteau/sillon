@@ -1,6 +1,10 @@
 import { queryOptions } from '@tanstack/react-query'
 
-import { getMasterVersions, searchMasters } from './search.api'
+import {
+  getMasterVersions,
+  getReleaseDetail,
+  searchMasters,
+} from './search.api'
 
 export const mastersQueryOptions = (q: string) =>
   queryOptions({
@@ -16,4 +20,11 @@ export const versionsQueryOptions = (masterId: string | undefined) =>
     queryFn: () => getMasterVersions({ data: { masterId: masterId! } }),
     enabled: masterId !== undefined,
     staleTime: 5 * 60 * 1000,
+  })
+
+export const releaseDetailQueryOptions = (releaseId: string) =>
+  queryOptions({
+    queryKey: ['search', 'release', releaseId] as const,
+    queryFn: () => getReleaseDetail({ data: { releaseId } }),
+    staleTime: 30 * 60 * 1000,
   })

@@ -60,7 +60,7 @@ function Search() {
           </button>
         </div>
 
-        <VersionsList masterId={masterId} />
+        <VersionsList masterId={masterId} q={q} />
       </main>
     )
   }
@@ -151,9 +151,10 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
 
 interface VersionsListProps {
   masterId: string
+  q: string
 }
 
-function VersionsList({ masterId }: VersionsListProps) {
+function VersionsList({ masterId, q }: VersionsListProps) {
   const { data, isFetching } = useQuery(versionsQueryOptions(masterId))
 
   const versions = useMemo(
@@ -172,7 +173,12 @@ function VersionsList({ masterId }: VersionsListProps) {
   return (
     <ul className="flex flex-col gap-3">
       {versions.map((version) => (
-        <VersionRow key={version.id} version={version} masterId={masterId} />
+        <VersionRow
+          key={version.id}
+          version={version}
+          masterId={masterId}
+          q={q}
+        />
       ))}
     </ul>
   )
