@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 
 import { useDebounce } from '#/shared/hooks/useDebounce'
@@ -50,7 +50,7 @@ function Search() {
 
   if (masterId !== undefined) {
     return (
-      <main className="page-wrap px-4 pb-8 pt-14">
+      <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
         <div className="mb-6 flex items-center gap-4">
           <button
             onClick={handleBack}
@@ -66,7 +66,7 @@ function Search() {
   }
 
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
+    <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
       <header className="mb-8">
         <p className="island-kicker mb-2">Discogs</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">

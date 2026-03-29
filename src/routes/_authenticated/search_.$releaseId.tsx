@@ -25,7 +25,7 @@ function ReleaseDetail() {
   const colors = release.formatText ? extractColors(release.formatText) : []
 
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
+    <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
       <Link
         to="/search"
         search={{ q, masterId }}

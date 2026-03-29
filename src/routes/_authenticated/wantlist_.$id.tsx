@@ -28,7 +28,7 @@ function WantDetail() {
     .find((w) => w.id === Number(id))
 
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
+    <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
       <Link
         to="/wantlist"
         className="island-kicker rise-in mb-8 inline-flex items-center gap-1.5 no-underline"
