@@ -26,6 +26,16 @@ export const VersionSchema = z.object({
   country: z.string(),
   major_formats: z.array(z.string()),
   format: z.string(),
+  formats: z
+    .array(
+      z.object({
+        name: z.string(),
+        qty: z.string().optional(),
+        descriptions: z.array(z.string()).optional(),
+        text: z.string().optional(),
+      }),
+    )
+    .optional(),
   stats: z.object({
     user: z.object({
       in_collection: z.number(),

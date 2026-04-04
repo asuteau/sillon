@@ -7,12 +7,12 @@ import {
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
 
+import type { ReleaseDetail, SearchPage, VersionsPage } from './search.schema'
 import {
   ReleaseDetailSchema,
   SearchPageSchema,
   VersionsPageSchema,
 } from './search.schema'
-import type { ReleaseDetail, SearchPage, VersionsPage } from './search.schema'
 
 export const searchMasters = createServerFn()
   .inputValidator((data: { q: string; page?: number }) => data)

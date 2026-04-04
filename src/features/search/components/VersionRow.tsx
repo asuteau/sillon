@@ -10,9 +10,11 @@ import {
   useAddToWantlist,
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
+import { VinylDisc } from '#/shared/components/VinylDisc'
 import { versionsQueryOptions } from '../search.queries'
 import type { MasterVersion } from '../search.model'
 import type { VersionsPage } from '../search.schema'
+import { parseVinylColors } from '../search.utils'
 
 interface VersionRowProps {
   version: MasterVersion
@@ -94,15 +96,11 @@ export function VersionRow({ version, masterId, q }: VersionRowProps) {
         search={{ q, masterId }}
         className="flex flex-1 items-center gap-3 min-w-0 no-underline"
       >
-        {version.thumb ? (
-          <img
-            src={version.thumb}
-            alt=""
-            className="h-10 w-10 rounded-lg object-cover shrink-0"
-          />
-        ) : (
-          <div className="h-10 w-10 rounded-lg bg-(--chip-bg) shrink-0" />
-        )}
+        <VinylDisc
+          colors={parseVinylColors(version.formats, version.format)}
+          spinning={false}
+          size={40}
+        />
 
         <div className="flex flex-1 flex-col gap-0.5 min-w-0">
           <span className="font-semibold text-(--sea-ink) truncate">

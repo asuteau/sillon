@@ -15,6 +15,7 @@ export type MasterVersion = {
   country: string
   majorFormat: string
   format: string
+  formats: Array<{ descriptions?: string[]; text?: string }>
   inCollection: number
   inWantlist: number
 }
@@ -61,6 +62,11 @@ export function toMasterVersion(raw: Version): MasterVersion {
     country: raw.country,
     majorFormat: raw.major_formats[0] ?? '',
     format: raw.format.replaceAll(', ', ' · '),
+    formats:
+      raw.formats?.map((f) => ({
+        descriptions: f.descriptions,
+        text: f.text,
+      })) ?? [],
     inCollection: raw.stats.user.in_collection,
     inWantlist: raw.stats.user.in_wantlist,
   }
