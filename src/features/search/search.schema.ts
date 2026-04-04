@@ -6,6 +6,12 @@ export const MasterResultSchema = z.object({
   year: z.string().optional(),
   thumb: z.string(),
   cover_image: z.string(),
+  user_data: z
+    .object({
+      in_collection: z.boolean(),
+      in_wantlist: z.boolean(),
+    })
+    .optional(),
 })
 
 export const PaginationSchema = z.object({

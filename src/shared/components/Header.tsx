@@ -51,7 +51,7 @@ export default function Header() {
               >
                 Collection
                 {(collectionCount ?? 0) > 0 && (
-                  <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-0.5 text-[8px] font-bold leading-none text-(--chip-bg)">
+                  <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-1 text-[8px] font-bold leading-tight text-(--chip-bg)">
                     {collectionCount}
                   </span>
                 )}
@@ -63,7 +63,7 @@ export default function Header() {
               >
                 Wantlist
                 {(wantlistCount ?? 0) > 0 && (
-                  <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-0.5 text-[8px] font-bold leading-none text-(--chip-bg)">
+                  <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-1 text-[8px] font-bold leading-tight text-(--chip-bg)">
                     {wantlistCount}
                   </span>
                 )}

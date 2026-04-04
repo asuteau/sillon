@@ -1,4 +1,4 @@
-import { useQueries, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
@@ -102,16 +102,6 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
     [data?.results],
   )
 
-  // Subscribe to cached versions for each visible master so the owned badge
-  // updates reactively when versions load (e.g. after navigating back).
-  // enabled: false prevents fetching — we only want the cache subscription.
-  const versionsCaches = useQueries({
-    queries: masters.map((master) => ({
-      ...versionsQueryOptions(String(master.id)),
-      enabled: false,
-    })),
-  })
-
   if (q.length <= 2) {
     return (
       <p className="text-(--sea-ink-soft)">
@@ -130,21 +120,14 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
 
   return (
     <ul className="flex flex-col gap-3">
-      {masters.map((master, index) => {
-        const versions = versionsCaches[index]?.data?.versions
-        const ownedCount =
-          versions?.reduce((sum, v) => sum + v.stats.user.in_collection, 0) ?? 0
-
-        return (
-          <MasterCard
-            key={master.id}
-            master={master}
-            ownedCount={ownedCount}
-            index={index}
-            onClick={() => onMasterClick(master.id)}
-          />
-        )
-      })}
+      {masters.map((master, index) => (
+        <MasterCard
+          key={master.id}
+          master={master}
+          index={index}
+          onClick={() => onMasterClick(master.id)}
+        />
+      ))}
     </ul>
   )
 }

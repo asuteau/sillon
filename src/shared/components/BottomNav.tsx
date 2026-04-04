@@ -58,7 +58,7 @@ export default function BottomNav() {
               <Library className="h-4 w-4" />
               <span className="nav-label">Collection</span>
               {(collectionCount ?? 0) > 0 && (
-                <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-0.5 text-[8px] font-bold leading-none text-(--chip-bg)">
+                <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-1 text-[8px] font-bold leading-tight text-(--chip-bg)">
                   {collectionCount}
                 </span>
               )}
@@ -74,7 +74,7 @@ export default function BottomNav() {
               <Heart className="h-4 w-4" />
               <span className="nav-label">Wantlist</span>
               {(wantlistCount ?? 0) > 0 && (
-                <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-0.5 text-[8px] font-bold leading-none text-(--chip-bg)">
+                <span className="flex min-w-3.5 items-center justify-center rounded-full bg-(--sea-ink) px-1 py-1 text-[8px] font-bold leading-tight text-(--chip-bg)">
                   {wantlistCount}
                 </span>
               )}

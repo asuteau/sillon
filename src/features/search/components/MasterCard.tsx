@@ -1,18 +1,14 @@
+import { Heart, Library } from 'lucide-react'
+
 import type { Master } from '../search.model'
 
 interface MasterCardProps {
   master: Master
   onClick: () => void
   index: number
-  ownedCount?: number
 }
 
-export function MasterCard({
-  master,
-  onClick,
-  index,
-  ownedCount = 0,
-}: MasterCardProps) {
+export function MasterCard({ master, onClick, index }: MasterCardProps) {
   return (
     <li>
       <button
@@ -32,9 +28,14 @@ export function MasterCard({
             </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            {ownedCount > 0 && (
-              <span className="flex items-center gap-1 rounded-full bg-(--sea-ink) px-2 py-0.5 text-[10px] font-bold leading-none text-(--chip-bg)">
-                {ownedCount}
+            {master.inCollection && (
+              <span className="flex items-center gap-1 rounded-full bg-(--sea-ink) px-2 py-1 text-[10px] font-bold leading-tight text-(--chip-bg)">
+                <Library className="h-2.5 w-2.5" />
+              </span>
+            )}
+            {master.inWantlist && (
+              <span className="flex items-center gap-1 rounded-full bg-(--sea-ink) px-2 py-1 text-[10px] font-bold leading-tight text-(--chip-bg)">
+                <Heart className="h-2.5 w-2.5" />
               </span>
             )}
             {master.year !== null && (

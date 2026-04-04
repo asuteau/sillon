@@ -6,6 +6,8 @@ export type Master = {
   year: number | null
   thumb: string
   coverImage: string
+  inCollection: boolean
+  inWantlist: boolean
 }
 
 export type MasterVersion = {
@@ -51,6 +53,8 @@ export function toMaster(raw: MasterResult): Master {
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     thumb: raw.thumb,
     coverImage: raw.cover_image,
+    inCollection: raw.user_data?.in_collection ?? false,
+    inWantlist: raw.user_data?.in_wantlist ?? false,
   }
 }
 
