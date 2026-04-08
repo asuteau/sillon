@@ -78,12 +78,7 @@ export function VinylDisc({ colors, spinning, size = 48 }: VinylDiscProps) {
         strokeWidth={1}
       />
       <circle cx={r} cy={r} r={r * 0.28} fill="#888" />
-      <circle
-        cx={r}
-        cy={r}
-        r={r * 0.06}
-        fill={isBlack ? '#333' : '#ccc'}
-      />
+      <circle cx={r} cy={r} r={r * 0.06} fill={isBlack ? '#333' : '#ccc'} />
     </svg>
   )
 }

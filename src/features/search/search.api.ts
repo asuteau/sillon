@@ -15,7 +15,9 @@ import {
 } from './search.schema'
 
 export const searchMasters = createServerFn()
-  .inputValidator((data: { q: string; page?: number }) => data)
+  .inputValidator(
+    (data: { q: string; type?: 'all' | 'artist'; page?: number }) => data,
+  )
   .handler(async ({ data }): Promise<SearchPage> => {
     const { useAppSession } = await import('#/services/session.server')
     const session = await useAppSession()
@@ -28,8 +30,24 @@ export const searchMasters = createServerFn()
     const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
     const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
     const page = data.page ?? 1
+    const searchType = data.type ?? 'all'
 
-    const url = `${DISCOGS_API}/database/search?type=master&q=${encodeURIComponent(data.q)}&per_page=20&page=${page}`
+    const params = new URLSearchParams({
+      per_page: '50',
+      sort: 'year',
+      sort_order: 'desc',
+      page: String(page),
+    })
+
+    params.set('type', 'master')
+
+    if (searchType === 'artist') {
+      params.set('artist', data.q)
+    } else {
+      params.set('q', data.q)
+    }
+
+    const url = `${DISCOGS_API}/database/search?${params.toString()}`
 
     const response = await fetch(url, {
       headers: {
@@ -68,7 +86,7 @@ export const getMasterVersions = createServerFn()
     const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
     const page = data.page ?? 1
 
-    const url = `${DISCOGS_API}/masters/${data.masterId}/versions?format=Vinyl&per_page=20&page=${page}`
+    const url = `${DISCOGS_API}/masters/${data.masterId}/versions?format=Vinyl&per_page=50&sort=released&sort_order=desc&page=${page}`
 
     const response = await fetch(url, {
       headers: {

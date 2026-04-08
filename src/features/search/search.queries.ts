@@ -6,10 +6,13 @@ import {
   searchMasters,
 } from './search.api'
 
-export const mastersQueryOptions = (q: string) =>
+export const mastersQueryOptions = (
+  q: string,
+  type: 'all' | 'artist' = 'all',
+) =>
   queryOptions({
-    queryKey: ['search', 'masters', q] as const,
-    queryFn: () => searchMasters({ data: { q } }),
+    queryKey: ['search', 'masters', q, type] as const,
+    queryFn: () => searchMasters({ data: { q, type } }),
     enabled: q.length > 2,
     staleTime: 5 * 60 * 1000,
   })

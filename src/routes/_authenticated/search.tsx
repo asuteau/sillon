@@ -16,13 +16,14 @@ import {
 export const Route = createFileRoute('/_authenticated/search')({
   validateSearch: z.object({
     q: z.string().default(''),
+    type: z.enum(['all', 'artist']).default('all'),
     masterId: z.string().optional(),
   }),
   component: Search,
 })
 
 function Search() {
-  const { q, masterId } = Route.useSearch()
+  const { q, type, masterId } = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
   const [inputValue, setInputValue] = useState(q)
   const debouncedValue = useDebounce(inputValue)
@@ -30,7 +31,7 @@ function Search() {
   useEffect(() => {
     if (debouncedValue === q) return
     navigate({
-      search: () => ({ q: debouncedValue, masterId: undefined }),
+      search: (s) => ({ ...s, q: debouncedValue, masterId: undefined }),
     }).catch(() => {})
   }, [debouncedValue])
 
@@ -45,7 +46,13 @@ function Search() {
   }
 
   const handleBack = () => {
-    navigate({ search: () => ({ q }) }).catch(() => {})
+    navigate({ search: (s) => ({ q: s.q, type: s.type }) }).catch(() => {})
+  }
+
+  const handleTypeChange = (newType: 'all' | 'artist') => {
+    navigate({
+      search: (s) => ({ q: s.q, type: newType, masterId: undefined }),
+    }).catch(() => {})
   }
 
   if (masterId !== undefined) {
@@ -84,18 +91,56 @@ function Search() {
         />
       </div>
 
-      <MastersList q={q} onMasterClick={handleMasterClick} />
+      <SearchFilters type={type} q={q} onTypeChange={handleTypeChange} />
+
+      <MastersList q={q} type={type} onMasterClick={handleMasterClick} />
     </main>
+  )
+}
+
+interface SearchFiltersProps {
+  type: 'all' | 'artist'
+  q: string
+  onTypeChange: (type: 'all' | 'artist') => void
+}
+
+function SearchFilters({ type, q, onTypeChange }: SearchFiltersProps) {
+  if (q.length === 0) {
+    return null
+  }
+
+  const filters = [
+    { value: 'all' as const, label: 'All' },
+    { value: 'artist' as const, label: 'Artist only' },
+  ]
+
+  return (
+    <div className="mb-4 flex gap-2 overflow-x-auto">
+      {filters.map((filter) => (
+        <button
+          key={filter.value}
+          onClick={() => onTypeChange(filter.value)}
+          className={`cursor-pointer whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+            type === filter.value
+              ? 'bg-(--sea-ink) text-(--chip-bg)'
+              : 'border border-(--line) text-(--sea-ink)'
+          }`}
+        >
+          {filter.label}
+        </button>
+      ))}
+    </div>
   )
 }
 
 interface MastersListProps {
   q: string
+  type: 'all' | 'artist'
   onMasterClick: (id: number) => void
 }
 
-function MastersList({ q, onMasterClick }: MastersListProps) {
-  const { data, isFetching } = useQuery(mastersQueryOptions(q))
+function MastersList({ q, type, onMasterClick }: MastersListProps) {
+  const { data, isFetching } = useQuery(mastersQueryOptions(q, type))
 
   const masters = useMemo(
     () => (data?.results ?? []).map(toMaster),
