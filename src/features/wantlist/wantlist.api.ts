@@ -32,7 +32,8 @@ export const getWantlist = createServerFn()
 
     const url = `${DISCOGS_API}/users/${discogsUsername}/wants?sort=added&sort_order=desc&per_page=${perPage}&page=${page}`
 
-    const response = await fetch(url, {
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
       headers: {
         Authorization: buildOAuthHeader({
           oauth_consumer_key: consumerKey,

@@ -32,7 +32,8 @@ export const getRecentAdditions = createServerFn()
 
     const url = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases?sort=added&sort_order=desc&per_page=${perPage}&page=${page}`
 
-    const response = await fetch(url, {
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
       headers: {
         Authorization: buildOAuthHeader({
           oauth_consumer_key: consumerKey,
@@ -88,7 +89,8 @@ export const fetchRandomRecord = createServerFn().handler(async () => {
     }
   }
 
-  const countRes = await fetch(`${base}?per_page=1&page=1`, {
+  const { discogsRequest } = await import('#/services/discogs.server')
+  const countRes = await discogsRequest(`${base}?per_page=1&page=1`, {
     headers: makeHeaders(),
   })
   if (!countRes.ok)
@@ -99,9 +101,12 @@ export const fetchRandomRecord = createServerFn().handler(async () => {
   if (pagination.items === 0) return null
 
   const randomPage = Math.ceil(Math.random() * pagination.items)
-  const itemRes = await fetch(`${base}?per_page=1&page=${randomPage}`, {
-    headers: makeHeaders(),
-  })
+  const itemRes = await discogsRequest(
+    `${base}?per_page=1&page=${randomPage}`,
+    {
+      headers: makeHeaders(),
+    },
+  )
   if (!itemRes.ok)
     throw new Error(`Discogs random fetch failed: ${itemRes.status}`)
   const { releases } = (await itemRes.json()) as CollectionPage

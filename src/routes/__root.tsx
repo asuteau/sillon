@@ -11,6 +11,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
 import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
 import BottomNav from '#/shared/components/BottomNav'
+import { DiscogsRateLimitDevTools } from '#/shared/components/DiscogsRateLimitDevTools'
 import Header from '#/shared/components/Header'
 
 import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
@@ -102,6 +103,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           ]}
         />
         <ReactQueryDevtools buttonPosition="bottom-left" />
+        <DiscogsRateLimitDevTools />
         <Scripts />
       </body>
     </html>

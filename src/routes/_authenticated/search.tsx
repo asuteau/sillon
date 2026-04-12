@@ -16,7 +16,7 @@ import {
 export const Route = createFileRoute('/_authenticated/search')({
   validateSearch: z.object({
     q: z.string().default(''),
-    type: z.enum(['all', 'artist']).default('all'),
+    type: z.enum(['all', 'artist']).default('artist'),
     masterId: z.string().optional(),
   }),
   component: Search,
@@ -110,8 +110,8 @@ function SearchFilters({ type, q, onTypeChange }: SearchFiltersProps) {
   }
 
   const filters = [
-    { value: 'all' as const, label: 'All' },
     { value: 'artist' as const, label: 'Artist only' },
+    { value: 'all' as const, label: 'All' },
   ]
 
   return (

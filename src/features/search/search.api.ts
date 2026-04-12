@@ -49,7 +49,8 @@ export const searchMasters = createServerFn()
 
     const url = `${DISCOGS_API}/database/search?${params.toString()}`
 
-    const response = await fetch(url, {
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
       headers: {
         Authorization: buildOAuthHeader({
           oauth_consumer_key: consumerKey,
@@ -88,7 +89,8 @@ export const getMasterVersions = createServerFn()
 
     const url = `${DISCOGS_API}/masters/${data.masterId}/versions?format=Vinyl&per_page=50&sort=released&sort_order=desc&page=${page}`
 
-    const response = await fetch(url, {
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
       headers: {
         Authorization: buildOAuthHeader({
           oauth_consumer_key: consumerKey,
@@ -128,7 +130,8 @@ export const getReleaseDetail = createServerFn()
 
     const url = `${DISCOGS_API}/releases/${data.releaseId}`
 
-    const response = await fetch(url, {
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
       headers: {
         Authorization: buildOAuthHeader({
           oauth_consumer_key: consumerKey,
