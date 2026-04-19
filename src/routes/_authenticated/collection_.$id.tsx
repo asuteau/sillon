@@ -3,6 +3,7 @@ import {
   formatArtists,
   formatDateAdded,
 } from '#/features/collection/collection.utils'
+import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
@@ -39,10 +40,13 @@ function RecordDetail() {
           <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
 
           <div className="relative flex flex-col gap-8 sm:flex-row sm:items-start">
-            <img
-              src={release.basic_information.cover_image}
-              alt={release.basic_information.title}
-              className="w-full rounded-2xl object-cover sm:w-72 aspect-square shrink-0"
+            <CoverArt
+              releaseId={String(release.id)}
+              artist={release.basic_information.artists[0]?.name ?? ''}
+              title={release.basic_information.title}
+              thumb={release.basic_information.thumb}
+              styles={release.basic_information.styles}
+              className="w-full sm:w-72 aspect-square shrink-0 rounded-2xl overflow-hidden"
             />
 
             <div className="flex flex-col gap-4">

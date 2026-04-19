@@ -3,6 +3,7 @@ import type { MasterResult, ReleaseDetail, Version } from './search.schema'
 export type Master = {
   id: number
   title: string
+  artist: string
   year: number | null
   thumb: string
   coverImage: string
@@ -47,9 +48,11 @@ export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
 }
 
 export function toMaster(raw: MasterResult): Master {
+  const dashIdx = raw.title.indexOf(' - ')
   return {
     id: raw.id,
-    title: raw.title,
+    title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
+    artist: dashIdx >= 0 ? raw.title.slice(0, dashIdx) : '',
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     thumb: raw.thumb,
     coverImage: raw.cover_image,

@@ -1,5 +1,6 @@
 import { collectionQueryOptions } from '#/features/collection/collection.queries'
 import { formatDateAdded } from '#/features/collection/collection.utils'
+import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
@@ -41,10 +42,14 @@ function Collection() {
                   className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
                   style={{ animationDelay: `${index * 60}ms` }}
                 >
-                  <img
-                    src={release.basic_information.thumb}
-                    alt={release.basic_information.title}
-                    className="h-12 w-12 rounded-lg object-cover shrink-0"
+                  <CoverArt
+                    releaseId={String(release.id)}
+                    artist={release.basic_information.artists[0]?.name ?? ''}
+                    title={release.basic_information.title}
+                    thumb={release.basic_information.thumb}
+                    styles={release.basic_information.styles}
+                    size={48}
+                    className="rounded-lg shrink-0 overflow-hidden"
                   />
                   <div className="flex flex-1 items-center justify-between">
                     <div className="flex flex-col gap-0.5">

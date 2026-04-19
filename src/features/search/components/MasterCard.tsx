@@ -1,6 +1,7 @@
 import { Heart, Library } from 'lucide-react'
 
 import type { Master } from '../search.model'
+import { CoverArt } from '#/shared/components/CoverArt'
 
 interface MasterCardProps {
   master: Master
@@ -16,10 +17,14 @@ export function MasterCard({ master, onClick, index }: MasterCardProps) {
         className="island-shell feature-card rise-in flex w-full items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer text-left"
         style={{ animationDelay: `${index * 60}ms` }}
       >
-        <img
-          src={master.thumb}
-          alt={master.title}
-          className="h-12 w-12 rounded-lg object-cover shrink-0"
+        <CoverArt
+          releaseId={String(master.id)}
+          artist={master.artist}
+          title={master.title}
+          thumb={master.thumb || null}
+          styles={[]}
+          size={48}
+          className="rounded-lg shrink-0 overflow-hidden"
         />
         <div className="flex flex-1 items-center justify-between">
           <div className="flex flex-col gap-0.5">

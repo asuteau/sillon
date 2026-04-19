@@ -231,7 +231,26 @@ features/collection/
 
 ---
 
-## 10. Context — React 19 syntax
+## 10. Arrow functions only
+
+Always use arrow functions — for components, utilities, handlers, and helpers.
+Never use the `function` keyword.
+
+```ts
+// ✅
+export const formatDateAdded = (date: string): string => ...
+
+export const CoverArt = ({ title }: CoverArtProps) => { ... }
+
+// ❌
+export function formatDateAdded(date: string): string { ... }
+
+function CoverArt({ title }: CoverArtProps) { ... }
+```
+
+---
+
+## 11. Context — React 19 syntax
 
 No `.Provider` wrapper. Pass value directly to the context component.
 

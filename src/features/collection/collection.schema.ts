@@ -10,6 +10,7 @@ export const CollectionReleaseSchema = z.object({
     artists: z.array(z.object({ name: z.string() })),
     cover_image: z.string(),
     thumb: z.string(),
+    styles: z.array(z.string()).optional().default([]),
   }),
 })
 

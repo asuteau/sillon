@@ -1,4 +1,5 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
+import { CoverArt } from '#/shared/components/CoverArt'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Sheet, SheetContent } from '#/shared/components/ui/sheet'
 import { useIsMobile } from '#/shared/hooks/useIsMobile'
@@ -19,10 +20,13 @@ function SpotlightContent({ record, onClose, onPickAgain, isPicking }: Props) {
       <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
 
       <div className="relative flex flex-col gap-5">
-        <img
-          src={info.cover_image}
-          alt={info.title}
-          className="w-full aspect-square rounded-2xl object-cover"
+        <CoverArt
+          releaseId={String(record.id)}
+          artist={info.artists[0]?.name ?? ''}
+          title={info.title}
+          thumb={info.thumb}
+          styles={info.styles}
+          className="w-full aspect-square rounded-2xl overflow-hidden"
         />
 
         <div className="flex flex-col gap-2">

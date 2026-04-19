@@ -1,6 +1,7 @@
 import { fetchRandomRecord, getRecentAdditions } from './collection.api'
 import { createServerFn } from '@tanstack/react-start'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import { getDeezerCover } from '#/services/deezer.api'
 
 const getCollectionCount = createServerFn().handler(async () => {
   const { useAppSession } = await import('#/services/session.server')
@@ -34,6 +35,19 @@ export const collectionQueryOptions = infiniteQueryOptions({
   staleTime: 10 * 60 * 1000,
   refetchOnMount: false,
 })
+
+export const coverArtQueryOptions = (
+  releaseId: string,
+  artist: string,
+  title: string,
+) =>
+  queryOptions({
+    queryKey: ['cover', releaseId],
+    queryFn: () => getDeezerCover({ data: { artist, title } }),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: false,
+  })
 
 export const randomRecordQueryOptions = queryOptions({
   queryKey: ['collection', 'random'],

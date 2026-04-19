@@ -1,4 +1,5 @@
 import { wantlistQueryOptions } from '#/features/wantlist/wantlist.queries'
+import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 
@@ -47,10 +48,13 @@ function WantDetail() {
           <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
 
           <div className="relative flex flex-col gap-8 sm:flex-row sm:items-start">
-            <img
-              src={want.basic_information.cover_image}
-              alt={want.basic_information.title}
-              className="w-full rounded-2xl object-cover sm:w-72 aspect-square shrink-0"
+            <CoverArt
+              releaseId={String(want.id)}
+              artist={want.basic_information.artists[0]?.name ?? ''}
+              title={want.basic_information.title}
+              thumb={want.basic_information.thumb}
+              styles={want.basic_information.styles}
+              className="w-full sm:w-72 aspect-square shrink-0 rounded-2xl overflow-hidden"
             />
 
             <div className="flex flex-col gap-4">

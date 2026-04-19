@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { toReleaseDetail } from '#/features/search/search.model'
 import { releaseDetailQueryOptions } from '#/features/search/search.queries'
+import { CoverArt } from '#/shared/components/CoverArt'
 import { extractColors } from '#/shared/utils/extractColors'
 
 export const Route = createFileRoute('/_authenticated/search_/$releaseId')({
@@ -42,15 +43,14 @@ function ReleaseDetail() {
         <div className="pointer-events-none absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
 
         <div className="relative flex flex-col gap-8 sm:flex-row sm:items-start">
-          {release.coverImage ? (
-            <img
-              src={release.coverImage}
-              alt={release.title}
-              className="w-full rounded-2xl object-cover sm:w-72 aspect-square shrink-0"
-            />
-          ) : (
-            <div className="w-full rounded-2xl bg-(--chip-bg) sm:w-72 aspect-square shrink-0" />
-          )}
+          <CoverArt
+            releaseId={releaseId}
+            artist={release.artists[0] ?? ''}
+            title={release.title}
+            thumb={release.coverImage || null}
+            styles={[]}
+            className="w-full sm:w-72 aspect-square shrink-0 rounded-2xl overflow-hidden"
+          />
 
           <div className="flex flex-col gap-4">
             {release.artists.length > 0 && (
