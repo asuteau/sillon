@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { PlusCircle } from 'lucide-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
@@ -75,10 +76,12 @@ function Search() {
   return (
     <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
       <header className="mb-8">
-        <p className="island-kicker mb-2">Discogs</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
-          Search
+          Add a record
         </h1>
+        <p className="mt-1 text-sm text-(--sea-ink-soft)">
+          Search Discogs to add to your collection or wantlist
+        </p>
       </header>
 
       <div className="mb-6">
@@ -86,7 +89,7 @@ function Search() {
           type="search"
           value={inputValue}
           onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder="Artist, album…"
+          placeholder="Artist, album, label..."
           className="island-shell w-full rounded-2xl px-4 py-3 text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
         />
       </div>
@@ -146,6 +149,24 @@ function MastersList({ q, type, onMasterClick }: MastersListProps) {
     () => (data?.results ?? []).map(toMaster),
     [data?.results],
   )
+
+  if (q.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-16 text-center">
+        <PlusCircle className="h-12 w-12 text-(--sea-ink)" />
+        <div>
+          <p className="font-semibold text-(--sea-ink)">Find a record</p>
+          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+            Search the Discogs database by artist
+            <br />
+            or album title, then add it directly
+            <br />
+            to your collection or wantlist.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   if (q.length <= 2) {
     return (

@@ -42,7 +42,7 @@ export default function Header() {
                 className="nav-link"
                 activeProps={{ className: 'nav-link is-active' }}
               >
-                Search
+                Add
               </Link>
               <Link
                 to="/collection"

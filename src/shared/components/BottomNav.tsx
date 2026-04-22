@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
-import { Heart, Home, Info, Library, Search } from 'lucide-react'
+import { Heart, Home, Info, Library, PlusCircle } from 'lucide-react'
 
 import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
 import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
@@ -44,8 +44,8 @@ export default function BottomNav() {
                   'nav-link is-active flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold',
               }}
             >
-              <Search className="h-4 w-4" />
-              <span className="nav-label">Search</span>
+              <PlusCircle className="h-4 w-4" />
+              <span className="nav-label">Add</span>
             </Link>
             <Link
               to="/collection"
