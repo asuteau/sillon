@@ -1,18 +1,7 @@
 import { coverArtQueryOptions } from '#/features/collection/collection.queries'
 import { useQuery } from '@tanstack/react-query'
+import { Disc3 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-
-// TODO: replace static map with dominant color extracted from the cover image via Canvas API
-const GENRE_COLORS: Record<string, string> = {
-  Electronic: '#1a2a3a',
-  Ambient: '#1a2a3a',
-  Jazz: '#2a1a0a',
-  Rock: '#1a1a2a',
-  Alternative: '#1a1a2a',
-  Classical: '#2a2a1a',
-  'Hip-Hop': '#0a1a0a',
-}
-const DEFAULT_COLOR = '#141414'
 
 interface CoverArtProps {
   releaseId: string
@@ -29,15 +18,12 @@ export function CoverArt({
   artist,
   title,
   thumb,
-  styles,
   size,
   className,
 }: CoverArtProps) {
   const [thumbLoaded, setThumbLoaded] = useState(false)
   const [hdUrl, setHdUrl] = useState<string | null>(null)
   const [hdVisible, setHdVisible] = useState(false)
-
-  const colorBg = GENRE_COLORS[styles[0] ?? ''] ?? DEFAULT_COLOR
 
   const { data: hdSrc } = useQuery(
     coverArtQueryOptions(releaseId, artist, title),
@@ -61,7 +47,7 @@ export function CoverArt({
       className={`relative ${className ?? ''}`}
       style={size ? { width: size, height: size } : undefined}
     >
-      <div className="absolute inset-0" style={{ backgroundColor: colorBg }} />
+      <div className="absolute inset-0 bg-neutral-900" />
 
       {thumb && (
         <img
@@ -80,6 +66,16 @@ export function CoverArt({
           crossOrigin="anonymous"
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hdVisible ? 'opacity-100' : 'opacity-0'}`}
         />
+      )}
+
+      {!hdVisible && (
+        <div className="absolute inset-0 flex items-center justify-center bg-neutral-600">
+          <Disc3
+            style={{ width: '42%', height: '42%' }}
+            strokeWidth={0.75}
+            className="text-neutral-400"
+          />
+        </div>
       )}
     </div>
   )
