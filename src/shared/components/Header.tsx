@@ -4,6 +4,7 @@ import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
+import { ScanButton } from './ScanButton'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
@@ -80,6 +81,7 @@ export default function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-3">
+          {user && <ScanButton />}
           {user && <ShuffleButton />}
           <ThemeToggle />
           {user ? (

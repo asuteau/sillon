@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
 import {
+  fetchDiscogsBarcode,
   getMasterVersions,
   getReleaseDetail,
   searchMasters,
@@ -30,4 +31,12 @@ export const releaseDetailQueryOptions = (releaseId: string) =>
     queryKey: ['search', 'release', releaseId] as const,
     queryFn: () => getReleaseDetail({ data: { releaseId } }),
     staleTime: 30 * 60 * 1000,
+  })
+
+export const barcodeSearchQueryOptions = (barcode: string) =>
+  queryOptions({
+    queryKey: ['search', 'barcode', barcode] as const,
+    queryFn: () => fetchDiscogsBarcode({ data: { barcode } }),
+    staleTime: Infinity,
+    enabled: barcode.length > 0,
   })

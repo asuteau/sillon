@@ -78,3 +78,15 @@ export type MasterResult = z.infer<typeof MasterResultSchema>
 export type SearchPage = z.infer<typeof SearchPageSchema>
 export type Version = z.infer<typeof VersionSchema>
 export type VersionsPage = z.infer<typeof VersionsPageSchema>
+
+export const BarcodeResultSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  year: z.string().optional(),
+  thumb: z.string().optional(),
+  cover_image: z.string().optional(),
+  labels: z.array(z.object({ name: z.string() })).optional(),
+  formats: z.array(z.object({ name: z.string() })).optional(),
+})
+
+export type BarcodeResult = z.infer<typeof BarcodeResultSchema>

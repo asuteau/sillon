@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query'
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, ScanLine } from 'lucide-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
+
+import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
 
 import { useDebounce } from '#/shared/hooks/useDebounce'
 
@@ -27,6 +29,8 @@ function Search() {
   const { q, type, masterId } = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
   const [inputValue, setInputValue] = useState(q)
+  const [isScannerOpen, setIsScannerOpen] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
   const debouncedValue = useDebounce(inputValue)
 
   useEffect(() => {
@@ -86,6 +90,7 @@ function Search() {
 
       <div className="mb-6">
         <input
+          ref={inputRef}
           type="search"
           value={inputValue}
           onChange={(e) => handleQueryChange(e.target.value)}
@@ -94,9 +99,29 @@ function Search() {
         />
       </div>
 
+      <div className="mb-6 flex justify-center">
+        <button
+          onClick={() => setIsScannerOpen(true)}
+          className="flex items-center gap-1.5 text-sm text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) cursor-pointer"
+        >
+          <ScanLine className="h-4 w-4" />
+          or scan a barcode
+        </button>
+      </div>
+
       <SearchFilters type={type} q={q} onTypeChange={handleTypeChange} />
 
       <MastersList q={q} type={type} onMasterClick={handleMasterClick} />
+
+      {isScannerOpen && (
+        <BarcodeScanner
+          onClose={() => setIsScannerOpen(false)}
+          onSearchManually={() => {
+            setIsScannerOpen(false)
+            inputRef.current?.focus()
+          }}
+        />
+      )}
     </main>
   )
 }
