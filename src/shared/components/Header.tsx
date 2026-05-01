@@ -1,5 +1,5 @@
 import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
-import ShuffleButton from '#/features/collection/components/ShuffleButton'
+import { ShuffleButton } from '#/features/collection/components/ShuffleButton'
 import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'

@@ -44,6 +44,7 @@ function Wantlist() {
                 <Link
                   to="/wantlist/$id"
                   params={{ id: String(want.id) }}
+                  search={{ from: 'wantlist' as const }}
                   className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
                   style={{ animationDelay: `${index * 60}ms` }}
                 >

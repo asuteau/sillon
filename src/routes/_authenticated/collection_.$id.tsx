@@ -1,20 +1,21 @@
+import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
 import { collectionQueryOptions } from '#/features/collection/collection.queries'
 import {
   formatArtists,
   formatDateAdded,
 } from '#/features/collection/collection.utils'
+import { Button } from '#/shared/components/ui/button'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Library } from 'lucide-react'
+import { z } from 'zod'
 
-export const Route = createFileRoute('/_authenticated/collection_/$id')({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.prefetchInfiniteQuery(collectionQueryOptions),
-  component: RecordDetail,
-})
-
-function RecordDetail() {
+const RecordDetail = () => {
   const { id } = Route.useParams()
+  const { from } = Route.useSearch()
+  const navigate = useNavigate()
+  const removeFromCollection = useRemoveFromCollection()
   const { data } = useSuspenseInfiniteQuery(collectionQueryOptions)
   const release = data.pages
     .flatMap((p) => p.releases)
@@ -69,6 +70,25 @@ function RecordDetail() {
                   <dd>{formatDateAdded(release.date_added)}</dd>
                 </div>
               </dl>
+
+              <div className="mt-6 flex gap-3">
+                <Button
+                  variant="destructive"
+                  className="rounded-full"
+                  disabled={removeFromCollection.isPending}
+                  onClick={() =>
+                    removeFromCollection.mutate(release.id, {
+                      onSuccess: () =>
+                        navigate({
+                          to: from === 'wantlist' ? '/wantlist' : '/collection',
+                        }),
+                    })
+                  }
+                >
+                  <Library className="h-4 w-4" />
+                  Remove from collection
+                </Button>
+              </div>
             </div>
           </div>
         </article>
@@ -76,3 +96,12 @@ function RecordDetail() {
     </main>
   )
 }
+
+export const Route = createFileRoute('/_authenticated/collection_/$id')({
+  validateSearch: z.object({
+    from: z.enum(['collection', 'wantlist']).optional(),
+  }),
+  loader: ({ context: { queryClient } }) =>
+    queryClient.prefetchInfiniteQuery(collectionQueryOptions),
+  component: RecordDetail,
+})

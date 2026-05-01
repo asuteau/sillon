@@ -39,6 +39,7 @@ function Collection() {
                 <Link
                   to="/collection/$id"
                   params={{ id: String(release.id) }}
+                  search={{ from: 'collection' as const }}
                   className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
                   style={{ animationDelay: `${index * 60}ms` }}
                 >

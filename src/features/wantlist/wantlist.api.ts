@@ -9,6 +9,35 @@ import {
 
 import type { WantlistPage } from './wantlist.schema'
 
+export const fetchWantlistCount = createServerFn().handler(async () => {
+  const { useAppSession } = await import('#/services/session.server')
+  const session = await useAppSession()
+  const { accessToken, accessTokenSecret, discogsUsername } = session.data
+  if (!accessToken || !accessTokenSecret || !discogsUsername) return 0
+
+  const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
+  const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+  const url = `${DISCOGS_API}/users/${discogsUsername}/wants?per_page=1&page=1`
+
+  const { discogsRequest } = await import('#/services/discogs.server')
+  const response = await discogsRequest(url, {
+    headers: {
+      Authorization: buildOAuthHeader({
+        oauth_consumer_key: consumerKey,
+        oauth_token: accessToken,
+        oauth_signature_method: 'PLAINTEXT',
+        oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+        oauth_nonce: nonce(),
+        oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+      }),
+      'User-Agent': 'Sillon/1.0',
+    },
+  })
+  if (!response.ok) return 0
+  const json = (await response.json()) as { pagination: { items: number } }
+  return json.pagination.items
+})
+
 export const getWantlist = createServerFn()
   .inputValidator(
     (data: { perPage?: number; page?: number } | undefined) => data ?? {},

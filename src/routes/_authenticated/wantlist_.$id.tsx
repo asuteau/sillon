@@ -1,28 +1,21 @@
+import {
+  formatArtists,
+  formatDateAdded,
+} from '#/features/collection/collection.utils'
+import { useRemoveFromWantlist } from '#/features/wantlist/wantlist.mutations'
 import { wantlistQueryOptions } from '#/features/wantlist/wantlist.queries'
+import { Button } from '#/shared/components/ui/button'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Heart } from 'lucide-react'
+import { z } from 'zod'
 
-export const Route = createFileRoute('/_authenticated/wantlist_/$id')({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.prefetchInfiniteQuery(wantlistQueryOptions),
-  component: WantDetail,
-})
-
-function formatDateAdded(dateAdded: string): string {
-  return new Date(dateAdded).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-function formatArtists(artists: { name: string }[]): string {
-  return artists.map((a) => a.name).join(', ')
-}
-
-function WantDetail() {
+const WantDetail = () => {
   const { id } = Route.useParams()
+  const { from } = Route.useSearch()
+  const navigate = useNavigate()
+  const removeFromWantlist = useRemoveFromWantlist()
   const { data } = useSuspenseInfiniteQuery(wantlistQueryOptions)
   const want = data.pages
     .flatMap((p) => p.wants)
@@ -77,6 +70,25 @@ function WantDetail() {
                   <dd>{formatDateAdded(want.date_added)}</dd>
                 </div>
               </dl>
+
+              <div className="mt-6 flex gap-3">
+                <Button
+                  variant="destructive"
+                  className="rounded-full"
+                  disabled={removeFromWantlist.isPending}
+                  onClick={() =>
+                    removeFromWantlist.mutate(want.id, {
+                      onSuccess: () =>
+                        navigate({
+                          to: from === 'collection' ? '/collection' : '/wantlist',
+                        }),
+                    })
+                  }
+                >
+                  <Heart className="h-4 w-4" />
+                  Remove from wantlist
+                </Button>
+              </div>
             </div>
           </div>
         </article>
@@ -84,3 +96,12 @@ function WantDetail() {
     </main>
   )
 }
+
+export const Route = createFileRoute('/_authenticated/wantlist_/$id')({
+  validateSearch: z.object({
+    from: z.enum(['collection', 'wantlist']).optional(),
+  }),
+  loader: ({ context: { queryClient } }) =>
+    queryClient.prefetchInfiniteQuery(wantlistQueryOptions),
+  component: WantDetail,
+})

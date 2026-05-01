@@ -31,6 +31,9 @@ export function MasterCard({ master, onClick, index }: MasterCardProps) {
             <span className="font-semibold text-(--sea-ink)">
               {master.title}
             </span>
+            <span className="text-sm text-(--sea-ink-soft)">
+              {master.artist}
+            </span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {master.inCollection && (

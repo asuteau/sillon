@@ -8,8 +8,6 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
-import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
 import BottomNav from '#/shared/components/BottomNav'
 import { DiscogsRateLimitDevTools } from '#/shared/components/DiscogsRateLimitDevTools'
 import Header from '#/shared/components/Header'
@@ -27,18 +25,8 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
   user: User | null
 }>()({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: async () => {
     const sessionUser = await getSessionUser()
-    if (sessionUser) {
-      context.queryClient.setQueryData(
-        collectionCountQueryOptions(sessionUser.username).queryKey,
-        sessionUser.numCollection,
-      )
-      context.queryClient.setQueryData(
-        wantlistCountQueryOptions(sessionUser.username).queryKey,
-        sessionUser.numWantlist,
-      )
-    }
     return { user: sessionUser ? { username: sessionUser.username } : null }
   },
   head: () => ({

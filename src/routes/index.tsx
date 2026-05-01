@@ -1,15 +1,19 @@
+import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
 import { recentAdditionsQueryOptions } from '#/features/collection/collection.queries'
+import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
+import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 export { recentAdditionsQueryOptions }
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { user, queryClient } }) => {
     if (!user) return null
-    return queryClient.ensureQueryData(recentAdditionsQueryOptions)
+    return queryClient.prefetchQuery(recentAdditionsQueryOptions)
   },
   component: App,
 })
@@ -20,6 +24,8 @@ function App() {
     ...recentAdditionsQueryOptions,
     enabled: !!user,
   })
+  const [selected, setSelected] = useState<CollectionRelease | null>(null)
+  const removeFromCollection = useRemoveFromCollection()
 
   if (!user) {
     return (
@@ -64,8 +70,9 @@ function App() {
         <ul className="flex flex-col gap-3">
           {data.releases.map((release, index) => (
             <li key={release.instance_id}>
-              <div
-                className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3"
+              <button
+                onClick={() => setSelected(release)}
+                className="island-shell feature-card rise-in flex w-full items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer text-left"
                 style={{ animationDelay: `${index * 60}ms` }}
               >
                 <CoverArt
@@ -90,10 +97,23 @@ function App() {
                     {formatDateAdded(release.date_added)}
                   </span>
                 </div>
-              </div>
+              </button>
             </li>
           ))}
         </ul>
+      )}
+
+      {selected && (
+        <RecordSpotlight
+          record={selected}
+          onClose={() => setSelected(null)}
+          onRemove={() =>
+            removeFromCollection.mutate(selected.id, {
+              onSuccess: () => setSelected(null),
+            })
+          }
+          isRemoving={removeFromCollection.isPending}
+        />
       )}
     </main>
   )

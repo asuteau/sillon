@@ -1,49 +1,65 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
+import { Button } from '#/shared/components/ui/button'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Sheet, SheetContent } from '#/shared/components/ui/sheet'
 import { useIsMobile } from '#/shared/hooks/useIsMobile'
-import { Link } from '@tanstack/react-router'
-import { Shuffle } from 'lucide-react'
+import { Library, Shuffle } from 'lucide-react'
 
 interface Props {
   record: CollectionRelease
   onClose: () => void
-  onPickAgain: () => void
+  onPickAgain?: () => void
   isPicking?: boolean
+  onRemove?: () => void
+  isRemoving?: boolean
 }
 
-function SpotlightContent({ record, onClose, onPickAgain, isPicking }: Props) {
+const SpotlightContent = ({
+  record,
+  onPickAgain,
+  isPicking,
+  onRemove,
+  isRemoving,
+}: Props) => {
   const { basic_information: info } = record
   return (
-    <div className="relative overflow-hidden">
-      <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
+    <div className="flex flex-col gap-5">
+      <CoverArt
+        key={record.id}
+        releaseId={String(record.id)}
+        artist={info.artists[0]?.name ?? ''}
+        title={info.title}
+        thumb={info.thumb}
+        styles={info.styles}
+        className="w-full aspect-square rounded-2xl overflow-hidden"
+      />
 
-      <div className="relative flex flex-col gap-5">
-        <CoverArt
-          releaseId={String(record.id)}
-          artist={info.artists[0]?.name ?? ''}
-          title={info.title}
-          thumb={info.thumb}
-          styles={info.styles}
-          className="w-full aspect-square rounded-2xl overflow-hidden"
-        />
+      <div className="flex flex-col items-center gap-2 text-center">
+        <p className="island-kicker">
+          {info.artists.map((a) => a.name).join(', ')}
+        </p>
+        <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
+          {info.title}
+        </h2>
+        {info.year > 0 && (
+          <p className="font-mono text-sm text-(--sea-ink-soft)">{info.year}</p>
+        )}
+      </div>
 
-        <div className="flex flex-col gap-2">
-          <p className="island-kicker">
-            {info.artists.map((a) => a.name).join(', ')}
-          </p>
-          <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
-            {info.title}
-          </h2>
-          {info.year > 0 && (
-            <p className="font-mono text-sm text-(--sea-ink-soft)">
-              {info.year}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-wrap gap-2 pt-1">
+      <div className="flex justify-center pt-1">
+        {onRemove && (
+          <Button
+            variant="destructive"
+            className="rounded-full"
+            disabled={isRemoving}
+            onClick={onRemove}
+          >
+            <Library className="h-4 w-4" />
+            Remove from collection
+          </Button>
+        )}
+        {!onRemove && (
           <button
             onClick={onPickAgain}
             disabled={isPicking}
@@ -54,26 +70,20 @@ function SpotlightContent({ record, onClose, onPickAgain, isPicking }: Props) {
             />
             Pick again
           </button>
-          <Link
-            to="/collection/$id"
-            params={{ id: String(record.id) }}
-            onClick={onClose}
-            className="flex items-center gap-1.5 rounded-full border border-[rgba(50,143,151,0.4)] bg-[rgba(79,184,178,0.14)] px-4 py-2 text-sm font-semibold text-(--lagoon-deep) no-underline hover:bg-[rgba(79,184,178,0.24)]"
-          >
-            View in collection →
-          </Link>
-        </div>
+        )}
       </div>
     </div>
   )
 }
 
-export default function RecordSpotlight({
+export const RecordSpotlight = ({
   record,
   onClose,
   onPickAgain,
   isPicking,
-}: Props) {
+  onRemove,
+  isRemoving,
+}: Props) => {
   const isMobile = useIsMobile()
 
   if (isMobile) {
@@ -90,6 +100,8 @@ export default function RecordSpotlight({
               onClose={onClose}
               onPickAgain={onPickAgain}
               isPicking={isPicking}
+              onRemove={onRemove}
+              isRemoving={isRemoving}
             />
           </div>
         </SheetContent>
@@ -109,6 +121,8 @@ export default function RecordSpotlight({
             onClose={onClose}
             onPickAgain={onPickAgain}
             isPicking={isPicking}
+            onRemove={onRemove}
+            isRemoving={isRemoving}
           />
         </div>
       </DialogContent>

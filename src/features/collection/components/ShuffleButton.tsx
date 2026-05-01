@@ -2,9 +2,9 @@ import { randomRecordQueryOptions } from '#/features/collection/collection.queri
 import { useQuery } from '@tanstack/react-query'
 import { Shuffle } from 'lucide-react'
 import { useState } from 'react'
-import RecordSpotlight from './RecordSpotlight'
+import { RecordSpotlight } from './RecordSpotlight'
 
-export default function ShuffleButton() {
+export const ShuffleButton = () => {
   const [open, setOpen] = useState(false)
   const {
     data: record,
@@ -12,7 +12,7 @@ export default function ShuffleButton() {
     refetch,
   } = useQuery(randomRecordQueryOptions)
 
-  async function handleShuffle() {
+  const handleShuffle = async () => {
     const result = await refetch()
     if (result.data) setOpen(true)
   }

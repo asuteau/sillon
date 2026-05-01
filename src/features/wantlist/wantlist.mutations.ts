@@ -8,7 +8,7 @@ import {
   nonce,
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
-import { wantlistCountQueryOptions } from './wantlist.queries'
+import { wantlistCountQueryOptions, wantlistQueryOptions } from './wantlist.queries'
 
 export const addToWantlist = createServerFn()
   .inputValidator((data: { releaseId: number }) => data)
@@ -96,6 +96,7 @@ export function useAddToWantlist() {
           (old: number | undefined) => (old ?? 0) + 1,
         )
       }
+      queryClient.invalidateQueries({ queryKey: wantlistQueryOptions.queryKey })
     },
   })
 }
@@ -114,6 +115,7 @@ export function useRemoveFromWantlist() {
           (old: number | undefined) => Math.max(0, (old ?? 0) - 1),
         )
       }
+      queryClient.invalidateQueries({ queryKey: wantlistQueryOptions.queryKey })
     },
   })
 }
