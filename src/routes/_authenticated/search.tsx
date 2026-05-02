@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
 
-import { useDebounce } from '#/shared/hooks/useDebounce'
+import { useDebounce } from '#/shared/hooks/use-debounce'
 
 import { MasterCard } from '#/features/search/components/MasterCard'
 import { VersionRow } from '#/features/search/components/VersionRow'

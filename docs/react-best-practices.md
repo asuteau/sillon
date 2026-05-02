@@ -282,12 +282,12 @@ Name hooks after **what they do**, not a lifecycle (`useOnlineStatus`,
 const CollectionGrid = () => {
   const [isOnline, setIsOnline] = useState(true)
   useEffect(() => {
-    const handleOnline  = () => setIsOnline(true)
+    const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online',  handleOnline)
+    window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
     return () => {
-      window.removeEventListener('online',  handleOnline)
+      window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
   }, [])
@@ -298,12 +298,12 @@ const CollectionGrid = () => {
 const useOnlineStatus = () => {
   const [isOnline, setIsOnline] = useState(true)
   useEffect(() => {
-    const handleOnline  = () => setIsOnline(true)
+    const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online',  handleOnline)
+    window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
     return () => {
-      window.removeEventListener('online',  handleOnline)
+      window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
     }
   }, [])
@@ -321,7 +321,14 @@ state. When a hook accepts a callback (event handler), wrap it in
 `useEffectEvent` (see §16) so changes to it don't re-trigger the Effect.
 
 Place hooks in `shared/hooks/` (cross-feature) or `features/<domain>/hooks/`
-(domain-specific), one hook per file with a `.hook.ts` suffix.
+(domain-specific). Name files with the React-idiomatic `use-xxx.ts` format —
+one hook per file.
+
+```
+src/shared/hooks/use-debounce.ts
+src/shared/hooks/use-is-mobile.ts
+src/features/search/hooks/use-barcode-scanner.ts
+```
 
 ---
 
@@ -344,7 +351,7 @@ const handleStop = () => {
 
 // ❌ Ref masquerading as state — UI never updates
 const countRef = useRef(0)
-return <p>Clicked {countRef.current} times</p>  // stale forever
+return <p>Clicked {countRef.current} times</p> // stale forever
 ```
 
 **Never read or write `ref.current` during rendering.** Only access refs inside
@@ -424,15 +431,19 @@ const handleClick = () => {
 
 ```tsx
 // ❌ Each setter triggers the next Effect — unpredictable order
-useEffect(() => { if (card?.gold) setGoldCount(c => c + 1) }, [card])
-useEffect(() => { if (goldCount > 3) setRound(r => r + 1)  }, [goldCount])
+useEffect(() => {
+  if (card?.gold) setGoldCount((c) => c + 1)
+}, [card])
+useEffect(() => {
+  if (goldCount > 3) setRound((r) => r + 1)
+}, [goldCount])
 
 // ✅ Single handler, single render
 const handlePlaceCard = (nextCard: Card) => {
   setCard(nextCard)
   const nextGold = nextCard.gold ? goldCount + 1 : goldCount
   setGoldCount(nextGold > 3 ? 0 : nextGold)
-  if (nextGold > 3) setRound(r => r + 1)
+  if (nextGold > 3) setRound((r) => r + 1)
 }
 ```
 
@@ -444,7 +455,9 @@ useEffect(() => {
   fetchRelease(id).then((data) => {
     if (!ignore) setRelease(data)
   })
-  return () => { ignore = true }
+  return () => {
+    ignore = true
+  }
 }, [id])
 ```
 
@@ -457,18 +470,20 @@ Effects — the library handles caching, deduplication, and race conditions.
 // ❌ Manual Effect subscription
 useEffect(() => {
   const handler = () => setIsOnline(navigator.onLine)
-  window.addEventListener('online',  handler)
+  window.addEventListener('online', handler)
   window.addEventListener('offline', handler)
-  return () => { /* cleanup */ }
+  return () => {
+    /* cleanup */
+  }
 }, [])
 
 // ✅ Purpose-built API
 const isOnline = useSyncExternalStore(
   (cb) => {
-    window.addEventListener('online',  cb)
+    window.addEventListener('online', cb)
     window.addEventListener('offline', cb)
     return () => {
-      window.removeEventListener('online',  cb)
+      window.removeEventListener('online', cb)
       window.removeEventListener('offline', cb)
     }
   },
@@ -495,13 +510,13 @@ useEffect(() => {
 
 When a dependency feels wrong, **fix the code** rather than the lint comment:
 
-| Situation | Fix |
-|---|---|
-| Object/function created on every render | Move it inside the Effect or outside the component |
-| Object prop with multiple fields | Destructure primitives: `const { roomId, url } = options` |
-| Reading state to update it | Use updater form: `setCount(prev => prev + 1)` |
-| Two unrelated synchronisations in one Effect | Split into two separate `useEffect` calls |
-| Non-reactive value causing spurious re-syncs | Use `useEffectEvent` (see §16) |
+| Situation                                    | Fix                                                       |
+| -------------------------------------------- | --------------------------------------------------------- |
+| Object/function created on every render      | Move it inside the Effect or outside the component        |
+| Object prop with multiple fields             | Destructure primitives: `const { roomId, url } = options` |
+| Reading state to update it                   | Use updater form: `setCount(prev => prev + 1)`            |
+| Two unrelated synchronisations in one Effect | Split into two separate `useEffect` calls                 |
+| Non-reactive value causing spurious re-syncs | Use `useEffectEvent` (see §16)                            |
 
 Each `useEffect` should represent **exactly one** synchronisation concern:
 
@@ -514,7 +529,9 @@ useEffect(() => {
 }, [roomId])
 
 // ✅ One concern per Effect
-useEffect(() => { logVisit(roomId) }, [roomId])
+useEffect(() => {
+  logVisit(roomId)
+}, [roomId])
 
 useEffect(() => {
   const conn = connect(roomId)
@@ -554,10 +571,11 @@ useEffect(() => {
   conn.on('connected', onConnected)
   conn.connect()
   return () => conn.disconnect()
-}, [roomId])  // theme is gone from deps
+}, [roomId]) // theme is gone from deps
 ```
 
 Rules:
+
 - **Never add** the `useEffectEvent` variable to the dependency array.
 - **Only call** Effect Events from inside Effects — never pass them to other
   components or hooks as props/arguments.

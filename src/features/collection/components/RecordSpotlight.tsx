@@ -1,9 +1,9 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
-import { Button } from '#/shared/components/ui/button'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Sheet, SheetContent } from '#/shared/components/ui/sheet'
-import { useIsMobile } from '#/shared/hooks/useIsMobile'
+import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 import { Library, Shuffle } from 'lucide-react'
 
 interface Props {

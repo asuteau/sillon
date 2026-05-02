@@ -120,8 +120,12 @@ export function useAddToCollection() {
           (old: number | undefined) => (old ?? 0) + 1,
         )
       }
-      queryClient.invalidateQueries({ queryKey: collectionQueryOptions.queryKey })
-      queryClient.invalidateQueries({ queryKey: recentAdditionsQueryOptions.queryKey })
+      queryClient.invalidateQueries({
+        queryKey: collectionQueryOptions.queryKey,
+      })
+      queryClient.invalidateQueries({
+        queryKey: recentAdditionsQueryOptions.queryKey,
+      })
     },
   })
 }
@@ -140,8 +144,12 @@ export function useRemoveFromCollection() {
           (old: number | undefined) => Math.max(0, (old ?? 0) - 1),
         )
       }
-      queryClient.invalidateQueries({ queryKey: collectionQueryOptions.queryKey })
-      queryClient.invalidateQueries({ queryKey: recentAdditionsQueryOptions.queryKey })
+      queryClient.invalidateQueries({
+        queryKey: collectionQueryOptions.queryKey,
+      })
+      queryClient.invalidateQueries({
+        queryKey: recentAdditionsQueryOptions.queryKey,
+      })
     },
   })
 }

@@ -80,7 +80,8 @@ const WantDetail = () => {
                     removeFromWantlist.mutate(want.id, {
                       onSuccess: () =>
                         navigate({
-                          to: from === 'collection' ? '/collection' : '/wantlist',
+                          to:
+                            from === 'collection' ? '/collection' : '/wantlist',
                         }),
                     })
                   }

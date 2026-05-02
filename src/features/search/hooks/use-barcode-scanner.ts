@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query'
 
 import { useAddToCollection } from '#/features/collection/collection.mutations'
 import { useAddToWantlist } from '#/features/wantlist/wantlist.mutations'
-import type { BarcodeResult } from './search.schema'
-import { barcodeSearchQueryOptions } from './search.queries'
+import type { BarcodeResult } from '../search.schema'
+import { barcodeSearchQueryOptions } from '../search.queries'
 
 interface BarcodeDetectorResult {
   rawValue: string
@@ -32,6 +32,7 @@ export interface UseBarcodeScannerReturn {
   handleScanAgain: () => Promise<void>
   handleAddToCollection: () => Promise<void>
   handleAddToWantlist: () => Promise<void>
+  handleManualBarcode: (code: string) => void
 }
 
 export const useBarcodeScanner = (
@@ -61,7 +62,8 @@ export const useBarcodeScanner = (
 
   // Attach stream to video element after scanning state triggers its mount
   useEffect(() => {
-    if (scanState !== 'scanning' || !streamRef.current || !videoRef.current) return
+    if (scanState !== 'scanning' || !streamRef.current || !videoRef.current)
+      return
     videoRef.current.srcObject = streamRef.current
     videoRef.current.play().catch(() => {})
   }, [scanState])
@@ -141,6 +143,11 @@ export const useBarcodeScanner = (
     }
   }
 
+  const handleManualBarcode = (code: string) => {
+    setDetectedBarcode(code)
+    setScanState('found')
+  }
+
   const handleAddToWantlist = async () => {
     if (!barcodeResult) return
     try {
@@ -167,5 +174,6 @@ export const useBarcodeScanner = (
     handleScanAgain,
     handleAddToCollection,
     handleAddToWantlist,
+    handleManualBarcode,
   }
 }

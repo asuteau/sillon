@@ -8,7 +8,10 @@ import {
   nonce,
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
-import { wantlistCountQueryOptions, wantlistQueryOptions } from './wantlist.queries'
+import {
+  wantlistCountQueryOptions,
+  wantlistQueryOptions,
+} from './wantlist.queries'
 
 export const addToWantlist = createServerFn()
   .inputValidator((data: { releaseId: number }) => data)

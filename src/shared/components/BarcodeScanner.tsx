@@ -1,10 +1,18 @@
-import { AlertCircle, Check, Heart, Library, RotateCcw, ScanLine, X } from 'lucide-react'
+import {
+  AlertCircle,
+  Check,
+  Heart,
+  Library,
+  RotateCcw,
+  ScanLine,
+  X,
+} from 'lucide-react'
 
-import { useBarcodeScanner } from '#/features/search/search.scanner'
+import { useBarcodeScanner } from '#/features/search/hooks/use-barcode-scanner'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Sheet, SheetContent } from '#/shared/components/ui/sheet'
-import { useIsMobile } from '#/shared/hooks/useIsMobile'
+import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
 interface BarcodeScannerProps {
   onClose: () => void
@@ -30,6 +38,7 @@ const BarcodeScannerContent = ({
     handleScanAgain,
     handleAddToCollection,
     handleAddToWantlist,
+    handleManualBarcode,
   } = useBarcodeScanner(onClose)
 
   if (scanState === 'idle') {
@@ -51,6 +60,17 @@ const BarcodeScannerContent = ({
           >
             Search manually →
           </button>
+          {import.meta.env.DEV && (
+            <input
+              type="text"
+              placeholder="Dev: enter barcode…"
+              className="mt-2 w-full rounded-lg border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-center font-mono text-xs text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter')
+                  handleManualBarcode(e.currentTarget.value)
+              }}
+            />
+          )}
         </div>
       )
     }
@@ -80,6 +100,16 @@ const BarcodeScannerContent = ({
             Cancel
           </button>
         </div>
+        {import.meta.env.DEV && (
+          <input
+            type="text"
+            placeholder="Dev: enter barcode…"
+            className="mt-2 w-full rounded-lg border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-center font-mono text-xs text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleManualBarcode(e.currentTarget.value)
+            }}
+          />
+        )}
       </div>
     )
   }
@@ -176,7 +206,7 @@ const BarcodeScannerContent = ({
           />
         )}
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 items-center text-center">
           <p className="island-kicker">{artist}</p>
           <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
             {albumTitle}
