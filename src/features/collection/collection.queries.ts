@@ -37,7 +37,7 @@ export const coverArtQueryOptions = (
   title: string,
 ) =>
   queryOptions({
-    queryKey: ['cover', releaseId],
+    queryKey: ['cover', 'v2', releaseId],
     queryFn: () => getDeezerCover({ data: { artist, title } }),
     staleTime: Infinity,
     gcTime: Infinity,

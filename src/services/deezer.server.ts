@@ -1,27 +1,61 @@
+import {
+  cleanTitle,
+  firstArtist,
+  jaccardSimilarity,
+  queryArtist,
+  stripSubtitle,
+} from '#/services/deezer.utils'
 import { z } from 'zod'
-import { cleanArtist, cleanTitle } from '#/services/deezer.utils'
+
+const ARTIST_THRESHOLD = 0.5
+const ALBUM_THRESHOLD = 0.3
 
 const DeezerSearchSchema = z.object({
   data: z.array(
     z.object({
-      album: z.object({
-        cover_xl: z.string().optional(),
-        cover_big: z.string().optional(),
-      }),
+      title: z.string().nullish(),
+      cover_xl: z.string().nullish(),
+      cover_big: z.string().nullish(),
+      artist: z.object({ name: z.string() }).nullish(),
     }),
   ),
 })
 
-const deezerSearch = async (q: string): Promise<string | null> => {
+type Candidate = {
+  artistName: string
+  albumTitle: string
+  coverUrl: string | null
+}
+
+const deezerSearch = async (q: string): Promise<Candidate[]> => {
   const res = await fetch(
-    `https://api.deezer.com/search?q=${encodeURIComponent(q)}`,
+    `https://api.deezer.com/search/album?q=${encodeURIComponent(q)}&limit=5`,
     { headers: { 'User-Agent': 'Sillon/1.0' } },
   )
-  if (!res.ok) return null
+  if (!res.ok) return []
   const json = DeezerSearchSchema.parse(await res.json())
-  const first = json.data.at(0)
-  if (!first) return null
-  return first.album.cover_xl ?? first.album.cover_big ?? null
+  return json.data.map((item) => ({
+    artistName: item.artist?.name ?? '',
+    albumTitle: item.title ?? '',
+    coverUrl: item.cover_xl ?? item.cover_big ?? null,
+  }))
+}
+
+const bestMatch = (
+  candidates: Candidate[],
+  artist: string,
+  title: string,
+): string | null => {
+  let best: { score: number; url: string } | null = null
+  for (const c of candidates) {
+    if (!c.coverUrl) continue
+    const artistScore = jaccardSimilarity(c.artistName, artist)
+    const albumScore = jaccardSimilarity(cleanTitle(c.albumTitle), title)
+    if (artistScore < ARTIST_THRESHOLD || albumScore < ALBUM_THRESHOLD) continue
+    const score = artistScore + albumScore
+    if (!best || score > best.score) best = { score, url: c.coverUrl }
+  }
+  return best?.url ?? null
 }
 
 export const fetchDeezerCover = async (
@@ -29,15 +63,24 @@ export const fetchDeezerCover = async (
   title: string,
 ): Promise<string | null> => {
   try {
-    const a = cleanArtist(artist)
+    const qa = queryArtist(artist)
+    const a = firstArtist(artist)
     const t = cleanTitle(title)
+    const tShort = stripSubtitle(t)
 
-    // Precise field search first
-    const precise = await deezerSearch(`artist:"${a}" album:"${t}"`)
-    if (precise) return precise
+    const queries = [
+      `artist:"${qa}" album:"${t}"`,
+      ...(tShort !== t ? [`artist:"${qa}" album:"${tShort}"`] : []),
+      `${qa} ${tShort}`,
+    ]
 
-    // Fallback: free-text with cleaned inputs
-    return await deezerSearch(`${a} ${t}`)
+    for (const q of queries) {
+      const candidates = await deezerSearch(q)
+      const match = bestMatch(candidates, a, t)
+      if (match) return match
+    }
+
+    return null
   } catch {
     return null
   }
