@@ -13,7 +13,7 @@ export const cleanArtist = (artist: string): string =>
 export const cleanTitle = (title: string): string =>
   sanitizeBase(title)
     .replace(
-      /\s*\(.*?(?:anniversary|remaster(?:ed)?|edition|deluxe|expanded|bonus|version).*?\)\s*$/i,
+      /\s*\(.*?(?:anniversary|remaster(?:ed)?|edition|deluxe|expanded|bonus|version|soundtrack|score|themes?|ost).*?\)\s*$/i,
       '',
     )
     .trim()
@@ -30,7 +30,7 @@ export const queryArtist = (artist: string): string =>
   artist
     .replace(/\[.*?\]/g, '')
     .replace(/\s*\(\d+\)\s*$/, '')
-    .replace(/"/g, '')
+    .replace(/["!]/g, '')
     .trim()
     .replace(/\s+/g, ' ')
     .split(/\s+\/\s+|,/)
@@ -42,17 +42,35 @@ export const stripSubtitle = (title: string): string =>
 
 const ROMAN_RE = /\b(VIII|VII|VI|IV|IX|III|II|I|V|X)\b/g
 const ROMAN_MAP: Record<string, number> = {
-  I: 1, II: 2, III: 3, IV: 4, V: 5,
-  VI: 6, VII: 7, VIII: 8, IX: 9, X: 10,
+  I: 1,
+  II: 2,
+  III: 3,
+  IV: 4,
+  V: 5,
+  VI: 6,
+  VII: 7,
+  VIII: 8,
+  IX: 9,
+  X: 10,
 }
 
 const normalizeNumerals = (text: string): string =>
   text.replace(ROMAN_RE, (m) => String(ROMAN_MAP[m]))
 
 const LATIN_EXT: Record<string, string> = {
-  æ: 'ae', Æ: 'ae', œ: 'oe', Œ: 'oe',
-  ø: 'o', Ø: 'o', ð: 'd', Ð: 'd', þ: 'th', Þ: 'th',
-  ł: 'l', Ł: 'l', ß: 'ss',
+  æ: 'ae',
+  Æ: 'ae',
+  œ: 'oe',
+  Œ: 'oe',
+  ø: 'o',
+  Ø: 'o',
+  ð: 'd',
+  Ð: 'd',
+  þ: 'th',
+  Þ: 'th',
+  ł: 'l',
+  Ł: 'l',
+  ß: 'ss',
 }
 
 const transliterateLatinExt = (text: string): string =>

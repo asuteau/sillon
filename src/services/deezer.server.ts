@@ -4,6 +4,7 @@ import {
   jaccardSimilarity,
   queryArtist,
   stripSubtitle,
+  tokenize,
 } from '#/services/deezer.utils'
 import { z } from 'zod'
 
@@ -51,8 +52,15 @@ const bestMatch = (
     if (!c.coverUrl) continue
     const artistScore = jaccardSimilarity(c.artistName, artist)
     const albumScore = jaccardSimilarity(cleanTitle(c.albumTitle), title)
-    if (artistScore < ARTIST_THRESHOLD || albumScore < ALBUM_THRESHOLD) continue
-    const score = artistScore + albumScore
+    const artistTokens = tokenize(artist)
+    const candidateArtistTokens = tokenize(c.artistName)
+    const isContained =
+      candidateArtistTokens.size > 0 &&
+      [...candidateArtistTokens].every((t) => artistTokens.has(t))
+    const effectiveArtistScore = isContained ? ARTIST_THRESHOLD : artistScore
+    if (effectiveArtistScore < ARTIST_THRESHOLD || albumScore < ALBUM_THRESHOLD)
+      continue
+    const score = effectiveArtistScore + albumScore
     if (!best || score > best.score) best = { score, url: c.coverUrl }
   }
   return best?.url ?? null
