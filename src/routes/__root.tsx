@@ -76,22 +76,24 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
-        <Header />
-        {children}
-        <BottomNav />
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-        <ReactQueryDevtools buttonPosition="bottom-left" />
-        <DiscogsRateLimitDevTools />
+        <div vaul-drawer-wrapper="" className="min-h-svh bg-background">
+          <Header />
+          {children}
+          <BottomNav />
+          <TanStackDevtools
+            config={{
+              position: 'bottom-right',
+            }}
+            plugins={[
+              {
+                name: 'Tanstack Router',
+                render: <TanStackRouterDevtoolsPanel />,
+              },
+            ]}
+          />
+          <ReactQueryDevtools buttonPosition="bottom-left" />
+          <DiscogsRateLimitDevTools />
+        </div>
         <Scripts />
       </body>
     </html>

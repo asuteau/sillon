@@ -5,7 +5,7 @@ import {
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
-import { Sheet, SheetContent } from '#/shared/components/ui/sheet'
+import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
 interface ReleaseInfo {
@@ -96,23 +96,17 @@ export function ReleaseSheet({
 
   if (isMobile) {
     return (
-      <Sheet open onOpenChange={onClose}>
-        <SheetContent
-          side="bottom"
-          className="h-[90dvh] border-0 bg-transparent p-4 shadow-none"
-          showCloseButton={false}
-        >
-          <div className="island-shell h-full overflow-y-auto rounded-t-3xl p-6">
-            <ReleaseSheetContent
-              release={release}
-              onRemove={onRemove}
-              isRemoving={isRemoving}
-              removeLabel={removeLabel}
-              removeIcon={removeIcon}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <Drawer open onOpenChange={onClose}>
+        <DrawerContent className="island-shell overflow-y-auto p-6">
+          <ReleaseSheetContent
+            release={release}
+            onRemove={onRemove}
+            isRemoving={isRemoving}
+            removeLabel={removeLabel}
+            removeIcon={removeIcon}
+          />
+        </DrawerContent>
+      </Drawer>
     )
   }
 

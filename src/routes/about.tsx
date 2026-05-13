@@ -92,9 +92,6 @@ function About() {
             The goal: spend less time typing code, more time on what actually
             matters — UX, performance, accessibility, edge cases.
           </p>
-          <p>
-            <em>A blog post is in the works.</em>
-          </p>
         </div>
       </section>
 
