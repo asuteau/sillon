@@ -15,7 +15,7 @@ function DiscogsRateLimitDevToolsInner() {
   const { data } = useQuery({
     queryKey: ['discogs', 'rateLimit'],
     queryFn: () => getDiscogsRateLimit(),
-    refetchInterval: 3000,
+    refetchInterval: 10_000,
   })
 
   if (!data) return null

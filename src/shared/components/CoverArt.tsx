@@ -1,4 +1,5 @@
 import { coverArtQueryOptions } from '#/features/collection/collection.queries'
+import { useInView } from '#/shared/hooks/use-in-view'
 import { useQuery } from '@tanstack/react-query'
 import { Disc3 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -21,13 +22,15 @@ export function CoverArt({
   size,
   className,
 }: CoverArtProps) {
+  const { ref, isInView } = useInView()
   const [thumbLoaded, setThumbLoaded] = useState(false)
   const [hdUrl, setHdUrl] = useState<string | null>(null)
   const [hdVisible, setHdVisible] = useState(false)
 
-  const { data: hdSrc } = useQuery(
-    coverArtQueryOptions(releaseId, artist, title),
-  )
+  const { data: hdSrc } = useQuery({
+    ...coverArtQueryOptions(releaseId, artist, title),
+    enabled: isInView,
+  })
 
   useEffect(() => {
     if (!hdSrc) return
@@ -44,6 +47,7 @@ export function CoverArt({
 
   return (
     <div
+      ref={ref}
       className={`relative ${className ?? ''}`}
       style={size ? { width: size, height: size } : undefined}
     >
@@ -53,6 +57,7 @@ export function CoverArt({
         <img
           src={thumb}
           alt=""
+          loading="lazy"
           crossOrigin="anonymous"
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${thumbLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setThumbLoaded(true)}

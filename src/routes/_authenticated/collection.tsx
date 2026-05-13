@@ -3,6 +3,7 @@ import { formatDateAdded } from '#/features/collection/collection.utils'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { Disc3 } from 'lucide-react'
 
 export { collectionQueryOptions }
 
@@ -16,8 +17,6 @@ function Collection() {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useSuspenseInfiniteQuery(collectionQueryOptions)
 
-  const releases = data.pages.flatMap((p) => p.releases)
-
   return (
     <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
       <header className="mb-8">
@@ -27,21 +26,22 @@ function Collection() {
         </h1>
       </header>
 
-      {releases.length === 0 ? (
+      {data.pages[0]?.releases.length === 0 ? (
         <p className="text-(--sea-ink-soft)">
           No records in your collection yet.
         </p>
       ) : (
         <>
           <ul className="flex flex-col gap-3">
-            {releases.map((release, index) => (
+            {data.pages.map((page) =>
+              page.releases.map((release, index) => (
               <li key={release.instance_id}>
                 <Link
                   to="/collection/$id"
                   params={{ id: String(release.id) }}
                   search={{ from: 'collection' as const }}
                   className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
-                  style={{ animationDelay: `${index * 60}ms` }}
+                  style={{ animationDelay: `${index * 20}ms` }}
                 >
                   <CoverArt
                     releaseId={String(release.id)}
@@ -67,7 +67,7 @@ function Collection() {
                   </div>
                 </Link>
               </li>
-            ))}
+            )))}
           </ul>
 
           {hasNextPage && (
@@ -75,9 +75,16 @@ function Collection() {
               <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="island-shell rise-in rounded-full px-6 py-2.5 text-sm font-medium text-(--sea-ink) disabled:opacity-50 cursor-pointer"
+                className="island-shell rise-in rounded-full px-6 py-2.5 text-sm font-medium text-(--sea-ink) disabled:opacity-50 cursor-pointer flex items-center gap-2"
               >
-                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+                {isFetchingNextPage ? (
+                  <>
+                    Loading…
+                    <Disc3 size={14} className="animate-spin opacity-70" />
+                  </>
+                ) : (
+                  'Load more'
+                )}
               </button>
             </div>
           )}

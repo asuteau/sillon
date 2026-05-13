@@ -2,6 +2,7 @@ import { wantlistQueryOptions } from '#/features/wantlist/wantlist.queries'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { Disc3 } from 'lucide-react'
 
 export { wantlistQueryOptions }
 
@@ -23,8 +24,6 @@ function Wantlist() {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useSuspenseInfiniteQuery(wantlistQueryOptions)
 
-  const wants = data.pages.flatMap((p) => p.wants)
-
   return (
     <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
       <header className="mb-8">
@@ -34,19 +33,20 @@ function Wantlist() {
         </h1>
       </header>
 
-      {wants.length === 0 ? (
+      {data.pages[0]?.wants.length === 0 ? (
         <p className="text-(--sea-ink-soft)">Your wantlist is empty.</p>
       ) : (
         <>
           <ul className="flex flex-col gap-3">
-            {wants.map((want, index) => (
+            {data.pages.map((page) =>
+              page.wants.map((want, index) => (
               <li key={want.id}>
                 <Link
                   to="/wantlist/$id"
                   params={{ id: String(want.id) }}
                   search={{ from: 'wantlist' as const }}
                   className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
-                  style={{ animationDelay: `${index * 60}ms` }}
+                  style={{ animationDelay: `${index * 20}ms` }}
                 >
                   <CoverArt
                     releaseId={String(want.id)}
@@ -72,7 +72,7 @@ function Wantlist() {
                   </div>
                 </Link>
               </li>
-            ))}
+            )))}
           </ul>
 
           {hasNextPage && (
@@ -80,9 +80,16 @@ function Wantlist() {
               <button
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="island-shell rise-in rounded-full px-6 py-2.5 text-sm font-medium text-(--sea-ink) disabled:opacity-50 cursor-pointer"
+                className="island-shell rise-in rounded-full px-6 py-2.5 text-sm font-medium text-(--sea-ink) disabled:opacity-50 cursor-pointer flex items-center gap-2"
               >
-                {isFetchingNextPage ? 'Loading…' : 'Load more'}
+                {isFetchingNextPage ? (
+                  <>
+                    Loading…
+                    <Disc3 size={14} className="animate-spin opacity-70" />
+                  </>
+                ) : (
+                  'Load more'
+                )}
               </button>
             </div>
           )}
