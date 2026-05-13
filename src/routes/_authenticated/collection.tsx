@@ -1,9 +1,13 @@
+import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
 import { collectionQueryOptions } from '#/features/collection/collection.queries'
 import { formatDateAdded } from '#/features/collection/collection.utils'
+import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Disc3 } from 'lucide-react'
+import { createFileRoute } from '@tanstack/react-router'
+import { Disc3, Library } from 'lucide-react'
+import { useState } from 'react'
 
 export { collectionQueryOptions }
 
@@ -16,6 +20,8 @@ export const Route = createFileRoute('/_authenticated/collection')({
 function Collection() {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useSuspenseInfiniteQuery(collectionQueryOptions)
+  const [selected, setSelected] = useState<CollectionRelease | null>(null)
+  const removeFromCollection = useRemoveFromCollection()
 
   return (
     <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
@@ -35,39 +41,39 @@ function Collection() {
           <ul className="flex flex-col gap-3">
             {data.pages.map((page) =>
               page.releases.map((release, index) => (
-              <li key={release.instance_id}>
-                <Link
-                  to="/collection/$id"
-                  params={{ id: String(release.id) }}
-                  search={{ from: 'collection' as const }}
-                  className="island-shell feature-card rise-in flex items-center gap-4 rounded-2xl px-4 py-3 no-underline cursor-pointer"
-                  style={{ animationDelay: `${index * 20}ms` }}
-                >
-                  <CoverArt
-                    releaseId={String(release.id)}
-                    artist={release.basic_information.artists[0]?.name ?? ''}
-                    title={release.basic_information.title}
-                    thumb={release.basic_information.thumb}
-                    styles={release.basic_information.styles}
-                    size={48}
-                    className="rounded-lg shrink-0 overflow-hidden"
-                  />
-                  <div className="flex flex-1 items-center justify-between">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold text-(--sea-ink)">
-                        {release.basic_information.title}
-                      </span>
-                      <span className="text-sm text-(--sea-ink-soft)">
-                        {release.basic_information.artists[0]?.name}
+                <li key={release.instance_id}>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(release)}
+                    className="island-shell feature-card rise-in flex w-full items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer text-left"
+                    style={{ animationDelay: `${index * 20}ms` }}
+                  >
+                    <CoverArt
+                      releaseId={String(release.id)}
+                      artist={release.basic_information.artists[0]?.name ?? ''}
+                      title={release.basic_information.title}
+                      thumb={release.basic_information.thumb}
+                      styles={release.basic_information.styles}
+                      size={48}
+                      className="rounded-lg shrink-0 overflow-hidden"
+                    />
+                    <div className="flex flex-1 items-center justify-between">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-semibold text-(--sea-ink)">
+                          {release.basic_information.title}
+                        </span>
+                        <span className="text-sm text-(--sea-ink-soft)">
+                          {release.basic_information.artists[0]?.name}
+                        </span>
+                      </div>
+                      <span className="font-mono text-xs text-(--sea-ink-soft)">
+                        {formatDateAdded(release.date_added)}
                       </span>
                     </div>
-                    <span className="font-mono text-xs text-(--sea-ink-soft)">
-                      {formatDateAdded(release.date_added)}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            )))}
+                  </button>
+                </li>
+              )),
+            )}
           </ul>
 
           {hasNextPage && (
@@ -89,6 +95,21 @@ function Collection() {
             </div>
           )}
         </>
+      )}
+
+      {selected && (
+        <ReleaseSheet
+          release={selected}
+          onClose={() => setSelected(null)}
+          onRemove={() =>
+            removeFromCollection.mutate(selected.id, {
+              onSuccess: () => setSelected(null),
+            })
+          }
+          isRemoving={removeFromCollection.isPending}
+          removeLabel="Remove from collection"
+          removeIcon={<Library className="h-4 w-4" />}
+        />
       )}
     </main>
   )
