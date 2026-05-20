@@ -1,3 +1,7 @@
+import BottomNav from '#/shared/components/BottomNav'
+import { DiscogsRateLimitDevTools } from '#/shared/components/DiscogsRateLimitDevTools'
+import Header from '#/shared/components/Header'
+import { PwaUpdateBanner } from '#/shared/components/PwaUpdateBanner'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import type { QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -8,12 +12,9 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import BottomNav from '#/shared/components/BottomNav'
-import { DiscogsRateLimitDevTools } from '#/shared/components/DiscogsRateLimitDevTools'
-import Header from '#/shared/components/Header'
 
-import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
 import { getSessionUser } from '#/services/session'
+import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
 import { NotFound } from '#/shared/components/NotFound'
 import appCss from '../styles.css?url'
 
@@ -31,22 +32,23 @@ export const Route = createRootRouteWithContext<{
   },
   head: () => ({
     meta: [
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'Sillon' },
+      { name: 'application-name', content: 'Sillon' },
+      { name: 'mobile-web-app-capable', content: 'yes' },
+      { name: 'theme-color', content: '#0a0a0b' },
+      { name: 'apple-mobile-web-app-capable', content: 'yes' },
       {
-        charSet: 'utf-8',
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'black-translucent',
       },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
-      },
-      {
-        title: 'Sillon',
-      },
+      { name: 'apple-mobile-web-app-title', content: 'Sillon' },
     ],
     links: [
-      {
-        rel: 'stylesheet',
-        href: appCss,
-      },
+      { rel: 'stylesheet', href: appCss },
+      { rel: 'manifest', href: '/manifest.webmanifest' },
+      { rel: 'apple-touch-icon', href: '/icons/icon-192.png' },
     ],
   }),
   errorComponent: (props) => {
@@ -75,8 +77,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <HeadContent />
       </head>
-      <body className="font-sans antialiased [overflow-wrap:anywhere] selection:bg-[rgba(79,184,178,0.24)]">
+      <body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
         <div vaul-drawer-wrapper="" className="min-h-svh bg-background">
+          <PwaUpdateBanner />
           <Header />
           {children}
           <BottomNav />
