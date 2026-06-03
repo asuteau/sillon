@@ -1,5 +1,9 @@
 import { Suspense } from 'react'
-import { useSuspenseQuery, useQueryClient, useQuery } from '@tanstack/react-query'
+import {
+  useSuspenseQuery,
+  useQueryClient,
+  useQuery,
+} from '@tanstack/react-query'
 import { Check, Heart, Library } from 'lucide-react'
 
 import {
@@ -40,9 +44,7 @@ function SearchReleaseSheetContent({
   const colors = release.formatText ? extractColors(release.formatText) : []
 
   const { data: versionsData } = useQuery(versionsQueryOptions(masterId))
-  const version = versionsData?.versions.find(
-    (v) => String(v.id) === releaseId,
-  )
+  const version = versionsData?.versions.find((v) => String(v.id) === releaseId)
   const inCollection = version?.stats.user.in_collection ?? 0
   const inWantlist = version?.stats.user.in_wantlist ?? 0
 
@@ -103,7 +105,8 @@ function SearchReleaseSheetContent({
 
   const isCollectionPending =
     addToCollection.isPending || removeFromCollection.isPending
-  const isWantlistPending = addToWantlist.isPending || removeFromWantlist.isPending
+  const isWantlistPending =
+    addToWantlist.isPending || removeFromWantlist.isPending
 
   return (
     <div className="flex flex-col gap-5">
@@ -128,7 +131,10 @@ function SearchReleaseSheetContent({
       <div className="flex flex-col items-center gap-2 text-center font-mono text-sm">
         {(release.year > 0 || release.country) && (
           <p className="text-(--sea-ink-soft)">
-            {[release.year > 0 ? String(release.year) : null, release.country || null]
+            {[
+              release.year > 0 ? String(release.year) : null,
+              release.country || null,
+            ]
               .filter(Boolean)
               .join(' · ')}
           </p>
@@ -198,7 +204,13 @@ export function SearchReleaseSheet({
   const isMobile = useIsMobile()
 
   const content = (
-    <Suspense fallback={<div className="py-8 text-center text-sm text-(--sea-ink-soft)">Loading…</div>}>
+    <Suspense
+      fallback={
+        <div className="py-8 text-center text-sm text-(--sea-ink-soft)">
+          Loading…
+        </div>
+      }
+    >
       <SearchReleaseSheetContent
         releaseId={releaseId}
         masterId={masterId}

@@ -65,7 +65,10 @@ export function ArtistCard({ artist, onClick, index }: ArtistCardProps) {
           />
         ) : (
           <div className="h-12 w-12 rounded-lg shrink-0 bg-(--sand) flex items-center justify-center">
-            <Mic2 className="h-5 w-5 text-(--sea-ink-soft) opacity-60" strokeWidth={1.25} />
+            <Mic2
+              className="h-5 w-5 text-(--sea-ink-soft) opacity-60"
+              strokeWidth={1.25}
+            />
           </div>
         )}
         <div className="flex flex-1 flex-col gap-0.5 min-w-0">

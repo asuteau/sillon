@@ -30,6 +30,7 @@ export const Route = createFileRoute('/_authenticated/search')({
     q: z.string().default(''),
     mode: z.enum(['artist', 'title']).default('artist'),
     artistId: z.string().optional(),
+    artistName: z.string().optional(),
     masterId: z.string().optional(),
     releaseId: z.string().optional(),
   }),
@@ -37,7 +38,8 @@ export const Route = createFileRoute('/_authenticated/search')({
 })
 
 function Search() {
-  const { q, mode, artistId, masterId, releaseId } = Route.useSearch()
+  const { q, mode, artistId, artistName, masterId, releaseId } =
+    Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
   const [inputValue, setInputValue] = useState(q)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
@@ -63,9 +65,9 @@ function Search() {
     }).catch(() => {})
   }
 
-  const handleArtistClick = (id: number) => {
+  const handleArtistClick = (id: number, name: string) => {
     navigate({
-      search: (s) => ({ ...s, artistId: String(id) }),
+      search: (s) => ({ ...s, artistId: String(id), artistName: name }),
     }).catch(() => {})
   }
 
@@ -77,7 +79,7 @@ function Search() {
 
   const handleBackFromDiscography = () => {
     navigate({
-      search: (s) => ({ q: s.q, mode: s.mode }),
+      search: (s) => ({ q: s.q, mode: s.mode, artistName: undefined }),
     }).catch(() => {})
   }
 
@@ -98,7 +100,8 @@ function Search() {
   }
 
   const showVersions = masterId !== undefined
-  const showDiscography = !showVersions && mode === 'artist' && artistId !== undefined
+  const showDiscography =
+    !showVersions && mode === 'artist' && artistId !== undefined
 
   const backLabel = showVersions
     ? mode === 'artist' && artistId
@@ -108,7 +111,9 @@ function Search() {
       ? '← Search'
       : null
 
-  const handleBack = showVersions ? handleBackFromVersions : handleBackFromDiscography
+  const handleBack = showVersions
+    ? handleBackFromVersions
+    : handleBackFromDiscography
 
   return (
     <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
@@ -164,7 +169,7 @@ function Search() {
       ) : showDiscography ? (
         <DiscographyList
           artistId={artistId}
-          artistName={q}
+          artistName={artistName ?? q}
           onMasterClick={handleMasterClick}
         />
       ) : mode === 'artist' ? (
@@ -221,7 +226,7 @@ function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
 
 interface ArtistListProps {
   q: string
-  onArtistClick: (id: number) => void
+  onArtistClick: (id: number, name: string) => void
 }
 
 function ArtistList({ q, onArtistClick }: ArtistListProps) {
@@ -250,7 +255,9 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
 
   if (q.length <= 2) {
     return (
-      <p className="text-(--sea-ink-soft)">Type at least 3 characters to search.</p>
+      <p className="text-(--sea-ink-soft)">
+        Type at least 3 characters to search.
+      </p>
     )
   }
 
@@ -269,12 +276,25 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
           key={artist.id}
           artist={artist}
           index={index}
-          onClick={() => onArtistClick(artist.id)}
+          onClick={() => onArtistClick(artist.id, artist.name)}
         />
       ))}
     </ul>
   )
 }
+
+type DiscographyFilter = 'albums' | 'eps' | 'compilations' | 'all'
+
+const DISCOGRAPHY_FILTERS: {
+  key: DiscographyFilter
+  label: string
+  match: string
+}[] = [
+  { key: 'albums', label: 'Albums', match: 'Album' },
+  { key: 'eps', label: 'EPs', match: 'EP' },
+  { key: 'compilations', label: 'Compilations', match: 'Compilation' },
+  { key: 'all', label: 'All', match: '' },
+]
 
 interface DiscographyListProps {
   artistId: string
@@ -282,34 +302,105 @@ interface DiscographyListProps {
   onMasterClick: (id: number) => void
 }
 
-function DiscographyList({ artistId, artistName, onMasterClick }: DiscographyListProps) {
-  const { data, isFetching } = useQuery(artistReleasesQueryOptions(artistId))
+function DiscographyList({
+  artistId,
+  artistName,
+  onMasterClick,
+}: DiscographyListProps) {
+  const [filter, setFilter] = useState<DiscographyFilter>('albums')
 
-  const items = useMemo(
-    () => (data?.releases ?? []).map(toArtistDiscographyItem),
-    [data?.releases],
+  // Primary: artist-ID based — complete, no false positives
+  const { data: releasesData, isFetching } = useQuery(
+    artistReleasesQueryOptions(artistId),
+  )
+  // Format enrichment: search API joined by master ID
+  const { data: searchData } = useQuery(
+    mastersQueryOptions(artistName, 'artist'),
   )
 
-  if (isFetching && items.length === 0) {
+  const allItems = useMemo(() => {
+    const formatMap = new Map<number, string[]>()
+    for (const raw of searchData?.results ?? []) {
+      if (raw.format?.length) formatMap.set(raw.id, raw.format)
+    }
+    return (releasesData?.releases ?? [])
+      .map(toArtistDiscographyItem)
+      .map((item) => ({ ...item, formats: formatMap.get(item.id) ?? [] }))
+  }, [releasesData?.releases, searchData?.results])
+
+  const counts = useMemo(
+    () => ({
+      albums: allItems.filter(
+        (i) => i.formats.includes('Album') || i.formats.length === 0,
+      ).length,
+      eps: allItems.filter((i) => i.formats.includes('EP')).length,
+      compilations: allItems.filter((i) => i.formats.includes('Compilation'))
+        .length,
+      all: allItems.length,
+    }),
+    [allItems],
+  )
+
+  const showAllChip = counts.eps > 0 || counts.compilations > 0
+
+  const items = useMemo(() => {
+    if (filter === 'all') return allItems
+    if (filter === 'albums')
+      return allItems.filter(
+        (i) => i.formats.includes('Album') || i.formats.length === 0,
+      )
+    const match = DISCOGRAPHY_FILTERS.find(
+      (entry) => entry.key === filter,
+    )!.match
+    return allItems.filter((i) => i.formats.includes(match))
+  }, [allItems, filter])
+
+  if (isFetching && allItems.length === 0) {
     return <p className="text-(--sea-ink-soft)">Loading discography…</p>
   }
 
-  if (items.length === 0) {
-    return <p className="text-(--sea-ink-soft)">No albums found.</p>
-  }
-
   return (
-    <ul className="flex flex-col gap-3">
-      {items.map((item, index) => (
-        <DiscographyCard
-          key={item.id}
-          item={item}
-          artistName={artistName}
-          index={index}
-          onClick={() => onMasterClick(item.id)}
-        />
-      ))}
-    </ul>
+    <>
+      <div className="mb-6 flex gap-2 flex-wrap">
+        {DISCOGRAPHY_FILTERS.map(({ key, label }) => {
+          const count = counts[key]
+          if (key === 'all' && !showAllChip) return null
+          if (key !== 'all' && count === 0) return null
+          return (
+            <button
+              key={key}
+              onClick={() => setFilter(key)}
+              className={`cursor-pointer whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                filter === key
+                  ? 'bg-(--sea-ink) text-(--chip-bg)'
+                  : 'border border-(--line) text-(--sea-ink)'
+              }`}
+            >
+              {label}
+              {key !== 'all' && (
+                <span className="ml-1 opacity-50">{count}</span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {items.length === 0 ? (
+        <p className="text-(--sea-ink-soft)">No {filter} found.</p>
+      ) : (
+        <ul className="flex flex-col gap-3">
+          {items.map((item, index) => (
+            <DiscographyCard
+              key={item.id}
+              item={item}
+              artistName={artistName}
+              index={index}
+              onClick={() => onMasterClick(item.id)}
+            />
+          ))}
+        </ul>
+      )}
+    </>
   )
 }
 
@@ -342,7 +433,9 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
 
   if (q.length <= 2) {
     return (
-      <p className="text-(--sea-ink-soft)">Type at least 3 characters to search.</p>
+      <p className="text-(--sea-ink-soft)">
+        Type at least 3 characters to search.
+      </p>
     )
   }
 

@@ -6,6 +6,7 @@ export const MasterResultSchema = z.object({
   year: z.string().optional(),
   thumb: z.string(),
   cover_image: z.string(),
+  format: z.array(z.string()).optional(),
   user_data: z
     .object({
       in_collection: z.boolean(),
@@ -112,6 +113,7 @@ export const ArtistReleaseSchema = z.object({
   thumb: z.string().optional(),
   type: z.string(),
   role: z.string().optional(),
+  format: z.string().optional(),
 })
 
 export const ArtistReleasesPageSchema = z.object({

@@ -13,6 +13,7 @@ export type Master = {
   year: number | null
   thumb: string
   coverImage: string
+  formats: string[]
   inCollection: boolean
   inWantlist: boolean
 }
@@ -62,13 +63,11 @@ export function toMaster(raw: MasterResult): Master {
   return {
     id: raw.id,
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
-    artist:
-      dashIdx >= 0
-        ? stripDisambiguator(raw.title.slice(0, dashIdx))
-        : '',
+    artist: dashIdx >= 0 ? stripDisambiguator(raw.title.slice(0, dashIdx)) : '',
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     thumb: raw.thumb,
     coverImage: raw.cover_image,
+    formats: raw.format ?? [],
     inCollection: raw.user_data?.in_collection ?? false,
     inWantlist: raw.user_data?.in_wantlist ?? false,
   }
@@ -87,6 +86,7 @@ export type ArtistDiscographyItem = {
   title: string
   year: number | null
   thumb: string
+  format: string
 }
 
 export function toArtist(raw: ArtistResult): Artist {
@@ -107,6 +107,7 @@ export function toArtistDiscographyItem(
     title: raw.title,
     year: raw.year ?? null,
     thumb: raw.thumb ?? '',
+    format: raw.format ?? '',
   }
 }
 
