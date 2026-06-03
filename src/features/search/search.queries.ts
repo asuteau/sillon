@@ -2,8 +2,11 @@ import { queryOptions } from '@tanstack/react-query'
 
 import {
   fetchDiscogsBarcode,
+  getArtistDetail,
+  getArtistReleases,
   getMasterVersions,
   getReleaseDetail,
+  searchArtists,
   searchMasters,
 } from './search.api'
 
@@ -30,6 +33,29 @@ export const releaseDetailQueryOptions = (releaseId: string) =>
   queryOptions({
     queryKey: ['search', 'release', releaseId] as const,
     queryFn: () => getReleaseDetail({ data: { releaseId } }),
+    staleTime: 30 * 60 * 1000,
+  })
+
+export const artistsQueryOptions = (q: string) =>
+  queryOptions({
+    queryKey: ['search', 'artists', q] as const,
+    queryFn: () => searchArtists({ data: { q } }),
+    enabled: q.length > 2,
+    staleTime: 5 * 60 * 1000,
+  })
+
+export const artistReleasesQueryOptions = (artistId: string | undefined) =>
+  queryOptions({
+    queryKey: ['search', 'artistReleases', artistId] as const,
+    queryFn: () => getArtistReleases({ data: { artistId: artistId! } }),
+    enabled: artistId !== undefined,
+    staleTime: 5 * 60 * 1000,
+  })
+
+export const artistDetailQueryOptions = (artistId: string) =>
+  queryOptions({
+    queryKey: ['search', 'artistDetail', artistId] as const,
+    queryFn: () => getArtistDetail({ data: { artistId } }),
     staleTime: 30 * 60 * 1000,
   })
 

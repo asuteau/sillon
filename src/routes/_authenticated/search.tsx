@@ -5,13 +5,22 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
-
+import { SearchReleaseSheet } from '#/shared/components/SearchReleaseSheet'
 import { useDebounce } from '#/shared/hooks/use-debounce'
 
+import { ArtistCard } from '#/features/search/components/ArtistCard'
+import { DiscographyCard } from '#/features/search/components/DiscographyCard'
 import { MasterCard } from '#/features/search/components/MasterCard'
 import { VersionRow } from '#/features/search/components/VersionRow'
-import { toMaster, toMasterVersion } from '#/features/search/search.model'
 import {
+  toArtist,
+  toArtistDiscographyItem,
+  toMaster,
+  toMasterVersion,
+} from '#/features/search/search.model'
+import {
+  artistReleasesQueryOptions,
+  artistsQueryOptions,
   mastersQueryOptions,
   versionsQueryOptions,
 } from '#/features/search/search.queries'
@@ -19,14 +28,16 @@ import {
 export const Route = createFileRoute('/_authenticated/search')({
   validateSearch: z.object({
     q: z.string().default(''),
-    type: z.enum(['all', 'artist']).default('artist'),
+    mode: z.enum(['artist', 'title']).default('artist'),
+    artistId: z.string().optional(),
     masterId: z.string().optional(),
+    releaseId: z.string().optional(),
   }),
   component: Search,
 })
 
 function Search() {
-  const { q, type, masterId } = Route.useSearch()
+  const { q, mode, artistId, masterId, releaseId } = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
   const [inputValue, setInputValue] = useState(q)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
@@ -36,12 +47,26 @@ function Search() {
   useEffect(() => {
     if (debouncedValue === q) return
     navigate({
-      search: (s) => ({ ...s, q: debouncedValue, masterId: undefined }),
+      search: (s) => ({
+        ...s,
+        q: debouncedValue,
+        artistId: undefined,
+        masterId: undefined,
+        releaseId: undefined,
+      }),
     }).catch(() => {})
   }, [debouncedValue])
 
-  const handleQueryChange = (value: string) => {
-    setInputValue(value)
+  const handleModeChange = (newMode: 'artist' | 'title') => {
+    navigate({
+      search: { q, mode: newMode },
+    }).catch(() => {})
+  }
+
+  const handleArtistClick = (id: number) => {
+    navigate({
+      search: (s) => ({ ...s, artistId: String(id) }),
+    }).catch(() => {})
   }
 
   const handleMasterClick = (id: number) => {
@@ -50,68 +75,111 @@ function Search() {
     }).catch(() => {})
   }
 
-  const handleBack = () => {
-    navigate({ search: (s) => ({ q: s.q, type: s.type }) }).catch(() => {})
-  }
-
-  const handleTypeChange = (newType: 'all' | 'artist') => {
+  const handleBackFromDiscography = () => {
     navigate({
-      search: (s) => ({ q: s.q, type: newType, masterId: undefined }),
+      search: (s) => ({ q: s.q, mode: s.mode }),
     }).catch(() => {})
   }
 
-  if (masterId !== undefined) {
-    return (
-      <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
+  const handleBackFromVersions = () => {
+    navigate({
+      search: (s) => ({
+        q: s.q,
+        mode: s.mode,
+        artistId: s.artistId,
+      }),
+    }).catch(() => {})
+  }
+
+  const handleCloseSheet = () => {
+    navigate({
+      search: (s) => ({ ...s, releaseId: undefined }),
+    }).catch(() => {})
+  }
+
+  const showVersions = masterId !== undefined
+  const showDiscography = !showVersions && mode === 'artist' && artistId !== undefined
+
+  const backLabel = showVersions
+    ? mode === 'artist' && artistId
+      ? '← Albums'
+      : '← Search'
+    : showDiscography
+      ? '← Search'
+      : null
+
+  const handleBack = showVersions ? handleBackFromVersions : handleBackFromDiscography
+
+  return (
+    <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
+      {backLabel ? (
         <div className="mb-6 flex items-center gap-4">
           <button
             onClick={handleBack}
             className="island-kicker rise-in inline-flex items-center gap-1.5 cursor-pointer"
           >
-            ← Search
+            {backLabel}
           </button>
         </div>
+      ) : (
+        <header className="mb-8">
+          <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
+            Add a record
+          </h1>
+          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+            Search Discogs to add to your collection or wantlist
+          </p>
+        </header>
+      )}
 
-        <VersionsList masterId={masterId} q={q} />
-      </main>
-    )
-  }
+      {!showVersions && !showDiscography && (
+        <>
+          <div className="mb-6">
+            <input
+              ref={inputRef}
+              type="search"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Artist, album, label..."
+              className="island-shell w-full rounded-2xl px-4 py-3 text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+            />
+          </div>
 
-  return (
-    <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
-      <header className="mb-8">
-        <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
-          Add a record
-        </h1>
-        <p className="mt-1 text-sm text-(--sea-ink-soft)">
-          Search Discogs to add to your collection or wantlist
-        </p>
-      </header>
+          <div className="mb-6 flex justify-center">
+            <button
+              onClick={() => setIsScannerOpen(true)}
+              className="flex items-center gap-1.5 text-sm text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) cursor-pointer"
+            >
+              <ScanLine className="h-4 w-4" />
+              or scan a barcode
+            </button>
+          </div>
 
-      <div className="mb-6">
-        <input
-          ref={inputRef}
-          type="search"
-          value={inputValue}
-          onChange={(e) => handleQueryChange(e.target.value)}
-          placeholder="Artist, album, label..."
-          className="island-shell w-full rounded-2xl px-4 py-3 text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+          <ModeToggle mode={mode} onModeChange={handleModeChange} />
+        </>
+      )}
+
+      {showVersions ? (
+        <VersionsList masterId={masterId} />
+      ) : showDiscography ? (
+        <DiscographyList
+          artistId={artistId}
+          artistName={q}
+          onMasterClick={handleMasterClick}
         />
-      </div>
+      ) : mode === 'artist' ? (
+        <ArtistList q={q} onArtistClick={handleArtistClick} />
+      ) : (
+        <MastersList q={q} onMasterClick={handleMasterClick} />
+      )}
 
-      <div className="mb-6 flex justify-center">
-        <button
-          onClick={() => setIsScannerOpen(true)}
-          className="flex items-center gap-1.5 text-sm text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) cursor-pointer"
-        >
-          <ScanLine className="h-4 w-4" />
-          or scan a barcode
-        </button>
-      </div>
-
-      <SearchFilters type={type} q={q} onTypeChange={handleTypeChange} />
-
-      <MastersList q={q} type={type} onMasterClick={handleMasterClick} />
+      {releaseId && masterId && (
+        <SearchReleaseSheet
+          releaseId={releaseId}
+          masterId={masterId}
+          onClose={handleCloseSheet}
+        />
+      )}
 
       {isScannerOpen && (
         <BarcodeScanner
@@ -126,49 +194,132 @@ function Search() {
   )
 }
 
-interface SearchFiltersProps {
-  type: 'all' | 'artist'
-  q: string
-  onTypeChange: (type: 'all' | 'artist') => void
+interface ModeToggleProps {
+  mode: 'artist' | 'title'
+  onModeChange: (mode: 'artist' | 'title') => void
 }
 
-function SearchFilters({ type, q, onTypeChange }: SearchFiltersProps) {
-  if (q.length === 0) {
-    return null
-  }
-
-  const filters = [
-    { value: 'artist' as const, label: 'Artist only' },
-    { value: 'all' as const, label: 'All' },
-  ]
-
+function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
   return (
-    <div className="mb-4 flex gap-2 overflow-x-auto">
-      {filters.map((filter) => (
+    <div className="mb-6 flex gap-2">
+      {(['artist', 'title'] as const).map((m) => (
         <button
-          key={filter.value}
-          onClick={() => onTypeChange(filter.value)}
+          key={m}
+          onClick={() => onModeChange(m)}
           className={`cursor-pointer whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-            type === filter.value
+            mode === m
               ? 'bg-(--sea-ink) text-(--chip-bg)'
               : 'border border-(--line) text-(--sea-ink)'
           }`}
         >
-          {filter.label}
+          {m === 'artist' ? 'By artist' : 'By title'}
         </button>
       ))}
     </div>
   )
 }
 
-interface MastersListProps {
+interface ArtistListProps {
   q: string
-  type: 'all' | 'artist'
+  onArtistClick: (id: number) => void
+}
+
+function ArtistList({ q, onArtistClick }: ArtistListProps) {
+  const { data, isFetching } = useQuery(artistsQueryOptions(q))
+
+  const artists = useMemo(
+    () => (data?.results ?? []).map(toArtist),
+    [data?.results],
+  )
+
+  if (q.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-16 text-center">
+        <PlusCircle className="h-12 w-12 text-(--sea-ink)" />
+        <div>
+          <p className="font-semibold text-(--sea-ink)">Find a record</p>
+          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+            Search by artist to browse their full discography,
+            <br />
+            or switch to "By title" to search album names directly.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (q.length <= 2) {
+    return (
+      <p className="text-(--sea-ink-soft)">Type at least 3 characters to search.</p>
+    )
+  }
+
+  if (isFetching && artists.length === 0) {
+    return <p className="text-(--sea-ink-soft)">Searching…</p>
+  }
+
+  if (artists.length === 0) {
+    return <p className="text-(--sea-ink-soft)">No artists found for "{q}".</p>
+  }
+
+  return (
+    <ul className="flex flex-col gap-3">
+      {artists.map((artist, index) => (
+        <ArtistCard
+          key={artist.id}
+          artist={artist}
+          index={index}
+          onClick={() => onArtistClick(artist.id)}
+        />
+      ))}
+    </ul>
+  )
+}
+
+interface DiscographyListProps {
+  artistId: string
+  artistName: string
   onMasterClick: (id: number) => void
 }
 
-function MastersList({ q, type, onMasterClick }: MastersListProps) {
-  const { data, isFetching } = useQuery(mastersQueryOptions(q, type))
+function DiscographyList({ artistId, artistName, onMasterClick }: DiscographyListProps) {
+  const { data, isFetching } = useQuery(artistReleasesQueryOptions(artistId))
+
+  const items = useMemo(
+    () => (data?.releases ?? []).map(toArtistDiscographyItem),
+    [data?.releases],
+  )
+
+  if (isFetching && items.length === 0) {
+    return <p className="text-(--sea-ink-soft)">Loading discography…</p>
+  }
+
+  if (items.length === 0) {
+    return <p className="text-(--sea-ink-soft)">No albums found.</p>
+  }
+
+  return (
+    <ul className="flex flex-col gap-3">
+      {items.map((item, index) => (
+        <DiscographyCard
+          key={item.id}
+          item={item}
+          artistName={artistName}
+          index={index}
+          onClick={() => onMasterClick(item.id)}
+        />
+      ))}
+    </ul>
+  )
+}
+
+interface MastersListProps {
+  q: string
+  onMasterClick: (id: number) => void
+}
+
+function MastersList({ q, onMasterClick }: MastersListProps) {
+  const { data, isFetching } = useQuery(mastersQueryOptions(q))
 
   const masters = useMemo(
     () => (data?.results ?? []).map(toMaster),
@@ -182,11 +333,7 @@ function MastersList({ q, type, onMasterClick }: MastersListProps) {
         <div>
           <p className="font-semibold text-(--sea-ink)">Find a record</p>
           <p className="mt-1 text-sm text-(--sea-ink-soft)">
-            Search the Discogs database by artist
-            <br />
-            or album title, then add it directly
-            <br />
-            to your collection or wantlist.
+            Search by album title, label, or artist name.
           </p>
         </div>
       </div>
@@ -195,9 +342,7 @@ function MastersList({ q, type, onMasterClick }: MastersListProps) {
 
   if (q.length <= 2) {
     return (
-      <p className="text-(--sea-ink-soft)">
-        Type at least 3 characters to search.
-      </p>
+      <p className="text-(--sea-ink-soft)">Type at least 3 characters to search.</p>
     )
   }
 
@@ -225,10 +370,9 @@ function MastersList({ q, type, onMasterClick }: MastersListProps) {
 
 interface VersionsListProps {
   masterId: string
-  q: string
 }
 
-function VersionsList({ masterId, q }: VersionsListProps) {
+function VersionsList({ masterId }: VersionsListProps) {
   const { data, isFetching } = useQuery(versionsQueryOptions(masterId))
 
   const versions = useMemo(
@@ -247,12 +391,7 @@ function VersionsList({ masterId, q }: VersionsListProps) {
   return (
     <ul className="flex flex-col gap-3">
       {versions.map((version) => (
-        <VersionRow
-          key={version.id}
-          version={version}
-          masterId={masterId}
-          q={q}
-        />
+        <VersionRow key={version.id} version={version} masterId={masterId} />
       ))}
     </ul>
   )

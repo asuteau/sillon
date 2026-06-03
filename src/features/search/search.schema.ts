@@ -59,18 +59,18 @@ export const ReleaseDetailSchema = z.object({
   id: z.number(),
   title: z.string(),
   year: z.number(),
-  country: z.string().optional(),
+  country: z.string().nullish(),
   artists: z.array(z.object({ name: z.string() })),
-  images: z.array(z.object({ uri: z.string() })).optional(),
+  images: z.array(z.object({ uri: z.string() })).nullish(),
   formats: z
     .array(
       z.object({
         name: z.string(),
         qty: z.string(),
-        text: z.string().optional(),
+        text: z.string().nullish(),
       }),
     )
-    .optional(),
+    .nullish(),
 })
 
 export type ReleaseDetail = z.infer<typeof ReleaseDetailSchema>
@@ -90,3 +90,43 @@ export const BarcodeResultSchema = z.object({
 })
 
 export type BarcodeResult = z.infer<typeof BarcodeResultSchema>
+
+export const ArtistResultSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  thumb: z.string(),
+  cover_image: z.string().optional(),
+  genres: z.array(z.string()).optional(),
+  styles: z.array(z.string()).optional(),
+})
+
+export const ArtistSearchPageSchema = z.object({
+  results: z.array(ArtistResultSchema),
+  pagination: PaginationSchema,
+})
+
+export const ArtistReleaseSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  year: z.number().optional(),
+  thumb: z.string().optional(),
+  type: z.string(),
+  role: z.string().optional(),
+})
+
+export const ArtistReleasesPageSchema = z.object({
+  releases: z.array(ArtistReleaseSchema),
+  pagination: PaginationSchema,
+})
+
+export const ArtistDetailSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  profile: z.string().optional(),
+})
+
+export type ArtistDetail = z.infer<typeof ArtistDetailSchema>
+export type ArtistResult = z.infer<typeof ArtistResultSchema>
+export type ArtistSearchPage = z.infer<typeof ArtistSearchPageSchema>
+export type ArtistRelease = z.infer<typeof ArtistReleaseSchema>
+export type ArtistReleasesPage = z.infer<typeof ArtistReleasesPageSchema>

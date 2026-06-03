@@ -51,7 +51,7 @@ export function CoverArt({
       className={`relative ${className ?? ''}`}
       style={size ? { width: size, height: size } : undefined}
     >
-      <div className="absolute inset-0 bg-neutral-900" />
+      <div className="absolute inset-0 bg-(--sand)" />
 
       {thumb && (
         <img
@@ -74,11 +74,11 @@ export function CoverArt({
       )}
 
       {!hdVisible && (
-        <div className="absolute inset-0 flex items-center justify-center bg-neutral-600">
+        <div className="absolute inset-0 flex items-center justify-center">
           <Disc3
             style={{ width: '42%', height: '42%' }}
             strokeWidth={0.75}
-            className="text-neutral-400"
+            className="text-(--sea-ink-soft) opacity-60"
           />
         </div>
       )}

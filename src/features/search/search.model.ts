@@ -1,4 +1,10 @@
-import type { MasterResult, ReleaseDetail, Version } from './search.schema'
+import type {
+  ArtistRelease,
+  ArtistResult,
+  MasterResult,
+  ReleaseDetail,
+  Version,
+} from './search.schema'
 
 export type Master = {
   id: number
@@ -34,13 +40,17 @@ export type ReleaseDetailModel = {
   formatText: string
 }
 
+function stripDisambiguator(name: string): string {
+  return name.replace(/\s*\(\d+\)$/, '')
+}
+
 export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
   return {
     id: raw.id,
     title: raw.title,
     year: raw.year,
     country: raw.country ?? '',
-    artists: raw.artists.map((a) => a.name),
+    artists: raw.artists.map((a) => stripDisambiguator(a.name)),
     coverImage: raw.images?.[0]?.uri ?? '',
     formatName: raw.formats?.[0]?.name ?? '',
     formatText: raw.formats?.[0]?.text ?? '',
@@ -52,12 +62,51 @@ export function toMaster(raw: MasterResult): Master {
   return {
     id: raw.id,
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
-    artist: dashIdx >= 0 ? raw.title.slice(0, dashIdx) : '',
+    artist:
+      dashIdx >= 0
+        ? stripDisambiguator(raw.title.slice(0, dashIdx))
+        : '',
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     thumb: raw.thumb,
     coverImage: raw.cover_image,
     inCollection: raw.user_data?.in_collection ?? false,
     inWantlist: raw.user_data?.in_wantlist ?? false,
+  }
+}
+
+export type Artist = {
+  id: number
+  name: string
+  thumb: string
+  genres: string[]
+  styles: string[]
+}
+
+export type ArtistDiscographyItem = {
+  id: number
+  title: string
+  year: number | null
+  thumb: string
+}
+
+export function toArtist(raw: ArtistResult): Artist {
+  return {
+    id: raw.id,
+    name: stripDisambiguator(raw.title),
+    thumb: raw.thumb,
+    genres: raw.genres ?? [],
+    styles: raw.styles ?? [],
+  }
+}
+
+export function toArtistDiscographyItem(
+  raw: ArtistRelease,
+): ArtistDiscographyItem {
+  return {
+    id: raw.id,
+    title: raw.title,
+    year: raw.year ?? null,
+    thumb: raw.thumb ?? '',
   }
 }
 

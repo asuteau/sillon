@@ -19,7 +19,6 @@ import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedWantlistRouteImport } from './routes/_authenticated/wantlist'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedCollectionRouteImport } from './routes/_authenticated/collection'
-import { Route as AuthenticatedSearchReleaseIdRouteImport } from './routes/_authenticated/search_.$releaseId'
 
 const OfflineRoute = OfflineRouteImport.update({
   id: '/offline',
@@ -70,12 +69,6 @@ const AuthenticatedCollectionRoute = AuthenticatedCollectionRouteImport.update({
   path: '/collection',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedSearchReleaseIdRoute =
-  AuthenticatedSearchReleaseIdRouteImport.update({
-    id: '/search_/$releaseId',
-    path: '/search/$releaseId',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -87,7 +80,6 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
-  '/search/$releaseId': typeof AuthenticatedSearchReleaseIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -99,7 +91,6 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
-  '/search/$releaseId': typeof AuthenticatedSearchReleaseIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -113,7 +104,6 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
-  '/_authenticated/search_/$releaseId': typeof AuthenticatedSearchReleaseIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,7 +117,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
-    | '/search/$releaseId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,7 +128,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
-    | '/search/$releaseId'
   id:
     | '__root__'
     | '/'
@@ -152,7 +140,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
-    | '/_authenticated/search_/$releaseId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -237,13 +224,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCollectionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/search_/$releaseId': {
-      id: '/_authenticated/search_/$releaseId'
-      path: '/search/$releaseId'
-      fullPath: '/search/$releaseId'
-      preLoaderRoute: typeof AuthenticatedSearchReleaseIdRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
   }
 }
 
@@ -251,14 +231,12 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCollectionRoute: typeof AuthenticatedCollectionRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedWantlistRoute: typeof AuthenticatedWantlistRoute
-  AuthenticatedSearchReleaseIdRoute: typeof AuthenticatedSearchReleaseIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCollectionRoute: AuthenticatedCollectionRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedWantlistRoute: AuthenticatedWantlistRoute,
-  AuthenticatedSearchReleaseIdRoute: AuthenticatedSearchReleaseIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

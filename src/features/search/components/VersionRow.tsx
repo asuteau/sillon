@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Check, Heart, Library } from 'lucide-react'
 
 import {
@@ -18,11 +18,11 @@ import type { VersionsPage } from '../search.schema'
 interface VersionRowProps {
   version: MasterVersion
   masterId: string
-  q: string
 }
 
-export function VersionRow({ version, masterId, q }: VersionRowProps) {
+export function VersionRow({ version, masterId }: VersionRowProps) {
   const queryClient = useQueryClient()
+  const navigate = useNavigate({ from: '/search' })
 
   const addToCollection = useAddToCollection()
   const removeFromCollection = useRemoveFromCollection()
@@ -87,22 +87,26 @@ export function VersionRow({ version, masterId, q }: VersionRowProps) {
   const isWantlistPending =
     addToWantlist.isPending || removeFromWantlist.isPending
 
+  const handleVersionClick = () => {
+    navigate({
+      search: (s) => ({ ...s, releaseId: String(version.id) }),
+    }).catch(() => {})
+  }
+
   return (
     <li className="island-shell rise-in flex items-center gap-3 rounded-2xl px-4 py-3">
-      <Link
-        to="/search/$releaseId"
-        params={{ releaseId: String(version.id) }}
-        search={{ q, masterId }}
-        className="flex flex-1 items-center gap-3 min-w-0 no-underline"
+      <button
+        onClick={handleVersionClick}
+        className="flex flex-1 items-center gap-3 min-w-0 cursor-pointer text-left"
       >
         <VinylDisc colors={['#1a1a1a']} spinning={false} size={40} />
 
         <div className="flex flex-1 flex-col gap-0.5 min-w-0">
           <span className="font-semibold text-(--sea-ink) truncate">
-            {version.country}
-            {version.year > 0 && (
+            {version.year > 0 ? version.year : '—'}
+            {version.country && (
               <span className="font-mono text-xs text-(--sea-ink-soft) ml-2">
-                {version.year}
+                {version.country}
               </span>
             )}
           </span>
@@ -110,7 +114,7 @@ export function VersionRow({ version, masterId, q }: VersionRowProps) {
             {version.format}
           </span>
         </div>
-      </Link>
+      </button>
 
       <div className="flex items-center gap-2 shrink-0">
         <button

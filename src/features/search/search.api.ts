@@ -8,12 +8,18 @@ import {
 } from '#/shared/utils/discogs-oauth'
 
 import type {
+  ArtistDetail,
+  ArtistReleasesPage,
+  ArtistSearchPage,
   BarcodeResult,
   ReleaseDetail,
   SearchPage,
   VersionsPage,
 } from './search.schema'
 import {
+  ArtistDetailSchema,
+  ArtistReleasesPageSchema,
+  ArtistSearchPageSchema,
   BarcodeResultSchema,
   ReleaseDetailSchema,
   SearchPageSchema,
@@ -157,6 +163,137 @@ export const getReleaseDetail = createServerFn()
 
     const json = await response.json()
     return ReleaseDetailSchema.parse(json)
+  })
+
+export const searchArtists = createServerFn()
+  .inputValidator((data: { q: string }) => data)
+  .handler(async ({ data }): Promise<ArtistSearchPage> => {
+    const { useAppSession } = await import('#/services/session.server')
+    const session = await useAppSession()
+
+    const { accessToken, accessTokenSecret } = session.data
+    if (!accessToken || !accessTokenSecret) {
+      return { results: [], pagination: { page: 1, pages: 1, items: 0 } }
+    }
+
+    const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
+    const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+
+    const params = new URLSearchParams({
+      q: data.q,
+      type: 'artist',
+      per_page: '25',
+    })
+
+    const url = `${DISCOGS_API}/database/search?${params.toString()}`
+
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
+      headers: {
+        Authorization: buildOAuthHeader({
+          oauth_consumer_key: consumerKey,
+          oauth_token: accessToken,
+          oauth_signature_method: 'PLAINTEXT',
+          oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+          oauth_nonce: nonce(),
+          oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+        }),
+        'User-Agent': 'Sillon/1.0',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Discogs artist search failed: ${response.status}`)
+    }
+
+    const json = await response.json()
+    return ArtistSearchPageSchema.parse(json)
+  })
+
+export const getArtistDetail = createServerFn()
+  .inputValidator((data: { artistId: string }) => data)
+  .handler(async ({ data }): Promise<ArtistDetail> => {
+    const { useAppSession } = await import('#/services/session.server')
+    const session = await useAppSession()
+
+    const { accessToken, accessTokenSecret } = session.data
+    if (!accessToken || !accessTokenSecret) {
+      throw new Error('Not authenticated')
+    }
+
+    const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
+    const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+
+    const url = `${DISCOGS_API}/artists/${data.artistId}`
+
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
+      headers: {
+        Authorization: buildOAuthHeader({
+          oauth_consumer_key: consumerKey,
+          oauth_token: accessToken,
+          oauth_signature_method: 'PLAINTEXT',
+          oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+          oauth_nonce: nonce(),
+          oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+        }),
+        'User-Agent': 'Sillon/1.0',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Discogs artist detail fetch failed: ${response.status}`)
+    }
+
+    const json = await response.json()
+    return ArtistDetailSchema.parse(json)
+  })
+
+export const getArtistReleases = createServerFn()
+  .inputValidator((data: { artistId: string }) => data)
+  .handler(async ({ data }): Promise<ArtistReleasesPage> => {
+    const { useAppSession } = await import('#/services/session.server')
+    const session = await useAppSession()
+
+    const { accessToken, accessTokenSecret } = session.data
+    if (!accessToken || !accessTokenSecret) {
+      return { releases: [], pagination: { page: 1, pages: 1, items: 0 } }
+    }
+
+    const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
+    const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+
+    const url = `${DISCOGS_API}/artists/${data.artistId}/releases?sort=year&sort_order=desc&per_page=100`
+
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(url, {
+      headers: {
+        Authorization: buildOAuthHeader({
+          oauth_consumer_key: consumerKey,
+          oauth_token: accessToken,
+          oauth_signature_method: 'PLAINTEXT',
+          oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+          oauth_nonce: nonce(),
+          oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+        }),
+        'User-Agent': 'Sillon/1.0',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(
+        `Discogs artist releases fetch failed: ${response.status}`,
+      )
+    }
+
+    const json = await response.json()
+    const parsed = ArtistReleasesPageSchema.parse(json)
+    return {
+      ...parsed,
+      releases: parsed.releases.filter(
+        (r) => r.type === 'master' && r.role === 'Main',
+      ),
+    }
   })
 
 export const fetchDiscogsBarcode = createServerFn()
