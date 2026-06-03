@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { PlusCircle, ScanLine } from 'lucide-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ScanLine, Search as SearchIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
@@ -139,28 +139,25 @@ function Search() {
 
       {!showVersions && !showDiscography && (
         <>
-          <div className="mb-6">
+          <ModeToggle mode={mode} onModeChange={handleModeChange} />
+
+          <div className="relative mb-6">
             <input
               ref={inputRef}
               type="search"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Artist, album, label..."
-              className="island-shell w-full rounded-2xl px-4 py-3 text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+              className="island-shell w-full rounded-2xl px-4 py-3 pr-10 text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
             />
-          </div>
-
-          <div className="mb-6 flex justify-center">
             <button
               onClick={() => setIsScannerOpen(true)}
-              className="flex items-center gap-1.5 text-sm text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink) cursor-pointer"
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink)"
+              aria-label="Scan barcode"
             >
               <ScanLine className="h-4 w-4" />
-              or scan a barcode
             </button>
           </div>
-
-          <ModeToggle mode={mode} onModeChange={handleModeChange} />
         </>
       )}
 
@@ -240,13 +237,11 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
   if (q.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <PlusCircle className="h-12 w-12 text-(--sea-ink)" />
+        <SearchIcon className="h-12 w-12 text-(--sea-ink)" />
         <div>
           <p className="font-semibold text-(--sea-ink)">Find a record</p>
           <p className="mt-1 text-sm text-(--sea-ink-soft)">
-            Search by artist to browse their full discography,
-            <br />
-            or switch to "By title" to search album names directly.
+            Search Discogs to find a record to add.
           </p>
         </div>
       </div>
@@ -420,11 +415,11 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
   if (q.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <PlusCircle className="h-12 w-12 text-(--sea-ink)" />
+        <SearchIcon className="h-12 w-12 text-(--sea-ink)" />
         <div>
           <p className="font-semibold text-(--sea-ink)">Find a record</p>
           <p className="mt-1 text-sm text-(--sea-ink-soft)">
-            Search by album title, label, or artist name.
+            Search Discogs to find a record to add.
           </p>
         </div>
       </div>
