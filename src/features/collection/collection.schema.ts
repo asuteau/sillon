@@ -11,6 +11,21 @@ export const CollectionReleaseSchema = z.object({
     cover_image: z.string(),
     thumb: z.string(),
     styles: z.array(z.string()).optional().default([]),
+    formats: z
+      .array(
+        z.object({
+          name: z.string(),
+          qty: z.string().optional(),
+          descriptions: z.array(z.string()).optional(),
+          text: z.string().optional(),
+        }),
+      )
+      .optional()
+      .default([]),
+    labels: z
+      .array(z.object({ name: z.string(), catno: z.string().optional() }))
+      .optional()
+      .default([]),
   }),
 })
 

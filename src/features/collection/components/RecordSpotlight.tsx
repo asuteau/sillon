@@ -1,4 +1,5 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
+import { formatDateAdded } from '#/features/collection/collection.utils'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
@@ -23,6 +24,17 @@ const SpotlightContent = ({
   isRemoving,
 }: Props) => {
   const { basic_information: info } = record
+  const fmt = info.formats[0]
+  const formatParts = fmt
+    ? [fmt.name, ...(fmt.descriptions ?? []), fmt.text].filter(Boolean)
+    : []
+  const label = info.labels[0]
+  const catno =
+    label?.catno && label.catno.toLowerCase() !== 'none'
+      ? label.catno
+      : null
+  const labelText = label ? [label.name, catno].filter(Boolean).join(' · ') : null
+
   return (
     <div className="flex flex-col gap-5">
       <CoverArt
@@ -42,8 +54,18 @@ const SpotlightContent = ({
         <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
           {info.title}
         </h2>
-        {info.year > 0 && (
-          <p className="font-mono text-sm text-(--sea-ink-soft)">{info.year}</p>
+        <p className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 font-mono text-sm text-(--sea-ink-soft)">
+          {info.year > 0 && <span>{info.year}</span>}
+          {info.year > 0 && <span aria-hidden>·</span>}
+          <span>{formatDateAdded(record.date_added)}</span>
+        </p>
+        {formatParts.length > 0 && (
+          <p className="font-mono text-sm text-(--sea-ink-soft)">
+            {formatParts.join(' · ')}
+          </p>
+        )}
+        {labelText && (
+          <p className="text-sm text-(--sea-ink-soft)">{labelText}</p>
         )}
       </div>
 
