@@ -190,6 +190,12 @@ const BarcodeScannerContent = ({
   const albumTitle = dashIndex !== -1 ? rawTitle.slice(dashIndex + 3) : rawTitle
   const thumb = barcodeResult?.thumb ?? barcodeResult?.cover_image ?? null
   const label = barcodeResult?.labels?.[0]?.name
+  const catno = barcodeResult?.catno
+  const format = barcodeResult?.formats?.[0]
+  const formatParts = [format?.name, ...(format?.descriptions ?? [])].filter(
+    Boolean,
+  )
+  const styles = (barcodeResult?.style ?? []).slice(0, 3)
 
   return (
     <div className="relative overflow-hidden p-6">
@@ -211,12 +217,30 @@ const BarcodeScannerContent = ({
           <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
             {albumTitle}
           </h2>
-          {barcodeResult?.year && (
+          {(barcodeResult?.year || formatParts.length > 0) && (
             <p className="font-mono text-sm text-(--sea-ink-soft)">
-              {barcodeResult.year}
+              {[barcodeResult?.year, ...formatParts]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
-          {label && <p className="text-sm text-(--sea-ink-soft)">{label}</p>}
+          {(label || catno) && (
+            <p className="text-sm text-(--sea-ink-soft)">
+              {[label, catno].filter(Boolean).join(' · ')}
+            </p>
+          )}
+          {styles.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {styles.map((s) => (
+                <span
+                  key={s}
+                  className="rounded-full border border-(--chip-line) bg-(--chip-bg) px-2.5 py-0.5 text-xs font-medium text-(--sea-ink-soft)"
+                >
+                  {s}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 pt-1">

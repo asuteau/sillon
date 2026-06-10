@@ -87,7 +87,17 @@ export const BarcodeResultSchema = z.object({
   thumb: z.string().optional(),
   cover_image: z.string().optional(),
   labels: z.array(z.object({ name: z.string() })).optional(),
-  formats: z.array(z.object({ name: z.string() })).optional(),
+  formats: z
+    .array(
+      z.object({
+        name: z.string(),
+        descriptions: z.array(z.string()).optional(),
+      }),
+    )
+    .optional(),
+  genre: z.array(z.string()).optional(),
+  style: z.array(z.string()).optional(),
+  catno: z.string().optional(),
 })
 
 export type BarcodeResult = z.infer<typeof BarcodeResultSchema>
