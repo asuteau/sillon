@@ -11,7 +11,7 @@ import {
 import { useBarcodeScanner } from '#/features/search/hooks/use-barcode-scanner'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
-import { Sheet, SheetContent } from '#/shared/components/ui/sheet'
+import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
 interface BarcodeScannerProps {
@@ -44,7 +44,7 @@ const BarcodeScannerContent = ({
   if (scanState === 'idle') {
     if (!isSupported) {
       return (
-        <div className="flex flex-col items-center gap-5 p-8 text-center">
+        <div className="flex flex-col items-center gap-5 py-2 text-center">
           <AlertCircle className="h-12 w-12 text-(--sea-ink-soft)" />
           <div>
             <p className="font-semibold text-(--sea-ink)">
@@ -76,7 +76,7 @@ const BarcodeScannerContent = ({
     }
 
     return (
-      <div className="flex flex-col items-center gap-5 p-8 text-center">
+      <div className="flex flex-col items-center gap-5 py-2 text-center">
         <ScanLine className="h-12 w-12 text-(--sea-ink)" />
         <div>
           <p className="font-semibold text-(--sea-ink)">Scan a barcode</p>
@@ -148,7 +148,7 @@ const BarcodeScannerContent = ({
 
   if (scanState === 'not_found') {
     return (
-      <div className="flex flex-col items-center gap-5 p-8 text-center">
+      <div className="flex flex-col items-center gap-5 py-2 text-center">
         <AlertCircle className="h-12 w-12 text-(--sea-ink-soft)" />
         <div>
           <p className="font-semibold text-(--sea-ink)">No result found</p>
@@ -178,7 +178,7 @@ const BarcodeScannerContent = ({
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center p-12">
+      <div className="flex items-center justify-center py-12">
         <ScanLine className="h-8 w-8 animate-pulse text-(--sea-ink-soft)" />
       </div>
     )
@@ -198,7 +198,7 @@ const BarcodeScannerContent = ({
   const styles = (barcodeResult?.style ?? []).slice(0, 3)
 
   return (
-    <div className="relative overflow-hidden p-6">
+    <div className="relative overflow-hidden">
       <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
       <div className="relative flex flex-col gap-5">
         {barcodeResult && (
@@ -298,20 +298,14 @@ export const BarcodeScanner = ({
 
   if (isMobile) {
     return (
-      <Sheet open onOpenChange={onClose}>
-        <SheetContent
-          side="bottom"
-          className="h-[90dvh] border-0 bg-transparent p-4 shadow-none"
-          showCloseButton={false}
-        >
-          <div className="island-shell h-full overflow-y-auto rounded-t-3xl">
-            <BarcodeScannerContent
-              onClose={onClose}
-              onSearchManually={onSearchManually}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <Drawer open onOpenChange={onClose}>
+        <DrawerContent className="island-shell overflow-y-auto p-6">
+          <BarcodeScannerContent
+            onClose={onClose}
+            onSearchManually={onSearchManually}
+          />
+        </DrawerContent>
+      </Drawer>
     )
   }
 
@@ -321,7 +315,7 @@ export const BarcodeScanner = ({
         className="max-w-md rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
         showCloseButton={false}
       >
-        <div className="island-shell overflow-hidden rounded-3xl">
+        <div className="island-shell overflow-hidden rounded-3xl p-6">
           <BarcodeScannerContent
             onClose={onClose}
             onSearchManually={onSearchManually}

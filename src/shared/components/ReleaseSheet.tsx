@@ -18,7 +18,12 @@ interface ReleaseInfo {
     cover_image: string
     thumb: string
     styles: string[]
-    formats?: { name: string; qty?: string; descriptions?: string[]; text?: string }[]
+    formats?: {
+      name: string
+      qty?: string
+      descriptions?: string[]
+      text?: string
+    }[]
     labels?: { name: string; catno?: string }[]
   }
 }
@@ -46,10 +51,10 @@ function ReleaseSheetContent({
     : []
   const label = info.labels?.[0]
   const catno =
-    label?.catno && label.catno.toLowerCase() !== 'none'
-      ? label.catno
-      : null
-  const labelText = label ? [label.name, catno].filter(Boolean).join(' · ') : null
+    label?.catno && label.catno.toLowerCase() !== 'none' ? label.catno : null
+  const labelText = label
+    ? [label.name, catno].filter(Boolean).join(' · ')
+    : null
 
   return (
     <div className="flex flex-col gap-5">
