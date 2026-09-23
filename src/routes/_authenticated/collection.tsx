@@ -4,6 +4,7 @@ import { formatDateAdded } from '#/features/collection/collection.utils'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
+import { ScanFab } from '#/shared/components/ScanFab'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Disc3, Library } from 'lucide-react'
@@ -24,7 +25,7 @@ function Collection() {
   const removeFromCollection = useRemoveFromCollection()
 
   return (
-    <main className="page-wrap px-4 pb-24 pt-14 sm:pb-8">
+    <main className="page-wrap px-4 pb-32 pt-14 sm:pb-8">
       <header className="mb-8">
         <p className="island-kicker mb-2">Vinyl</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
@@ -111,6 +112,8 @@ function Collection() {
           removeIcon={<Library className="h-4 w-4" />}
         />
       )}
+
+      <ScanFab />
     </main>
   )
 }

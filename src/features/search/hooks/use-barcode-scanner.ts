@@ -46,6 +46,7 @@ export const useBarcodeScanner = (
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+  const unmountedRef = useRef(false)
 
   const isSupported =
     typeof window !== 'undefined' && 'BarcodeDetector' in window
@@ -58,7 +59,30 @@ export const useBarcodeScanner = (
   const addToCollection = useAddToCollection()
   const addToWantlist = useAddToWantlist()
 
-  useEffect(() => () => stopCamera(), [])
+  useEffect(() => {
+    unmountedRef.current = false
+    return () => {
+      unmountedRef.current = true
+      stopCamera()
+    }
+  }, [])
+
+  // Skip the explainer screen when the camera was already granted before
+  useEffect(() => {
+    if (!isSupported) return
+
+    void (async () => {
+      try {
+        const status = await navigator.permissions.query({
+          name: 'camera' as PermissionName,
+        })
+        if (unmountedRef.current || status.state !== 'granted') return
+        await startCamera()
+      } catch {
+        // Permissions API unavailable (Safari) — keep the explainer screen
+      }
+    })()
+  }, [isSupported])
 
   // Attach stream to video element after scanning state triggers its mount
   useEffect(() => {

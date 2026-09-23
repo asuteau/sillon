@@ -27,7 +27,8 @@ function DiscogsRateLimitDevToolsInner() {
     <div
       style={{
         position: 'fixed',
-        bottom: '80px',
+        // Clears the mobile scan FAB, which sits at bottom-20 right-4
+        bottom: '140px',
         right: '16px',
         backgroundColor: 'rgba(10, 10, 15, 0.92)',
         border: `1px solid ${color}`,
