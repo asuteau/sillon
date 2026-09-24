@@ -4,6 +4,7 @@ import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -56,6 +57,8 @@ function App() {
 
   return (
     <main className="page-wrap px-4 pb-32 pt-14 sm:pb-8">
+      <MetricsStrip username={user.username} />
+
       <header className="mb-8">
         <p className="island-kicker mb-2">Vinyl</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">

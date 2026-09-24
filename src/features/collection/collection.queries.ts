@@ -1,16 +1,18 @@
 import {
-  fetchCollectionCount,
   fetchRandomRecord,
   getCollection,
+  getCollectionValue,
 } from './collection.api'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import { getDeezerCover } from '#/services/deezer.api'
 import type { ListSort } from '#/shared/utils/list-sort'
 
-export const collectionCountQueryOptions = (username: string) =>
+// Only changes with the Collection itself — mutations invalidate it
+export const collectionValueQueryOptions = (username: string) =>
   queryOptions({
-    queryKey: ['collection', username, 'count'] as const,
-    queryFn: () => fetchCollectionCount(),
+    queryKey: ['collection', username, 'value'] as const,
+    queryFn: () => getCollectionValue(),
+    staleTime: 60 * 60 * 1000,
   })
 
 export const recentAdditionsQueryOptions = queryOptions({

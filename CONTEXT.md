@@ -26,3 +26,17 @@ _Avoid_: Direction
 
 **Default order**:
 The sort order a sort key starts with when chosen: descending for `added` and `year` (most recent first), ascending for `artist` and `title` (A→Z).
+
+### Metrics
+
+**Estimated value**:
+Discogs' marketplace-based estimate of what the Collection is worth, in the user's Discogs currency. Headline is the median; the minimum–maximum range is shown alongside to signal uncertainty. Not what the user paid.
+_Avoid_: Collection value, worth, price
+
+**Record count**:
+The number of copies in a list — each owned copy counts once, even when the same release or album is owned several times. Matches the figure Discogs shows.
+_Avoid_: Item count, size, total
+
+**Discogs currency**:
+The currency set on the user's Discogs account. Every money figure in Sillon is expressed in it; changing it in Sillon changes it on Discogs too. Sillon never converts between currencies.
+_Avoid_: Display currency, preferred currency

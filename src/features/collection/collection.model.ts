@@ -1,4 +1,5 @@
-import type { CollectionRelease } from './collection.schema'
+import type { CollectionRelease, CollectionValue } from './collection.schema'
+import { parseAmount } from './collection.utils'
 
 export type CollectionRecord = {
   id: number
@@ -21,5 +22,22 @@ export function toRecord(release: CollectionRelease): CollectionRecord {
     artists: release.basic_information.artists.map((a) => a.name),
     coverImage: release.basic_information.cover_image,
     thumb: release.basic_information.thumb,
+  }
+}
+
+// Null when Discogs has nothing to estimate (empty Collection, no sales history)
+export type EstimatedValue = {
+  minimum: number
+  median: number
+  maximum: number
+} | null
+
+export function toEstimatedValue(value: CollectionValue): EstimatedValue {
+  const median = parseAmount(value.median)
+  if (median === null || median === 0) return null
+  return {
+    minimum: parseAmount(value.minimum) ?? median,
+    median,
+    maximum: parseAmount(value.maximum) ?? median,
   }
 }

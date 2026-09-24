@@ -8,9 +8,11 @@ import {
   nonce,
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
+import { adjustProfileCount } from '#/features/profile/profile.queries'
+
 import {
-  collectionCountQueryOptions,
   collectionListQueryKey,
+  collectionValueQueryOptions,
   recentAdditionsQueryOptions,
 } from './collection.queries'
 
@@ -115,10 +117,10 @@ export function useAddToCollection() {
     mutationFn: (releaseId: number) => addToCollection({ data: { releaseId } }),
     onSuccess: () => {
       if (user) {
-        queryClient.setQueryData(
-          collectionCountQueryOptions(user.username).queryKey,
-          (old: number | undefined) => (old ?? 0) + 1,
-        )
+        adjustProfileCount(queryClient, user.username, 'recordCount', 1)
+        queryClient.invalidateQueries({
+          queryKey: collectionValueQueryOptions(user.username).queryKey,
+        })
       }
       queryClient.invalidateQueries({
         queryKey: collectionListQueryKey,
@@ -139,10 +141,10 @@ export function useRemoveFromCollection() {
       removeFromCollection({ data: { releaseId } }),
     onSuccess: () => {
       if (user) {
-        queryClient.setQueryData(
-          collectionCountQueryOptions(user.username).queryKey,
-          (old: number | undefined) => Math.max(0, (old ?? 0) - 1),
-        )
+        adjustProfileCount(queryClient, user.username, 'recordCount', -1)
+        queryClient.invalidateQueries({
+          queryKey: collectionValueQueryOptions(user.username).queryKey,
+        })
       }
       queryClient.invalidateQueries({
         queryKey: collectionListQueryKey,

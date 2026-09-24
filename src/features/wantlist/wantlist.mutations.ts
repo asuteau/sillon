@@ -8,10 +8,9 @@ import {
   nonce,
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
-import {
-  wantlistCountQueryOptions,
-  wantlistListQueryKey,
-} from './wantlist.queries'
+import { adjustProfileCount } from '#/features/profile/profile.queries'
+
+import { wantlistListQueryKey } from './wantlist.queries'
 
 export const addToWantlist = createServerFn()
   .inputValidator((data: { releaseId: number }) => data)
@@ -94,10 +93,7 @@ export function useAddToWantlist() {
     mutationFn: (releaseId: number) => addToWantlist({ data: { releaseId } }),
     onSuccess: () => {
       if (user) {
-        queryClient.setQueryData(
-          wantlistCountQueryOptions(user.username).queryKey,
-          (old: number | undefined) => (old ?? 0) + 1,
-        )
+        adjustProfileCount(queryClient, user.username, 'wantlistCount', 1)
       }
       queryClient.invalidateQueries({ queryKey: wantlistListQueryKey })
     },
@@ -113,10 +109,7 @@ export function useRemoveFromWantlist() {
       removeFromWantlist({ data: { releaseId } }),
     onSuccess: () => {
       if (user) {
-        queryClient.setQueryData(
-          wantlistCountQueryOptions(user.username).queryKey,
-          (old: number | undefined) => Math.max(0, (old ?? 0) - 1),
-        )
+        adjustProfileCount(queryClient, user.username, 'wantlistCount', -1)
       }
       queryClient.invalidateQueries({ queryKey: wantlistListQueryKey })
     },

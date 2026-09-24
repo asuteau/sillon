@@ -1,14 +1,8 @@
-import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import { infiniteQueryOptions } from '@tanstack/react-query'
 
 import type { ListSort } from '#/shared/utils/list-sort'
 
-import { fetchWantlistCount, getWantlist } from './wantlist.api'
-
-export const wantlistCountQueryOptions = (username: string) =>
-  queryOptions({
-    queryKey: ['wantlist', username, 'count'] as const,
-    queryFn: () => fetchWantlistCount(),
-  })
+import { getWantlist } from './wantlist.api'
 
 // Prefix shared by every sorted list, used for invalidation
 export const wantlistListQueryKey = ['wantlist', 'list'] as const

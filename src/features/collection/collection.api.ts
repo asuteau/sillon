@@ -10,36 +10,9 @@ import {
 
 import { listSortSchema, resolveListSort } from '#/shared/utils/list-sort'
 
+import { toEstimatedValue } from './collection.model'
 import type { CollectionPage } from './collection.schema'
-
-export const fetchCollectionCount = createServerFn().handler(async () => {
-  const { useAppSession } = await import('#/services/session.server')
-  const session = await useAppSession()
-  const { accessToken, accessTokenSecret, discogsUsername } = session.data
-  if (!accessToken || !accessTokenSecret || !discogsUsername) return 0
-
-  const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
-  const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
-  const url = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases?per_page=1&page=1`
-
-  const { discogsRequest } = await import('#/services/discogs.server')
-  const response = await discogsRequest(url, {
-    headers: {
-      Authorization: buildOAuthHeader({
-        oauth_consumer_key: consumerKey,
-        oauth_token: accessToken,
-        oauth_signature_method: 'PLAINTEXT',
-        oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
-        oauth_nonce: nonce(),
-        oauth_timestamp: String(Math.floor(Date.now() / 1000)),
-      }),
-      'User-Agent': 'Sillon/1.0',
-    },
-  })
-  if (!response.ok) return 0
-  const json = (await response.json()) as { pagination: { items: number } }
-  return json.pagination.items
-})
+import { CollectionValueSchema } from './collection.schema'
 
 export const getCollection = createServerFn()
   .inputValidator(
@@ -150,4 +123,36 @@ export const fetchRandomRecord = createServerFn().handler(async () => {
     throw new Error(`Discogs random fetch failed: ${itemRes.status}`)
   const { releases } = (await itemRes.json()) as CollectionPage
   return releases[0] ?? null
+})
+
+export const getCollectionValue = createServerFn().handler(async () => {
+  const { useAppSession } = await import('#/services/session.server')
+  const session = await useAppSession()
+  const { accessToken, accessTokenSecret, discogsUsername } = session.data
+  if (!accessToken || !accessTokenSecret || !discogsUsername) return null
+
+  const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
+  const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+  const url = `${DISCOGS_API}/users/${discogsUsername}/collection/value`
+
+  const { discogsRequest } = await import('#/services/discogs.server')
+  const response = await discogsRequest(url, {
+    headers: {
+      Authorization: buildOAuthHeader({
+        oauth_consumer_key: consumerKey,
+        oauth_token: accessToken,
+        oauth_signature_method: 'PLAINTEXT',
+        oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+        oauth_nonce: nonce(),
+        oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+      }),
+      'User-Agent': 'Sillon/1.0',
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Discogs collection value fetch failed: ${response.status}`)
+  }
+
+  return toEstimatedValue(CollectionValueSchema.parse(await response.json()))
 })

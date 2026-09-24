@@ -2,8 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
 import { Heart, Home, Info, Library, PlusCircle } from 'lucide-react'
 
-import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
-import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
+import { profileQueryOptions } from '#/features/profile/profile.queries'
 
 export default function BottomNav() {
   const user = useMatch({
@@ -11,14 +10,12 @@ export default function BottomNav() {
     select: (match) => match.context.user,
   })
 
-  const { data: collectionCount } = useQuery({
-    ...collectionCountQueryOptions(user?.username ?? ''),
+  const { data: profile } = useQuery({
+    ...profileQueryOptions(user?.username ?? ''),
     enabled: !!user,
   })
-  const { data: wantlistCount } = useQuery({
-    ...wantlistCountQueryOptions(user?.username ?? ''),
-    enabled: !!user,
-  })
+  const collectionCount = profile?.recordCount
+  const wantlistCount = profile?.wantlistCount
 
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center sm:hidden">

@@ -40,3 +40,12 @@ export const CollectionPageSchema = z.object({
 
 export type CollectionRelease = z.infer<typeof CollectionReleaseSchema>
 export type CollectionPage = z.infer<typeof CollectionPageSchema>
+
+// Discogs returns preformatted amounts, e.g. "€1,240.52"
+export const CollectionValueSchema = z.object({
+  minimum: z.string(),
+  median: z.string(),
+  maximum: z.string(),
+})
+
+export type CollectionValue = z.infer<typeof CollectionValueSchema>

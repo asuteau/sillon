@@ -1,6 +1,5 @@
-import { collectionCountQueryOptions } from '#/features/collection/collection.queries'
 import { ShuffleButton } from '#/features/collection/components/ShuffleButton'
-import { wantlistCountQueryOptions } from '#/features/wantlist/wantlist.queries'
+import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
 import { LogOut } from 'lucide-react'
@@ -13,14 +12,12 @@ export default function Header() {
     select: (match) => match.context.user,
   })
 
-  const { data: collectionCount } = useQuery({
-    ...collectionCountQueryOptions(user?.username ?? ''),
+  const { data: profile } = useQuery({
+    ...profileQueryOptions(user?.username ?? ''),
     enabled: !!user,
   })
-  const { data: wantlistCount } = useQuery({
-    ...wantlistCountQueryOptions(user?.username ?? ''),
-    enabled: !!user,
-  })
+  const collectionCount = profile?.recordCount
+  const wantlistCount = profile?.wantlistCount
 
   return (
     <header className="sticky top-0 z-50 border-b border-(--line) bg-(--header-bg) px-4 backdrop-blur-lg">
