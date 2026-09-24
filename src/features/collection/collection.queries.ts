@@ -1,10 +1,11 @@
 import {
   fetchCollectionCount,
   fetchRandomRecord,
-  getRecentAdditions,
+  getCollection,
 } from './collection.api'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import { getDeezerCover } from '#/services/deezer.api'
+import type { ListSort } from '#/shared/utils/list-sort'
 
 export const collectionCountQueryOptions = (username: string) =>
   queryOptions({
@@ -14,22 +15,27 @@ export const collectionCountQueryOptions = (username: string) =>
 
 export const recentAdditionsQueryOptions = queryOptions({
   queryKey: ['collection', { perPage: 10 }],
-  queryFn: () => getRecentAdditions({ data: { perPage: 10 } }),
+  queryFn: () =>
+    getCollection({ data: { perPage: 10, sort: 'added', order: 'desc' } }),
   staleTime: 10 * 60 * 1000,
 })
 
-export const collectionQueryOptions = infiniteQueryOptions({
-  queryKey: ['collection', { perPage: 20 }],
-  queryFn: ({ pageParam }) =>
-    getRecentAdditions({ data: { perPage: 20, page: pageParam } }),
-  initialPageParam: 1,
-  getNextPageParam: (last) =>
-    last.pagination.page < last.pagination.pages
-      ? last.pagination.page + 1
-      : undefined,
-  staleTime: 10 * 60 * 1000,
-  refetchOnMount: false,
-})
+// Prefix shared by every sorted list, used for invalidation
+export const collectionListQueryKey = ['collection', 'list'] as const
+
+export const collectionQueryOptions = (listSort: ListSort) =>
+  infiniteQueryOptions({
+    queryKey: [...collectionListQueryKey, { perPage: 20, ...listSort }],
+    queryFn: ({ pageParam }) =>
+      getCollection({ data: { perPage: 20, page: pageParam, ...listSort } }),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.pagination.page < last.pagination.pages
+        ? last.pagination.page + 1
+        : undefined,
+    staleTime: 10 * 60 * 1000,
+    refetchOnMount: false,
+  })
 
 export const coverArtQueryOptions = (
   releaseId: string,

@@ -5,23 +5,42 @@ import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
+import { SortChips } from '#/shared/components/SortChips'
+import {
+  formatYear,
+  listSortSchema,
+  nextListSort,
+  resolveListSort,
+  toListSortSearch,
+} from '#/shared/utils/list-sort'
+import type { SortKey } from '#/shared/utils/list-sort'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Disc3, Library } from 'lucide-react'
-import { useState } from 'react'
-
-export { collectionQueryOptions }
+import { useState, useTransition } from 'react'
 
 export const Route = createFileRoute('/_authenticated/collection')({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.prefetchInfiniteQuery(collectionQueryOptions),
+  validateSearch: listSortSchema,
+  loaderDeps: ({ search }) => resolveListSort(search),
+  loader: ({ context: { queryClient }, deps }) =>
+    queryClient.prefetchInfiniteQuery(collectionQueryOptions(deps)),
   component: Collection,
 })
 
 function Collection() {
+  const listSort = resolveListSort(Route.useSearch())
+  const navigate = Route.useNavigate()
+  const [isSortPending, startSortTransition] = useTransition()
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useSuspenseInfiniteQuery(collectionQueryOptions)
+    useSuspenseInfiniteQuery(collectionQueryOptions(listSort))
   const [selected, setSelected] = useState<CollectionRelease | null>(null)
+
+  const handleSortSelect = (key: SortKey) => {
+    startSortTransition(async () => {
+      await navigate({ search: toListSortSearch(nextListSort(listSort, key)) })
+    })
+  }
+
   const removeFromCollection = useRemoveFromCollection()
 
   return (
@@ -33,13 +52,22 @@ function Collection() {
         </h1>
       </header>
 
+      <SortChips
+        value={listSort}
+        onSelect={handleSortSelect}
+        isPending={isSortPending}
+      />
+
       {data.pages[0]?.releases.length === 0 ? (
         <p className="text-(--sea-ink-soft)">
           No records in your collection yet.
         </p>
       ) : (
         <>
-          <ul className="flex flex-col gap-3">
+          <ul
+            aria-busy={isSortPending}
+            className={`flex flex-col gap-3 transition-opacity ${isSortPending ? 'opacity-50' : ''}`}
+          >
             {data.pages.map((page) =>
               page.releases.map((release, index) => (
                 <li key={release.instance_id}>
@@ -68,7 +96,9 @@ function Collection() {
                         </span>
                       </div>
                       <span className="font-mono text-xs text-(--sea-ink-soft)">
-                        {formatDateAdded(release.date_added)}
+                        {listSort.sort === 'year'
+                          ? formatYear(release.basic_information.year)
+                          : formatDateAdded(release.date_added)}
                       </span>
                     </div>
                   </button>

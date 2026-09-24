@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
 
 import {
   buildOAuthHeader,
@@ -6,6 +7,8 @@ import {
   nonce,
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
+
+import { listSortSchema, resolveListSort } from '#/shared/utils/list-sort'
 
 import type { WantlistPage } from './wantlist.schema'
 
@@ -40,7 +43,13 @@ export const fetchWantlistCount = createServerFn().handler(async () => {
 
 export const getWantlist = createServerFn()
   .inputValidator(
-    (data: { perPage?: number; page?: number } | undefined) => data ?? {},
+    listSortSchema
+      .extend({
+        perPage: z.number().int().positive().optional(),
+        page: z.number().int().positive().optional(),
+      })
+      .optional()
+      .default({}),
   )
   .handler(async ({ data }) => {
     const { useAppSession } = await import('#/services/session.server')
@@ -58,8 +67,9 @@ export const getWantlist = createServerFn()
     const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
     const perPage = data.perPage ?? 20
     const page = data.page ?? 1
+    const { sort, order } = resolveListSort(data)
 
-    const url = `${DISCOGS_API}/users/${discogsUsername}/wants?sort=added&sort_order=desc&per_page=${perPage}&page=${page}`
+    const url = `${DISCOGS_API}/users/${discogsUsername}/wants?sort=${sort}&sort_order=${order}&per_page=${perPage}&page=${page}`
 
     const { discogsRequest } = await import('#/services/discogs.server')
     const response = await discogsRequest(url, {

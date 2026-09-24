@@ -10,7 +10,7 @@ import {
 } from '#/shared/utils/discogs-oauth'
 import {
   collectionCountQueryOptions,
-  collectionQueryOptions,
+  collectionListQueryKey,
   recentAdditionsQueryOptions,
 } from './collection.queries'
 
@@ -121,7 +121,7 @@ export function useAddToCollection() {
         )
       }
       queryClient.invalidateQueries({
-        queryKey: collectionQueryOptions.queryKey,
+        queryKey: collectionListQueryKey,
       })
       queryClient.invalidateQueries({
         queryKey: recentAdditionsQueryOptions.queryKey,
@@ -145,7 +145,7 @@ export function useRemoveFromCollection() {
         )
       }
       queryClient.invalidateQueries({
-        queryKey: collectionQueryOptions.queryKey,
+        queryKey: collectionListQueryKey,
       })
       queryClient.invalidateQueries({
         queryKey: recentAdditionsQueryOptions.queryKey,

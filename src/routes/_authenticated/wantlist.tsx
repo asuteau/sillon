@@ -8,23 +8,42 @@ import {
 import { CoverArt } from '#/shared/components/CoverArt'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
+import { SortChips } from '#/shared/components/SortChips'
+import {
+  formatYear,
+  listSortSchema,
+  nextListSort,
+  resolveListSort,
+  toListSortSearch,
+} from '#/shared/utils/list-sort'
+import type { SortKey } from '#/shared/utils/list-sort'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Disc3, Heart } from 'lucide-react'
-import { useState } from 'react'
-
-export { wantlistQueryOptions }
+import { useState, useTransition } from 'react'
 
 export const Route = createFileRoute('/_authenticated/wantlist')({
-  loader: ({ context: { queryClient } }) =>
-    queryClient.prefetchInfiniteQuery(wantlistQueryOptions),
+  validateSearch: listSortSchema,
+  loaderDeps: ({ search }) => resolveListSort(search),
+  loader: ({ context: { queryClient }, deps }) =>
+    queryClient.prefetchInfiniteQuery(wantlistQueryOptions(deps)),
   component: Wantlist,
 })
 
 function Wantlist() {
+  const listSort = resolveListSort(Route.useSearch())
+  const navigate = Route.useNavigate()
+  const [isSortPending, startSortTransition] = useTransition()
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useSuspenseInfiniteQuery(wantlistQueryOptions)
+    useSuspenseInfiniteQuery(wantlistQueryOptions(listSort))
   const [selected, setSelected] = useState<WantlistItem | null>(null)
+
+  const handleSortSelect = (key: SortKey) => {
+    startSortTransition(async () => {
+      await navigate({ search: toListSortSearch(nextListSort(listSort, key)) })
+    })
+  }
+
   const removeFromWantlist = useRemoveFromWantlist()
 
   return (
@@ -36,11 +55,20 @@ function Wantlist() {
         </h1>
       </header>
 
+      <SortChips
+        value={listSort}
+        onSelect={handleSortSelect}
+        isPending={isSortPending}
+      />
+
       {data.pages[0]?.wants.length === 0 ? (
         <p className="text-(--sea-ink-soft)">Your wantlist is empty.</p>
       ) : (
         <>
-          <ul className="flex flex-col gap-3">
+          <ul
+            aria-busy={isSortPending}
+            className={`flex flex-col gap-3 transition-opacity ${isSortPending ? 'opacity-50' : ''}`}
+          >
             {data.pages.map((page) =>
               page.wants.map((want, index) => (
                 <li key={want.id}>
@@ -69,7 +97,9 @@ function Wantlist() {
                         </span>
                       </div>
                       <span className="font-mono text-xs text-(--sea-ink-soft)">
-                        {formatDateAdded(want.date_added)}
+                        {listSort.sort === 'year'
+                          ? formatYear(want.basic_information.year)
+                          : formatDateAdded(want.date_added)}
                       </span>
                     </div>
                   </button>

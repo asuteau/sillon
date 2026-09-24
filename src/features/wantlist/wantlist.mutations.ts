@@ -10,7 +10,7 @@ import {
 } from '#/shared/utils/discogs-oauth'
 import {
   wantlistCountQueryOptions,
-  wantlistQueryOptions,
+  wantlistListQueryKey,
 } from './wantlist.queries'
 
 export const addToWantlist = createServerFn()
@@ -99,7 +99,7 @@ export function useAddToWantlist() {
           (old: number | undefined) => (old ?? 0) + 1,
         )
       }
-      queryClient.invalidateQueries({ queryKey: wantlistQueryOptions.queryKey })
+      queryClient.invalidateQueries({ queryKey: wantlistListQueryKey })
     },
   })
 }
@@ -118,7 +118,7 @@ export function useRemoveFromWantlist() {
           (old: number | undefined) => Math.max(0, (old ?? 0) - 1),
         )
       }
-      queryClient.invalidateQueries({ queryKey: wantlistQueryOptions.queryKey })
+      queryClient.invalidateQueries({ queryKey: wantlistListQueryKey })
     },
   })
 }
