@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const CollectionReleaseSchema = z.object({
   id: z.number(),
   instance_id: z.number(),
+  folder_id: z.number(),
   date_added: z.string(),
   basic_information: z.object({
     title: z.string(),

@@ -4,8 +4,11 @@ import {
   getCollectionValue,
 } from './collection.api'
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { getDeezerCover } from '#/services/deezer.api'
 import type { ListSort } from '#/shared/utils/list-sort'
+
+import type { CollectionPage } from './collection.schema'
 
 // Only changes with the Collection itself — mutations invalidate it
 export const collectionValueQueryOptions = (username: string) =>
@@ -59,3 +62,36 @@ export const randomRecordQueryOptions = queryOptions({
   gcTime: 0,
   enabled: false,
 })
+
+const withoutCopy = (
+  page: CollectionPage,
+  instanceId: number,
+): CollectionPage => ({
+  releases: page.releases.filter((r) => r.instance_id !== instanceId),
+  pagination: {
+    ...page.pagination,
+    items: Math.max(0, page.pagination.items - 1),
+  },
+})
+
+// Discogs reads lag behind writes, so cached lists are patched from the
+// mutation result instead of refetched
+export function removeCopyFromLists(
+  queryClient: QueryClient,
+  instanceId: number,
+) {
+  queryClient.setQueriesData<InfiniteData<CollectionPage, number>>(
+    { queryKey: collectionListQueryKey },
+    (old) =>
+      old
+        ? {
+            ...old,
+            pages: old.pages.map((page) => withoutCopy(page, instanceId)),
+          }
+        : old,
+  )
+  queryClient.setQueryData<CollectionPage>(
+    recentAdditionsQueryOptions.queryKey,
+    (old) => (old ? withoutCopy(old, instanceId) : old),
+  )
+}

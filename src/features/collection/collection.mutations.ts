@@ -14,9 +14,10 @@ import {
   collectionListQueryKey,
   collectionValueQueryOptions,
   recentAdditionsQueryOptions,
+  removeCopyFromLists,
 } from './collection.queries'
 
-export const addToCollection = createServerFn()
+export const addToCollection = createServerFn({ method: 'POST' })
   .inputValidator((data: { releaseId: number }) => data)
   .handler(async ({ data }) => {
     const { useAppSession } = await import('#/services/session.server')
@@ -56,8 +57,14 @@ export const addToCollection = createServerFn()
     return { instanceId: json.instance_id }
   })
 
-export const removeFromCollection = createServerFn()
-  .inputValidator((data: { releaseId: number }) => data)
+// Without a Copy, removes the first Copy of the release
+interface RemoveFromCollectionInput {
+  releaseId: number
+  copy?: { instanceId: number; folderId: number }
+}
+
+export const removeFromCollection = createServerFn({ method: 'POST' })
+  .inputValidator((data: RemoveFromCollectionInput) => data)
   .handler(async ({ data }) => {
     const { useAppSession } = await import('#/services/session.server')
     const session = await useAppSession()
@@ -84,29 +91,35 @@ export const removeFromCollection = createServerFn()
       }
     }
 
-    // Resolve the instance_id from the collection releases endpoint
-    const instancesRes = await fetch(
-      `${DISCOGS_API}/users/${discogsUsername}/collection/releases/${data.releaseId}`,
-      { headers: makeHeaders() },
-    )
-    if (!instancesRes.ok) {
-      throw new Error(
-        `Failed to fetch collection instances: ${instancesRes.status}`,
+    async function resolveFirstCopy() {
+      const instancesRes = await fetch(
+        `${DISCOGS_API}/users/${discogsUsername}/collection/releases/${data.releaseId}`,
+        { headers: makeHeaders() },
       )
+      if (!instancesRes.ok) {
+        throw new Error(
+          `Failed to fetch collection instances: ${instancesRes.status}`,
+        )
+      }
+      const instancesJson = (await instancesRes.json()) as {
+        releases: Array<{ instance_id: number; folder_id: number }>
+      }
+      const { instance_id, folder_id } = instancesJson.releases[0]
+      return { instanceId: instance_id, folderId: folder_id }
     }
-    const instancesJson = (await instancesRes.json()) as {
-      releases: Array<{ instance_id: number; folder_id: number }>
-    }
-    const { instance_id, folder_id } = instancesJson.releases[0]
+
+    const { instanceId, folderId } = data.copy ?? (await resolveFirstCopy())
 
     const deleteRes = await fetch(
-      `${DISCOGS_API}/users/${discogsUsername}/collection/folders/${folder_id}/releases/${data.releaseId}/instances/${instance_id}`,
+      `${DISCOGS_API}/users/${discogsUsername}/collection/folders/${folderId}/releases/${data.releaseId}/instances/${instanceId}`,
       { method: 'DELETE', headers: makeHeaders() },
     )
 
     if (!deleteRes.ok) {
       throw new Error(`Failed to remove from collection: ${deleteRes.status}`)
     }
+
+    return { instanceId }
   })
 
 export function useAddToCollection() {
@@ -137,21 +150,17 @@ export function useRemoveFromCollection() {
   const user = useMatch({ from: '__root__', select: (m) => m.context.user })
 
   return useMutation({
-    mutationFn: (releaseId: number) =>
-      removeFromCollection({ data: { releaseId } }),
-    onSuccess: () => {
+    mutationFn: (data: RemoveFromCollectionInput) =>
+      removeFromCollection({ data }),
+    onSuccess: ({ instanceId }) => {
       if (user) {
         adjustProfileCount(queryClient, user.username, 'recordCount', -1)
         queryClient.invalidateQueries({
           queryKey: collectionValueQueryOptions(user.username).queryKey,
+          refetchType: 'none',
         })
       }
-      queryClient.invalidateQueries({
-        queryKey: collectionListQueryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: recentAdditionsQueryOptions.queryKey,
-      })
+      removeCopyFromLists(queryClient, instanceId)
     },
   })
 }

@@ -10,6 +10,10 @@ Personal vinyl record app mirroring a user's Discogs collection and wantlist.
 The records the user owns, as recorded in their Discogs collection.
 _Avoid_: Library, shelf
 
+**Copy**:
+One physical record the user owns. The Collection holds copies, not releases: the same release can be owned several times, and removing from the Collection removes one specific copy.
+_Avoid_: Instance, item
+
 **Wantlist**:
 The records the user wants to acquire, as recorded in their Discogs wantlist.
 _Avoid_: Wishlist, wants

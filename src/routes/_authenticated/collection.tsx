@@ -133,9 +133,18 @@ function Collection() {
           release={selected}
           onClose={() => setSelected(null)}
           onRemove={() =>
-            removeFromCollection.mutate(selected.id, {
-              onSuccess: () => setSelected(null),
-            })
+            removeFromCollection.mutate(
+              {
+                releaseId: selected.id,
+                copy: {
+                  instanceId: selected.instance_id,
+                  folderId: selected.folder_id,
+                },
+              },
+              {
+                onSuccess: () => setSelected(null),
+              },
+            )
           }
           isRemoving={removeFromCollection.isPending}
           removeLabel="Remove from collection"

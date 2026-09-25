@@ -57,7 +57,7 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
   const handleCollectionToggle = async () => {
     try {
       if (version.inCollection > 0) {
-        await removeFromCollection.mutateAsync(version.id)
+        await removeFromCollection.mutateAsync({ releaseId: version.id })
         updateVersionsCache('in_collection', 0)
       } else {
         await addToCollection.mutateAsync(version.id)

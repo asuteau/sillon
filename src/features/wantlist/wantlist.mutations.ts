@@ -10,9 +10,10 @@ import {
 } from '#/shared/utils/discogs-oauth'
 import { adjustProfileCount } from '#/features/profile/profile.queries'
 
-import { wantlistListQueryKey } from './wantlist.queries'
+import { addWantToLists, removeWantFromLists } from './wantlist.queries'
+import { WantlistItemSchema } from './wantlist.schema'
 
-export const addToWantlist = createServerFn()
+export const addToWantlist = createServerFn({ method: 'POST' })
   .inputValidator((data: { releaseId: number }) => data)
   .handler(async ({ data }) => {
     const { useAppSession } = await import('#/services/session.server')
@@ -47,9 +48,11 @@ export const addToWantlist = createServerFn()
     if (!response.ok) {
       throw new Error(`Failed to add to wantlist: ${response.status}`)
     }
+
+    return WantlistItemSchema.parse(await response.json())
   })
 
-export const removeFromWantlist = createServerFn()
+export const removeFromWantlist = createServerFn({ method: 'POST' })
   .inputValidator((data: { releaseId: number }) => data)
   .handler(async ({ data }) => {
     const { useAppSession } = await import('#/services/session.server')
@@ -91,11 +94,11 @@ export function useAddToWantlist() {
 
   return useMutation({
     mutationFn: (releaseId: number) => addToWantlist({ data: { releaseId } }),
-    onSuccess: () => {
+    onSuccess: (want) => {
       if (user) {
         adjustProfileCount(queryClient, user.username, 'wantlistCount', 1)
       }
-      queryClient.invalidateQueries({ queryKey: wantlistListQueryKey })
+      addWantToLists(queryClient, want)
     },
   })
 }
@@ -107,11 +110,11 @@ export function useRemoveFromWantlist() {
   return useMutation({
     mutationFn: (releaseId: number) =>
       removeFromWantlist({ data: { releaseId } }),
-    onSuccess: () => {
+    onSuccess: (_, releaseId) => {
       if (user) {
         adjustProfileCount(queryClient, user.username, 'wantlistCount', -1)
       }
-      queryClient.invalidateQueries({ queryKey: wantlistListQueryKey })
+      removeWantFromLists(queryClient, releaseId)
     },
   })
 }

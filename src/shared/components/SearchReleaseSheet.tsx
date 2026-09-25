@@ -76,7 +76,9 @@ function SearchReleaseSheetContent({
   const handleCollectionToggle = async () => {
     try {
       if (inCollection > 0) {
-        await removeFromCollection.mutateAsync(Number(releaseId))
+        await removeFromCollection.mutateAsync({
+          releaseId: Number(releaseId),
+        })
         updateVersionsCache('in_collection', 0)
       } else {
         await addToCollection.mutateAsync(Number(releaseId))
