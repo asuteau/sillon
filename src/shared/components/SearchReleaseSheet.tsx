@@ -21,7 +21,7 @@ import {
 } from '#/features/search/search.queries'
 import type { VersionsPage } from '#/features/search/search.schema'
 import { extractColors } from '#/shared/utils/extractColors'
-import { CoverArt } from './CoverArt'
+import { SheetCover } from '#/shared/components/SheetCover'
 import { Button } from './ui/button'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Drawer, DrawerContent } from './ui/drawer'
@@ -111,14 +111,13 @@ function SearchReleaseSheetContent({
     addToWantlist.isPending || removeFromWantlist.isPending
 
   return (
-    <div className="flex flex-col gap-5">
-      <CoverArt
+    <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
+      <SheetCover
         releaseId={releaseId}
         artist={release.artists[0] ?? ''}
         title={release.title}
         thumb={release.coverImage || null}
         styles={[]}
-        className="w-full aspect-square rounded-2xl overflow-hidden"
       />
 
       <div className="flex flex-col items-center gap-2 text-center">
@@ -224,9 +223,7 @@ export function SearchReleaseSheet({
   if (isMobile) {
     return (
       <Drawer open onOpenChange={onClose}>
-        <DrawerContent className="island-shell overflow-y-auto p-6">
-          {content}
-        </DrawerContent>
+        <DrawerContent className="island-shell p-6">{content}</DrawerContent>
       </Drawer>
     )
   }
@@ -237,7 +234,7 @@ export function SearchReleaseSheet({
         className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
         showCloseButton={false}
       >
-        <div className="island-shell overflow-hidden rounded-3xl p-6">
+        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
           {content}
         </div>
       </DialogContent>

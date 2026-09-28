@@ -2,7 +2,7 @@ import {
   formatArtists,
   formatDateAdded,
 } from '#/features/collection/collection.utils'
-import { CoverArt } from '#/shared/components/CoverArt'
+import { SheetCover } from '#/shared/components/SheetCover'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
@@ -57,15 +57,14 @@ function ReleaseSheetContent({
     : null
 
   return (
-    <div className="flex flex-col gap-5">
-      <CoverArt
+    <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
+      <SheetCover
         key={release.id}
         releaseId={String(release.id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
         thumb={info.thumb}
         styles={info.styles}
-        className="w-full aspect-square rounded-2xl overflow-hidden"
       />
 
       <div className="flex flex-col items-center gap-2 text-center">
@@ -116,7 +115,7 @@ export function ReleaseSheet({
   if (isMobile) {
     return (
       <Drawer open onOpenChange={onClose}>
-        <DrawerContent className="island-shell overflow-y-auto p-6">
+        <DrawerContent className="island-shell p-6">
           <ReleaseSheetContent
             release={release}
             onRemove={onRemove}
@@ -135,7 +134,7 @@ export function ReleaseSheet({
         className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
         showCloseButton={false}
       >
-        <div className="island-shell overflow-hidden rounded-3xl p-6">
+        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
           <ReleaseSheetContent
             release={release}
             onRemove={onRemove}
