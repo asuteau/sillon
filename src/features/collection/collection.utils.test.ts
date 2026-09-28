@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { parseAmount } from './collection.utils'
+import { formatAmount, parseAmount } from './collection.utils'
 
 describe('parseAmount', () => {
   it('parses a Discogs amount with thousands and cents', () => {
@@ -21,5 +21,29 @@ describe('parseAmount', () => {
 
   it('returns null when there is no number', () => {
     expect(parseAmount('')).toBeNull()
+  })
+})
+
+describe('formatAmount', () => {
+  const format = (amount: number) => formatAmount(amount, 'EUR', 'en-US')
+
+  it('rounds amounts under 1K to whole numbers', () => {
+    expect(format(850.4)).toBe('€850')
+  })
+
+  it('rounds up to 1K without a decimal', () => {
+    expect(format(999.6)).toBe('€1K')
+  })
+
+  it('keeps one decimal from 1K up', () => {
+    expect(format(1240.52)).toBe('€1.2K')
+  })
+
+  it('drops a zero decimal', () => {
+    expect(format(1000)).toBe('€1K')
+  })
+
+  it('compacts millions', () => {
+    expect(format(3_400_000)).toBe('€3.4M')
   })
 })

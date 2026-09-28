@@ -8,7 +8,8 @@ Built with TanStack Start — migrated from Remix.
 ```bash
 pnpm dev                          # Start dev server
 pnpm build                        # Production build
-pnpm lint:fix && pnpm typecheck   # Run after every code change
+pnpm test                         # Run tests (vitest)
+pnpm check && npx tsc --noEmit    # Run after every code change (prettier + eslint fix, typecheck)
 ```
 
 ## Stack

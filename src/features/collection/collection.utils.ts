@@ -23,11 +23,17 @@ export function parseAmount(amount: string): number | null {
   return Number(decimal ? `${integer}.${decimal[1]}` : integer)
 }
 
-export function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat(undefined, {
+// Compact, e.g. "€850", "€1.2K", "€3.4M". One decimal only from 1K up.
+export function formatAmount(
+  amount: number,
+  currency: string,
+  locale?: string,
+): string {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
+    notation: 'compact',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: Math.abs(amount) < 1000 ? 0 : 1,
   }).format(amount)
 }
