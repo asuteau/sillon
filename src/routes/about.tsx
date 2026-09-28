@@ -7,37 +7,48 @@ export const Route = createFileRoute('/about')({
 const stack = [
   {
     name: 'TanStack Start',
-    description: 'Over Remix and Next — cleanest DX I found',
+    description:
+      'Over Remix and Next — cleanest DX I found (Router + server fns)',
     href: 'https://tanstack.com/start',
   },
   {
     name: 'TanStack Query',
-    description: 'Server state & caching',
+    description: 'Server state, caching, optimistic updates',
     href: 'https://tanstack.com/query',
   },
   {
-    name: 'TanStack Router',
-    description: 'File-based routing',
-    href: 'https://tanstack.com/router',
-  },
-  {
     name: 'Tailwind CSS v4',
-    description: 'Styling',
+    description: 'Styling, CSS-first tokens',
     href: 'https://tailwindcss.com',
   },
   {
-    name: 'shadcn/ui',
+    name: 'shadcn/ui + Base UI',
     description: 'No custom design system, LLM-friendly',
     href: 'https://ui.shadcn.com',
   },
   {
-    name: 'Framer Motion',
-    description: 'Animations',
-    href: 'https://www.framer.com/motion',
+    name: 'vaul',
+    description: 'Native-feeling mobile drawers',
+    href: 'https://vaul.emilkowal.ski',
+  },
+  {
+    name: 'Zod',
+    description: 'Validation at API boundaries',
+    href: 'https://zod.dev',
+  },
+  {
+    name: 'PWA (vite-plugin-pwa)',
+    description: 'Installable, offline fallback',
+    href: 'https://vite-pwa-org.netlify.app',
+  },
+  {
+    name: 'BarcodeDetector API',
+    description: "Scan a sleeve's barcode, no library",
+    href: 'https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector',
   },
   {
     name: 'Discogs API',
-    description: 'Collection data, OAuth 1.0a',
+    description: 'Collection, wantlist, value — OAuth 1.0a',
     href: 'https://www.discogs.com/developers',
   },
   {
@@ -129,7 +140,9 @@ function About() {
             appeal either. TanStack Start's composition (Start + Router + Query)
             felt right for this kind of app. shadcn was a no-brainer: didn't
             want to rebuild a design system, and it plays well with the AI
-            workflow.
+            workflow. Went PWA rather than native: one codebase, installable on
+            my phone, good enough for a personal tool. Where the platform has an
+            API (barcode scanning), I use it rather than pull a library.
           </p>
         </div>
       </section>
@@ -141,8 +154,8 @@ function About() {
       >
         <p className="island-kicker mb-3">About me</p>
         <p className="mb-4 max-w-2xl text-base leading-relaxed text-(--sea-ink-soft)">
-          Aymeric Suteau — Frontend Software Engineer, 10 years in product-first
-          SaaS B2B and e-commerce.
+          Aymeric Suteau — Frontend Software Engineer, 10 years in software
+          engineering, including 5 in product-first SaaS B2B and e-commerce.
         </p>
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
           <a
