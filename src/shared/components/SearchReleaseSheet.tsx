@@ -22,9 +22,11 @@ import {
 import type { VersionsPage } from '#/features/search/search.schema'
 import { extractColors } from '#/shared/utils/extractColors'
 import { SheetCover } from '#/shared/components/SheetCover'
+import { masterCoverKey } from '#/shared/utils/cover-key'
 import { Button } from './ui/button'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Drawer, DrawerContent } from './ui/drawer'
+import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
 interface SearchReleaseSheetProps {
@@ -113,7 +115,7 @@ function SearchReleaseSheetContent({
   return (
     <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
       <SheetCover
-        releaseId={releaseId}
+        coverKey={masterCoverKey(masterId)}
         artist={release.artists[0] ?? ''}
         title={release.title}
         thumb={release.coverImage || null}
@@ -203,6 +205,8 @@ export function SearchReleaseSheet({
   onClose,
 }: SearchReleaseSheetProps) {
   const isMobile = useIsMobile()
+  const { open, close, onOpenChange, onAnimationEnd } =
+    useAnimatedClose(onClose)
 
   const content = (
     <Suspense
@@ -215,21 +219,29 @@ export function SearchReleaseSheet({
       <SearchReleaseSheetContent
         releaseId={releaseId}
         masterId={masterId}
-        onClose={onClose}
+        onClose={close}
       />
     </Suspense>
   )
 
   if (isMobile) {
     return (
-      <Drawer open onOpenChange={onClose}>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        onAnimationEnd={onAnimationEnd}
+      >
         <DrawerContent className="island-shell p-6">{content}</DrawerContent>
       </Drawer>
     )
   }
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={onAnimationEnd}
+    >
       <DialogContent
         className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
         showCloseButton={false}

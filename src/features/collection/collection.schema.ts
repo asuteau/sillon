@@ -6,6 +6,7 @@ export const CollectionReleaseSchema = z.object({
   folder_id: z.number(),
   date_added: z.string(),
   basic_information: z.object({
+    master_id: z.number().optional(),
     title: z.string(),
     year: z.number(),
     artists: z.array(z.object({ name: z.string() })),

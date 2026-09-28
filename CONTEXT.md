@@ -18,6 +18,20 @@ _Avoid_: Instance, item
 The records the user wants to acquire, as recorded in their Discogs wantlist.
 _Avoid_: Wishlist, wants
 
+### Records
+
+**Master**:
+The abstract work — an album as labels and Discogs define it — grouping every pressing of it.
+_Avoid_: Album group
+
+**Release**:
+One specific pressing of a Master (label, country, year, format). The Collection and Wantlist hold Releases. A Release may have no Master.
+_Avoid_: Version, pressing, edition
+
+**Cover**:
+The HD artwork shown for a record. It belongs to the Master: every Release of a Master shows the same Cover. A Release without a Master has its own Cover.
+_Avoid_: Artwork, image, thumb
+
 ### Sorting
 
 **Sort key**:

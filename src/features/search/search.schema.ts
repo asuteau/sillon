@@ -58,6 +58,7 @@ export const VersionsPageSchema = z.object({
 
 export const ReleaseDetailSchema = z.object({
   id: z.number(),
+  master_id: z.number().nullish(),
   title: z.string(),
   year: z.number(),
   country: z.string().nullish(),
@@ -82,6 +83,7 @@ export type VersionsPage = z.infer<typeof VersionsPageSchema>
 
 export const BarcodeResultSchema = z.object({
   id: z.number(),
+  master_id: z.number().nullish(),
   title: z.string(),
   year: z.string().optional(),
   thumb: z.string().optional(),

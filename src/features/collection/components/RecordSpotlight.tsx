@@ -1,6 +1,7 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import { SheetCover } from '#/shared/components/SheetCover'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
@@ -39,7 +40,7 @@ const SpotlightContent = ({
     <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
       <SheetCover
         key={record.id}
-        releaseId={String(record.id)}
+        coverKey={releaseCoverKey(record.id, info.master_id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
         thumb={info.thumb}

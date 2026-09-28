@@ -3,6 +3,7 @@ import { collectionQueryOptions } from '#/features/collection/collection.queries
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { SortChips } from '#/shared/components/SortChips'
@@ -78,7 +79,10 @@ function Collection() {
                     style={{ animationDelay: `${index * 20}ms` }}
                   >
                     <CoverArt
-                      releaseId={String(release.id)}
+                      coverKey={releaseCoverKey(
+                        release.id,
+                        release.basic_information.master_id,
+                      )}
                       artist={release.basic_information.artists[0]?.name ?? ''}
                       title={release.basic_information.title}
                       thumb={release.basic_information.thumb}

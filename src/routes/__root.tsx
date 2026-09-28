@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
-import { getSessionUser } from '#/services/session'
+import { sessionUserQueryOptions } from '#/features/auth/auth.queries'
 import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
 import { NotFound } from '#/shared/components/NotFound'
 import appCss from '../styles.css?url'
@@ -26,8 +26,10 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
   user: User | null
 }>()({
-  beforeLoad: async () => {
-    const sessionUser = await getSessionUser()
+  beforeLoad: async ({ context }) => {
+    const sessionUser = await context.queryClient.fetchQuery(
+      sessionUserQueryOptions,
+    )
     return { user: sessionUser ? { username: sessionUser.username } : null }
   },
   head: () => ({

@@ -3,15 +3,18 @@ import {
   formatDateAdded,
 } from '#/features/collection/collection.utils'
 import { SheetCover } from '#/shared/components/SheetCover'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
+import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
 interface ReleaseInfo {
   id: number
   date_added: string
   basic_information: {
+    master_id?: number
     title: string
     year: number
     artists: { name: string }[]
@@ -60,7 +63,7 @@ function ReleaseSheetContent({
     <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
       <SheetCover
         key={release.id}
-        releaseId={String(release.id)}
+        coverKey={releaseCoverKey(release.id, info.master_id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
         thumb={info.thumb}
@@ -111,10 +114,15 @@ export function ReleaseSheet({
   removeIcon,
 }: Props) {
   const isMobile = useIsMobile()
+  const { open, onOpenChange, onAnimationEnd } = useAnimatedClose(onClose)
 
   if (isMobile) {
     return (
-      <Drawer open onOpenChange={onClose}>
+      <Drawer
+        open={open}
+        onOpenChange={onOpenChange}
+        onAnimationEnd={onAnimationEnd}
+      >
         <DrawerContent className="island-shell p-6">
           <ReleaseSheetContent
             release={release}
@@ -129,7 +137,11 @@ export function ReleaseSheet({
   }
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={onAnimationEnd}
+    >
       <DialogContent
         className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
         showCloseButton={false}

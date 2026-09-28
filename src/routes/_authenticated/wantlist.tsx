@@ -6,6 +6,7 @@ import {
   formatDateAdded,
 } from '#/features/collection/collection.utils'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { SortChips } from '#/shared/components/SortChips'
@@ -79,7 +80,10 @@ function Wantlist() {
                     style={{ animationDelay: `${index * 20}ms` }}
                   >
                     <CoverArt
-                      releaseId={String(want.id)}
+                      coverKey={releaseCoverKey(
+                        want.id,
+                        want.basic_information.master_id,
+                      )}
                       artist={want.basic_information.artists[0]?.name ?? ''}
                       title={want.basic_information.title}
                       thumb={want.basic_information.thumb}

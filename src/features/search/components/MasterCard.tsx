@@ -2,6 +2,7 @@ import { Heart, Library } from 'lucide-react'
 
 import type { Master } from '../search.model'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { masterCoverKey } from '#/shared/utils/cover-key'
 
 interface MasterCardProps {
   master: Master
@@ -18,7 +19,7 @@ export function MasterCard({ master, onClick, index }: MasterCardProps) {
         style={{ animationDelay: `${index * 60}ms` }}
       >
         <CoverArt
-          releaseId={String(master.id)}
+          coverKey={masterCoverKey(master.id)}
           artist={master.artist}
           title={master.title}
           thumb={master.thumb || null}

@@ -4,6 +4,7 @@ import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { useQuery } from '@tanstack/react-query'
@@ -80,7 +81,10 @@ function App() {
                 style={{ animationDelay: `${index * 60}ms` }}
               >
                 <CoverArt
-                  releaseId={String(release.id)}
+                  coverKey={releaseCoverKey(
+                    release.id,
+                    release.basic_information.master_id,
+                  )}
                   artist={release.basic_information.artists[0]?.name ?? ''}
                   title={release.basic_information.title}
                   thumb={release.basic_information.thumb}

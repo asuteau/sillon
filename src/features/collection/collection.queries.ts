@@ -43,12 +43,12 @@ export const collectionQueryOptions = (listSort: ListSort) =>
   })
 
 export const coverArtQueryOptions = (
-  releaseId: string,
+  coverKey: string,
   artist: string,
   title: string,
 ) =>
   queryOptions({
-    queryKey: ['cover', 'v3', releaseId],
+    queryKey: ['cover', 'v4', coverKey],
     queryFn: () => getDeezerCover({ data: { artist, title } }),
     staleTime: Infinity,
     gcTime: Infinity,

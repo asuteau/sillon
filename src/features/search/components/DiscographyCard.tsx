@@ -1,4 +1,5 @@
 import { CoverArt } from '#/shared/components/CoverArt'
+import { masterCoverKey } from '#/shared/utils/cover-key'
 import type { ArtistDiscographyItem } from '../search.model'
 
 interface DiscographyCardProps {
@@ -22,7 +23,7 @@ export function DiscographyCard({
         style={{ animationDelay: `${index * 60}ms` }}
       >
         <CoverArt
-          releaseId={String(item.id)}
+          coverKey={masterCoverKey(item.id)}
           artist={artistName}
           title={item.title}
           thumb={item.thumb || null}

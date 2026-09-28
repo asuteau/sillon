@@ -5,7 +5,8 @@ import { Disc3 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface CoverArtProps {
-  releaseId: string
+  /** From masterCoverKey / releaseCoverKey */
+  coverKey: string
   artist: string
   title: string
   thumb: string | null
@@ -15,7 +16,7 @@ interface CoverArtProps {
 }
 
 export function CoverArt({
-  releaseId,
+  coverKey,
   artist,
   title,
   thumb,
@@ -28,7 +29,7 @@ export function CoverArt({
   const [hdVisible, setHdVisible] = useState(false)
 
   const { data: hdSrc } = useQuery({
-    ...coverArtQueryOptions(releaseId, artist, title),
+    ...coverArtQueryOptions(coverKey, artist, title),
     enabled: isInView,
   })
 

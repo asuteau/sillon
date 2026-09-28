@@ -10,6 +10,7 @@ import {
 
 import { useBarcodeScanner } from '#/features/search/hooks/use-barcode-scanner'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
@@ -203,7 +204,10 @@ const BarcodeScannerContent = ({
       <div className="relative flex flex-col gap-5">
         {barcodeResult && (
           <CoverArt
-            releaseId={String(barcodeResult.id)}
+            coverKey={releaseCoverKey(
+              barcodeResult.id,
+              barcodeResult.master_id,
+            )}
             artist={artist}
             title={albumTitle}
             thumb={thumb}
