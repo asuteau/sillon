@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import {
   useSuspenseQuery,
   useQueryClient,
@@ -14,6 +14,7 @@ import {
   useAddToWantlist,
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
+import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { toReleaseDetail } from '#/features/search/search.model'
 import {
   releaseDetailQueryOptions,
@@ -54,6 +55,7 @@ function SearchReleaseSheetContent({
   const removeFromCollection = useRemoveFromCollection()
   const addToWantlist = useAddToWantlist()
   const removeFromWantlist = useRemoveFromWantlist()
+  const [isAskingFulfilledWant, setIsAskingFulfilledWant] = useState(false)
 
   function updateVersionsCache(
     field: 'in_collection' | 'in_wantlist',
@@ -85,7 +87,8 @@ function SearchReleaseSheetContent({
       } else {
         await addToCollection.mutateAsync(Number(releaseId))
         updateVersionsCache('in_collection', 1)
-        onClose()
+        if (inWantlist > 0) setIsAskingFulfilledWant(true)
+        else onClose()
       }
     } catch {
       // leave state as-is
@@ -105,6 +108,11 @@ function SearchReleaseSheetContent({
     } catch {
       // leave state as-is
     }
+  }
+
+  const handleFulfilledWantResolved = (removed: boolean) => {
+    if (removed) updateVersionsCache('in_wantlist', 0)
+    onClose()
   }
 
   const isCollectionPending =
@@ -166,35 +174,42 @@ function SearchReleaseSheetContent({
         )}
       </div>
 
-      <div className="flex justify-center gap-3 pt-1">
-        <Button
-          variant={inCollection > 0 ? 'default' : 'outline'}
-          className="rounded-full"
-          disabled={isCollectionPending}
-          onClick={handleCollectionToggle}
-        >
-          {inCollection > 0 ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <Library className="h-4 w-4" />
-          )}
-          {inCollection > 0 ? 'Owned' : 'Collection'}
-        </Button>
+      {isAskingFulfilledWant ? (
+        <FulfilledWantPrompt
+          releaseId={Number(releaseId)}
+          onResolved={handleFulfilledWantResolved}
+        />
+      ) : (
+        <div className="flex justify-center gap-3 pt-1">
+          <Button
+            variant={inCollection > 0 ? 'default' : 'outline'}
+            className="rounded-full"
+            disabled={isCollectionPending}
+            onClick={handleCollectionToggle}
+          >
+            {inCollection > 0 ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Library className="h-4 w-4" />
+            )}
+            {inCollection > 0 ? 'Owned' : 'Collection'}
+          </Button>
 
-        <Button
-          variant={inWantlist > 0 ? 'default' : 'outline'}
-          className="rounded-full"
-          disabled={isWantlistPending}
-          onClick={handleWantlistToggle}
-        >
-          {inWantlist > 0 ? (
-            <Check className="h-4 w-4" />
-          ) : (
-            <Heart className="h-4 w-4" />
-          )}
-          {inWantlist > 0 ? 'Wanted' : 'Wantlist'}
-        </Button>
-      </div>
+          <Button
+            variant={inWantlist > 0 ? 'default' : 'outline'}
+            className="rounded-full"
+            disabled={isWantlistPending}
+            onClick={handleWantlistToggle}
+          >
+            {inWantlist > 0 ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Heart className="h-4 w-4" />
+            )}
+            {inWantlist > 0 ? 'Wanted' : 'Wantlist'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }

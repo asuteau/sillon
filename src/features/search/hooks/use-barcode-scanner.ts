@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { useAddToCollection } from '#/features/collection/collection.mutations'
 import { useAddToWantlist } from '#/features/wantlist/wantlist.mutations'
@@ -25,6 +25,7 @@ export interface UseBarcodeScannerReturn {
   videoRef: React.RefObject<HTMLVideoElement | null>
   addedToCollection: boolean
   addedToWantlist: boolean
+  isAskingFulfilledWant: boolean
   isCollectionPending: boolean
   isWantlistPending: boolean
   startCamera: () => Promise<void>
@@ -32,6 +33,7 @@ export interface UseBarcodeScannerReturn {
   handleScanAgain: () => Promise<void>
   handleAddToCollection: () => Promise<void>
   handleAddToWantlist: () => Promise<void>
+  handleFulfilledWantResolved: (removed: boolean) => void
   handleManualBarcode: (code: string) => void
 }
 
@@ -42,6 +44,8 @@ export const useBarcodeScanner = (
   const [detectedBarcode, setDetectedBarcode] = useState('')
   const [addedToCollection, setAddedToCollection] = useState(false)
   const [addedToWantlist, setAddedToWantlist] = useState(false)
+  const [isAskingFulfilledWant, setIsAskingFulfilledWant] = useState(false)
+  const queryClient = useQueryClient()
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -153,6 +157,7 @@ export const useBarcodeScanner = (
     setDetectedBarcode('')
     setAddedToCollection(false)
     setAddedToWantlist(false)
+    setIsAskingFulfilledWant(false)
     await startCamera()
   }
 
@@ -161,10 +166,24 @@ export const useBarcodeScanner = (
     try {
       await addToCollection.mutateAsync(barcodeResult.id)
       setAddedToCollection(true)
-      setTimeout(() => onClose(), 1000)
+      if (barcodeResult.user_data?.in_wantlist) setIsAskingFulfilledWant(true)
+      else setTimeout(() => onClose(), 1000)
     } catch {
       // stay on screen
     }
+  }
+
+  const handleFulfilledWantResolved = (removed: boolean) => {
+    if (removed) {
+      queryClient.setQueryData(
+        barcodeSearchQueryOptions(detectedBarcode).queryKey,
+        (old) =>
+          old?.user_data
+            ? { ...old, user_data: { ...old.user_data, in_wantlist: false } }
+            : old,
+      )
+    }
+    onClose()
   }
 
   const handleManualBarcode = (code: string) => {
@@ -191,6 +210,7 @@ export const useBarcodeScanner = (
     videoRef,
     addedToCollection,
     addedToWantlist,
+    isAskingFulfilledWant,
     isCollectionPending: addToCollection.isPending,
     isWantlistPending: addToWantlist.isPending,
     startCamera,
@@ -198,6 +218,7 @@ export const useBarcodeScanner = (
     handleScanAgain,
     handleAddToCollection,
     handleAddToWantlist,
+    handleFulfilledWantResolved,
     handleManualBarcode,
   }
 }

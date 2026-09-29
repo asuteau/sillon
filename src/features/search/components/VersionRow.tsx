@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { Check, Heart, Library } from 'lucide-react'
@@ -10,6 +11,7 @@ import {
   useAddToWantlist,
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
+import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { VinylDisc } from '#/shared/components/VinylDisc'
 import { versionsQueryOptions } from '../search.queries'
 import type { MasterVersion } from '../search.model'
@@ -28,6 +30,7 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
   const removeFromCollection = useRemoveFromCollection()
   const addToWantlist = useAddToWantlist()
   const removeFromWantlist = useRemoveFromWantlist()
+  const [isAskingFulfilledWant, setIsAskingFulfilledWant] = useState(false)
 
   function updateVersionsCache(
     field: 'in_collection' | 'in_wantlist',
@@ -62,6 +65,7 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
       } else {
         await addToCollection.mutateAsync(version.id)
         updateVersionsCache('in_collection', 1)
+        if (version.inWantlist > 0) setIsAskingFulfilledWant(true)
       }
     } catch {
       // mutation error — leave state as-is
@@ -86,6 +90,11 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
     addToCollection.isPending || removeFromCollection.isPending
   const isWantlistPending =
     addToWantlist.isPending || removeFromWantlist.isPending
+
+  const handleFulfilledWantResolved = (removed: boolean) => {
+    if (removed) updateVersionsCache('in_wantlist', 0)
+    setIsAskingFulfilledWant(false)
+  }
 
   const handleVersionClick = () => {
     navigate({
@@ -116,57 +125,67 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
         </div>
       </button>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <button
-          onClick={handleCollectionToggle}
-          disabled={isCollectionPending}
-          aria-label={
-            version.inCollection > 0
-              ? 'Remove from collection'
-              : 'Add to collection'
-          }
-          className={[
-            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition',
-            'disabled:opacity-50 cursor-pointer',
-            version.inCollection > 0
-              ? 'bg-(--sea-ink) text-(--chip-bg)'
-              : 'island-shell text-(--sea-ink)',
-          ].join(' ')}
-        >
-          {version.inCollection > 0 ? (
-            <Check className="h-3 w-3" />
-          ) : (
-            <Library className="h-3 w-3" />
-          )}
-          <span className="hidden sm:inline">
-            {version.inCollection > 0 ? 'Owned' : 'Collection'}
-          </span>
-        </button>
+      {isAskingFulfilledWant ? (
+        <FulfilledWantPrompt
+          releaseId={version.id}
+          onResolved={handleFulfilledWantResolved}
+          variant="row"
+        />
+      ) : (
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleCollectionToggle}
+            disabled={isCollectionPending}
+            aria-label={
+              version.inCollection > 0
+                ? 'Remove from collection'
+                : 'Add to collection'
+            }
+            className={[
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition',
+              'disabled:opacity-50 cursor-pointer',
+              version.inCollection > 0
+                ? 'bg-(--sea-ink) text-(--chip-bg)'
+                : 'island-shell text-(--sea-ink)',
+            ].join(' ')}
+          >
+            {version.inCollection > 0 ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <Library className="h-3 w-3" />
+            )}
+            <span className="hidden sm:inline">
+              {version.inCollection > 0 ? 'Owned' : 'Collection'}
+            </span>
+          </button>
 
-        <button
-          onClick={handleWantlistToggle}
-          disabled={isWantlistPending}
-          aria-label={
-            version.inWantlist > 0 ? 'Remove from wantlist' : 'Add to wantlist'
-          }
-          className={[
-            'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition',
-            'disabled:opacity-50 cursor-pointer',
-            version.inWantlist > 0
-              ? 'bg-(--sea-ink) text-(--chip-bg)'
-              : 'island-shell text-(--sea-ink)',
-          ].join(' ')}
-        >
-          {version.inWantlist > 0 ? (
-            <Check className="h-3 w-3" />
-          ) : (
-            <Heart className="h-3 w-3" />
-          )}
-          <span className="hidden sm:inline">
-            {version.inWantlist > 0 ? 'Wanted' : 'Wantlist'}
-          </span>
-        </button>
-      </div>
+          <button
+            onClick={handleWantlistToggle}
+            disabled={isWantlistPending}
+            aria-label={
+              version.inWantlist > 0
+                ? 'Remove from wantlist'
+                : 'Add to wantlist'
+            }
+            className={[
+              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition',
+              'disabled:opacity-50 cursor-pointer',
+              version.inWantlist > 0
+                ? 'bg-(--sea-ink) text-(--chip-bg)'
+                : 'island-shell text-(--sea-ink)',
+            ].join(' ')}
+          >
+            {version.inWantlist > 0 ? (
+              <Check className="h-3 w-3" />
+            ) : (
+              <Heart className="h-3 w-3" />
+            )}
+            <span className="hidden sm:inline">
+              {version.inWantlist > 0 ? 'Wanted' : 'Wantlist'}
+            </span>
+          </button>
+        </div>
+      )}
     </li>
   )
 }

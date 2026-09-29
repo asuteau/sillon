@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 
 import { useBarcodeScanner } from '#/features/search/hooks/use-barcode-scanner'
+import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
@@ -32,6 +33,7 @@ const BarcodeScannerContent = ({
     videoRef,
     addedToCollection,
     addedToWantlist,
+    isAskingFulfilledWant,
     isCollectionPending,
     isWantlistPending,
     startCamera,
@@ -39,6 +41,7 @@ const BarcodeScannerContent = ({
     handleScanAgain,
     handleAddToCollection,
     handleAddToWantlist,
+    handleFulfilledWantResolved,
     handleManualBarcode,
   } = useBarcodeScanner(onClose)
 
@@ -248,30 +251,41 @@ const BarcodeScannerContent = ({
         </div>
 
         <div className="flex flex-col gap-2 pt-1">
-          <button
-            onClick={handleAddToCollection}
-            disabled={addedToCollection || isCollectionPending}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
-          >
-            {addedToCollection ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Library className="h-3.5 w-3.5" />
-            )}
-            {addedToCollection ? 'Added to collection!' : 'Add to collection'}
-          </button>
-          <button
-            onClick={handleAddToWantlist}
-            disabled={addedToWantlist || isWantlistPending}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
-          >
-            {addedToWantlist ? (
-              <Check className="h-3.5 w-3.5" />
-            ) : (
-              <Heart className="h-3.5 w-3.5" />
-            )}
-            {addedToWantlist ? 'Added to wantlist!' : 'Add to wantlist'}
-          </button>
+          {isAskingFulfilledWant && barcodeResult ? (
+            <FulfilledWantPrompt
+              releaseId={barcodeResult.id}
+              onResolved={handleFulfilledWantResolved}
+            />
+          ) : (
+            <>
+              <button
+                onClick={handleAddToCollection}
+                disabled={addedToCollection || isCollectionPending}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
+              >
+                {addedToCollection ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Library className="h-3.5 w-3.5" />
+                )}
+                {addedToCollection
+                  ? 'Added to collection!'
+                  : 'Add to collection'}
+              </button>
+              <button
+                onClick={handleAddToWantlist}
+                disabled={addedToWantlist || isWantlistPending}
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
+              >
+                {addedToWantlist ? (
+                  <Check className="h-3.5 w-3.5" />
+                ) : (
+                  <Heart className="h-3.5 w-3.5" />
+                )}
+                {addedToWantlist ? 'Added to wantlist!' : 'Add to wantlist'}
+              </button>
+            </>
+          )}
           <div className="flex gap-2 pt-1">
             <button
               onClick={handleScanAgain}

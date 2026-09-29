@@ -100,6 +100,12 @@ export const BarcodeResultSchema = z.object({
   genre: z.array(z.string()).optional(),
   style: z.array(z.string()).optional(),
   catno: z.string().optional(),
+  user_data: z
+    .object({
+      in_collection: z.boolean(),
+      in_wantlist: z.boolean(),
+    })
+    .optional(),
 })
 
 export type BarcodeResult = z.infer<typeof BarcodeResultSchema>

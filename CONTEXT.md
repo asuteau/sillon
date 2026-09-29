@@ -18,6 +18,10 @@ _Avoid_: Instance, item
 The records the user wants to acquire, as recorded in their Discogs wantlist.
 _Avoid_: Wishlist, wants
 
+**Fulfilled want**:
+A Wantlist entry whose exact Release now has a Copy in the Collection. Another Release of the same Master does not fulfil it. When adding to the Collection fulfils a want, Sillon suggests removing it from the Wantlist but never removes it on its own — the user may still want it (spare, trade, sealed copy).
+_Avoid_: Owned want, completed want
+
 ### Records
 
 **Master**:
