@@ -4,6 +4,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import {
   fetchDiscogsBarcode,
   getArtistDetail,
+  getArtistMasterFormats,
   getArtistReleases,
   getMasterVersions,
   getReleaseDetail,
@@ -12,13 +13,10 @@ import {
 } from './search.api'
 import type { BarcodeResult } from './search.schema'
 
-export const mastersQueryOptions = (
-  q: string,
-  type: 'all' | 'artist' = 'all',
-) =>
+export const mastersQueryOptions = (q: string) =>
   queryOptions({
-    queryKey: ['search', 'masters', q, type] as const,
-    queryFn: () => searchMasters({ data: { q, type } }),
+    queryKey: ['search', 'masters', q] as const,
+    queryFn: () => searchMasters({ data: { q } }),
     enabled: q.length > 2,
     staleTime: 5 * 60 * 1000,
   })
@@ -51,7 +49,15 @@ export const artistReleasesQueryOptions = (artistId: string | undefined) =>
     queryKey: ['search', 'artistReleases', artistId] as const,
     queryFn: () => getArtistReleases({ data: { artistId: artistId! } }),
     enabled: artistId !== undefined,
-    staleTime: 5 * 60 * 1000,
+    // Up to 10 Discogs requests per artist, and discographies rarely change
+    staleTime: 24 * 60 * 60 * 1000,
+  })
+
+export const artistMasterFormatsQueryOptions = (artistName: string) =>
+  queryOptions({
+    queryKey: ['search', 'artistMasterFormats', artistName] as const,
+    queryFn: () => getArtistMasterFormats({ data: { artistName } }),
+    staleTime: 24 * 60 * 60 * 1000,
   })
 
 export const artistDetailQueryOptions = (artistId: string) =>

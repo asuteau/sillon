@@ -39,3 +39,21 @@ export function parseVinylColors(
 
   return found.length > 0 ? found : DEFAULT_COLORS
 }
+
+const NON_STUDIO_FORMATS = [
+  'Compilation',
+  'Live',
+  'Unofficial Release',
+  'Box Set',
+]
+
+// Format tags miss some live records and compilations, so titles are checked too
+const NON_STUDIO_TITLE = /\b(unplugged|live|best of|greatest hits|remixes)\b/i
+
+export function isStudioAlbum(title: string, formats: string[]): boolean {
+  return (
+    formats.includes('Album') &&
+    !formats.some((f) => NON_STUDIO_FORMATS.includes(f)) &&
+    !NON_STUDIO_TITLE.test(title)
+  )
+}

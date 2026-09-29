@@ -21,6 +21,10 @@ export const PaginationSchema = z.object({
   items: z.number(),
 })
 
+export const PaginatedSchema = z.object({
+  pagination: PaginationSchema,
+})
+
 export const SearchPageSchema = z.object({
   results: z.array(MasterResultSchema),
   pagination: PaginationSchema,
@@ -149,4 +153,10 @@ export type ArtistDetail = z.infer<typeof ArtistDetailSchema>
 export type ArtistResult = z.infer<typeof ArtistResultSchema>
 export type ArtistSearchPage = z.infer<typeof ArtistSearchPageSchema>
 export type ArtistRelease = z.infer<typeof ArtistReleaseSchema>
-export type ArtistReleasesPage = z.infer<typeof ArtistReleasesPageSchema>
+export type ArtistDiscography = {
+  releases: ArtistRelease[]
+  // True when the artist has more releases than Sillon fetches
+  truncated: boolean
+}
+
+export type MasterFormats = { id: number; formats: string[] }

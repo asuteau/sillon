@@ -40,6 +40,14 @@ _Avoid_: Album group
 One specific pressing of a Master (label, country, year, format). The Collection and Wantlist hold Releases. A Release may have no Master.
 _Avoid_: Version, pressing, edition
 
+**Discography**:
+The Masters an artist is credited on as main artist, newest first. Excludes guest appearances, remixes and production credits. Best-effort for very prolific artists: it may be truncated.
+_Avoid_: Releases, albums list
+
+**Studio album**:
+A Master in a Discography that Discogs tags as an album and that isn't a compilation, live recording, box set or unofficial release. An approximation: Discogs has no reliable "studio" flag, so an occasional wrong inclusion or exclusion is accepted.
+_Avoid_: LP, full-length, official album
+
 **Cover**:
 The HD artwork shown for a record. It belongs to the Master: every Release of a Master shows the same Cover. A Release without a Master has its own Cover.
 _Avoid_: Artwork, image, thumb

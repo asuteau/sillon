@@ -19,11 +19,13 @@ import {
   toMasterVersion,
 } from '#/features/search/search.model'
 import {
+  artistMasterFormatsQueryOptions,
   artistReleasesQueryOptions,
   artistsQueryOptions,
   mastersQueryOptions,
   versionsQueryOptions,
 } from '#/features/search/search.queries'
+import { isStudioAlbum } from '#/features/search/search.utils'
 
 export const Route = createFileRoute('/_authenticated/search')({
   validateSearch: z.object({
@@ -283,12 +285,20 @@ type DiscographyFilter = 'albums' | 'eps' | 'compilations' | 'all'
 const DISCOGRAPHY_FILTERS: {
   key: DiscographyFilter
   label: string
-  match: string
+  matches: (item: { title: string; formats: string[] }) => boolean
 }[] = [
-  { key: 'albums', label: 'Albums', match: 'Album' },
-  { key: 'eps', label: 'EPs', match: 'EP' },
-  { key: 'compilations', label: 'Compilations', match: 'Compilation' },
-  { key: 'all', label: 'All', match: '' },
+  {
+    key: 'albums',
+    label: 'Studio albums',
+    matches: (i) => isStudioAlbum(i.title, i.formats),
+  },
+  { key: 'eps', label: 'EPs', matches: (i) => i.formats.includes('EP') },
+  {
+    key: 'compilations',
+    label: 'Compilations',
+    matches: (i) => i.formats.includes('Compilation'),
+  },
+  { key: 'all', label: 'All', matches: () => true },
 ]
 
 interface DiscographyListProps {
@@ -305,52 +315,46 @@ function DiscographyList({
   const [filter, setFilter] = useState<DiscographyFilter>('albums')
 
   // Primary: artist-ID based — complete, no false positives
-  const { data: releasesData, isFetching } = useQuery(
+  const { data: releasesData, isPending: isReleasesPending } = useQuery(
     artistReleasesQueryOptions(artistId),
   )
   // Format enrichment: search API joined by master ID
-  const { data: searchData } = useQuery(
-    mastersQueryOptions(artistName, 'artist'),
+  const { data: formatsData, isPending: isFormatsPending } = useQuery(
+    artistMasterFormatsQueryOptions(artistName),
   )
 
   const allItems = useMemo(() => {
-    const formatMap = new Map<number, string[]>()
-    for (const raw of searchData?.results ?? []) {
-      if (raw.format?.length) formatMap.set(raw.id, raw.format)
-    }
+    const formatMap = new Map((formatsData ?? []).map((m) => [m.id, m.formats]))
     return (releasesData?.releases ?? [])
       .map(toArtistDiscographyItem)
       .map((item) => ({ ...item, formats: formatMap.get(item.id) ?? [] }))
-  }, [releasesData?.releases, searchData?.results])
+  }, [releasesData?.releases, formatsData])
 
   const counts = useMemo(
-    () => ({
-      albums: allItems.filter(
-        (i) => i.formats.includes('Album') || i.formats.length === 0,
-      ).length,
-      eps: allItems.filter((i) => i.formats.includes('EP')).length,
-      compilations: allItems.filter((i) => i.formats.includes('Compilation'))
-        .length,
-      all: allItems.length,
-    }),
+    () =>
+      Object.fromEntries(
+        DISCOGRAPHY_FILTERS.map(({ key, matches }) => [
+          key,
+          allItems.filter(matches).length,
+        ]),
+      ) as Record<DiscographyFilter, number>,
     [allItems],
   )
 
-  const showAllChip = counts.eps > 0 || counts.compilations > 0
+  // Artists without studio albums (singles-only DJs…) fall back to everything
+  const activeFilter =
+    filter === 'albums' && counts.albums === 0 ? 'all' : filter
 
-  const items = useMemo(() => {
-    if (filter === 'all') return allItems
-    if (filter === 'albums')
-      return allItems.filter(
-        (i) => i.formats.includes('Album') || i.formats.length === 0,
-      )
-    const match = DISCOGRAPHY_FILTERS.find(
-      (entry) => entry.key === filter,
-    )!.match
-    return allItems.filter((i) => i.formats.includes(match))
-  }, [allItems, filter])
+  const items = useMemo(
+    () =>
+      allItems.filter(
+        DISCOGRAPHY_FILTERS.find((entry) => entry.key === activeFilter)!
+          .matches,
+      ),
+    [allItems, activeFilter],
+  )
 
-  if (isFetching && allItems.length === 0) {
+  if (isReleasesPending || isFormatsPending) {
     return <p className="text-(--sea-ink-soft)">Loading discography…</p>
   }
 
@@ -359,14 +363,14 @@ function DiscographyList({
       <div className="mb-6 flex gap-2 flex-wrap">
         {DISCOGRAPHY_FILTERS.map(({ key, label }) => {
           const count = counts[key]
-          if (key === 'all' && !showAllChip) return null
+          if (key === 'all' && count === counts.albums) return null
           if (key !== 'all' && count === 0) return null
           return (
             <button
               key={key}
               onClick={() => setFilter(key)}
               className={`cursor-pointer whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                filter === key
+                activeFilter === key
                   ? 'bg-(--sea-ink) text-(--chip-bg)'
                   : 'border border-(--line) text-(--sea-ink)'
               }`}
@@ -381,7 +385,7 @@ function DiscographyList({
       </div>
 
       {items.length === 0 ? (
-        <p className="text-(--sea-ink-soft)">No {filter} found.</p>
+        <p className="text-(--sea-ink-soft)">No releases found.</p>
       ) : (
         <ul className="flex flex-col gap-3">
           {items.map((item, index) => (
@@ -394,6 +398,12 @@ function DiscographyList({
             />
           ))}
         </ul>
+      )}
+
+      {releasesData?.truncated && (
+        <p className="mt-6 text-center text-sm text-(--sea-ink-soft)">
+          Older releases not shown — search by title
+        </p>
       )}
     </>
   )
