@@ -1182,11 +1182,18 @@ Each row opens the pre-built search URL in a new tab. No request is made by Sill
 
 **Priority**: after 5.3, before 5.5. Low implementation cost, high perceived value for crate diggers.
 
-### 5.5 Random pick — "Surprise me"
+### 5.5 Random pick — "Pick for me"
 
-**Concept**: a shuffle button in the dashboard header. Fetches a truly random record from the full Discogs collection (not just loaded pages), then displays it in a `RecordSpotlight` component. The user can pick again without closing or navigating away.
+**Concept**: answers "what do I play now?". Fetches a truly random record from the full Discogs collection (not just loaded pages), then displays it in a `RecordSpotlight` component. The user can pick again without closing or navigating away.
 
-**Trigger**: `Shuffle` icon (lucide-react) in the dashboard header. Always enabled — no dependency on collection cache state.
+**Trigger**: "Pick for me" (`Shuffle` icon + label) in two places, hidden when the Collection is empty:
+
+- Home — `RandomPickCard` between `MetricsStrip` and Recently Added (primary entry)
+- Collection page — `RandomPickButton` beside the title (secondary)
+
+Not in the global header: it is a Collection action, not app chrome. Not in `SortChips`: it is not an ordering.
+
+Shared state lives in `features/collection/hooks/use-random-pick.ts`.
 
 **Fetch strategy**: 2 lightweight requests regardless of collection size:
 
@@ -1252,7 +1259,7 @@ function RecordSpotlight({ record, onClose, onPickAgain }) {
 **User flow**:
 
 ```
-Tap Shuffle
+Tap "Pick for me"
   → icon spins (~300ms fetch)
   → RecordSpotlight opens
       [cover · title · artist · year · label]

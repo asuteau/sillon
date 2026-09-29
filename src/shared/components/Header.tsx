@@ -1,4 +1,3 @@
-import { ShuffleButton } from '#/features/collection/components/ShuffleButton'
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
@@ -83,7 +82,6 @@ export default function Header() {
               <ScanButton />
             </div>
           )}
-          {user && <ShuffleButton />}
           <ThemeToggle />
           {user ? (
             <a

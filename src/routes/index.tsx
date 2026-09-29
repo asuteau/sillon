@@ -2,6 +2,7 @@ import { useRemoveFromCollection } from '#/features/collection/collection.mutati
 import { recentAdditionsQueryOptions } from '#/features/collection/collection.queries'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
+import { RandomPickCard } from '#/features/collection/components/RandomPickCard'
 import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
@@ -59,6 +60,8 @@ function App() {
   return (
     <main className="page-wrap px-4 pb-32 pt-14 sm:pb-8">
       <MetricsStrip username={user.username} />
+
+      {data && data.releases.length > 0 && <RandomPickCard />}
 
       <header className="mb-8">
         <p className="island-kicker mb-2">Vinyl</p>

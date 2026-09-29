@@ -6,6 +6,7 @@ import { CoverArt } from '#/shared/components/CoverArt'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
+import { RandomPickButton } from '#/features/collection/components/RandomPickButton'
 import { SortChips } from '#/shared/components/SortChips'
 import {
   formatYear,
@@ -43,14 +44,18 @@ function Collection() {
   }
 
   const removeFromCollection = useRemoveFromCollection()
+  const isEmpty = data.pages[0]?.releases.length === 0
 
   return (
     <main className="page-wrap px-4 pb-32 pt-14 sm:pb-8">
-      <header className="mb-8">
-        <p className="island-kicker mb-2">Vinyl</p>
-        <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
-          Collection
-        </h1>
+      <header className="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p className="island-kicker mb-2">Vinyl</p>
+          <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
+            Collection
+          </h1>
+        </div>
+        {!isEmpty && <RandomPickButton />}
       </header>
 
       <SortChips
@@ -59,7 +64,7 @@ function Collection() {
         isPending={isSortPending}
       />
 
-      {data.pages[0]?.releases.length === 0 ? (
+      {isEmpty ? (
         <p className="text-(--sea-ink-soft)">
           No records in your collection yet.
         </p>

@@ -26,6 +26,10 @@ _Avoid_: Wishlist, wants
 A Wantlist entry whose exact Release now has a Copy in the Collection. Another Release of the same Master does not fulfil it. When adding to the Collection fulfils a want, Sillon suggests removing it from the Wantlist but never removes it on its own — the user may still want it (spare, trade, sealed copy).
 _Avoid_: Owned want, completed want
 
+**Random pick**:
+One Copy drawn at random from the whole Collection, to answer "what do I play now?". Picking again draws a new one.
+_Avoid_: Shuffle, surprise me
+
 ### Records
 
 **Master**:
