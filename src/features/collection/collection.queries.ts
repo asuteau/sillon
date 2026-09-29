@@ -18,10 +18,24 @@ export const collectionValueQueryOptions = (username: string) =>
     staleTime: 60 * 60 * 1000,
   })
 
+const RECENT_ADDITIONS_COUNT = 10
+
+// Over-fetched so removals (patched from cache, see removeCopyFromLists) let
+// the next Copy slide in instead of shrinking the list
 export const recentAdditionsQueryOptions = queryOptions({
-  queryKey: ['collection', { perPage: 10 }],
+  queryKey: ['collection', { perPage: RECENT_ADDITIONS_COUNT * 2 }],
   queryFn: () =>
-    getCollection({ data: { perPage: 10, sort: 'added', order: 'desc' } }),
+    getCollection({
+      data: {
+        perPage: RECENT_ADDITIONS_COUNT * 2,
+        sort: 'added',
+        order: 'desc',
+      },
+    }),
+  select: (page): CollectionPage => ({
+    ...page,
+    releases: page.releases.slice(0, RECENT_ADDITIONS_COUNT),
+  }),
   staleTime: 10 * 60 * 1000,
 })
 

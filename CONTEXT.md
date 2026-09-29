@@ -14,6 +14,10 @@ _Avoid_: Library, shelf
 One physical record the user owns. The Collection holds copies, not releases: the same release can be owned several times, and removing from the Collection removes one specific copy.
 _Avoid_: Instance, item
 
+**Recent additions**:
+The 10 Copies most recently added to the Collection. A live window, not a log: removing one lets the next most recent Copy slide in, so it always shows ten records unless the Collection holds fewer.
+_Avoid_: Recently added list, latest
+
 **Wantlist**:
 The records the user wants to acquire, as recorded in their Discogs wantlist.
 _Avoid_: Wishlist, wants
