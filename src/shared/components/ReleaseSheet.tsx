@@ -2,6 +2,7 @@ import {
   formatArtists,
   formatDateAdded,
 } from '#/features/collection/collection.utils'
+import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
@@ -89,6 +90,8 @@ function ReleaseSheetContent({
           <p className="text-sm text-(--sea-ink-soft)">{labelText}</p>
         )}
       </div>
+
+      <MarketplaceSection releaseId={release.id} />
 
       <div className="flex justify-center pt-1">
         <Button

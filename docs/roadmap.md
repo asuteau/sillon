@@ -1396,11 +1396,26 @@ create index feed_events_user_id_idx on feed_events(user_id);
 // supabase/functions/poll-wantlist/index.ts
 // For each user:
 //   1. Fetch Discogs wantlist
-//   2. For each item → GET /marketplace/search?release_id=xxx
+//   2. For each item → GET /marketplace/stats/{release_id}?curr_abbr=xxx
 //   3. Compare with watched_releases.max_price
-//   4. If new listing → INSERT feed_events
+//   4. If Listings count rises / Lowest price drops → INSERT feed_events
 //   → Supabase Realtime push automatic
 ```
+
+> ⚠️ The Discogs API has **no endpoint listing the Listings of a Release**
+> (`/marketplace/search` doesn't exist). `/marketplace/stats` only gives the
+> Listings count, the Lowest price and `blocked_from_sale` — no seller, no
+> condition, no listing ID. `feed_events.payload` is limited accordingly
+> (`{ numForSale, lowestPrice }`); details stay on the Discogs sell page.
+> Mind the 60 req/min budget: one call per want per poll.
+
+### 7.4 Wantlist card marketplace info
+
+Precomputed by the cron above, stored per release — never fetched live from
+cards (rate limit). Enables on each Wantlist card: Listings count + Lowest
+price, plus sort "cheapest first" and filter "available only".
+Until then, marketplace info lives only in the release sheets (see
+`features/marketplace/`), fetched on open.
 
 ### 7.3 Client subscription
 

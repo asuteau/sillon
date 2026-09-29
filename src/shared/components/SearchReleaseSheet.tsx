@@ -14,6 +14,7 @@ import {
   useAddToWantlist,
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
+import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { toReleaseDetail } from '#/features/search/search.model'
 import {
@@ -173,6 +174,8 @@ function SearchReleaseSheetContent({
           </div>
         )}
       </div>
+
+      <MarketplaceSection releaseId={Number(releaseId)} />
 
       {isAskingFulfilledWant ? (
         <FulfilledWantPrompt

@@ -78,3 +78,17 @@ _Avoid_: Item count, size, total
 **Discogs currency**:
 The currency set on the user's Discogs account. Every money figure in Sillon is expressed in it; changing it in Sillon changes it on Discogs too. Sillon never converts between currencies.
 _Avoid_: Display currency, preferred currency
+
+### Marketplace
+
+**Listing**:
+One record offered for sale by a seller on the Discogs marketplace. Not a Copy: a Copy is owned by the user, a Listing belongs to someone else.
+_Avoid_: Copy for sale, offer, stock
+
+**Lowest price**:
+The item price of the cheapest current Listing for a Release, in the Discogs currency. Excludes shipping, so it can understate what the record really costs.
+_Avoid_: Starting price, from-price, cheapest
+
+**Suggested price**:
+Discogs' fair-price estimate for a Release in a given condition (Mint to Poor), in the Discogs currency. Unrelated to current Listings.
+_Avoid_: Market value, estimate
