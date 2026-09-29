@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { useAddToCollection } from '#/features/collection/collection.mutations'
 import { useAddToWantlist } from '#/features/wantlist/wantlist.mutations'
@@ -33,7 +33,7 @@ export interface UseBarcodeScannerReturn {
   handleScanAgain: () => Promise<void>
   handleAddToCollection: () => Promise<void>
   handleAddToWantlist: () => Promise<void>
-  handleFulfilledWantResolved: (removed: boolean) => void
+  handleFulfilledWantResolved: () => void
   handleManualBarcode: (code: string) => void
 }
 
@@ -45,7 +45,6 @@ export const useBarcodeScanner = (
   const [addedToCollection, setAddedToCollection] = useState(false)
   const [addedToWantlist, setAddedToWantlist] = useState(false)
   const [isAskingFulfilledWant, setIsAskingFulfilledWant] = useState(false)
-  const queryClient = useQueryClient()
 
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -173,18 +172,7 @@ export const useBarcodeScanner = (
     }
   }
 
-  const handleFulfilledWantResolved = (removed: boolean) => {
-    if (removed) {
-      queryClient.setQueryData(
-        barcodeSearchQueryOptions(detectedBarcode).queryKey,
-        (old) =>
-          old?.user_data
-            ? { ...old, user_data: { ...old.user_data, in_wantlist: false } }
-            : old,
-      )
-    }
-    onClose()
-  }
+  const handleFulfilledWantResolved = () => onClose()
 
   const handleManualBarcode = (code: string) => {
     setDetectedBarcode(code)

@@ -9,6 +9,7 @@ import {
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
 import { adjustProfileCount } from '#/features/profile/profile.queries'
+import { patchBarcodeUserData } from '#/features/search/search.queries'
 
 import { addWantToLists, removeWantFromLists } from './wantlist.queries'
 import { WantlistItemSchema } from './wantlist.schema'
@@ -99,6 +100,7 @@ export function useAddToWantlist() {
         adjustProfileCount(queryClient, user.username, 'wantlistCount', 1)
       }
       addWantToLists(queryClient, want)
+      patchBarcodeUserData(queryClient, want.id, { in_wantlist: true })
     },
   })
 }
@@ -115,6 +117,7 @@ export function useRemoveFromWantlist() {
         adjustProfileCount(queryClient, user.username, 'wantlistCount', -1)
       }
       removeWantFromLists(queryClient, releaseId)
+      patchBarcodeUserData(queryClient, releaseId, { in_wantlist: false })
     },
   })
 }

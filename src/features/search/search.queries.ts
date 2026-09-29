@@ -1,4 +1,5 @@
 import { queryOptions } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query'
 
 import {
   fetchDiscogsBarcode,
@@ -9,6 +10,7 @@ import {
   searchArtists,
   searchMasters,
 } from './search.api'
+import type { BarcodeResult } from './search.schema'
 
 export const mastersQueryOptions = (
   q: string,
@@ -66,3 +68,18 @@ export const barcodeSearchQueryOptions = (barcode: string) =>
     staleTime: Infinity,
     enabled: barcode.length > 0,
   })
+
+// Barcode results never go stale, so list changes must be patched into them
+export const patchBarcodeUserData = (
+  queryClient: QueryClient,
+  releaseId: number,
+  patch: Partial<NonNullable<BarcodeResult['user_data']>>,
+) => {
+  queryClient.setQueriesData<BarcodeResult | null>(
+    { queryKey: ['search', 'barcode'] },
+    (old) =>
+      old?.id === releaseId && old.user_data
+        ? { ...old, user_data: { ...old.user_data, ...patch } }
+        : old,
+  )
+}

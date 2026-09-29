@@ -200,6 +200,7 @@ const BarcodeScannerContent = ({
     Boolean,
   )
   const styles = (barcodeResult?.style ?? []).slice(0, 3)
+  const isWanted = barcodeResult?.user_data?.in_wantlist ?? false
 
   return (
     <div className="relative overflow-hidden">
@@ -274,15 +275,19 @@ const BarcodeScannerContent = ({
               </button>
               <button
                 onClick={handleAddToWantlist}
-                disabled={addedToWantlist || isWantlistPending}
+                disabled={addedToWantlist || isWanted || isWantlistPending}
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
               >
-                {addedToWantlist ? (
+                {addedToWantlist || isWanted ? (
                   <Check className="h-3.5 w-3.5" />
                 ) : (
                   <Heart className="h-3.5 w-3.5" />
                 )}
-                {addedToWantlist ? 'Added to wantlist!' : 'Add to wantlist'}
+                {addedToWantlist
+                  ? 'Added to wantlist!'
+                  : isWanted
+                    ? 'In your wantlist'
+                    : 'Add to wantlist'}
               </button>
             </>
           )}

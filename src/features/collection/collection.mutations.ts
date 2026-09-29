@@ -9,6 +9,7 @@ import {
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
 import { adjustProfileCount } from '#/features/profile/profile.queries'
+import { patchBarcodeUserData } from '#/features/search/search.queries'
 
 import {
   collectionListQueryKey,
@@ -128,7 +129,8 @@ export function useAddToCollection() {
 
   return useMutation({
     mutationFn: (releaseId: number) => addToCollection({ data: { releaseId } }),
-    onSuccess: () => {
+    onSuccess: (_, releaseId) => {
+      patchBarcodeUserData(queryClient, releaseId, { in_collection: true })
       if (user) {
         adjustProfileCount(queryClient, user.username, 'recordCount', 1)
         queryClient.invalidateQueries({
