@@ -18,11 +18,14 @@ import type {
   SearchPage,
   VersionsPage,
 } from './search.schema'
+import type { MasterTags } from './search.utils'
+import { MAX_VERSION_LOOKUPS } from './search.utils'
 import {
   ArtistDetailSchema,
   ArtistReleasesPageSchema,
   ArtistSearchPageSchema,
   BarcodeResultSchema,
+  MasterVersionFormatsPageSchema,
   PaginatedSchema,
   ReleaseDetailSchema,
   SearchPageSchema,
@@ -336,6 +339,42 @@ export const getArtistMasterFormats = createServerFn()
     return pages
       .flatMap((json) => SearchPageSchema.parse(json).results)
       .map((r) => ({ id: r.id, formats: r.format ?? [] }))
+  })
+
+// Fills in the tags search results miss, from every Release of each Master
+export const getMasterTags = createServerFn()
+  .inputValidator(
+    (data: { masters: { id: number; mainReleaseId: number | null }[] }) => data,
+  )
+  .handler(async ({ data }): Promise<(MasterTags & { id: number })[]> => {
+    const { useAppSession } = await import('#/services/session.server')
+    const session = await useAppSession()
+
+    const { accessToken, accessTokenSecret } = session.data
+    if (!accessToken || !accessTokenSecret) return []
+
+    const results = await Promise.allSettled(
+      data.masters
+        .slice(0, MAX_VERSION_LOOKUPS)
+        .map(async ({ id, mainReleaseId }) => {
+          const json = await discogsGet(
+            `${DISCOGS_API}/masters/${id}/versions?per_page=100`,
+            { accessToken, accessTokenSecret },
+            'Discogs master version formats fetch',
+          )
+          const { versions } = MasterVersionFormatsPageSchema.parse(json)
+          const tags: MasterTags = { main: [], others: [] }
+          for (const version of versions) {
+            const formats = version.format.split(', ')
+            if (version.id === mainReleaseId) tags.main.push(...formats)
+            else tags.others.push(...formats)
+          }
+          return { id, ...tags }
+        }),
+    )
+
+    // A failed lookup leaves that Master unclassified rather than failing the Discography
+    return results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
   })
 
 export const fetchDiscogsBarcode = createServerFn()

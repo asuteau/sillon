@@ -136,6 +136,7 @@ export const ArtistReleaseSchema = z.object({
   type: z.string(),
   role: z.string().optional(),
   format: z.string().optional(),
+  main_release: z.number().nullish(),
 })
 
 export const ArtistReleasesPageSchema = z.object({
@@ -160,3 +161,7 @@ export type ArtistDiscography = {
 }
 
 export type MasterFormats = { id: number; formats: string[] }
+
+export const MasterVersionFormatsPageSchema = z.object({
+  versions: z.array(z.object({ id: z.number(), format: z.string() })),
+})

@@ -6,6 +6,7 @@ import {
   getArtistDetail,
   getArtistMasterFormats,
   getArtistReleases,
+  getMasterTags,
   getMasterVersions,
   getReleaseDetail,
   searchArtists,
@@ -57,6 +58,17 @@ export const artistMasterFormatsQueryOptions = (artistName: string) =>
   queryOptions({
     queryKey: ['search', 'artistMasterFormats', artistName] as const,
     queryFn: () => getArtistMasterFormats({ data: { artistName } }),
+    staleTime: 24 * 60 * 60 * 1000,
+  })
+
+export const masterTagsQueryOptions = (
+  masters: { id: number; mainReleaseId: number | null }[],
+  enabled: boolean,
+) =>
+  queryOptions({
+    queryKey: ['search', 'masterTags', masters.map((m) => m.id)] as const,
+    queryFn: () => getMasterTags({ data: { masters } }),
+    enabled,
     staleTime: 24 * 60 * 60 * 1000,
   })
 

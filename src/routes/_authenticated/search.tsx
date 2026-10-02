@@ -23,9 +23,16 @@ import {
   artistReleasesQueryOptions,
   artistsQueryOptions,
   mastersQueryOptions,
+  masterTagsQueryOptions,
   versionsQueryOptions,
 } from '#/features/search/search.queries'
-import { isStudioAlbum } from '#/features/search/search.utils'
+import type { MasterTags } from '#/features/search/search.utils'
+import {
+  isEp,
+  isStudioAlbum,
+  MAX_VERSION_LOOKUPS,
+  needsVersionLookup,
+} from '#/features/search/search.utils'
 
 export const Route = createFileRoute('/_authenticated/search')({
   validateSearch: z.object({
@@ -285,18 +292,18 @@ type DiscographyFilter = 'albums' | 'eps' | 'compilations' | 'all'
 const DISCOGRAPHY_FILTERS: {
   key: DiscographyFilter
   label: string
-  matches: (item: { title: string; formats: string[] }) => boolean
+  matches: (item: { title: string; tags: MasterTags }) => boolean
 }[] = [
   {
     key: 'albums',
     label: 'Studio albums',
-    matches: (i) => isStudioAlbum(i.title, i.formats),
+    matches: (i) => isStudioAlbum(i.title, i.tags),
   },
-  { key: 'eps', label: 'EPs', matches: (i) => i.formats.includes('EP') },
+  { key: 'eps', label: 'EPs', matches: (i) => isEp(i.tags) },
   {
     key: 'compilations',
     label: 'Compilations',
-    matches: (i) => i.formats.includes('Compilation'),
+    matches: (i) => i.tags.main.includes('Compilation'),
   },
   { key: 'all', label: 'All', matches: () => true },
 ]
@@ -323,12 +330,34 @@ function DiscographyList({
     artistMasterFormatsQueryOptions(artistName),
   )
 
+  const formatMap = useMemo(
+    () => new Map((formatsData ?? []).map((m) => [m.id, m.formats])),
+    [formatsData],
+  )
+
+  // Releases come newest first, so the lookup cap drops the oldest Masters
+  const lookups = useMemo(
+    () =>
+      (releasesData?.releases ?? [])
+        .filter((r) => needsVersionLookup(formatMap.get(r.id)))
+        .slice(0, MAX_VERSION_LOOKUPS)
+        .map((r) => ({ id: r.id, mainReleaseId: r.main_release ?? null })),
+    [releasesData?.releases, formatMap],
+  )
+  const { data: tagsData, isPending: isTagsPending } = useQuery(
+    masterTagsQueryOptions(lookups, !isReleasesPending && !isFormatsPending),
+  )
+
   const allItems = useMemo(() => {
-    const formatMap = new Map((formatsData ?? []).map((m) => [m.id, m.formats]))
-    return (releasesData?.releases ?? [])
-      .map(toArtistDiscographyItem)
-      .map((item) => ({ ...item, formats: formatMap.get(item.id) ?? [] }))
-  }, [releasesData?.releases, formatsData])
+    const tagsMap = new Map((tagsData ?? []).map((t) => [t.id, t]))
+    return (releasesData?.releases ?? []).map((release) => {
+      const tags = tagsMap.get(release.id) ?? {
+        main: formatMap.get(release.id) ?? [],
+        others: [],
+      }
+      return { ...toArtistDiscographyItem(release), tags }
+    })
+  }, [releasesData?.releases, formatMap, tagsData])
 
   const counts = useMemo(
     () =>
@@ -354,7 +383,7 @@ function DiscographyList({
     [allItems, activeFilter],
   )
 
-  if (isReleasesPending || isFormatsPending) {
+  if (isReleasesPending || isFormatsPending || isTagsPending) {
     return <p className="text-(--sea-ink-soft)">Loading discography…</p>
   }
 

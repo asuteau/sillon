@@ -40,6 +40,9 @@ export function parseVinylColors(
   return found.length > 0 ? found : DEFAULT_COLORS
 }
 
+// Format tags of a Master: its Main release's, then every other Release's
+export type MasterTags = { main: string[]; others: string[] }
+
 const NON_STUDIO_FORMATS = [
   'Compilation',
   'Live',
@@ -47,13 +50,44 @@ const NON_STUDIO_FORMATS = [
   'Box Set',
 ]
 
-// Format tags miss some live records and compilations, so titles are checked too
-const NON_STUDIO_TITLE = /\b(unplugged|live|best of|greatest hits|remixes)\b/i
+// Tags on the Main release that settle a Master's kind without looking at other Releases
+const CONCLUSIVE_FORMATS = [
+  'Album',
+  'EP',
+  'Single',
+  'Maxi-Single',
+  ...NON_STUDIO_FORMATS,
+]
 
-export function isStudioAlbum(title: string, formats: string[]): boolean {
+// Format tags miss some live records and compilations, so titles are checked too
+const NON_STUDIO_TITLE =
+  /\b(live (at|in|from)|unplugged|best of|greatest hits|remix(es|ed))\b|\(live\)/i
+
+// The Main release decides; other Releases only fill in when it carries neither tag
+function masterKind({ main, others }: MasterTags): 'album' | 'ep' | null {
+  for (const formats of [main, others]) {
+    if (formats.includes('Album')) return 'album'
+    if (formats.includes('EP')) return 'ep'
+  }
+  return null
+}
+
+export function isStudioAlbum(title: string, tags: MasterTags): boolean {
   return (
-    formats.includes('Album') &&
-    !formats.some((f) => NON_STUDIO_FORMATS.includes(f)) &&
+    masterKind(tags) === 'album' &&
+    !tags.main.some((f) => NON_STUDIO_FORMATS.includes(f)) &&
     !NON_STUDIO_TITLE.test(title)
   )
+}
+
+export function isEp(tags: MasterTags): boolean {
+  return masterKind(tags) === 'ep'
+}
+
+// Caps the extra Discogs requests spent classifying one artist's Discography
+export const MAX_VERSION_LOOKUPS = 20
+
+// Search results only carry Main release tags, and miss Masters credited under name variations
+export function needsVersionLookup(mainFormats: string[] | undefined): boolean {
+  return !mainFormats?.some((f) => CONCLUSIVE_FORMATS.includes(f))
 }
