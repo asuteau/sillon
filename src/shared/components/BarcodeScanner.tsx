@@ -203,9 +203,9 @@ const BarcodeScannerContent = ({
   const isWanted = barcodeResult?.user_data?.in_wantlist ?? false
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative flex min-h-0 flex-col gap-5 overflow-hidden">
       <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
-      <div className="relative flex flex-col gap-5">
+      <div className="relative flex min-h-0 flex-col gap-5 overflow-y-auto">
         {barcodeResult && (
           <CoverArt
             coverKey={releaseCoverKey(
@@ -216,11 +216,11 @@ const BarcodeScannerContent = ({
             title={albumTitle}
             thumb={thumb}
             styles={[]}
-            className="aspect-square w-full overflow-hidden rounded-2xl"
+            className="aspect-square w-full shrink-0 overflow-hidden rounded-2xl"
           />
         )}
 
-        <div className="flex flex-col gap-2 items-center text-center">
+        <div className="flex shrink-0 flex-col items-center gap-2 text-center">
           <p className="island-kicker">{artist}</p>
           <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
             {albumTitle}
@@ -250,63 +250,61 @@ const BarcodeScannerContent = ({
             </div>
           )}
         </div>
+      </div>
 
-        <div className="flex flex-col gap-2 pt-1">
-          {isAskingFulfilledWant && barcodeResult ? (
-            <FulfilledWantPrompt
-              releaseId={barcodeResult.id}
-              onResolved={handleFulfilledWantResolved}
-            />
-          ) : (
-            <>
-              <button
-                onClick={handleAddToCollection}
-                disabled={addedToCollection || isCollectionPending}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
-              >
-                {addedToCollection ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <Library className="h-3.5 w-3.5" />
-                )}
-                {addedToCollection
-                  ? 'Added to collection!'
-                  : 'Add to collection'}
-              </button>
-              <button
-                onClick={handleAddToWantlist}
-                disabled={addedToWantlist || isWanted || isWantlistPending}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
-              >
-                {addedToWantlist || isWanted ? (
-                  <Check className="h-3.5 w-3.5" />
-                ) : (
-                  <Heart className="h-3.5 w-3.5" />
-                )}
-                {addedToWantlist
-                  ? 'Added to wantlist!'
-                  : isWanted
-                    ? 'In your wantlist'
-                    : 'Add to wantlist'}
-              </button>
-            </>
-          )}
-          <div className="flex gap-2 pt-1">
+      <div className="relative flex shrink-0 flex-col gap-2 pt-1">
+        {isAskingFulfilledWant && barcodeResult ? (
+          <FulfilledWantPrompt
+            releaseId={barcodeResult.id}
+            onResolved={handleFulfilledWantResolved}
+          />
+        ) : (
+          <>
             <button
-              onClick={handleScanAgain}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
+              onClick={handleAddToCollection}
+              disabled={addedToCollection || isCollectionPending}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
             >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Scan again
+              {addedToCollection ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <Library className="h-3.5 w-3.5" />
+              )}
+              {addedToCollection ? 'Added to collection!' : 'Add to collection'}
             </button>
             <button
-              onClick={onClose}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
+              onClick={handleAddToWantlist}
+              disabled={addedToWantlist || isWanted || isWantlistPending}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
             >
-              <X className="h-3.5 w-3.5" />
-              Cancel
+              {addedToWantlist || isWanted ? (
+                <Check className="h-3.5 w-3.5" />
+              ) : (
+                <Heart className="h-3.5 w-3.5" />
+              )}
+              {addedToWantlist
+                ? 'Added to wantlist!'
+                : isWanted
+                  ? 'In your wantlist'
+                  : 'Add to wantlist'}
             </button>
-          </div>
+          </>
+        )}
+        <div className="flex gap-2 pt-1">
+          <button
+            onClick={handleScanAgain}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Scan again
+          </button>
+          <button
+            onClick={onClose}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
+          >
+            <X className="h-3.5 w-3.5" />
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -322,7 +320,7 @@ export const BarcodeScanner = ({
   if (isMobile) {
     return (
       <Drawer open onOpenChange={onClose}>
-        <DrawerContent className="island-shell overflow-y-auto p-6">
+        <DrawerContent className="island-shell p-6 data-[vaul-drawer-direction=bottom]:max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)]">
           <BarcodeScannerContent
             onClose={onClose}
             onSearchManually={onSearchManually}
@@ -338,7 +336,7 @@ export const BarcodeScanner = ({
         className="max-w-md rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
         showCloseButton={false}
       >
-        <div className="island-shell overflow-hidden rounded-3xl p-6">
+        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
           <BarcodeScannerContent
             onClose={onClose}
             onSearchManually={onSearchManually}
