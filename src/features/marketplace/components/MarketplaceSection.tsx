@@ -20,7 +20,7 @@ export const MarketplaceSection = ({ releaseId }: MarketplaceSectionProps) => {
     <MarketplaceSectionView
       releaseId={releaseId}
       stats={stats.data}
-      isLoading={stats.isPending}
+      isLoading={stats.isPending || suggestions.isPending}
       isError={stats.isError || stats.data === null}
       onRetry={() => void stats.refetch()}
       suggestedPrices={suggestions.data ?? []}
@@ -48,8 +48,9 @@ export const MarketplaceSectionView = ({
   if (isLoading) {
     return (
       <MarketplaceShell>
-        <span className="h-4 w-44 animate-pulse rounded-md bg-(--line)" />
-        <span className="h-4 w-32 animate-pulse rounded-md bg-(--line)" />
+        <span className="h-5 w-52 animate-pulse rounded-md bg-(--line)" />
+        <span className="h-5.5 w-60 animate-pulse rounded-full bg-(--line)" />
+        <span className="h-5 w-40 animate-pulse rounded-md bg-(--line)" />
       </MarketplaceShell>
     )
   }
@@ -158,6 +159,10 @@ const MarketplaceShell = ({ children }: MarketplaceShellProps) => (
     className="flex flex-col items-center gap-2 border-t border-(--line) pt-4 text-center"
   >
     <h3 className="island-kicker">Marketplace</h3>
-    {children}
+    {/* Fixed min height (summary + suggested prices + link) so the sheet
+        cover doesn't resize when the state changes. */}
+    <div className="flex min-h-19.5 flex-col items-center justify-center gap-2">
+      {children}
+    </div>
   </section>
 )
