@@ -77,7 +77,7 @@ export const useBarcodeScanner = (
     void (async () => {
       try {
         const status = await navigator.permissions.query({
-          name: 'camera' as PermissionName,
+          name: 'camera',
         })
         if (unmountedRef.current || status.state !== 'granted') return
         await startCamera()
