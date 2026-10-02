@@ -33,7 +33,7 @@ export const getCollection = createServerFn()
       return {
         releases: [],
         pagination: { page: 1, pages: 1, items: 0 },
-      } as CollectionPage
+      }
     }
 
     const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
@@ -73,7 +73,7 @@ export const getCollection = createServerFn()
         pages: json.pagination.pages,
         items: json.pagination.items,
       },
-    } as CollectionPage
+    }
   })
 
 export const fetchRandomRecord = createServerFn().handler(async () => {
