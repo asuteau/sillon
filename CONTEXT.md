@@ -45,16 +45,24 @@ The Release Discogs designates as the canonical one for a Master. It decides wha
 _Avoid_: Primary release, original pressing
 
 **Discography**:
-The Masters an artist is credited on as main artist, newest first. Excludes guest appearances, remixes and production credits. Best-effort for very prolific artists: it may be truncated.
+The Masters an artist is credited on as main artist, newest first, including splits and collaborations whatever the credit order. Excludes guest appearances, remixes and production credits. Best-effort for very prolific artists: it may be truncated.
 _Avoid_: Releases, albums list
 
 **Studio album**:
-A Master in a Discography whose Main release is tagged as an album by Discogs — or, when the Main release is tagged neither album nor EP, any of its Releases is — and whose Main release isn't a compilation, live recording, box set or unofficial release. Soundtracks and scores count. An approximation: Discogs has no reliable "studio" flag, so an occasional wrong inclusion or exclusion is accepted.
+A Master in a Discography whose Main release is tagged as an album by Discogs, and isn't a compilation, live recording, box set or unofficial release. Soundtracks and scores count. An approximation: Discogs has no reliable "studio" flag, so an occasional wrong inclusion or exclusion is accepted.
 _Avoid_: LP, full-length, official album
 
 **EP**:
-A Master in a Discography classified as an EP the same way a Studio album is classified as an album. A Master is never both: the Main release decides, and other Releases only fill in when it carries neither tag.
+A Master in a Discography whose Main release is tagged as an EP by Discogs, and isn't an Unofficial release. Only the Main release's tags count, so a Master is never both a Studio album and an EP.
 _Avoid_: Mini-album
+
+**Compilation**:
+A Master in a Discography whose Main release is tagged as a compilation by Discogs, and isn't an Unofficial release.
+_Avoid_: Best-of, anthology
+
+**Unofficial release**:
+A record not sanctioned by the artist or their label (bootlegs, unlicensed pressings), as tagged by Discogs. Excluded from Studio albums, EPs and Compilations; only the full Discography shows them.
+_Avoid_: Bootleg, pirate
 
 **Cover**:
 The HD artwork shown for a record. It belongs to the Master: every Release of a Master shows the same Cover. A Release without a Master has its own Cover.

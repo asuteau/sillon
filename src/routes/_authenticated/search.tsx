@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ScanLine, Search as SearchIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -12,6 +12,7 @@ import { ArtistCard } from '#/features/search/components/ArtistCard'
 import { DiscographyCard } from '#/features/search/components/DiscographyCard'
 import { MasterCard } from '#/features/search/components/MasterCard'
 import { VersionRow } from '#/features/search/components/VersionRow'
+import type { ArtistDiscographyItem } from '#/features/search/search.model'
 import {
   toArtist,
   toArtistDiscographyItem,
@@ -19,19 +20,21 @@ import {
   toMasterVersion,
 } from '#/features/search/search.model'
 import {
-  artistMasterFormatsQueryOptions,
-  artistReleasesQueryOptions,
+  artistDetailQueryOptions,
+  artistMastersQueryOptions,
   artistsQueryOptions,
   mastersQueryOptions,
-  masterTagsQueryOptions,
   versionsQueryOptions,
 } from '#/features/search/search.queries'
-import type { MasterTags } from '#/features/search/search.utils'
+import type {
+  ArtistMasters,
+  DiscographyFormat,
+} from '#/features/search/search.schema'
 import {
+  isCompilation,
+  isCreditedTo,
   isEp,
   isStudioAlbum,
-  MAX_VERSION_LOOKUPS,
-  needsVersionLookup,
 } from '#/features/search/search.utils'
 
 export const Route = createFileRoute('/_authenticated/search')({
@@ -287,25 +290,40 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
   )
 }
 
-type DiscographyFilter = 'albums' | 'eps' | 'compilations' | 'all'
+type ClassifiedFilter = 'albums' | 'eps' | 'compilations'
+type DiscographyFilter = ClassifiedFilter | 'all'
 
-const DISCOGRAPHY_FILTERS: {
-  key: DiscographyFilter
-  label: string
-  matches: (item: { title: string; tags: MasterTags }) => boolean
-}[] = [
-  {
-    key: 'albums',
+// Each classified filter is its own Discogs search, so the full Discography only loads on demand
+const CLASSIFIED_FILTERS = {
+  albums: {
     label: 'Studio albums',
-    matches: (i) => isStudioAlbum(i.title, i.tags),
+    format: 'Album',
+    matches: (i) => isStudioAlbum(i.title, i.formats),
   },
-  { key: 'eps', label: 'EPs', matches: (i) => isEp(i.tags) },
-  {
-    key: 'compilations',
+  eps: { label: 'EPs', format: 'EP', matches: (i) => isEp(i.formats) },
+  compilations: {
     label: 'Compilations',
-    matches: (i) => i.tags.main.includes('Compilation'),
+    format: 'Compilation',
+    matches: (i) => isCompilation(i.formats),
   },
-  { key: 'all', label: 'All', matches: () => true },
+} satisfies Record<
+  ClassifiedFilter,
+  {
+    label: string
+    format: DiscographyFormat
+    matches: (item: ArtistDiscographyItem) => boolean
+  }
+>
+
+// Default order when the chosen filter is empty, the slow full Discography last
+const FALLBACK_ORDER: ClassifiedFilter[] = ['albums', 'eps', 'compilations']
+
+const FILTER_CHIPS: { key: DiscographyFilter; label: string }[] = [
+  ...FALLBACK_ORDER.map((key) => ({
+    key,
+    label: CLASSIFIED_FILTERS[key].label,
+  })),
+  { key: 'all', label: 'All' },
 ]
 
 interface DiscographyListProps {
@@ -321,79 +339,83 @@ function DiscographyList({
 }: DiscographyListProps) {
   const [filter, setFilter] = useState<DiscographyFilter>('albums')
 
-  // Primary: artist-ID based — complete, no false positives
-  const { data: releasesData, isPending: isReleasesPending } = useQuery(
-    artistReleasesQueryOptions(artistId),
+  // Name variations tell the artist's own credits from homonyms'
+  const { data: artist, isPending: isArtistPending } = useQuery(
+    artistDetailQueryOptions(artistId),
   )
-  // Format enrichment: search API joined by master ID
-  const { data: formatsData, isPending: isFormatsPending } = useQuery(
-    artistMasterFormatsQueryOptions(artistName),
-  )
+  const [albumsQuery, epsQuery, compilationsQuery] = useQueries({
+    queries: FALLBACK_ORDER.map((key) =>
+      artistMastersQueryOptions(artistName, CLASSIFIED_FILTERS[key].format),
+    ),
+  })
+  const isClassifiedPending =
+    isArtistPending ||
+    albumsQuery.isPending ||
+    epsQuery.isPending ||
+    compilationsQuery.isPending
 
-  const formatMap = useMemo(
-    () => new Map((formatsData ?? []).map((m) => [m.id, m.formats])),
-    [formatsData],
-  )
-
-  // Releases come newest first, so the lookup cap drops the oldest Masters
-  const lookups = useMemo(
+  const names = useMemo(
     () =>
-      (releasesData?.releases ?? [])
-        .filter((r) => needsVersionLookup(formatMap.get(r.id)))
-        .slice(0, MAX_VERSION_LOOKUPS)
-        .map((r) => ({ id: r.id, mainReleaseId: r.main_release ?? null })),
-    [releasesData?.releases, formatMap],
-  )
-  const { data: tagsData, isPending: isTagsPending } = useQuery(
-    masterTagsQueryOptions(lookups, !isReleasesPending && !isFormatsPending),
+      artist ? [artist.name, ...(artist.namevariations ?? [])] : [artistName],
+    [artist, artistName],
   )
 
-  const allItems = useMemo(() => {
-    const tagsMap = new Map((tagsData ?? []).map((t) => [t.id, t]))
-    return (releasesData?.releases ?? []).map((release) => {
-      const tags = tagsMap.get(release.id) ?? {
-        main: formatMap.get(release.id) ?? [],
-        others: [],
-      }
-      return { ...toArtistDiscographyItem(release), tags }
-    })
-  }, [releasesData?.releases, formatMap, tagsData])
+  const classifiedItems = useMemo(() => {
+    const keep = (data: ArtistMasters | undefined, key: ClassifiedFilter) =>
+      (data?.results ?? [])
+        .map(toArtistDiscographyItem)
+        .filter(
+          (item) =>
+            isCreditedTo(item.credit, names) &&
+            CLASSIFIED_FILTERS[key].matches(item),
+        )
+    return {
+      albums: keep(albumsQuery.data, 'albums'),
+      eps: keep(epsQuery.data, 'eps'),
+      compilations: keep(compilationsQuery.data, 'compilations'),
+    } satisfies Record<ClassifiedFilter, ArtistDiscographyItem[]>
+  }, [names, albumsQuery.data, epsQuery.data, compilationsQuery.data])
 
-  const counts = useMemo(
+  // Artists without studio albums (singles-only DJs…) fall back to the first non-empty filter
+  const activeFilter: DiscographyFilter =
+    filter === 'albums' && classifiedItems.albums.length === 0
+      ? (FALLBACK_ORDER.find((key) => classifiedItems[key].length > 0) ?? 'all')
+      : filter
+
+  const allQuery = useQuery(
+    artistMastersQueryOptions(
+      artistName,
+      null,
+      !isClassifiedPending && activeFilter === 'all',
+    ),
+  )
+  const allItems = useMemo(
     () =>
-      Object.fromEntries(
-        DISCOGRAPHY_FILTERS.map(({ key, matches }) => [
-          key,
-          allItems.filter(matches).length,
-        ]),
-      ) as Record<DiscographyFilter, number>,
-    [allItems],
+      (allQuery.data?.results ?? [])
+        .map(toArtistDiscographyItem)
+        .filter((item) => isCreditedTo(item.credit, names)),
+    [allQuery.data, names],
   )
 
-  // Artists without studio albums (singles-only DJs…) fall back to everything
-  const activeFilter =
-    filter === 'albums' && counts.albums === 0 ? 'all' : filter
-
-  const items = useMemo(
-    () =>
-      allItems.filter(
-        DISCOGRAPHY_FILTERS.find((entry) => entry.key === activeFilter)!
-          .matches,
-      ),
-    [allItems, activeFilter],
-  )
-
-  if (isReleasesPending || isFormatsPending || isTagsPending) {
+  if (isClassifiedPending) {
     return <p className="text-(--sea-ink-soft)">Loading discography…</p>
   }
+
+  const items =
+    activeFilter === 'all' ? allItems : classifiedItems[activeFilter]
+  const activeQuery = {
+    albums: albumsQuery,
+    eps: epsQuery,
+    compilations: compilationsQuery,
+    all: allQuery,
+  }[activeFilter]
 
   return (
     <>
       <div className="mb-6 flex gap-2 flex-wrap">
-        {DISCOGRAPHY_FILTERS.map(({ key, label }) => {
-          const count = counts[key]
-          if (key === 'all' && count === counts.albums) return null
-          if (key !== 'all' && count === 0) return null
+        {FILTER_CHIPS.map(({ key, label }) => {
+          const count = key === 'all' ? null : classifiedItems[key].length
+          if (count === 0) return null
           return (
             <button
               key={key}
@@ -405,7 +427,7 @@ function DiscographyList({
               }`}
             >
               {label}
-              {key !== 'all' && (
+              {count !== null && (
                 <span className="ml-1 opacity-50">{count}</span>
               )}
             </button>
@@ -413,7 +435,9 @@ function DiscographyList({
         })}
       </div>
 
-      {items.length === 0 ? (
+      {activeQuery.isPending ? (
+        <p className="text-(--sea-ink-soft)">Loading discography…</p>
+      ) : items.length === 0 ? (
         <p className="text-(--sea-ink-soft)">No releases found.</p>
       ) : (
         <ul className="flex flex-col gap-3">
@@ -429,7 +453,7 @@ function DiscographyList({
         </ul>
       )}
 
-      {releasesData?.truncated && (
+      {activeQuery.data?.truncated && (
         <p className="mt-6 text-center text-sm text-(--sea-ink-soft)">
           Older releases not shown — search by title
         </p>

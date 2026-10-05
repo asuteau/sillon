@@ -128,40 +128,22 @@ export const ArtistSearchPageSchema = z.object({
   pagination: PaginationSchema,
 })
 
-export const ArtistReleaseSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  year: z.number().optional(),
-  thumb: z.string().optional(),
-  type: z.string(),
-  role: z.string().optional(),
-  format: z.string().optional(),
-  main_release: z.number().nullish(),
-})
-
-export const ArtistReleasesPageSchema = z.object({
-  releases: z.array(ArtistReleaseSchema),
-  pagination: PaginationSchema,
-})
-
 export const ArtistDetailSchema = z.object({
   id: z.number(),
   name: z.string(),
   profile: z.string().optional(),
+  namevariations: z.array(z.string()).optional(),
 })
 
 export type ArtistDetail = z.infer<typeof ArtistDetailSchema>
 export type ArtistResult = z.infer<typeof ArtistResultSchema>
 export type ArtistSearchPage = z.infer<typeof ArtistSearchPageSchema>
-export type ArtistRelease = z.infer<typeof ArtistReleaseSchema>
-export type ArtistDiscography = {
-  releases: ArtistRelease[]
-  // True when the artist has more releases than Sillon fetches
+
+// Discogs format tags each Discography filter searches by; null searches every Master
+export type DiscographyFormat = 'Album' | 'EP' | 'Compilation'
+
+export type ArtistMasters = {
+  results: MasterResult[]
+  // True when the artist has more Masters than Sillon fetches
   truncated: boolean
 }
-
-export type MasterFormats = { id: number; formats: string[] }
-
-export const MasterVersionFormatsPageSchema = z.object({
-  versions: z.array(z.object({ id: z.number(), format: z.string() })),
-})

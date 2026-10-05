@@ -9,23 +9,18 @@ import {
 
 import type {
   ArtistDetail,
-  ArtistDiscography,
-  ArtistRelease,
+  ArtistMasters,
   ArtistSearchPage,
   BarcodeResult,
-  MasterFormats,
+  DiscographyFormat,
   ReleaseDetail,
   SearchPage,
   VersionsPage,
 } from './search.schema'
-import type { MasterTags } from './search.utils'
-import { MAX_VERSION_LOOKUPS } from './search.utils'
 import {
   ArtistDetailSchema,
-  ArtistReleasesPageSchema,
   ArtistSearchPageSchema,
   BarcodeResultSchema,
-  MasterVersionFormatsPageSchema,
   PaginatedSchema,
   ReleaseDetailSchema,
   SearchPageSchema,
@@ -65,10 +60,6 @@ async function discogsGet(
   }
 
   return response.json()
-}
-
-function keepMainMasters(releases: ArtistRelease[]): ArtistRelease[] {
-  return releases.filter((r) => r.type === 'master' && r.role === 'Main')
 }
 
 async function discogsGetAllPages(
@@ -281,100 +272,40 @@ export const getArtistDetail = createServerFn()
     return ArtistDetailSchema.parse(json)
   })
 
-export const getArtistReleases = createServerFn()
-  .inputValidator((data: { artistId: string }) => data)
-  .handler(async ({ data }): Promise<ArtistDiscography> => {
+// Search by name rather than artist ID: it returns Masters only, with their Main release tags
+export const getArtistMasters = createServerFn()
+  .inputValidator(
+    (data: { artistName: string; format: DiscographyFormat | null }) => data,
+  )
+  .handler(async ({ data }): Promise<ArtistMasters> => {
     const { useAppSession } = await import('#/services/session.server')
     const session = await useAppSession()
 
     const { accessToken, accessTokenSecret } = session.data
     if (!accessToken || !accessTokenSecret) {
-      return { releases: [], truncated: false }
+      return { results: [], truncated: false }
     }
-
-    // Discogs lists Main releases first, then appearances, so paging stops once they run out
-    const releases: ArtistRelease[] = []
-    for (let page = 1; page <= MAX_PAGES; page++) {
-      const json = await discogsGet(
-        `${DISCOGS_API}/artists/${data.artistId}/releases?sort=year&sort_order=desc&per_page=100&page=${page}`,
-        { accessToken, accessTokenSecret },
-        'Discogs artist releases fetch',
-      )
-      const parsed = ArtistReleasesPageSchema.parse(json)
-      releases.push(...parsed.releases)
-
-      const isLastPage = page >= parsed.pagination.pages
-      const mainEnded = parsed.releases.some((r) => r.role !== 'Main')
-      if (isLastPage || mainEnded) {
-        return { releases: keepMainMasters(releases), truncated: false }
-      }
-    }
-
-    return { releases: keepMainMasters(releases), truncated: true }
-  })
-
-// Artist releases carry no format tags, so they are looked up via search and joined by master ID
-export const getArtistMasterFormats = createServerFn()
-  .inputValidator((data: { artistName: string }) => data)
-  .handler(async ({ data }): Promise<MasterFormats[]> => {
-    const { useAppSession } = await import('#/services/session.server')
-    const session = await useAppSession()
-
-    const { accessToken, accessTokenSecret } = session.data
-    if (!accessToken || !accessTokenSecret) return []
 
     const params = new URLSearchParams({
       artist: data.artistName,
       type: 'master',
+      sort: 'year',
+      sort_order: 'desc',
       per_page: '100',
     })
+    if (data.format) params.set('format', data.format)
 
-    const { pages } = await discogsGetAllPages(
+    const { pages, truncated } = await discogsGetAllPages(
       (page) =>
         `${DISCOGS_API}/database/search?${params.toString()}&page=${page}`,
       { accessToken, accessTokenSecret },
-      'Discogs artist formats search',
+      'Discogs artist masters search',
     )
 
-    return pages
-      .flatMap((json) => SearchPageSchema.parse(json).results)
-      .map((r) => ({ id: r.id, formats: r.format ?? [] }))
-  })
-
-// Fills in the tags search results miss, from every Release of each Master
-export const getMasterTags = createServerFn()
-  .inputValidator(
-    (data: { masters: { id: number; mainReleaseId: number | null }[] }) => data,
-  )
-  .handler(async ({ data }): Promise<(MasterTags & { id: number })[]> => {
-    const { useAppSession } = await import('#/services/session.server')
-    const session = await useAppSession()
-
-    const { accessToken, accessTokenSecret } = session.data
-    if (!accessToken || !accessTokenSecret) return []
-
-    const results = await Promise.allSettled(
-      data.masters
-        .slice(0, MAX_VERSION_LOOKUPS)
-        .map(async ({ id, mainReleaseId }) => {
-          const json = await discogsGet(
-            `${DISCOGS_API}/masters/${id}/versions?per_page=100`,
-            { accessToken, accessTokenSecret },
-            'Discogs master version formats fetch',
-          )
-          const { versions } = MasterVersionFormatsPageSchema.parse(json)
-          const tags: MasterTags = { main: [], others: [] }
-          for (const version of versions) {
-            const formats = version.format.split(', ')
-            if (version.id === mainReleaseId) tags.main.push(...formats)
-            else tags.others.push(...formats)
-          }
-          return { id, ...tags }
-        }),
-    )
-
-    // A failed lookup leaves that Master unclassified rather than failing the Discography
-    return results.flatMap((r) => (r.status === 'fulfilled' ? [r.value] : []))
+    return {
+      results: pages.flatMap((json) => SearchPageSchema.parse(json).results),
+      truncated,
+    }
   })
 
 export const fetchDiscogsBarcode = createServerFn()

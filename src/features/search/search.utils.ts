@@ -40,9 +40,6 @@ export function parseVinylColors(
   return found.length > 0 ? found : DEFAULT_COLORS
 }
 
-// Format tags of a Master: its Main release's, then every other Release's
-export type MasterTags = { main: string[]; others: string[] }
-
 const NON_STUDIO_FORMATS = [
   'Compilation',
   'Live',
@@ -50,44 +47,38 @@ const NON_STUDIO_FORMATS = [
   'Box Set',
 ]
 
-// Tags on the Main release that settle a Master's kind without looking at other Releases
-const CONCLUSIVE_FORMATS = [
-  'Album',
-  'EP',
-  'Single',
-  'Maxi-Single',
-  ...NON_STUDIO_FORMATS,
-]
-
-// Format tags miss some live records and compilations, so titles are checked too
+// Format tags miss some live records, compilations and demos, so titles are checked too
 const NON_STUDIO_TITLE =
-  /\b(live (at|in|from)|unplugged|best of|greatest hits|remix(es|ed))\b|\(live\)/i
+  /\b(live[!:]?\s+(at|in|from)|live recordings?|unplugged|best of|greatest hits|remix(es|ed)|demos?|bootleg)\b|\(live\)/i
 
-// The Main release decides; other Releases only fill in when it carries neither tag
-function masterKind({ main, others }: MasterTags): 'album' | 'ep' | null {
-  for (const formats of [main, others]) {
-    if (formats.includes('Album')) return 'album'
-    if (formats.includes('EP')) return 'ep'
-  }
-  return null
-}
+// Classification reads the Main release's format tags only
+export const isStudioAlbum = (title: string, formats: string[]): boolean =>
+  formats.includes('Album') &&
+  !formats.some((f) => NON_STUDIO_FORMATS.includes(f)) &&
+  !NON_STUDIO_TITLE.test(title)
 
-export function isStudioAlbum(title: string, tags: MasterTags): boolean {
-  return (
-    masterKind(tags) === 'album' &&
-    !tags.main.some((f) => NON_STUDIO_FORMATS.includes(f)) &&
-    !NON_STUDIO_TITLE.test(title)
+export const isEp = (formats: string[]): boolean =>
+  formats.includes('EP') &&
+  !formats.includes('Album') &&
+  !formats.includes('Unofficial Release')
+
+export const isCompilation = (formats: string[]): boolean =>
+  formats.includes('Compilation') && !formats.includes('Unofficial Release')
+
+const escapeRegExp = (text: string): string =>
+  text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const CREDIT_JOIN = String.raw`\s(?:\/|\+|&|x|with|meets|vs\.?|and|feat\.?|featuring)\s|,\s`
+
+// Search matches artists by name, so homonyms ("The Beatles (4)") and tributes are weeded out:
+// one of the artist's names must stand whole in the credit, alone or joined to another artist
+export const isCreditedTo = (credit: string, names: string[]): boolean => {
+  // Drops the translated credit ("The Beatles = ビートルズ*") and name variation stars
+  const normalized = credit.split(' = ')[0].replaceAll('*', '').trim()
+  return names.some((name) =>
+    new RegExp(
+      `(?:^|${CREDIT_JOIN})${escapeRegExp(name)}(?:$|${CREDIT_JOIN})`,
+      'i',
+    ).test(normalized),
   )
-}
-
-export function isEp(tags: MasterTags): boolean {
-  return masterKind(tags) === 'ep'
-}
-
-// Caps the extra Discogs requests spent classifying one artist's Discography
-export const MAX_VERSION_LOOKUPS = 20
-
-// Search results only carry Main release tags, and miss Masters credited under name variations
-export function needsVersionLookup(mainFormats: string[] | undefined): boolean {
-  return !mainFormats?.some((f) => CONCLUSIVE_FORMATS.includes(f))
 }

@@ -1,5 +1,4 @@
 import type {
-  ArtistRelease,
   ArtistResult,
   MasterResult,
   ReleaseDetail,
@@ -84,9 +83,11 @@ export type Artist = {
 export type ArtistDiscographyItem = {
   id: number
   title: string
+  // Raw Discogs artist credit, disambiguation included, to tell homonyms apart
+  credit: string
   year: number | null
   thumb: string
-  format: string
+  formats: string[]
 }
 
 export function toArtist(raw: ArtistResult): Artist {
@@ -100,14 +101,16 @@ export function toArtist(raw: ArtistResult): Artist {
 }
 
 export function toArtistDiscographyItem(
-  raw: ArtistRelease,
+  raw: MasterResult,
 ): ArtistDiscographyItem {
+  const dashIdx = raw.title.indexOf(' - ')
   return {
     id: raw.id,
-    title: raw.title,
-    year: raw.year ?? null,
-    thumb: raw.thumb ?? '',
-    format: raw.format ?? '',
+    title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
+    credit: dashIdx >= 0 ? raw.title.slice(0, dashIdx) : '',
+    year: raw.year ? parseInt(raw.year, 10) || null : null,
+    thumb: raw.thumb,
+    formats: raw.format ?? [],
   }
 }
 
