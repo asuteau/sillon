@@ -44,3 +44,17 @@ Auth (Phase 2) is complete.
 - `docs/roadmap.md` — full phased plan, file conventions (section 3.7), architecture decisions
 - `docs/react-best-practices.md` — apply every rule to every component generated
 - `docs/design-system.md` — CSS tokens, typography, theming, shadcn config
+
+## Agent skills
+
+### Issue tracker
+
+Issues tracked in GitHub Issues (asuteau/sillon) via `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
