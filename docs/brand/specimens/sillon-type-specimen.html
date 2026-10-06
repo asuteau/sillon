@@ -1,0 +1,184 @@
+<title>Sillon Type Specimen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Schibsted+Grotesk:wght@400;500;600&family=Fragment+Mono&family=Gloock&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Familjen+Grotesk:ital,wght@0,400..700;1,400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+<style>
+/* Layout: two specimens side by side, same content, so only the type changes */
+:root {
+  --bg: #f3f2ef; --surface: #fbfaf8; --fg: #141312; --muted: #6d6a66; --line: #dcd9d4; --groove-a: #1b1a19; --groove-b: #2a2826; --label: #c8452f;
+  --a-display: 'Newsreader', Georgia, serif;
+  --a-ui: 'Schibsted Grotesk', system-ui, sans-serif;
+  --a-mono: 'Fragment Mono', ui-monospace, monospace;
+  --b-display: 'Gloock', Georgia, serif;
+  --b-ui: 'Hanken Grotesk', system-ui, sans-serif;
+  --b-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --c-display: 'Familjen Grotesk', system-ui, sans-serif;
+  --c-ui: 'Familjen Grotesk', system-ui, sans-serif;
+  --c-mono: 'Martian Mono', ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e0d0d; --surface: #161514; --fg: #ece9e4; --muted: #8f8a84; --line: #2a2826; --groove-a: #050505; --groove-b: #1d1c1b; --label: #d9573f; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e0d0d; --surface: #161514; --fg: #ece9e4; --muted: #8f8a84; --line: #2a2826; --groove-a: #050505; --groove-b: #1d1c1b; --label: #d9573f; color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--a-ui); }
+.wrap { max-width: 1560px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; gap: 28px; }
+.intro { font-size: 13px; color: var(--muted); max-width: 62ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 24px; }
+.spec { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 28px; display: grid; gap: 32px; min-width: 0; }
+.tag { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.spec.a { --d: var(--a-display); --u: var(--a-ui); --m: var(--a-mono); }
+.spec.b { --d: var(--b-display); --u: var(--b-ui); --m: var(--b-mono); }
+.spec.c { --d: var(--c-display); --u: var(--c-ui); --m: var(--c-mono); }
+.spec.c .hero h1 { font-weight: 700; letter-spacing: -.045em; line-height: .92; }
+.spec.c .hero h1 em { font-style: normal; font-weight: 400; color: var(--muted); }
+.spec.c .artist { font-weight: 500; font-size: 15px; text-transform: uppercase; letter-spacing: .06em; }
+.spec.c .title { font-weight: 700; letter-spacing: -.03em; }
+.spec.c .row .t { font-weight: 600; letter-spacing: -.01em; }
+.spec.c .row .t i { font-style: normal; font-weight: 400; color: var(--muted); font-size: 14px; }
+.spec.c .cat, .spec.c .y { font-size: 10.5px; font-variation-settings: 'wdth' 87.5; }
+.spec.c .small b { font-weight: 700; letter-spacing: -.03em; }
+.spec * { font-family: var(--u); }
+.d { font-family: var(--d) !important; }
+.m { font-family: var(--m) !important; }
+
+.hero h1 { font-weight: 400; font-size: clamp(40px, 6vw, 64px); line-height: .98; letter-spacing: -.02em; margin: 0; text-wrap: balance; }
+.spec.a .hero h1 { font-weight: 360; font-variation-settings: 'opsz' 72; }
+.hero h1 em { font-style: italic; }
+.spec.b .hero h1 em { font-style: normal; color: var(--label); }
+.hero p { margin: 14px 0 0; font-size: 16px; line-height: 1.55; color: var(--muted); max-width: 46ch; }
+
+.feature { display: grid; grid-template-columns: 148px 1fr; gap: 20px; align-items: end; }
+.disc { width: 100%; aspect-ratio: 1; max-width: 100%; border-radius: 50%;
+  background: radial-gradient(circle, var(--label) 0 17%, var(--groove-a) 17.5% 19%, transparent 19%),
+    repeating-radial-gradient(circle, var(--groove-a) 0 1.4px, var(--groove-b) 1.4px 2.6px); }
+.artist { font-size: 22px; line-height: 1.1; margin: 0; }
+.spec.a .artist { font-style: italic; font-weight: 400; }
+.title { font-size: 34px; line-height: 1.02; margin: 2px 0 10px; font-weight: 500; letter-spacing: -.01em; text-wrap: balance; }
+.spec.b .title { font-weight: 400; }
+.cat { font-size: 12px; color: var(--muted); letter-spacing: .02em; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+.list { display: grid; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 12px 0; border-top: 1px solid var(--line); align-items: baseline; }
+.row .t { font-size: 18px; line-height: 1.2; }
+.row .t i { font-style: italic; }
+.spec.b .row .t i { font-style: normal; font-family: var(--u) !important; font-size: 14px; color: var(--muted); }
+.row .y { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.ui { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font-size: 14px; font-weight: 500; padding: 10px 18px; border-radius: 999px; border: 1px solid var(--fg); background: var(--fg); color: var(--bg); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line); }
+.chip { font-size: 12px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.chip.on { color: var(--fg); border-color: var(--fg); }
+.btn:focus-visible, .chip:focus-visible { outline: 2px solid var(--label); outline-offset: 2px; }
+.body { font-size: 15px; line-height: 1.6; max-width: 60ch; margin: 0; }
+.small { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.small div { border-top: 1px solid var(--line); padding-top: 8px; }
+.small b { display: block; font-size: 26px; font-weight: 400; line-height: 1; }
+.small span { font-size: 11px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+@media (max-width: 480px) { .feature { grid-template-columns: 96px 1fr; } .title { font-size: 26px; } .spec { padding: 20px; } }
+</style>
+
+<div class="wrap">
+  <p class="intro">Same content set in all three pairings. Display face for titles, UI face for controls and running text, mono for catalogue data. Switch your system theme to see light and dark.</p>
+  <div class="grid">
+    <!-- A -->
+    <section class="spec a">
+      <div class="tag"><span>A · Newsreader / Schibsted Grotesk / Fragment Mono</span><span>Literary</span></div>
+      <div class="hero">
+        <h1 class="d">Every record you own, <em>in its groove.</em></h1>
+        <p>Sillon mirrors your Discogs collection and wantlist, with high-definition covers for every record.</p>
+      </div>
+      <div class="feature">
+        <div class="disc" role="img" aria-label="Record"></div>
+        <div>
+          <p class="artist d">Miles Davis</p>
+          <p class="title d">Kind of Blue</p>
+          <div class="cat m"><span>COLUMBIA</span><span>CS 8163</span><span>US · 1959</span><span>LP, ALBUM, STEREO</span></div>
+        </div>
+      </div>
+      <div class="list">
+        <div class="row"><span class="t d">Homogenic <i>Björk</i></span><span class="y m">1997</span></div>
+        <div class="row"><span class="t d">In Rainbows <i>Radiohead</i></span><span class="y m">2007</span></div>
+        <div class="row"><span class="t d">Selected Ambient Works 85–92 <i>Aphex Twin</i></span><span class="y m">1992</span></div>
+      </div>
+      <div class="ui">
+        <button class="btn" type="button">Add to Collection</button>
+        <button class="btn ghost" type="button">Wantlist</button>
+        <span class="chip on">Studio albums</span><span class="chip">EPs</span><span class="chip">Compilations</span>
+      </div>
+      <p class="body">A Release is one specific pressing of a Master. Adding this one to your Collection fulfils the want for Columbia CS 8163, but not for the 1997 Legacy reissue.</p>
+      <div class="small">
+        <div><b class="d">1,284</b><span>Copies</span></div>
+        <div><b class="d">212</b><span>Wantlist</span></div>
+        <div><b class="d">63</b><span>Labels</span></div>
+      </div>
+    </section>
+
+    <!-- B -->
+    <section class="spec b">
+      <div class="tag"><span>B · Gloock / Hanken Grotesk / IBM Plex Mono</span><span>Sharp</span></div>
+      <div class="hero">
+        <h1 class="d">Every record you own, <em>in its groove.</em></h1>
+        <p>Sillon mirrors your Discogs collection and wantlist, with high-definition covers for every record.</p>
+      </div>
+      <div class="feature">
+        <div class="disc" role="img" aria-label="Record"></div>
+        <div>
+          <p class="artist d">Miles Davis</p>
+          <p class="title d">Kind of Blue</p>
+          <div class="cat m"><span>COLUMBIA</span><span>CS 8163</span><span>US · 1959</span><span>LP, ALBUM, STEREO</span></div>
+        </div>
+      </div>
+      <div class="list">
+        <div class="row"><span class="t d">Homogenic <i>Björk</i></span><span class="y m">1997</span></div>
+        <div class="row"><span class="t d">In Rainbows <i>Radiohead</i></span><span class="y m">2007</span></div>
+        <div class="row"><span class="t d">Selected Ambient Works 85–92 <i>Aphex Twin</i></span><span class="y m">1992</span></div>
+      </div>
+      <div class="ui">
+        <button class="btn" type="button">Add to Collection</button>
+        <button class="btn ghost" type="button">Wantlist</button>
+        <span class="chip on">Studio albums</span><span class="chip">EPs</span><span class="chip">Compilations</span>
+      </div>
+      <p class="body">A Release is one specific pressing of a Master. Adding this one to your Collection fulfils the want for Columbia CS 8163, but not for the 1997 Legacy reissue.</p>
+      <div class="small">
+        <div><b class="d">1,284</b><span>Copies</span></div>
+        <div><b class="d">212</b><span>Wantlist</span></div>
+        <div><b class="d">63</b><span>Labels</span></div>
+      </div>
+    </section>
+    <!-- C -->
+    <section class="spec c">
+      <div class="tag"><span>C · Familjen Grotesk / Martian Mono</span><span>Modernist</span></div>
+      <div class="hero">
+        <h1 class="d">Every record you own, <em>in its groove.</em></h1>
+        <p>Sillon mirrors your Discogs collection and wantlist, with high-definition covers for every record.</p>
+      </div>
+      <div class="feature">
+        <div class="disc" role="img" aria-label="Record"></div>
+        <div>
+          <p class="artist d">Miles Davis</p>
+          <p class="title d">Kind of Blue</p>
+          <div class="cat m"><span>COLUMBIA</span><span>CS 8163</span><span>US · 1959</span><span>LP, ALBUM, STEREO</span></div>
+        </div>
+      </div>
+      <div class="list">
+        <div class="row"><span class="t d">Homogenic <i>Björk</i></span><span class="y m">1997</span></div>
+        <div class="row"><span class="t d">In Rainbows <i>Radiohead</i></span><span class="y m">2007</span></div>
+        <div class="row"><span class="t d">Selected Ambient Works 85–92 <i>Aphex Twin</i></span><span class="y m">1992</span></div>
+      </div>
+      <div class="ui">
+        <button class="btn" type="button">Add to Collection</button>
+        <button class="btn ghost" type="button">Wantlist</button>
+        <span class="chip on">Studio albums</span><span class="chip">EPs</span><span class="chip">Compilations</span>
+      </div>
+      <p class="body">A Release is one specific pressing of a Master. Adding this one to your Collection fulfils the want for Columbia CS 8163, but not for the 1997 Legacy reissue.</p>
+      <div class="small">
+        <div><b class="d">1,284</b><span>Copies</span></div>
+        <div><b class="d">212</b><span>Wantlist</span></div>
+        <div><b class="d">63</b><span>Labels</span></div>
+      </div>
+    </section>
+  </div>
+</div>
