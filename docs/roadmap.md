@@ -404,24 +404,41 @@ pnpm add -D vitest @vitest/ui jsdom \
 ```ts
 // vitest.config.ts
 import { defineConfig } from 'vitest/config'
+import tsconfigPaths from 'vite-tsconfig-paths'
+import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
+  plugins: [tsconfigPaths({ projects: ['./tsconfig.json'] }), viteReact()],
   test: {
-    environment: 'jsdom',
-    globals: true,
+    environment: 'node',
     setupFiles: ['./src/test/setup.ts'],
   },
 })
 ```
 
+**Standalone config — never inherit `vite.config.ts`.** `tanstackStart()` sets env-level
+resolve config (`dedupe`, `noExternal`) that splits React into two instances under vitest
+→ `Invalid hook call` / `useState` of null in any test that renders. Nitro and PWA plugins
+are irrelevant to unit tests too.
+
+- **Environment**: `node` by default. DOM tests opt in per file with
+  `// @vitest-environment jsdom` on line 1 — keeps pure util/model tests fast and keeps
+  browser globals out of server code.
+- **No globals**: import `describe`/`it`/`expect`/`vi` from `vitest` explicitly. Since RTL's
+  auto-cleanup only registers with globals, the setup file calls it.
+
 ```ts
 // src/test/setup.ts
-import '@testing-library/jest-dom'
-import { server } from './mocks/server'
+import { cleanup } from '@testing-library/react'
+import { afterEach } from 'vitest'
 
-beforeAll(() => server.listen())
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+afterEach(() => cleanup())
+
+// Future (once msw is installed):
+// import { server } from './mocks/server'
+// beforeAll(() => server.listen())
+// afterEach(() => server.resetHandlers())
+// afterAll(() => server.close())
 ```
 
 #### Test strategy by layer
