@@ -6,7 +6,7 @@ import { RandomPickCard } from '#/features/collection/components/RandomPickCard'
 import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
-import { Colophon } from '#/features/landing/components/Colophon'
+import { LinerNotes } from '#/features/landing/components/LinerNotes'
 import { LandingPage } from '#/features/landing/components/LandingPage'
 import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
 import { ScanFab } from '#/shared/components/ScanFab'
@@ -86,7 +86,7 @@ function App() {
       )}
 
       {/* /about lands here too once signed in */}
-      <Colophon />
+      <LinerNotes />
 
       <ScanFab />
     </main>

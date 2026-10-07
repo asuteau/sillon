@@ -1,4 +1,4 @@
-import { COLOPHON_STACK } from '../landing.content'
+import { LINER_NOTES_STACK } from '../landing.content'
 
 const LABEL_CLASSES = 'type-caps mb-3 text-[11px] text-muted-foreground'
 const BODY_CLASSES =
@@ -6,17 +6,17 @@ const BODY_CLASSES =
 const LINK_CLASSES = 'text-foreground no-underline hover:underline'
 
 // Who made Sillon and how. /about redirects here.
-export const Colophon = () => (
+export const LinerNotes = () => (
   <section
-    id="colophon"
-    aria-labelledby="colophon-title"
+    id="liner-notes"
+    aria-labelledby="liner-notes-title"
     className="scroll-mt-20 border-t border-border py-14 sm:py-20"
   >
     <h2
-      id="colophon-title"
+      id="liner-notes-title"
       className="type-display mb-10 text-4xl text-foreground"
     >
-      Colophon
+      Liner notes
     </h2>
 
     <div className="grid gap-x-14 gap-y-10 md:grid-cols-2">
@@ -70,7 +70,7 @@ export const Colophon = () => (
         <div>
           <p className={LABEL_CLASSES}>Stack</p>
           <ul className="divide-y divide-border border-y border-border">
-            {COLOPHON_STACK.map(({ name, description, href }) => (
+            {LINER_NOTES_STACK.map(({ name, description, href }) => (
               <li key={name}>
                 <a
                   href={href}

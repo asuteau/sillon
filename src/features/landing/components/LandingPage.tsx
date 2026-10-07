@@ -1,5 +1,5 @@
 import { CollectionStill } from './CollectionStill'
-import { Colophon } from './Colophon'
+import { LinerNotes } from './LinerNotes'
 import { FeatureSection } from './FeatureSection'
 import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
@@ -70,6 +70,6 @@ export const LandingPage = () => (
     </FeatureSection>
 
     <LandingCta />
-    <Colophon />
+    <LinerNotes />
   </main>
 )

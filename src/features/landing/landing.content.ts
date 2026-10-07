@@ -105,8 +105,8 @@ export const catalogueLines = ({
   catno,
 }: LandingRecord): string[] => [String(year), format, `${label} · ${catno}`]
 
-// The Colophon's stack notes
-export const COLOPHON_STACK = [
+// The liner notes' stack
+export const LINER_NOTES_STACK = [
   {
     name: 'TanStack Start',
     description:

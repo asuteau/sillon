@@ -52,10 +52,10 @@ export default function BottomNav() {
             </Link>
           </>
         )}
-        {/* The Colophon, at the foot of the landing page (no Header nav on mobile) */}
+        {/* The liner notes, at the foot of the landing page (no Header nav on mobile) */}
         <Link
           to="/"
-          hash="colophon"
+          hash="liner-notes"
           activeOptions={{ includeHash: true }}
           className={TAB_CLASSES}
         >

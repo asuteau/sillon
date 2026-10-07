@@ -58,7 +58,7 @@ export default function Header() {
           )}
           <Link
             to="/"
-            hash="colophon"
+            hash="liner-notes"
             activeOptions={{ includeHash: true }}
             className={NAV_LINK_CLASSES}
           >

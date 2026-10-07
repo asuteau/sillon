@@ -27,7 +27,7 @@ describe('LandingPage', () => {
     ).toBe('/auth/login')
   })
 
-  it('shows the features, then a final call to action, then the colophon', () => {
+  it('shows the features, then a final call to action, then the liner notes', () => {
     renderLanding()
     expect(sectionHeadings()).toEqual([
       'Your collection, in HD.',
@@ -35,7 +35,7 @@ describe('LandingPage', () => {
       'Scan the sleeve.',
       'Nothing to spin?',
       'Bring your crates.',
-      'Colophon',
+      'Liner notes',
     ])
     const links = screen.getAllByRole('link', { name: 'Connect with Discogs' })
     expect(links).toHaveLength(2)
@@ -43,11 +43,11 @@ describe('LandingPage', () => {
       expect(link.getAttribute('href')).toBe('/auth/login')
   })
 
-  it('anchors the colophon for /about', () => {
+  it('anchors the liner notes for /about', () => {
     const { container } = renderLanding()
-    const colophon = container.querySelector('#colophon')
-    expect(colophon?.textContent).toContain('TanStack Start')
-    expect(colophon?.textContent).toContain('Aymeric Suteau')
+    const linerNotes = container.querySelector('#liner-notes')
+    expect(linerNotes?.textContent).toContain('TanStack Start')
+    expect(linerNotes?.textContent).toContain('Aymeric Suteau')
   })
 
   it('shows House sleeves only, never third-party cover art', () => {
