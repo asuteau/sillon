@@ -72,12 +72,12 @@ export const CoverArt = ({
         />
       )}
 
+      {/* No crossOrigin: Discogs images send no CORS headers */}
       {thumb && !thumbFailed && (
         <img
           src={thumb}
           alt=""
           loading="lazy"
-          crossOrigin="anonymous"
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${thumbLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setThumbLoaded(true)}
           onError={() => setThumbFailed(true)}
