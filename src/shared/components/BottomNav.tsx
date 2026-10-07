@@ -7,7 +7,7 @@ import { CountBadge } from '#/shared/components/CountBadge'
 
 // Active state from the router's data-status; only the active tab shows its label
 const TAB_CLASSES =
-  'group/tab flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-muted-foreground no-underline transition-colors duration-160 ease-fade hover:text-foreground data-[status=active]:bg-foreground data-[status=active]:text-background'
+  'group/tab flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-muted-foreground no-underline transition-colors duration-160 ease-fade hover:text-foreground data-[status=active]:bg-muted data-[status=active]:text-foreground'
 const TAB_LABEL_CLASSES = 'hidden group-data-[status=active]/tab:inline'
 
 export default function BottomNav() {
