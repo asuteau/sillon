@@ -89,7 +89,8 @@ export const flyCover = ({ row, sheet, direction }: FlyCoverInput) => {
   copy.setAttribute('aria-hidden', 'true')
   document.body.append(copy)
 
-  const hidden = isOpening ? [row, sheet] : [row]
+  // The row Cover stays put: the copy lifts off it and lands back on it
+  const hidden = isOpening ? [sheet] : []
   for (const el of hidden) el.style.visibility = 'hidden'
 
   const atRow = { transform: flipTransform(rowRect, sheetRect) }

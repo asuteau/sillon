@@ -73,7 +73,8 @@ const SpotlightContent = ({
         ]}
       />
 
-      <div className="flex justify-center pt-1">
+      {/* Bottom padding inside the scroller, so button shadows aren't clipped */}
+      <div className="flex justify-center pt-1 pb-6">
         {onRemove && (
           <Button
             variant="destructive"
@@ -115,7 +116,7 @@ export const RecordSpotlight = ({
     return (
       <Drawer open onOpenChange={handleClose}>
         <DrawerContent
-          className="sheet-fade p-6"
+          className="sheet-fade px-6 pt-6"
           style={{ '--cover-tint': tint ?? undefined }}
         >
           <CoverGlow tint={tint} />
@@ -135,7 +136,7 @@ export const RecordSpotlight = ({
   return (
     <Dialog open onOpenChange={handleClose}>
       <DialogContent
-        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden px-6 pt-6"
         style={{ '--cover-tint': tint ?? undefined }}
         showCloseButton={false}
       >

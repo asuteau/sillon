@@ -97,7 +97,8 @@ function ReleaseSheetContent({
 
       <MarketplaceSection releaseId={release.id} />
 
-      <div className="flex justify-center pt-1">
+      {/* Bottom padding inside the scroller, so button shadows aren't clipped */}
+      <div className="flex justify-center pt-1 pb-6">
         <Button variant="destructive" disabled={isRemoving} onClick={onRemove}>
           {removeIcon}
           {removeLabel}
@@ -132,7 +133,7 @@ export function ReleaseSheet({
         onAnimationEnd={onAnimationEnd}
       >
         <DrawerContent
-          className="sheet-fade p-6"
+          className="sheet-fade px-6 pt-6"
           style={{ '--cover-tint': tint ?? undefined }}
         >
           <CoverGlow tint={tint} />
@@ -156,7 +157,7 @@ export function ReleaseSheet({
       onOpenChangeComplete={onAnimationEnd}
     >
       <DialogContent
-        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden px-6 pt-6"
         style={{ '--cover-tint': tint ?? undefined }}
         showCloseButton={false}
       >
