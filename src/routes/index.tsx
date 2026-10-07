@@ -64,7 +64,6 @@ function App() {
       {data && data.releases.length > 0 && <RandomPickCard />}
 
       <header className="mb-8">
-        <p className="island-kicker mb-2">Vinyl</p>
         <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
           Recently Added
         </h1>
