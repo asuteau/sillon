@@ -251,6 +251,42 @@
   --radius-sheet: 14px;
 }
 
+/* Type roles — hierarchy from weight, case and tracking, never italics.
+   No font-size here: callers pick the size. Leading goes through
+   --tw-leading so text-* sizes don't reset it. */
+
+/* Page and sheet titles */
+@utility type-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  --tw-leading: 0.95;
+  line-height: 0.95;
+}
+
+/* Record titles in lists */
+@utility type-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  --tw-leading: 1.2;
+  line-height: 1.2;
+}
+
+/* Artist names and section labels: small uppercase, letter-spaced */
+@utility type-caps {
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Catalogue lines: cat no., year, format, counts */
+@utility type-catalogue {
+  font-family: var(--font-mono);
+  font-stretch: 87.5%;
+  font-variant-numeric: tabular-nums;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -7,6 +7,9 @@ import { useBarcodeScanner } from '#/features/search/hooks/use-barcode-scanner'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { RecordHeading } from '#/shared/components/RecordHeading'
+import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Input } from '#/shared/components/ui/input'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
@@ -45,26 +48,23 @@ const BarcodeScannerContent = ({
     if (!isSupported) {
       return (
         <div className="flex flex-col items-center gap-5 py-2 text-center">
-          <AlertCircle className="h-12 w-12 text-(--sea-ink-soft)" />
+          <AlertCircle className="size-12 text-muted-foreground" />
           <div>
-            <p className="font-semibold text-(--sea-ink)">
+            <p className="type-title text-lg text-foreground">
               Barcode scanning is not supported on this browser.
             </p>
-            <p className="mt-1 text-sm text-(--sea-ink-soft)">
-              Please search manually.
+            <p className="mt-1 text-sm text-muted-foreground">
+              Search manually instead.
             </p>
           </div>
-          <button
-            onClick={onSearchManually}
-            className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
-          >
+          <Button variant="outline" size="lg" onClick={onSearchManually}>
             Search manually →
-          </button>
+          </Button>
           {import.meta.env.DEV && (
             <Input
               type="text"
               placeholder="Dev: enter barcode…"
-              className="mt-2 h-8 text-center font-mono text-xs sm:text-xs"
+              className="type-catalogue mt-2 h-8 text-center text-xs sm:text-xs"
               onKeyDown={(e) => {
                 if (e.key === 'Enter')
                   handleManualBarcode(e.currentTarget.value)
@@ -77,34 +77,28 @@ const BarcodeScannerContent = ({
 
     return (
       <div className="flex flex-col items-center gap-5 py-2 text-center">
-        <ScanIcon className="h-12 w-12 text-(--sea-ink)" />
+        <ScanIcon className="size-12 text-foreground" />
         <div>
-          <p className="font-semibold text-(--sea-ink)">Scan a barcode</p>
-          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+          <p className="type-title text-lg text-foreground">Scan a barcode</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             Point your camera at the barcode
             <br />
             on the record sleeve or spine.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          <button
-            onClick={startCamera}
-            className="flex items-center gap-1.5 rounded-full bg-(--sea-ink) px-4 py-2 text-sm font-semibold text-(--chip-bg) cursor-pointer"
-          >
+          <Button size="lg" onClick={startCamera}>
             Start scanning →
-          </button>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
-          >
+          </Button>
+          <Button variant="outline" size="lg" onClick={onClose}>
             Cancel
-          </button>
+          </Button>
         </div>
         {import.meta.env.DEV && (
           <Input
             type="text"
             placeholder="Dev: enter barcode…"
-            className="mt-2 h-8 text-center font-mono text-xs sm:text-xs"
+            className="type-catalogue mt-2 h-8 text-center text-xs sm:text-xs"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleManualBarcode(e.currentTarget.value)
             }}
@@ -116,7 +110,7 @@ const BarcodeScannerContent = ({
 
   if (scanState === 'scanning') {
     return (
-      <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl">
+      <div className="relative aspect-4/3 w-full overflow-hidden rounded-(--radius) bg-vinyl-black">
         <video
           ref={videoRef}
           playsInline
@@ -135,12 +129,13 @@ const BarcodeScannerContent = ({
           </p>
         </div>
         <div className="absolute bottom-6 inset-x-0 flex justify-center">
-          <button
+          <Button
+            size="lg"
             onClick={handleCancel}
-            className="flex items-center gap-1.5 rounded-full bg-black/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur cursor-pointer"
+            className="bg-black/40 text-white backdrop-blur"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -149,28 +144,22 @@ const BarcodeScannerContent = ({
   if (scanState === 'not_found') {
     return (
       <div className="flex flex-col items-center gap-5 py-2 text-center">
-        <AlertCircle className="h-12 w-12 text-(--sea-ink-soft)" />
+        <AlertCircle className="size-12 text-muted-foreground" />
         <div>
-          <p className="font-semibold text-(--sea-ink)">No result found</p>
-          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+          <p className="type-title text-lg text-foreground">No result found</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             No record matched this barcode on Discogs.
             <br />
             Try searching manually.
           </p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          <button
-            onClick={handleScanAgain}
-            className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
-          >
+          <Button variant="outline" size="lg" onClick={handleScanAgain}>
             Scan again
-          </button>
-          <button
-            onClick={onSearchManually}
-            className="flex items-center gap-1.5 rounded-full bg-(--sea-ink) px-4 py-2 text-sm font-semibold text-(--chip-bg) cursor-pointer"
-          >
+          </Button>
+          <Button size="lg" onClick={onSearchManually}>
             Search manually →
-          </button>
+          </Button>
         </div>
       </div>
     )
@@ -179,7 +168,7 @@ const BarcodeScannerContent = ({
   if (isPending) {
     return (
       <div className="flex items-center justify-center py-12">
-        <ScanIcon className="h-8 w-8 animate-pulse text-(--sea-ink-soft)" />
+        <GrooveLoader size={32} />
       </div>
     )
   }
@@ -200,7 +189,6 @@ const BarcodeScannerContent = ({
 
   return (
     <div className="relative flex min-h-0 flex-col gap-5 overflow-hidden">
-      <div className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(47,106,74,0.18),transparent_66%)]" />
       <div className="relative flex min-h-0 flex-col gap-5 overflow-y-auto">
         {barcodeResult && (
           <CoverArt
@@ -212,33 +200,25 @@ const BarcodeScannerContent = ({
             title={albumTitle}
             thumb={thumb}
             styles={[]}
-            className="aspect-square w-full shrink-0 overflow-hidden rounded-2xl"
+            className="aspect-square w-full shrink-0 overflow-hidden rounded-(--radius)"
           />
         )}
 
-        <div className="flex shrink-0 flex-col items-center gap-2 text-center">
-          <p className="island-kicker">{artist}</p>
-          <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
-            {albumTitle}
-          </h2>
-          {(barcodeResult?.year || formatParts.length > 0) && (
-            <p className="font-mono text-sm text-(--sea-ink-soft)">
-              {[barcodeResult?.year, ...formatParts]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-          )}
-          {(label || catno) && (
-            <p className="text-sm text-(--sea-ink-soft)">
-              {[label, catno].filter(Boolean).join(' · ')}
-            </p>
-          )}
+        <div className="flex shrink-0 flex-col items-center gap-3 text-center">
+          <RecordHeading
+            artist={artist}
+            title={albumTitle}
+            catalogue={[
+              [barcodeResult?.year, ...formatParts].filter(Boolean).join(' · '),
+              [label, catno].filter(Boolean).join(' · '),
+            ]}
+          />
           {styles.length > 0 && (
             <div className="flex flex-wrap justify-center gap-1.5">
               {styles.map((s) => (
                 <span
                   key={s}
-                  className="rounded-full border border-(--chip-line) bg-(--chip-bg) px-2.5 py-0.5 text-xs font-medium text-(--sea-ink-soft)"
+                  className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
                 >
                   {s}
                 </span>
@@ -256,51 +236,40 @@ const BarcodeScannerContent = ({
           />
         ) : (
           <>
-            <button
+            <Button
+              size="lg"
               onClick={handleAddToCollection}
               disabled={addedToCollection || isCollectionPending}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
+              className="w-full"
             >
-              {addedToCollection ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <CollectionIcon className="h-3.5 w-3.5" />
-              )}
-              {addedToCollection ? 'Added to collection!' : 'Add to collection'}
-            </button>
-            <button
+              {addedToCollection ? <Check /> : <CollectionIcon />}
+              {addedToCollection ? 'Added to collection' : 'Add to collection'}
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
               onClick={handleAddToWantlist}
               disabled={addedToWantlist || isWanted || isWantlistPending}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-(--sea-ink) px-4 py-2.5 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
+              className="w-full"
             >
-              {addedToWantlist || isWanted ? (
-                <Check className="h-3.5 w-3.5" />
-              ) : (
-                <WantlistIcon className="h-3.5 w-3.5" />
-              )}
+              {addedToWantlist || isWanted ? <Check /> : <WantlistIcon />}
               {addedToWantlist
-                ? 'Added to wantlist!'
+                ? 'Added to wantlist'
                 : isWanted
                   ? 'In your wantlist'
                   : 'Add to wantlist'}
-            </button>
+            </Button>
           </>
         )}
         <div className="flex gap-2 pt-1">
-          <button
-            onClick={handleScanAgain}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
+          <Button variant="ghost" onClick={handleScanAgain} className="flex-1">
+            <RotateCcw />
             Scan again
-          </button>
-          <button
-            onClick={onClose}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) cursor-pointer"
-          >
-            <X className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant="ghost" onClick={onClose} className="flex-1">
+            <X />
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>

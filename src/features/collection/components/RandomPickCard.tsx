@@ -1,31 +1,26 @@
 import { useRandomPick } from '#/features/collection/hooks/use-random-pick'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
+import { Button } from '#/shared/components/ui/button'
 import { RandomPickSpotlight } from './RandomPickSpotlight'
 
 export const RandomPickCard = () => {
   const { record, isPicking, pick, close } = useRandomPick()
 
   return (
-    <section className="island-shell rise-in mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl px-5 py-4">
-      <div className="flex flex-col gap-0.5">
-        <p className="m-0 font-semibold text-(--sea-ink)">
+    <section className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-(--radius) border border-border bg-card px-5 py-4">
+      <div className="flex flex-col gap-1">
+        <p className="type-title m-0 text-base text-foreground">
           Not sure what to spin?
         </p>
-        <p className="m-0 text-sm text-(--sea-ink-soft)">
+        <p className="m-0 text-sm text-muted-foreground">
           Let Sillon pull a record from your collection.
         </p>
       </div>
-      <button
-        type="button"
-        onClick={pick}
-        disabled={isPicking}
-        className="flex items-center gap-1.5 rounded-full bg-(--sea-ink) px-4 py-2 text-sm font-semibold text-(--chip-bg) transition hover:opacity-90 disabled:opacity-50 cursor-pointer"
-      >
-        <RandomPickIcon
-          className={`size-3.5 ${isPicking ? 'animate-pulse' : ''}`}
-        />
+      <Button variant="lacquer" size="lg" onClick={pick} disabled={isPicking}>
+        {isPicking ? <GrooveLoader size={14} /> : <RandomPickIcon />}
         Pick for me
-      </button>
+      </Button>
 
       <RandomPickSpotlight
         record={record}

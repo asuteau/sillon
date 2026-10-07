@@ -9,7 +9,7 @@ export function SheetCover(props: Props) {
     <div className="aspect-square min-h-40 w-full">
       <CoverArt
         {...props}
-        className="mx-auto aspect-square h-full max-w-full overflow-hidden rounded-2xl"
+        className="mx-auto aspect-square h-full max-w-full overflow-hidden rounded-(--radius)"
       />
     </div>
   )

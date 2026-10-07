@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
+import { ArrowLeft } from 'lucide-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ScanIcon } from '#/shared/components/icons/ScanIcon'
 import { SearchIcon } from '#/shared/components/icons/SearchIcon'
@@ -6,6 +7,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
+import { RecordList } from '#/shared/components/RecordList'
+import { Button } from '#/shared/components/ui/button'
 import { Chip } from '#/shared/components/ui/chip'
 import { Input } from '#/shared/components/ui/input'
 import { SearchReleaseSheet } from '#/shared/components/SearchReleaseSheet'
@@ -120,10 +123,10 @@ function Search() {
 
   const backLabel = showVersions
     ? mode === 'artist' && artistId
-      ? '← Albums'
-      : '← Search'
+      ? 'Albums'
+      : 'Search'
     : showDiscography
-      ? '← Search'
+      ? 'Search'
       : null
 
   const handleBack = showVersions
@@ -131,23 +134,24 @@ function Search() {
     : handleBackFromDiscography
 
   return (
-    <main className="page-wrap px-4 pb-24 sm:pb-8 pt-14">
+    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-24 sm:pb-8">
       {backLabel ? (
-        <div className="mb-6 flex items-center gap-4">
-          <button
-            onClick={handleBack}
-            className="island-kicker rise-in inline-flex items-center gap-1.5 cursor-pointer"
-          >
-            {backLabel}
-          </button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBack}
+          className="mb-6 -ml-2"
+        >
+          <ArrowLeft />
+          {backLabel}
+        </Button>
       ) : (
-        <header className="mb-8">
-          <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
+        <header className="mb-6">
+          <h1 className="type-display text-4xl text-foreground">
             Add a record
           </h1>
-          <p className="mt-1 text-sm text-(--sea-ink-soft)">
-            Search Discogs to add to your collection or wantlist
+          <p className="mt-2 text-sm text-muted-foreground">
+            Search Discogs to add to your collection or wantlist.
           </p>
         </header>
       )}
@@ -163,15 +167,17 @@ function Search() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Artist, album, label..."
-              className="h-12 pr-10"
+              className="h-12 pr-12"
             />
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setIsScannerOpen(true)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink)"
+              className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label="Scan barcode"
             >
-              <ScanIcon className="h-4 w-4" />
-            </button>
+              <ScanIcon />
+            </Button>
           </div>
         </>
       )}
@@ -244,10 +250,10 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
   if (q.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <SearchIcon className="h-12 w-12 text-(--sea-ink)" />
+        <SearchIcon className="size-12 text-foreground" />
         <div>
-          <p className="font-semibold text-(--sea-ink)">Find a record</p>
-          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+          <p className="type-title text-lg text-foreground">Find a record</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             Search Discogs to find a record to add.
           </p>
         </div>
@@ -257,31 +263,30 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
 
   if (q.length <= 2) {
     return (
-      <p className="text-(--sea-ink-soft)">
+      <p className="text-muted-foreground">
         Type at least 3 characters to search.
       </p>
     )
   }
 
   if (isFetching && artists.length === 0) {
-    return <p className="text-(--sea-ink-soft)">Searching…</p>
+    return <p className="text-muted-foreground">Searching…</p>
   }
 
   if (artists.length === 0) {
-    return <p className="text-(--sea-ink-soft)">No artists found for "{q}".</p>
+    return <p className="text-muted-foreground">No artists found for "{q}".</p>
   }
 
   return (
-    <ul className="flex flex-col gap-3">
-      {artists.map((artist, index) => (
+    <RecordList>
+      {artists.map((artist) => (
         <ArtistCard
           key={artist.id}
           artist={artist}
-          index={index}
           onClick={() => onArtistClick(artist.id, artist.name)}
         />
       ))}
-    </ul>
+    </RecordList>
   )
 }
 
@@ -393,7 +398,7 @@ function DiscographyList({
   )
 
   if (isClassifiedPending) {
-    return <p className="text-(--sea-ink-soft)">Loading discography…</p>
+    return <p className="text-muted-foreground">Loading discography…</p>
   }
 
   const items =
@@ -407,7 +412,7 @@ function DiscographyList({
 
   return (
     <>
-      <div className="mb-6 flex gap-2 flex-wrap">
+      <div className="mb-6 flex flex-wrap gap-2">
         {FILTER_CHIPS.map(({ key, label }) => {
           const count = key === 'all' ? null : classifiedItems[key].length
           if (count === 0) return null
@@ -419,7 +424,9 @@ function DiscographyList({
             >
               {label}
               {count !== null && (
-                <span className="font-mono text-xs opacity-60">{count}</span>
+                <span className="type-catalogue text-[11px] opacity-60">
+                  {count}
+                </span>
               )}
             </Chip>
           )
@@ -427,26 +434,25 @@ function DiscographyList({
       </div>
 
       {activeQuery.isPending ? (
-        <p className="text-(--sea-ink-soft)">Loading discography…</p>
+        <p className="text-muted-foreground">Loading discography…</p>
       ) : items.length === 0 ? (
-        <p className="text-(--sea-ink-soft)">No releases found.</p>
+        <p className="text-muted-foreground">No releases found.</p>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {items.map((item, index) => (
+        <RecordList>
+          {items.map((item) => (
             <DiscographyCard
               key={item.id}
               item={item}
               artistName={artistName}
-              index={index}
               onClick={() => onMasterClick(item.id)}
             />
           ))}
-        </ul>
+        </RecordList>
       )}
 
       {activeQuery.data?.truncated && (
-        <p className="mt-6 text-center text-sm text-(--sea-ink-soft)">
-          Older releases not shown — search by title
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          Older releases not shown. Search by title to find them.
         </p>
       )}
     </>
@@ -469,10 +475,10 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
   if (q.length === 0) {
     return (
       <div className="flex flex-col items-center gap-4 py-16 text-center">
-        <SearchIcon className="h-12 w-12 text-(--sea-ink)" />
+        <SearchIcon className="size-12 text-foreground" />
         <div>
-          <p className="font-semibold text-(--sea-ink)">Find a record</p>
-          <p className="mt-1 text-sm text-(--sea-ink-soft)">
+          <p className="type-title text-lg text-foreground">Find a record</p>
+          <p className="mt-1 text-sm text-muted-foreground">
             Search Discogs to find a record to add.
           </p>
         </div>
@@ -482,31 +488,30 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
 
   if (q.length <= 2) {
     return (
-      <p className="text-(--sea-ink-soft)">
+      <p className="text-muted-foreground">
         Type at least 3 characters to search.
       </p>
     )
   }
 
   if (isFetching && masters.length === 0) {
-    return <p className="text-(--sea-ink-soft)">Searching…</p>
+    return <p className="text-muted-foreground">Searching…</p>
   }
 
   if (masters.length === 0) {
-    return <p className="text-(--sea-ink-soft)">No results for "{q}".</p>
+    return <p className="text-muted-foreground">No results for "{q}".</p>
   }
 
   return (
-    <ul className="flex flex-col gap-3">
-      {masters.map((master, index) => (
+    <RecordList>
+      {masters.map((master) => (
         <MasterCard
           key={master.id}
           master={master}
-          index={index}
           onClick={() => onMasterClick(master.id)}
         />
       ))}
-    </ul>
+    </RecordList>
   )
 }
 
@@ -523,18 +528,18 @@ function VersionsList({ masterId }: VersionsListProps) {
   )
 
   if (isFetching && versions.length === 0) {
-    return <p className="text-(--sea-ink-soft)">Loading versions…</p>
+    return <p className="text-muted-foreground">Loading versions…</p>
   }
 
   if (versions.length === 0) {
-    return <p className="text-(--sea-ink-soft)">No vinyl versions found.</p>
+    return <p className="text-muted-foreground">No vinyl versions found.</p>
   }
 
   return (
-    <ul className="flex flex-col gap-3">
+    <RecordList>
       {versions.map((version) => (
         <VersionRow key={version.id} version={version} masterId={masterId} />
       ))}
-    </ul>
+    </RecordList>
   )
 }

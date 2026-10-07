@@ -1,5 +1,7 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
@@ -48,51 +50,37 @@ const SpotlightContent = ({
         styles={info.styles}
       />
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        <p className="island-kicker">
-          {info.artists.map((a) => a.name).join(', ')}
-        </p>
-        <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
-          {info.title}
-        </h2>
-        <p className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 font-mono text-sm text-(--sea-ink-soft)">
-          {info.year > 0 && <span>{info.year}</span>}
-          {info.year > 0 && <span aria-hidden>·</span>}
-          <span>{formatDateAdded(record.date_added)}</span>
-        </p>
-        {formatParts.length > 0 && (
-          <p className="font-mono text-sm text-(--sea-ink-soft)">
-            {formatParts.join(' · ')}
-          </p>
-        )}
-        {labelText && (
-          <p className="text-sm text-(--sea-ink-soft)">{labelText}</p>
-        )}
-      </div>
+      <RecordHeading
+        artist={info.artists.map((a) => a.name).join(', ')}
+        title={info.title}
+        catalogue={[
+          [
+            info.year > 0 ? String(info.year) : null,
+            formatDateAdded(record.date_added),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          formatParts.join(' · '),
+          labelText,
+        ]}
+      />
 
       <div className="flex justify-center pt-1">
         {onRemove && (
           <Button
             variant="destructive"
-            className="rounded-full"
             disabled={isRemoving}
             onClick={onRemove}
           >
-            <CollectionIcon className="h-4 w-4" />
+            <CollectionIcon />
             Remove from collection
           </Button>
         )}
         {!onRemove && (
-          <button
-            onClick={onPickAgain}
-            disabled={isPicking}
-            className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) disabled:opacity-50 cursor-pointer"
-          >
-            <RandomPickIcon
-              className={`size-3.5 ${isPicking ? 'animate-pulse' : ''}`}
-            />
+          <Button variant="lacquer" onClick={onPickAgain} disabled={isPicking}>
+            {isPicking ? <GrooveLoader size={14} /> : <RandomPickIcon />}
             Pick again
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -2,9 +2,10 @@ import { useRemoveFromCollection } from '#/features/collection/collection.mutati
 import { collectionQueryOptions } from '#/features/collection/collection.queries'
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
-import { CoverArt } from '#/shared/components/CoverArt'
+import { RecordList } from '#/shared/components/RecordList'
+import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
+import { Button } from '#/shared/components/ui/button'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { RandomPickButton } from '#/features/collection/components/RandomPickButton'
@@ -48,13 +49,9 @@ function Collection() {
   const isEmpty = data.pages[0]?.releases.length === 0
 
   return (
-    <main className="page-wrap px-4 pb-32 pt-14 sm:pb-8">
-      <header className="mb-8 flex items-end justify-between gap-4">
-        <div>
-          <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
-            Collection
-          </h1>
-        </div>
+    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-32 sm:pb-8">
+      <header className="mb-6 flex items-end justify-between gap-4">
+        <h1 className="type-display text-4xl text-foreground">Collection</h1>
         {!isEmpty && <RandomPickButton />}
       </header>
 
@@ -65,63 +62,36 @@ function Collection() {
       />
 
       {isEmpty ? (
-        <p className="text-(--sea-ink-soft)">
+        <p className="text-muted-foreground">
           No records in your collection yet.
         </p>
       ) : (
         <>
-          <ul
-            aria-busy={isSortPending}
-            className={`flex flex-col gap-3 transition-opacity ${isSortPending ? 'opacity-50' : ''}`}
-          >
+          <RecordList aria-busy={isSortPending}>
             {data.pages.map((page) =>
-              page.releases.map((release, index) => (
+              page.releases.map((release) => (
                 <li key={release.instance_id}>
-                  <button
-                    type="button"
+                  <ReleaseRow
+                    release={release}
+                    meta={
+                      listSort.sort === 'year'
+                        ? formatYear(release.basic_information.year)
+                        : formatDateAdded(release.date_added)
+                    }
                     onClick={() => setSelected(release)}
-                    className="island-shell feature-card rise-in flex w-full items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer text-left"
-                    style={{ animationDelay: `${index * 20}ms` }}
-                  >
-                    <CoverArt
-                      coverKey={releaseCoverKey(
-                        release.id,
-                        release.basic_information.master_id,
-                      )}
-                      artist={release.basic_information.artists[0]?.name ?? ''}
-                      title={release.basic_information.title}
-                      thumb={release.basic_information.thumb}
-                      styles={release.basic_information.styles}
-                      size={48}
-                      className="rounded-lg shrink-0 overflow-hidden"
-                    />
-                    <div className="flex flex-1 items-center justify-between">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-(--sea-ink)">
-                          {release.basic_information.title}
-                        </span>
-                        <span className="text-sm text-(--sea-ink-soft)">
-                          {release.basic_information.artists[0]?.name}
-                        </span>
-                      </div>
-                      <span className="font-mono text-xs text-(--sea-ink-soft)">
-                        {listSort.sort === 'year'
-                          ? formatYear(release.basic_information.year)
-                          : formatDateAdded(release.date_added)}
-                      </span>
-                    </div>
-                  </button>
+                  />
                 </li>
               )),
             )}
-          </ul>
+          </RecordList>
 
           {hasNextPage && (
             <div className="mt-6 flex justify-center">
-              <button
+              <Button
+                variant="outline"
+                size="lg"
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="island-shell rise-in rounded-full px-6 py-2.5 text-sm font-medium text-(--sea-ink) disabled:opacity-50 cursor-pointer flex items-center gap-2"
               >
                 {isFetchingNextPage ? (
                   <>
@@ -131,7 +101,7 @@ function Collection() {
                 ) : (
                   'Load more'
                 )}
-              </button>
+              </Button>
             </div>
           )}
         </>
@@ -157,7 +127,7 @@ function Collection() {
           }
           isRemoving={removeFromCollection.isPending}
           removeLabel="Remove from collection"
-          removeIcon={<CollectionIcon className="h-4 w-4" />}
+          removeIcon={<CollectionIcon className="size-4" />}
         />
       )}
 

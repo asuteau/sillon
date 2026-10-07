@@ -3,6 +3,7 @@ import {
   formatDateAdded,
 } from '#/features/collection/collection.utils'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
+import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
@@ -71,35 +72,25 @@ function ReleaseSheetContent({
         styles={info.styles}
       />
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        <p className="island-kicker">{formatArtists(info.artists)}</p>
-        <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
-          {info.title}
-        </h2>
-        <p className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 font-mono text-sm text-(--sea-ink-soft)">
-          {info.year > 0 && <span>{info.year}</span>}
-          {info.year > 0 && <span aria-hidden>·</span>}
-          <span>{formatDateAdded(release.date_added)}</span>
-        </p>
-        {formatParts.length > 0 && (
-          <p className="font-mono text-sm text-(--sea-ink-soft)">
-            {formatParts.join(' · ')}
-          </p>
-        )}
-        {labelText && (
-          <p className="text-sm text-(--sea-ink-soft)">{labelText}</p>
-        )}
-      </div>
+      <RecordHeading
+        artist={formatArtists(info.artists)}
+        title={info.title}
+        catalogue={[
+          [
+            info.year > 0 ? String(info.year) : null,
+            formatDateAdded(release.date_added),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          formatParts.join(' · '),
+          labelText,
+        ]}
+      />
 
       <MarketplaceSection releaseId={release.id} />
 
       <div className="flex justify-center pt-1">
-        <Button
-          variant="destructive"
-          className="rounded-full"
-          disabled={isRemoving}
-          onClick={onRemove}
-        >
+        <Button variant="destructive" disabled={isRemoving} onClick={onRemove}>
           {removeIcon}
           {removeLabel}
         </Button>

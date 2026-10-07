@@ -1,13 +1,11 @@
 import { useRemoveFromWantlist } from '#/features/wantlist/wantlist.mutations'
 import { wantlistQueryOptions } from '#/features/wantlist/wantlist.queries'
 import type { WantlistItem } from '#/features/wantlist/wantlist.schema'
-import {
-  formatArtists,
-  formatDateAdded,
-} from '#/features/collection/collection.utils'
-import { CoverArt } from '#/shared/components/CoverArt'
+import { formatDateAdded } from '#/features/collection/collection.utils'
+import { RecordList } from '#/shared/components/RecordList'
+import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
+import { Button } from '#/shared/components/ui/button'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { SortChips } from '#/shared/components/SortChips'
@@ -49,12 +47,8 @@ function Wantlist() {
   const removeFromWantlist = useRemoveFromWantlist()
 
   return (
-    <main className="page-wrap px-4 pb-32 pt-14 sm:pb-8">
-      <header className="mb-8">
-        <h1 className="display-title text-4xl font-bold tracking-tight text-(--sea-ink)">
-          Wantlist
-        </h1>
-      </header>
+    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-32 sm:pb-8">
+      <h1 className="type-display mb-6 text-4xl text-foreground">Wantlist</h1>
 
       <SortChips
         value={listSort}
@@ -63,61 +57,34 @@ function Wantlist() {
       />
 
       {data.pages[0]?.wants.length === 0 ? (
-        <p className="text-(--sea-ink-soft)">Your wantlist is empty.</p>
+        <p className="text-muted-foreground">Your wantlist is empty.</p>
       ) : (
         <>
-          <ul
-            aria-busy={isSortPending}
-            className={`flex flex-col gap-3 transition-opacity ${isSortPending ? 'opacity-50' : ''}`}
-          >
+          <RecordList aria-busy={isSortPending}>
             {data.pages.map((page) =>
-              page.wants.map((want, index) => (
+              page.wants.map((want) => (
                 <li key={want.id}>
-                  <button
-                    type="button"
+                  <ReleaseRow
+                    release={want}
+                    meta={
+                      listSort.sort === 'year'
+                        ? formatYear(want.basic_information.year)
+                        : formatDateAdded(want.date_added)
+                    }
                     onClick={() => setSelected(want)}
-                    className="island-shell feature-card rise-in flex w-full items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer text-left"
-                    style={{ animationDelay: `${index * 20}ms` }}
-                  >
-                    <CoverArt
-                      coverKey={releaseCoverKey(
-                        want.id,
-                        want.basic_information.master_id,
-                      )}
-                      artist={want.basic_information.artists[0]?.name ?? ''}
-                      title={want.basic_information.title}
-                      thumb={want.basic_information.thumb}
-                      styles={want.basic_information.styles}
-                      size={48}
-                      className="rounded-lg shrink-0 overflow-hidden"
-                    />
-                    <div className="flex flex-1 items-center justify-between">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-(--sea-ink)">
-                          {want.basic_information.title}
-                        </span>
-                        <span className="text-sm text-(--sea-ink-soft)">
-                          {formatArtists(want.basic_information.artists)}
-                        </span>
-                      </div>
-                      <span className="font-mono text-xs text-(--sea-ink-soft)">
-                        {listSort.sort === 'year'
-                          ? formatYear(want.basic_information.year)
-                          : formatDateAdded(want.date_added)}
-                      </span>
-                    </div>
-                  </button>
+                  />
                 </li>
               )),
             )}
-          </ul>
+          </RecordList>
 
           {hasNextPage && (
             <div className="mt-6 flex justify-center">
-              <button
+              <Button
+                variant="outline"
+                size="lg"
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="island-shell rise-in rounded-full px-6 py-2.5 text-sm font-medium text-(--sea-ink) disabled:opacity-50 cursor-pointer flex items-center gap-2"
               >
                 {isFetchingNextPage ? (
                   <>
@@ -127,7 +94,7 @@ function Wantlist() {
                 ) : (
                   'Load more'
                 )}
-              </button>
+              </Button>
             </div>
           )}
         </>
@@ -144,7 +111,7 @@ function Wantlist() {
           }
           isRemoving={removeFromWantlist.isPending}
           removeLabel="Remove from wantlist"
-          removeIcon={<WantlistIcon className="h-4 w-4" />}
+          removeIcon={<WantlistIcon className="size-4" />}
         />
       )}
 

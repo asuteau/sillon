@@ -25,6 +25,8 @@ import {
 } from '#/features/search/search.queries'
 import type { VersionsPage } from '#/features/search/search.schema'
 import { extractColors } from '#/shared/utils/extractColors'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { masterCoverKey } from '#/shared/utils/cover-key'
 import { Button } from './ui/button'
@@ -133,43 +135,25 @@ function SearchReleaseSheetContent({
         styles={[]}
       />
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        {release.artists.length > 0 && (
-          <p className="island-kicker">{release.artists.join(', ')}</p>
-        )}
-        <h2 className="display-title text-2xl font-bold tracking-tight text-(--lagoon-deep)">
-          {release.title}
-        </h2>
-      </div>
-
-      <div className="flex flex-col items-center gap-2 text-center font-mono text-sm">
-        {(release.year > 0 || release.country) && (
-          <p className="text-(--sea-ink-soft)">
-            {[
-              release.year > 0 ? String(release.year) : null,
-              release.country || null,
-            ]
+      <div className="flex flex-col items-center gap-3">
+        <RecordHeading
+          artist={release.artists.join(', ')}
+          title={release.title}
+          catalogue={[
+            [release.year > 0 ? String(release.year) : null, release.country]
               .filter(Boolean)
-              .join(' · ')}
-          </p>
-        )}
-
-        {release.formatText && (
-          <p
-            className="line-clamp-2 text-(--sea-ink-soft)"
-            title={release.formatText}
-          >
-            {release.formatText}
-          </p>
-        )}
+              .join(' · '),
+            release.formatText,
+          ]}
+        />
 
         {colors.length > 0 && (
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2">
             {colors.map((color) => (
               <span
                 key={color}
                 title={color}
-                className="h-4.5 w-4.5 rounded-full border border-(--line) shrink-0"
+                className="size-4.5 shrink-0 rounded-full border border-border"
                 style={{ background: color }}
               />
             ))}
@@ -188,28 +172,26 @@ function SearchReleaseSheetContent({
         <div className="flex justify-center gap-3 pt-1">
           <Button
             variant={inCollection > 0 ? 'default' : 'outline'}
-            className="rounded-full"
             disabled={isCollectionPending}
             onClick={handleCollectionToggle}
           >
             {inCollection > 0 ? (
-              <Check className="h-4 w-4" />
+              <Check className="size-4" />
             ) : (
-              <CollectionIcon className="h-4 w-4" />
+              <CollectionIcon className="size-4" />
             )}
             {inCollection > 0 ? 'Owned' : 'Collection'}
           </Button>
 
           <Button
             variant={inWantlist > 0 ? 'default' : 'outline'}
-            className="rounded-full"
             disabled={isWantlistPending}
             onClick={handleWantlistToggle}
           >
             {inWantlist > 0 ? (
-              <Check className="h-4 w-4" />
+              <Check className="size-4" />
             ) : (
-              <WantlistIcon className="h-4 w-4" />
+              <WantlistIcon className="size-4" />
             )}
             {inWantlist > 0 ? 'Wanted' : 'Wantlist'}
           </Button>
@@ -231,8 +213,8 @@ export function SearchReleaseSheet({
   const content = (
     <Suspense
       fallback={
-        <div className="py-8 text-center text-sm text-(--sea-ink-soft)">
-          Loading…
+        <div className="flex justify-center py-8">
+          <GrooveLoader size={32} />
         </div>
       }
     >
