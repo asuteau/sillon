@@ -10,7 +10,7 @@ import ThemeToggle from './ThemeToggle'
 import { buttonVariants } from './ui/button'
 
 // Active state from the router's data-status; underline fades in
-const NAV_LINK =
+const NAV_LINK_CLASSES =
   'relative inline-flex items-center gap-1.5 rounded-(--radius) text-muted-foreground no-underline transition-colors duration-160 ease-fade after:absolute after:inset-x-0 after:-bottom-1.5 after:h-px after:bg-current after:opacity-0 after:transition-opacity after:duration-160 after:ease-fade hover:text-foreground hover:after:opacity-100 data-[status=active]:text-foreground data-[status=active]:after:opacity-100'
 
 export default function Header() {
@@ -43,20 +43,20 @@ export default function Header() {
         <div className="hidden w-full flex-wrap items-center gap-x-4 gap-y-1 pb-1 text-sm font-semibold sm:flex sm:w-auto sm:flex-nowrap sm:pb-0">
           {user && (
             <>
-              <Link to="/search" className={NAV_LINK}>
+              <Link to="/search" className={NAV_LINK_CLASSES}>
                 Add
               </Link>
-              <Link to="/collection" className={NAV_LINK}>
+              <Link to="/collection" className={NAV_LINK_CLASSES}>
                 Collection
                 <CountBadge count={collectionCount} />
               </Link>
-              <Link to="/wantlist" className={NAV_LINK}>
+              <Link to="/wantlist" className={NAV_LINK_CLASSES}>
                 Wantlist
                 <CountBadge count={wantlistCount} />
               </Link>
             </>
           )}
-          <Link to="/about" className={NAV_LINK}>
+          <Link to="/about" className={NAV_LINK_CLASSES}>
             About
           </Link>
         </div>

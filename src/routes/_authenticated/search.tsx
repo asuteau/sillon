@@ -411,20 +411,16 @@ function DiscographyList({
           const count = key === 'all' ? null : classifiedItems[key].length
           if (count === 0) return null
           return (
-            <button
+            <Chip
               key={key}
+              active={activeFilter === key}
               onClick={() => setFilter(key)}
-              className={`cursor-pointer whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                activeFilter === key
-                  ? 'bg-(--sea-ink) text-(--chip-bg)'
-                  : 'border border-(--line) text-(--sea-ink)'
-              }`}
             >
               {label}
               {count !== null && (
-                <span className="ml-1 opacity-50">{count}</span>
+                <span className="font-mono text-xs opacity-60">{count}</span>
               )}
-            </button>
+            </Chip>
           )
         })}
       </div>
