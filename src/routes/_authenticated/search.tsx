@@ -5,6 +5,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
+import { Chip } from '#/shared/components/ui/chip'
+import { Input } from '#/shared/components/ui/input'
 import { SearchReleaseSheet } from '#/shared/components/SearchReleaseSheet'
 import { useDebounce } from '#/shared/hooks/use-debounce'
 
@@ -154,13 +156,13 @@ function Search() {
           <ModeToggle mode={mode} onModeChange={handleModeChange} />
 
           <div className="relative mb-6">
-            <input
+            <Input
               ref={inputRef}
               type="search"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Artist, album, label..."
-              className="island-shell w-full rounded-2xl px-4 py-3 pr-10 text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+              className="h-12 pr-10"
             />
             <button
               onClick={() => setIsScannerOpen(true)}
@@ -217,17 +219,9 @@ function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
   return (
     <div className="mb-6 flex gap-2">
       {(['artist', 'title'] as const).map((m) => (
-        <button
-          key={m}
-          onClick={() => onModeChange(m)}
-          className={`cursor-pointer whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-            mode === m
-              ? 'bg-(--sea-ink) text-(--chip-bg)'
-              : 'border border-(--line) text-(--sea-ink)'
-          }`}
-        >
+        <Chip key={m} active={mode === m} onClick={() => onModeChange(m)}>
           {m === 'artist' ? 'By artist' : 'By title'}
-        </button>
+        </Chip>
       ))}
     </div>
   )

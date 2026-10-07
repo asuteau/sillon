@@ -249,7 +249,7 @@ export function SearchReleaseSheet({
         onOpenChange={onOpenChange}
         onAnimationEnd={onAnimationEnd}
       >
-        <DrawerContent className="island-shell p-6">{content}</DrawerContent>
+        <DrawerContent className="p-6">{content}</DrawerContent>
       </Drawer>
     )
   }
@@ -261,12 +261,10 @@ export function SearchReleaseSheet({
       onOpenChangeComplete={onAnimationEnd}
     >
       <DialogContent
-        className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
         showCloseButton={false}
       >
-        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
-          {content}
-        </div>
+        {content}
       </DialogContent>
     </Dialog>
   )

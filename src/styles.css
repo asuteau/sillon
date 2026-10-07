@@ -247,6 +247,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* The one exception to 2px: bottom sheets' top corners */
+  --radius-sheet: 14px;
 }
 
 @layer base {
@@ -258,6 +260,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Visible on every control in both themes */
+  :focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
   }
 }
 

@@ -13,6 +13,7 @@ import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWan
 import { CoverArt } from '#/shared/components/CoverArt'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
+import { Input } from '#/shared/components/ui/input'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
@@ -65,10 +66,10 @@ const BarcodeScannerContent = ({
             Search manually →
           </button>
           {import.meta.env.DEV && (
-            <input
+            <Input
               type="text"
               placeholder="Dev: enter barcode…"
-              className="mt-2 w-full rounded-lg border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-center font-mono text-xs text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+              className="mt-2 h-8 text-center font-mono text-xs sm:text-xs"
               onKeyDown={(e) => {
                 if (e.key === 'Enter')
                   handleManualBarcode(e.currentTarget.value)
@@ -105,10 +106,10 @@ const BarcodeScannerContent = ({
           </button>
         </div>
         {import.meta.env.DEV && (
-          <input
+          <Input
             type="text"
             placeholder="Dev: enter barcode…"
-            className="mt-2 w-full rounded-lg border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-center font-mono text-xs text-(--sea-ink) placeholder:text-(--sea-ink-soft) outline-none"
+            className="mt-2 h-8 text-center font-mono text-xs sm:text-xs"
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleManualBarcode(e.currentTarget.value)
             }}
@@ -320,7 +321,7 @@ export const BarcodeScanner = ({
   if (isMobile) {
     return (
       <Drawer open onOpenChange={onClose}>
-        <DrawerContent className="island-shell p-6 data-[vaul-drawer-direction=bottom]:max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)]">
+        <DrawerContent className="p-6 data-[vaul-drawer-direction=bottom]:max-h-[calc(100dvh-env(safe-area-inset-top)-1rem)]">
           <BarcodeScannerContent
             onClose={onClose}
             onSearchManually={onSearchManually}
@@ -333,15 +334,13 @@ export const BarcodeScanner = ({
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent
-        className="max-w-md rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6 sm:max-w-md"
         showCloseButton={false}
       >
-        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
-          <BarcodeScannerContent
-            onClose={onClose}
-            onSearchManually={onSearchManually}
-          />
-        </div>
+        <BarcodeScannerContent
+          onClose={onClose}
+          onSearchManually={onSearchManually}
+        />
       </DialogContent>
     </Dialog>
   )

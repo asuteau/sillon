@@ -111,7 +111,7 @@ export const RecordSpotlight = ({
   if (isMobile) {
     return (
       <Drawer open onOpenChange={onClose}>
-        <DrawerContent className="island-shell p-6">
+        <DrawerContent className="p-6">
           <SpotlightContent
             record={record}
             onClose={onClose}
@@ -128,19 +128,17 @@ export const RecordSpotlight = ({
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent
-        className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
         showCloseButton={false}
       >
-        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
-          <SpotlightContent
-            record={record}
-            onClose={onClose}
-            onPickAgain={onPickAgain}
-            isPicking={isPicking}
-            onRemove={onRemove}
-            isRemoving={isRemoving}
-          />
-        </div>
+        <SpotlightContent
+          record={record}
+          onClose={onClose}
+          onPickAgain={onPickAgain}
+          isPicking={isPicking}
+          onRemove={onRemove}
+          isRemoving={isRemoving}
+        />
       </DialogContent>
     </Dialog>
   )

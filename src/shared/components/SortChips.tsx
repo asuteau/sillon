@@ -1,5 +1,7 @@
-import { ArrowDown, ArrowUp, Disc3 } from 'lucide-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { Chip } from '#/shared/components/ui/chip'
 import { SORT_KEYS } from '#/shared/utils/list-sort'
 import type { ListSort, SortKey } from '#/shared/utils/list-sort'
 
@@ -24,30 +26,24 @@ export const SortChips = ({ value, onSelect, isPending }: SortChipsProps) => {
       {SORT_KEYS.map((key) => {
         const isActive = value.sort === key
         return (
-          <button
+          <Chip
             key={key}
-            type="button"
+            active={isActive}
             onClick={() => onSelect(key)}
-            aria-pressed={isActive}
             aria-label={
               isActive
                 ? `${LABELS[key]}, ${value.order === 'asc' ? 'ascending' : 'descending'}`
                 : LABELS[key]
             }
-            className={`flex cursor-pointer items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-(--sea-ink) text-(--chip-bg)'
-                : 'border border-(--line) text-(--sea-ink)'
-            }`}
           >
             {LABELS[key]}
             {isActive &&
               (isPending ? (
-                <Disc3 size={14} className="animate-spin opacity-70" />
+                <GrooveLoader size={14} />
               ) : (
                 <OrderIcon size={14} />
               ))}
-          </button>
+          </Chip>
         )
       })}
     </div>
