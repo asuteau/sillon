@@ -1314,20 +1314,15 @@ VitePWA({
   manifest: {
     name: 'Sillon',
     short_name: 'Sillon',
-    description: 'Your vinyl record collection',
-    theme_color: '#0d0d0f',
-    background_color: '#0d0d0f',
+    description: 'Your record collection and wantlist, synced with Discogs.',
+    // Vinyl black: the launch screen is always dark
+    theme_color: VINYL_BLACK,
+    background_color: VINYL_BLACK,
     display: 'standalone',
-    icons: [
-      { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
-      {
-        src: '/icon-512.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-    ],
+    lang: 'en',
+    // Generated from the groove mark: pnpm generate:pwa-assets
+    // (src/shared/utils/pwa-assets.ts)
+    icons: manifestIcons(),
   },
   workbox: {
     runtimeCaching: [
