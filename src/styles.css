@@ -66,6 +66,10 @@
     'Liberation Mono', monospace;
   /* Display role — swap here only to bring in a paid display face */
   --font-display: var(--font-sans);
+
+  /* Motion — fades by default, platter for the two signatures */
+  --ease-fade: cubic-bezier(0.2, 0, 0, 1);
+  --ease-platter: cubic-bezier(0.65, 0, 0.15, 1);
 }
 
 /* Tokens — black, white and grey with a slight warm bias. No hue accent:
@@ -107,7 +111,16 @@
 
   /* Sillon additions */
   --vinyl-black: #0a0a0b;
-  --lacquer: linear-gradient(120deg, #e6e8eb, #9a9ea5 60%, #cfd2d6);
+  /* Stops shared with the SVG groove mark's lacquer gradient */
+  --lacquer-1: #e6e8eb;
+  --lacquer-2: #9a9ea5;
+  --lacquer-3: #cfd2d6;
+  --lacquer: linear-gradient(
+    120deg,
+    var(--lacquer-1),
+    var(--lacquer-2) 60%,
+    var(--lacquer-3)
+  );
   --lacquer-foreground: #0d0d0e;
   /* Set at runtime from the current Cover */
   --cover-tint: oklch(0.6 0 0);
@@ -392,5 +405,41 @@ a {
   }
   to {
     opacity: 1;
+  }
+}
+
+/* Groove loader — the spiral draws in from the outer edge. Paths carry
+   pathLength="1" so the dash maths is size-independent. */
+
+.groove-loader path {
+  stroke-dasharray: 1;
+  animation: groove-draw 1100ms var(--ease-platter) infinite both;
+}
+
+/* ~800ms draw-in, short hold, then start again from the edge */
+@keyframes groove-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  73%,
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes groove-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .groove-loader {
+    animation: groove-fade 160ms var(--ease-fade) both;
+  }
+
+  .groove-loader path {
+    stroke-dasharray: none;
+    animation: none;
   }
 }
