@@ -14,7 +14,6 @@ import {
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
-import { VinylDisc } from '#/shared/components/VinylDisc'
 import { versionsQueryOptions } from '../search.queries'
 import type { MasterVersion } from '../search.model'
 import type { VersionsPage } from '../search.schema'
@@ -110,8 +109,6 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
         onClick={handleVersionClick}
         className="flex flex-1 items-center gap-3 min-w-0 cursor-pointer text-left"
       >
-        <VinylDisc colors={['#1a1a1a']} spinning={false} size={40} />
-
         <div className="flex flex-1 flex-col gap-0.5 min-w-0">
           <span className="font-semibold text-(--sea-ink) truncate">
             {version.year > 0 ? version.year : '—'}

@@ -3,6 +3,7 @@ import { collectionQueryOptions } from '#/features/collection/collection.queries
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { CoverArt } from '#/shared/components/CoverArt'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
 import { ScanFab } from '#/shared/components/ScanFab'
@@ -18,7 +19,6 @@ import {
 import type { SortKey } from '#/shared/utils/list-sort'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Disc3 } from 'lucide-react'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { useState, useTransition } from 'react'
 
@@ -126,7 +126,7 @@ function Collection() {
                 {isFetchingNextPage ? (
                   <>
                     Loading…
-                    <Disc3 size={14} className="animate-spin opacity-70" />
+                    <GrooveLoader size={14} />
                   </>
                 ) : (
                   'Load more'
