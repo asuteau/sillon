@@ -43,7 +43,7 @@ pnpm add -D @tanstack/react-query-devtools @tanstack/router-devtools
 pnpm add zod
 ```
 
-Framer Motion, Geist, lucide-react, shadcn, TanStack Virtual → added when needed (Phases 3 and 4).
+lucide-react, shadcn, TanStack Virtual → added when needed (Phases 3 and 4).
 
 ### 1.3 Target file structure
 
@@ -80,8 +80,7 @@ src/
     components/                   ← flat for now, subfolders added if needed
     hooks/
     utils/
-  styles/
-    globals.css                   ← Tailwind base only, tokens in Phase 4
+  styles.css                      ← tokens, type roles, motion (see docs/design-system.md)
 ```
 
 File-based routing is kept as recommended by TanStack — the code-gen provides
@@ -602,12 +601,9 @@ Everything designed for a 390px screen, held in hand, used while crate digging.
 ```bash
 # UI components
 pnpm dlx shadcn@latest init
-# style=default · baseColor=neutral · cssVariables=true
+# style=base-nova · baseColor=neutral · cssVariables=true
 pnpm dlx shadcn@latest add button badge input dialog sheet \
   command tooltip skeleton separator avatar dropdown-menu tabs
-
-# Animation
-pnpm add framer-motion
 
 # Icons
 pnpm add lucide-react
@@ -618,15 +614,9 @@ pnpm add @tanstack/react-virtual
 
 ### 4.1 Global CSS
 
-Copy tokens from `docs/design-system.md` into `globals.css`.
+Tokens, type roles and motion live in `src/styles.css`, as documented in `docs/design-system.md`.
 Dual theme: `.dark` + `@media (prefers-color-scheme: dark)`.
-Fonts are self-hosted — place `.woff2` files in `public/fonts/` and declare them via `@font-face` as documented in `docs/design-system.md`. No npm package needed.
-
-### 4.1 Global CSS
-
-Copy tokens from `docs/design-system.md` into `globals.css`.
-Dual theme: `.dark` + `@media (prefers-color-scheme: dark)`.
-Fonts are self-hosted — place `.woff2` files in `public/fonts/` and declare them via `@font-face` as documented in `docs/design-system.md`. No npm package needed.
+Fonts are self-hosted variable `.woff2` files in `public/fonts/`, declared via `@font-face`. No npm package needed.
 
 ### 4.2 Theme system
 
@@ -873,7 +863,7 @@ type Stage = 'color' | 'thumb' | 'hd'
 - All Sillon components typed and documented
 - RecordBin working with real data
 - SellerMatchSheet operational from Search and Wantlist
-- No inline styles outside Framer Motion animated components
+- No inline styles except runtime values (`--cover-tint`, generated House sleeve colours)
 
 ---
 
@@ -1588,8 +1578,6 @@ Supabase Edge Function cron (every hour):
     "@tanstack/react-router": "^1.x",
     "@tanstack/react-start": "^1.x",
     "@tanstack/react-virtual": "^3.x",
-    "framer-motion": "^11.x",
-    "geist": "^1.x",
     "lucide-react": "^0.x",
     "zod": "^3.x",
     "@supabase/supabase-js": "^2.x" // Phase 7 only

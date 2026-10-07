@@ -12,7 +12,8 @@ The name comes from the groove cut into a vinyl record.
 - [TanStack Query](https://tanstack.com/query) — server state & caching
 - [TanStack Router](https://tanstack.com/router) — file-based routing
 - [Tailwind CSS v4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)
-- [Framer Motion](https://www.framer.com/motion/) — animations
+- Familjen Grotesk + Martian Mono, self-hosted — see [docs/design-system.md](docs/design-system.md)
+- Motion: CSS + Web Animations API (no animation library)
 - Discogs OAuth 1.0a — authentication & collection data
 - Deezer API — HD cover art
 
