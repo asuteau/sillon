@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ScanLine } from 'lucide-react'
 
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
+import { ScanIcon } from '#/shared/components/icons/ScanIcon'
+import { Button } from '#/shared/components/ui/button'
 
 export const ScanButton = () => {
   const [open, setOpen] = useState(false)
@@ -15,14 +16,15 @@ export const ScanButton = () => {
 
   return (
     <>
-      <button
+      <Button
+        variant="lacquer"
+        size="sm"
         onClick={() => setOpen(true)}
         aria-label="Scan a barcode"
-        className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-sm font-semibold text-(--sea-ink) transition hover:bg-(--lagoon)/10 cursor-pointer"
       >
-        <ScanLine className="h-3.5 w-3.5" />
+        <ScanIcon />
         <span className="hidden sm:inline">Scan</span>
-      </button>
+      </Button>
 
       {open && (
         <BarcodeScanner

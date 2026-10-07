@@ -1,90 +1,377 @@
 <title>Sillon Brand Colour</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap"
+/>
 <style>
-/* Layout: four columns, one per candidate brand colour; each shows icon, splash, landing hero, CTA */
-:root {
-  --bg: #f3f3f2; --surface: #fbfbfa; --fg: #121212; --muted: #6b6b69; --line: #dddcda;
-  --vinyl: #0c0c0c; --groove: #1e1e1e; --splash: #0a0a0a; --splash-fg: #ecebe8;
-  --sans: 'Familjen Grotesk', system-ui, sans-serif;
-  --mono: 'Martian Mono', ui-monospace, monospace;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0d0d0d; --surface: #151515; --fg: #ebeae7; --muted: #8b8a87; --line: #262626; color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #0d0d0d; --surface: #151515; --fg: #ebeae7; --muted: #8b8a87; --line: #262626; color-scheme: dark }
+  /* Layout: four columns, one per candidate brand colour; each shows icon, splash, landing hero, CTA */
+  :root {
+    --bg: #f3f3f2;
+    --surface: #fbfbfa;
+    --fg: #121212;
+    --muted: #6b6b69;
+    --line: #dddcda;
+    --vinyl: #0c0c0c;
+    --groove: #1e1e1e;
+    --splash: #0a0a0a;
+    --splash-fg: #ecebe8;
+    --sans: 'Familjen Grotesk', system-ui, sans-serif;
+    --mono: 'Martian Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0d0d0d;
+      --surface: #151515;
+      --fg: #ebeae7;
+      --muted: #8b8a87;
+      --line: #262626;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #0d0d0d;
+    --surface: #151515;
+    --fg: #ebeae7;
+    --muted: #8b8a87;
+    --line: #262626;
+    color-scheme: dark;
+  }
 
-body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
-.wrap { max-width: 1600px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; gap: 24px; }
-.intro { font-size: 13px; color: var(--muted); max-width: 64ch; margin: 0; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 20px; }
-.opt { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 22px; display: grid; gap: 26px; align-content: start; min-width: 0; }
-.tag { font-family: var(--mono); font-size: 10.5px; font-variation-settings: 'wdth' 87.5; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
-.tag b { color: var(--fg); font-weight: 500; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+  }
+  .wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 32px 64px;
+    display: grid;
+    gap: 24px;
+  }
+  .intro {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 64ch;
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+    gap: 20px;
+  }
+  .opt {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px;
+    display: grid;
+    gap: 26px;
+    align-content: start;
+    min-width: 0;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-variation-settings: 'wdth' 87.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .tag b {
+    color: var(--fg);
+    font-weight: 500;
+  }
 
-/* brand sets */
-.lacquer { --b: #b9bdc3; --b-deep: #1b1c1e; --b-on: #0d0d0e; --b-label: linear-gradient(135deg,#e9ebee,#8d9198 55%,#d4d7db); --b-cta: linear-gradient(120deg,#e6e8eb,#9a9ea5 60%,#cfd2d6); --sheen: .55; }
-.oxblood { --b: #7a1d24; --b-deep: #3a0c10; --b-on: #fff; --b-label: #8f2229; --b-cta: #7a1d24; --sheen: .18; }
-.ultra   { --b: #2437a8; --b-deep: #0f1747; --b-on: #fff; --b-label: #2b41c2; --b-cta: #2437a8; --sheen: .18; }
-.amber   { --b: #d4861a; --b-deep: #3d2306; --b-on: #1a1206; --b-label: #e0951f; --b-cta: #d4861a; --sheen: .2; }
+  /* brand sets */
+  .lacquer {
+    --b: #b9bdc3;
+    --b-deep: #1b1c1e;
+    --b-on: #0d0d0e;
+    --b-label: linear-gradient(135deg, #e9ebee, #8d9198 55%, #d4d7db);
+    --b-cta: linear-gradient(120deg, #e6e8eb, #9a9ea5 60%, #cfd2d6);
+    --sheen: 0.55;
+  }
+  .oxblood {
+    --b: #7a1d24;
+    --b-deep: #3a0c10;
+    --b-on: #fff;
+    --b-label: #8f2229;
+    --b-cta: #7a1d24;
+    --sheen: 0.18;
+  }
+  .ultra {
+    --b: #2437a8;
+    --b-deep: #0f1747;
+    --b-on: #fff;
+    --b-label: #2b41c2;
+    --b-cta: #2437a8;
+    --sheen: 0.18;
+  }
+  .amber {
+    --b: #d4861a;
+    --b-deep: #3d2306;
+    --b-on: #1a1206;
+    --b-label: #e0951f;
+    --b-cta: #d4861a;
+    --sheen: 0.2;
+  }
 
-.moments { display: grid; grid-template-columns: 96px 1fr; gap: 18px; align-items: center; }
-.icon { width: 96px; aspect-ratio: 1; border-radius: 22px; background: var(--b-deep); display: grid; place-items: center; box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 6px 18px rgba(0,0,0,.25); overflow: hidden; }
-.lacquer .icon { background: radial-gradient(120% 90% at 30% 10%, #2b2c2f, #0a0a0b 70%); }
-.disc { position: relative; border-radius: 50%; aspect-ratio: 1; max-width: 100%;
-  background:
-    radial-gradient(circle, var(--vinyl) 0 4%, transparent 4.5%),
-    radial-gradient(circle, transparent 0 30%, var(--vinyl) 30.5% 33%, transparent 33.5%),
-    repeating-radial-gradient(circle, var(--vinyl) 0 1.2px, var(--groove) 1.2px 2.2px); }
-.disc::before { content: ""; position: absolute; inset: 33%; border-radius: 50%; background: var(--b-label); }
-.disc::after { content: ""; position: absolute; inset: 0; border-radius: 50%; mix-blend-mode: screen; opacity: var(--sheen);
-  background: conic-gradient(from 30deg, transparent 0 8%, #fff 14%, transparent 22% 58%, #fff 64%, transparent 72%); }
-.disc .hole { position: absolute; inset: 48.5%; border-radius: 50%; background: var(--vinyl); z-index: 1; }
-.icon .disc { width: 78%; }
+  .moments {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 18px;
+    align-items: center;
+  }
+  .icon {
+    width: 96px;
+    aspect-ratio: 1;
+    border-radius: 22px;
+    background: var(--b-deep);
+    display: grid;
+    place-items: center;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 6px 18px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+  }
+  .lacquer .icon {
+    background: radial-gradient(120% 90% at 30% 10%, #2b2c2f, #0a0a0b 70%);
+  }
+  .disc {
+    position: relative;
+    border-radius: 50%;
+    aspect-ratio: 1;
+    max-width: 100%;
+    background:
+      radial-gradient(circle, var(--vinyl) 0 4%, transparent 4.5%),
+      radial-gradient(
+        circle,
+        transparent 0 30%,
+        var(--vinyl) 30.5% 33%,
+        transparent 33.5%
+      ),
+      repeating-radial-gradient(
+        circle,
+        var(--vinyl) 0 1.2px,
+        var(--groove) 1.2px 2.2px
+      );
+  }
+  .disc::before {
+    content: '';
+    position: absolute;
+    inset: 33%;
+    border-radius: 50%;
+    background: var(--b-label);
+  }
+  .disc::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    opacity: var(--sheen);
+    background: conic-gradient(
+      from 30deg,
+      transparent 0 8%,
+      #fff 14%,
+      transparent 22% 58%,
+      #fff 64%,
+      transparent 72%
+    );
+  }
+  .disc .hole {
+    position: absolute;
+    inset: 48.5%;
+    border-radius: 50%;
+    background: var(--vinyl);
+    z-index: 1;
+  }
+  .icon .disc {
+    width: 78%;
+  }
 
-.splash { width: 100%; max-width: 170px; justify-self: end; aspect-ratio: 9 / 19; border-radius: 22px; background: var(--b-deep); border: 4px solid #050505; display: grid; place-items: center; align-content: center; gap: 18px; overflow: hidden; }
-.lacquer .splash { background: #0a0a0b; }
-.splash .disc { width: 62%; animation: spin 3.2s linear infinite; }
-.word { font-weight: 700; font-size: 22px; letter-spacing: -.05em; color: var(--splash-fg); line-height: 1; }
-.amber .word { color: #f3e6d2; }
-.load { width: 34%; height: 2px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; }
-.load i { display: block; height: 100%; width: 40%; background: var(--b); animation: slide 1.6s ease-in-out infinite; }
-.lacquer .load i { background: var(--b-cta); }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
-@media (prefers-reduced-motion: reduce) { .splash .disc, .load i { animation: none; } }
+  .splash {
+    width: 100%;
+    max-width: 170px;
+    justify-self: end;
+    aspect-ratio: 9 / 19;
+    border-radius: 22px;
+    background: var(--b-deep);
+    border: 4px solid #050505;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 18px;
+    overflow: hidden;
+  }
+  .lacquer .splash {
+    background: #0a0a0b;
+  }
+  .splash .disc {
+    width: 62%;
+    animation: spin 3.2s linear infinite;
+  }
+  .word {
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.05em;
+    color: var(--splash-fg);
+    line-height: 1;
+  }
+  .amber .word {
+    color: #f3e6d2;
+  }
+  .load {
+    width: 34%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .load i {
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--b);
+    animation: slide 1.6s ease-in-out infinite;
+  }
+  .lacquer .load i {
+    background: var(--b-cta);
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes slide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(250%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .splash .disc,
+    .load i {
+      animation: none;
+    }
+  }
 
-.hero { display: grid; gap: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
-.hero h2 { margin: 0; font-weight: 700; font-size: clamp(30px, 3vw, 40px); line-height: .94; letter-spacing: -.045em; text-wrap: balance; }
-.hero h2 span { font-weight: 400; color: var(--muted); }
-.hero p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--muted); max-width: 40ch; }
-.rule { height: 3px; width: 56px; background: var(--b-cta); border-radius: 2px; }
-.ctas { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.cta { font-family: var(--sans); font-size: 14px; font-weight: 600; padding: 11px 20px; border-radius: 999px; border: 0; background: var(--b-cta); color: var(--b-on); cursor: pointer; }
-.cta.ghost { background: transparent; color: var(--fg); box-shadow: 0 0 0 1px var(--line) inset; font-weight: 500; }
-.cta:focus-visible { outline: 2px solid var(--b); outline-offset: 3px; }
-.meta { font-family: var(--mono); font-size: 10.5px; font-variation-settings: 'wdth' 87.5; color: var(--muted); letter-spacing: .02em; }
+  .hero {
+    display: grid;
+    gap: 14px;
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+  }
+  .hero h2 {
+    margin: 0;
+    font-weight: 700;
+    font-size: clamp(30px, 3vw, 40px);
+    line-height: 0.94;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+  .hero h2 span {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .hero p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--muted);
+    max-width: 40ch;
+  }
+  .rule {
+    height: 3px;
+    width: 56px;
+    background: var(--b-cta);
+    border-radius: 2px;
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .cta {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--b-cta);
+    color: var(--b-on);
+    cursor: pointer;
+  }
+  .cta.ghost {
+    background: transparent;
+    color: var(--fg);
+    box-shadow: 0 0 0 1px var(--line) inset;
+    font-weight: 500;
+  }
+  .cta:focus-visible {
+    outline: 2px solid var(--b);
+    outline-offset: 3px;
+  }
+  .meta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-variation-settings: 'wdth' 87.5;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
 
-.swatches { display: flex; gap: 6px; }
-.swatches span { flex: 1; height: 22px; border-radius: 3px; }
+  .swatches {
+    display: flex;
+    gap: 6px;
+  }
+  .swatches span {
+    flex: 1;
+    height: 22px;
+    border-radius: 3px;
+  }
 </style>
 
 <div class="wrap">
-  <p class="intro">Four candidate brand colours, all set in Familjen Grotesk and Martian Mono. Each column shows the app icon, the PWA splash screen, and the landing hero with its main button. Switch your system theme to check light and dark.</p>
+  <p class="intro">
+    Four candidate brand colours, all set in Familjen Grotesk and Martian Mono.
+    Each column shows the app icon, the PWA splash screen, and the landing hero
+    with its main button. Switch your system theme to check light and dark.
+  </p>
   <div class="grid">
-
     <section class="opt lacquer">
       <div class="tag"><b>A · Lacquer</b><span>No hue</span></div>
       <div class="moments">
-        <div class="icon"><div class="disc"><span class="hole"></span></div></div>
-        <div class="splash"><div class="disc"><span class="hole"></span></div><div class="word">sillon</div><div class="load"><i></i></div></div>
+        <div class="icon">
+          <div class="disc"><span class="hole"></span></div>
+        </div>
+        <div class="splash">
+          <div class="disc"><span class="hole"></span></div>
+          <div class="word">sillon</div>
+          <div class="load"><i></i></div>
+        </div>
       </div>
       <div class="hero">
         <div class="rule"></div>
         <h2>Every record you own. <span>In its groove.</span></h2>
-        <p>Your Discogs collection and wantlist, with high-definition covers for every record.</p>
-        <div class="ctas"><button class="cta" type="button">Connect with Discogs</button><button class="cta ghost" type="button">How it works</button></div>
+        <p>
+          Your Discogs collection and wantlist, with high-definition covers for
+          every record.
+        </p>
+        <div class="ctas">
+          <button class="cta" type="button">Connect with Discogs</button
+          ><button class="cta ghost" type="button">How it works</button>
+        </div>
         <div class="meta">COLLECTION · 1,284 COPIES · 212 WANTS</div>
       </div>
     </section>
@@ -92,14 +379,26 @@ body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
     <section class="opt oxblood">
       <div class="tag"><b>B · Oxblood</b><span>Label red</span></div>
       <div class="moments">
-        <div class="icon"><div class="disc"><span class="hole"></span></div></div>
-        <div class="splash"><div class="disc"><span class="hole"></span></div><div class="word">sillon</div><div class="load"><i></i></div></div>
+        <div class="icon">
+          <div class="disc"><span class="hole"></span></div>
+        </div>
+        <div class="splash">
+          <div class="disc"><span class="hole"></span></div>
+          <div class="word">sillon</div>
+          <div class="load"><i></i></div>
+        </div>
       </div>
       <div class="hero">
         <div class="rule"></div>
         <h2>Every record you own. <span>In its groove.</span></h2>
-        <p>Your Discogs collection and wantlist, with high-definition covers for every record.</p>
-        <div class="ctas"><button class="cta" type="button">Connect with Discogs</button><button class="cta ghost" type="button">How it works</button></div>
+        <p>
+          Your Discogs collection and wantlist, with high-definition covers for
+          every record.
+        </p>
+        <div class="ctas">
+          <button class="cta" type="button">Connect with Discogs</button
+          ><button class="cta ghost" type="button">How it works</button>
+        </div>
         <div class="meta">COLLECTION · 1,284 COPIES · 212 WANTS</div>
       </div>
     </section>
@@ -107,14 +406,26 @@ body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
     <section class="opt ultra">
       <div class="tag"><b>C · Ultramarine</b><span>Sleeve ink</span></div>
       <div class="moments">
-        <div class="icon"><div class="disc"><span class="hole"></span></div></div>
-        <div class="splash"><div class="disc"><span class="hole"></span></div><div class="word">sillon</div><div class="load"><i></i></div></div>
+        <div class="icon">
+          <div class="disc"><span class="hole"></span></div>
+        </div>
+        <div class="splash">
+          <div class="disc"><span class="hole"></span></div>
+          <div class="word">sillon</div>
+          <div class="load"><i></i></div>
+        </div>
       </div>
       <div class="hero">
         <div class="rule"></div>
         <h2>Every record you own. <span>In its groove.</span></h2>
-        <p>Your Discogs collection and wantlist, with high-definition covers for every record.</p>
-        <div class="ctas"><button class="cta" type="button">Connect with Discogs</button><button class="cta ghost" type="button">How it works</button></div>
+        <p>
+          Your Discogs collection and wantlist, with high-definition covers for
+          every record.
+        </p>
+        <div class="ctas">
+          <button class="cta" type="button">Connect with Discogs</button
+          ><button class="cta ghost" type="button">How it works</button>
+        </div>
         <div class="meta">COLLECTION · 1,284 COPIES · 212 WANTS</div>
       </div>
     </section>
@@ -122,17 +433,28 @@ body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
     <section class="opt amber">
       <div class="tag"><b>D · Amber</b><span>Coloured vinyl</span></div>
       <div class="moments">
-        <div class="icon"><div class="disc"><span class="hole"></span></div></div>
-        <div class="splash"><div class="disc"><span class="hole"></span></div><div class="word">sillon</div><div class="load"><i></i></div></div>
+        <div class="icon">
+          <div class="disc"><span class="hole"></span></div>
+        </div>
+        <div class="splash">
+          <div class="disc"><span class="hole"></span></div>
+          <div class="word">sillon</div>
+          <div class="load"><i></i></div>
+        </div>
       </div>
       <div class="hero">
         <div class="rule"></div>
         <h2>Every record you own. <span>In its groove.</span></h2>
-        <p>Your Discogs collection and wantlist, with high-definition covers for every record.</p>
-        <div class="ctas"><button class="cta" type="button">Connect with Discogs</button><button class="cta ghost" type="button">How it works</button></div>
+        <p>
+          Your Discogs collection and wantlist, with high-definition covers for
+          every record.
+        </p>
+        <div class="ctas">
+          <button class="cta" type="button">Connect with Discogs</button
+          ><button class="cta ghost" type="button">How it works</button>
+        </div>
         <div class="meta">COLLECTION · 1,284 COPIES · 212 WANTS</div>
       </div>
     </section>
-
   </div>
 </div>

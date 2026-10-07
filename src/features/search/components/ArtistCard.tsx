@@ -2,17 +2,22 @@ import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Mic2 } from 'lucide-react'
 
+import {
+  RECORD_ROW_MEDIA_CLASSES,
+  RecordRow,
+} from '#/shared/components/RecordList'
+import { cn } from '#/shared/utils/cn'
+
 import { artistDetailQueryOptions } from '../search.queries'
 import type { Artist } from '../search.model'
 
 interface ArtistCardProps {
   artist: Artist
   onClick: () => void
-  index: number
 }
 
-function stripDiscogsMarkup(text: string): string {
-  return text
+const stripDiscogsMarkup = (text: string): string =>
+  text
     .replace(/\[a\d*=([^\]]+)\]/g, '$1')
     .replace(/\[url=[^\]]*\](.*?)\[\/url\]/g, '$1')
     .replace(/\[l=([^\]]+)\]/g, '$1')
@@ -21,9 +26,8 @@ function stripDiscogsMarkup(text: string): string {
     .replace(/\[i\](.*?)\[\/i\]/g, '$1')
     .replace(/\[[\w/=\d ]+\]/g, '')
     .trim()
-}
 
-export function ArtistCard({ artist, onClick, index }: ArtistCardProps) {
+export const ArtistCard = ({ artist, onClick }: ArtistCardProps) => {
   const ref = useRef<HTMLLIElement>(null)
   const [isInView, setIsInView] = useState(false)
 
@@ -52,36 +56,29 @@ export function ArtistCard({ artist, onClick, index }: ArtistCardProps) {
 
   return (
     <li ref={ref}>
-      <button
+      <RecordRow
         onClick={onClick}
-        className="island-shell feature-card rise-in flex w-full items-center gap-4 rounded-2xl px-4 py-3 cursor-pointer text-left"
-        style={{ animationDelay: `${index * 60}ms` }}
-      >
-        {artist.thumb ? (
-          <img
-            src={artist.thumb}
-            alt={artist.name}
-            className="h-12 w-12 rounded-lg shrink-0 overflow-hidden object-cover"
-          />
-        ) : (
-          <div className="h-12 w-12 rounded-lg shrink-0 bg-(--sand) flex items-center justify-center">
-            <Mic2
-              className="h-5 w-5 text-(--sea-ink-soft) opacity-60"
-              strokeWidth={1.25}
+        media={
+          artist.thumb ? (
+            <img
+              src={artist.thumb}
+              alt=""
+              className={cn(RECORD_ROW_MEDIA_CLASSES, 'object-cover')}
             />
-          </div>
-        )}
-        <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-          <span className="font-semibold text-(--sea-ink) truncate">
-            {artist.name}
-          </span>
-          {profile && (
-            <span className="text-xs text-(--sea-ink-soft) line-clamp-1">
-              {profile}
+          ) : (
+            <span
+              className={cn(
+                RECORD_ROW_MEDIA_CLASSES,
+                'flex items-center justify-center bg-muted',
+              )}
+            >
+              <Mic2 className="size-5 text-muted-foreground" />
             </span>
-          )}
-        </div>
-      </button>
+          )
+        }
+        title={artist.name}
+        description={profile}
+      />
     </li>
   )
 }

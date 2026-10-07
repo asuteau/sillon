@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { ExternalLink, RotateCw } from 'lucide-react'
 
+import { Button } from '#/shared/components/ui/button'
+
 import type { MarketplaceStats, SuggestedPrice } from '../marketplace.model'
 import {
   marketplaceStatsQueryOptions,
@@ -48,9 +50,9 @@ export const MarketplaceSectionView = ({
   if (isLoading) {
     return (
       <MarketplaceShell>
-        <span className="h-5 w-52 animate-pulse rounded-md bg-(--line)" />
-        <span className="h-5.5 w-60 animate-pulse rounded-full bg-(--line)" />
-        <span className="h-5 w-40 animate-pulse rounded-md bg-(--line)" />
+        <span className="h-5 w-52 rounded-(--radius) bg-muted" />
+        <span className="h-5.5 w-60 rounded-full bg-muted" />
+        <span className="h-5 w-40 rounded-(--radius) bg-muted" />
       </MarketplaceShell>
     )
   }
@@ -58,14 +60,15 @@ export const MarketplaceSectionView = ({
   if (isError || !stats) {
     return (
       <MarketplaceShell>
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={onRetry}
-          className="flex items-center gap-1.5 text-sm text-(--sea-ink-soft) hover:text-(--sea-ink)"
+          className="text-muted-foreground hover:text-foreground"
         >
           Marketplace unavailable
-          <RotateCw className="h-3.5 w-3.5" aria-label="Retry" />
-        </button>
+          <RotateCw aria-label="Retry" />
+        </Button>
       </MarketplaceShell>
     )
   }
@@ -73,7 +76,7 @@ export const MarketplaceSectionView = ({
   if (stats.status === 'blocked') {
     return (
       <MarketplaceShell>
-        <p className="text-sm text-(--sea-ink-soft)">
+        <p className="text-sm text-muted-foreground">
           Can&apos;t be sold on Discogs
         </p>
       </MarketplaceShell>
@@ -91,13 +94,13 @@ export const MarketplaceSectionView = ({
 
       {suggestedPrices.length > 0 && (
         <div className="flex flex-wrap items-center justify-center gap-1.5">
-          <span className="mr-0.5 text-xs text-(--sea-ink-soft)">
+          <span className="mr-0.5 text-xs text-muted-foreground">
             Suggested
           </span>
           {suggestedPrices.map(({ condition, price }) => (
             <span
               key={condition}
-              className="rounded-full border border-(--line) px-2 py-0.5 font-mono text-xs text-(--sea-ink)"
+              className="type-catalogue rounded-full border border-border px-2 py-0.5 text-[11px] text-foreground"
             >
               {condition} {formatPrice(price)}
             </span>
@@ -109,10 +112,10 @@ export const MarketplaceSectionView = ({
         href={discogsListingsUrl(releaseId)}
         target="_blank"
         rel="noopener noreferrer"
-        className="flex items-center gap-1 text-sm font-medium text-(--lagoon-deep) hover:underline"
+        className="flex items-center gap-1 text-sm font-semibold text-foreground underline-offset-4 hover:underline"
       >
         See Listings on Discogs
-        <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+        <ExternalLink className="size-3.5" aria-hidden />
       </a>
     </MarketplaceShell>
   )
@@ -128,18 +131,18 @@ const ListingsSummary = ({
   lowestPrice,
 }: ListingsSummaryProps) => {
   if (listingCount === 0) {
-    return <p className="text-sm text-(--sea-ink-soft)">No Listings</p>
+    return <p className="text-sm text-muted-foreground">No Listings</p>
   }
 
   return (
-    <p className="text-sm text-(--sea-ink)">
-      <span className="font-semibold tabular-nums">{listingCount}</span> for
+    <p className="text-sm text-foreground">
+      <span className="type-catalogue font-semibold">{listingCount}</span> for
       sale
       {lowestPrice && (
         <>
           {' · from '}
-          <span className="font-semibold tabular-nums">{lowestPrice}</span>
-          <span className="text-xs text-(--sea-ink-soft)">
+          <span className="type-catalogue font-semibold">{lowestPrice}</span>
+          <span className="text-xs text-muted-foreground">
             {' '}
             (excl. shipping)
           </span>
@@ -156,9 +159,9 @@ interface MarketplaceShellProps {
 const MarketplaceShell = ({ children }: MarketplaceShellProps) => (
   <section
     aria-label="Marketplace"
-    className="flex flex-col items-center gap-2 border-t border-(--line) pt-4 text-center"
+    className="flex flex-col items-center gap-2 border-t border-border pt-4 text-center"
   >
-    <h3 className="island-kicker">Marketplace</h3>
+    <h3 className="type-caps text-[11px] text-muted-foreground">Marketplace</h3>
     {/* Fixed min height (summary + suggested prices + link) so the sheet
         cover doesn't resize when the state changes. */}
     <div className="flex min-h-19.5 flex-col items-center justify-center gap-2">

@@ -9,6 +9,8 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+import { VINYL_BLACK, manifestIcons } from './src/shared/utils/pwa-assets'
+
 const config = defineConfig({
   plugins: [
     devtools(),
@@ -26,25 +28,19 @@ const config = defineConfig({
       manifest: {
         name: 'Sillon',
         short_name: 'Sillon',
-        description: 'Your vinyl record collection',
-        theme_color: '#0a0a0b',
-        background_color: '#0a0a0b',
+        description:
+          'Your record collection and wantlist, synced with Discogs.',
+        // Vinyl black: the launch screen is always dark
+        theme_color: VINYL_BLACK,
+        background_color: VINYL_BLACK,
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
         start_url: '/',
         scope: '/',
-        lang: 'fr',
-        icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          {
-            src: '/icons/icon-512-maskable.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
-        ],
+        lang: 'en',
+        // Generated from the groove mark: pnpm generate:pwa-assets
+        icons: manifestIcons(),
       },
 
       workbox: {

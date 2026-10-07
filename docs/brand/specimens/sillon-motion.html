@@ -1,114 +1,438 @@
 <title>Sillon Motion</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap"
+/>
 <style>
-/* Layout: three interactive phone screens, identical content, only the motion language changes */
-:root {
-  --bg: #f3f3f2; --surface: #fbfbfa; --raised: #ffffff; --fg: #121212; --muted: #6b6b69; --line: #dddcda; --skel: #e7e6e3;
-  --lac: linear-gradient(120deg,#e6e8eb,#9a9ea5 60%,#cfd2d6); --on-lac: #0d0d0e; --lac-stroke: #8d9198;
-  --sans: 'Familjen Grotesk', system-ui, sans-serif;
-  --mono: 'Martian Mono', ui-monospace, monospace;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0d0d0d; --surface: #141414; --raised: #1b1b1b; --fg: #ebeae7; --muted: #8b8a87; --line: #262626; --skel: #1f1f1f; --lac-stroke: #c9ccd1; color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #0d0d0d; --surface: #141414; --raised: #1b1b1b; --fg: #ebeae7; --muted: #8b8a87; --line: #262626; --skel: #1f1f1f; --lac-stroke: #c9ccd1; color-scheme: dark }
+  /* Layout: three interactive phone screens, identical content, only the motion language changes */
+  :root {
+    --bg: #f3f3f2;
+    --surface: #fbfbfa;
+    --raised: #ffffff;
+    --fg: #121212;
+    --muted: #6b6b69;
+    --line: #dddcda;
+    --skel: #e7e6e3;
+    --lac: linear-gradient(120deg, #e6e8eb, #9a9ea5 60%, #cfd2d6);
+    --on-lac: #0d0d0e;
+    --lac-stroke: #8d9198;
+    --sans: 'Familjen Grotesk', system-ui, sans-serif;
+    --mono: 'Martian Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0d0d0d;
+      --surface: #141414;
+      --raised: #1b1b1b;
+      --fg: #ebeae7;
+      --muted: #8b8a87;
+      --line: #262626;
+      --skel: #1f1f1f;
+      --lac-stroke: #c9ccd1;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #0d0d0d;
+    --surface: #141414;
+    --raised: #1b1b1b;
+    --fg: #ebeae7;
+    --muted: #8b8a87;
+    --line: #262626;
+    --skel: #1f1f1f;
+    --lac-stroke: #c9ccd1;
+    color-scheme: dark;
+  }
 
-body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
-.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; gap: 24px; }
-.intro { font-size: 13px; color: var(--muted); max-width: 70ch; margin: 0; line-height: 1.55; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 24px; }
-.tag { font-family: var(--mono); font-size: 10.5px; font-variation-settings: 'wdth' 87.5; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.tag b { color: var(--fg); font-weight: 500; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+  }
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 32px 64px;
+    display: grid;
+    gap: 24px;
+  }
+  .intro {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 70ch;
+    margin: 0;
+    line-height: 1.55;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+    gap: 24px;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-variation-settings: 'wdth' 87.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .tag b {
+    color: var(--fg);
+    font-weight: 500;
+  }
 
-.phone { position: relative; overflow: hidden; background: var(--surface); border: 1px solid var(--line); height: 600px; max-width: 360px; margin: 0 auto; }
-.home { padding: 18px 16px; display: grid; gap: 16px; align-content: start; }
-.hd { display: flex; align-items: center; gap: 8px; }
-.hd svg { width: 22px; height: 22px; color: var(--fg); }
-.wm { font-weight: 700; font-size: 21px; letter-spacing: -.055em; }
-.h3 { font-size: 19px; font-weight: 700; letter-spacing: -.03em; margin: 6px 0 0; }
-.covers { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
-.cv { aspect-ratio: 1; border: 0; padding: 0; border-radius: 2px; cursor: pointer; display: block; width: 100%; }
-.cv:focus-visible, .btn:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
-.covers.skeleton .cv { background: var(--skel) !important; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-.btn { font-family: var(--sans); font-size: 13px; font-weight: 600; padding: 9px 15px; border-radius: 999px; border: 0; background: var(--fg); color: var(--surface); cursor: pointer; }
-.btn.ghost { background: transparent; color: var(--fg); box-shadow: 0 0 0 1px var(--line) inset; font-weight: 500; }
-.btn.lac { background: var(--lac); color: var(--on-lac); }
-.hint { font-size: 11.5px; color: var(--muted); }
+  .phone {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    height: 600px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+  .home {
+    padding: 18px 16px;
+    display: grid;
+    gap: 16px;
+    align-content: start;
+  }
+  .hd {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hd svg {
+    width: 22px;
+    height: 22px;
+    color: var(--fg);
+  }
+  .wm {
+    font-weight: 700;
+    font-size: 21px;
+    letter-spacing: -0.055em;
+  }
+  .h3 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 6px 0 0;
+  }
+  .covers {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .cv {
+    aspect-ratio: 1;
+    border: 0;
+    padding: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+  }
+  .cv:focus-visible,
+  .btn:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+  .covers.skeleton .cv {
+    background: var(--skel) !important;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 15px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--fg);
+    color: var(--surface);
+    cursor: pointer;
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--fg);
+    box-shadow: 0 0 0 1px var(--line) inset;
+    font-weight: 500;
+  }
+  .btn.lac {
+    background: var(--lac);
+    color: var(--on-lac);
+  }
+  .hint {
+    font-size: 11.5px;
+    color: var(--muted);
+  }
 
-.layer { position: absolute; inset: 0; background: var(--surface); }
-.loader { display: grid; place-items: center; background: transparent; pointer-events: none; }
-.loader svg { width: 96px; height: 96px; }
-.loader .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--fg); }
+  .layer {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+  }
+  .loader {
+    display: grid;
+    place-items: center;
+    background: transparent;
+    pointer-events: none;
+  }
+  .loader svg {
+    width: 96px;
+    height: 96px;
+  }
+  .loader .dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--fg);
+  }
 
-.detail { padding: 14px 16px; display: grid; align-content: start; gap: 18px; overflow: hidden; }
-.detail .glow { position: absolute; inset: -20% -30% 40% -30%; pointer-events: none; opacity: .55; }
-.detail .back { justify-self: start; position: relative; }
-.dcover { width: 78%; aspect-ratio: 1; justify-self: center; border-radius: 2px; position: relative; box-shadow: 0 18px 40px rgba(0,0,0,.28); }
-.meta { display: grid; gap: 6px; position: relative; }
-.meta .a { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
-.meta .n { font-size: 30px; font-weight: 700; letter-spacing: -.045em; line-height: .95; }
-.meta .c { font-family: var(--mono); font-size: 10px; font-variation-settings: 'wdth' 87.5; color: var(--muted); }
-.meta .actions { margin-top: 8px; }
+  .detail {
+    padding: 14px 16px;
+    display: grid;
+    align-content: start;
+    gap: 18px;
+    overflow: hidden;
+  }
+  .detail .glow {
+    position: absolute;
+    inset: -20% -30% 40% -30%;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+  .detail .back {
+    justify-self: start;
+    position: relative;
+  }
+  .dcover {
+    width: 78%;
+    aspect-ratio: 1;
+    justify-self: center;
+    border-radius: 2px;
+    position: relative;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  }
+  .meta {
+    display: grid;
+    gap: 6px;
+    position: relative;
+  }
+  .meta .a {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+  .meta .n {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+  .meta .c {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-variation-settings: 'wdth' 87.5;
+    color: var(--muted);
+  }
+  .meta .actions {
+    margin-top: 8px;
+  }
 
-.picker { display: grid; align-content: center; justify-items: center; gap: 18px; padding: 16px; perspective: 900px; }
-.picker .k { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-variation-settings: 'wdth' 87.5; }
-.slot { width: 64%; aspect-ratio: 1; position: relative; }
-.slot .cv { position: absolute; inset: 0; height: 100%; cursor: default; box-shadow: 0 18px 40px rgba(0,0,0,.28); }
-.picker .meta { text-align: center; justify-items: center; }
-.picker .meta .n { font-size: 24px; }
+  .picker {
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 18px;
+    padding: 16px;
+    perspective: 900px;
+  }
+  .picker .k {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-variation-settings: 'wdth' 87.5;
+  }
+  .slot {
+    width: 64%;
+    aspect-ratio: 1;
+    position: relative;
+  }
+  .slot .cv {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    cursor: default;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  }
+  .picker .meta {
+    text-align: center;
+    justify-items: center;
+  }
+  .picker .meta .n {
+    font-size: 24px;
+  }
 
-/* abstract stand-ins for covers */
-.c0 { background: linear-gradient(180deg,#1d3a6b 0 62%, #e9e4d6 62%); }
-.c1 { background: radial-gradient(circle at 60% 40%, #d9a7b5, #6c6f78 70%); }
-.c2 { background: conic-gradient(from 200deg at 40% 60%, #e5462f, #f2b630, #3aa66b, #2a6dd8, #e5462f); }
-.c3 { background: repeating-linear-gradient(180deg, #0b0b0b 0 5px, #e8e8e8 5px 6px); }
-.c4 { background: linear-gradient(135deg,#b9c1c9,#5d636b); }
-.c5 { background: linear-gradient(160deg,#c24a2c,#2e1a14); }
+  /* abstract stand-ins for covers */
+  .c0 {
+    background: linear-gradient(180deg, #1d3a6b 0 62%, #e9e4d6 62%);
+  }
+  .c1 {
+    background: radial-gradient(circle at 60% 40%, #d9a7b5, #6c6f78 70%);
+  }
+  .c2 {
+    background: conic-gradient(
+      from 200deg at 40% 60%,
+      #e5462f,
+      #f2b630,
+      #3aa66b,
+      #2a6dd8,
+      #e5462f
+    );
+  }
+  .c3 {
+    background: repeating-linear-gradient(
+      180deg,
+      #0b0b0b 0 5px,
+      #e8e8e8 5px 6px
+    );
+  }
+  .c4 {
+    background: linear-gradient(135deg, #b9c1c9, #5d636b);
+  }
+  .c5 {
+    background: linear-gradient(160deg, #c24a2c, #2e1a14);
+  }
 </style>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <defs><linearGradient id="lacg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef0f3"/><stop offset=".45" stop-color="#8d9198"/><stop offset=".7" stop-color="#d9dce0"/><stop offset="1" stop-color="#7b7f86"/></linearGradient></defs>
-  <symbol id="groove" viewBox="0 0 100 100"><path class="gp" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></symbol>
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="lacg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef0f3" />
+      <stop offset=".45" stop-color="#8d9198" />
+      <stop offset=".7" stop-color="#d9dce0" />
+      <stop offset="1" stop-color="#7b7f86" />
+    </linearGradient>
+  </defs>
+  <symbol id="groove" viewBox="0 0 100 100">
+    <path
+      class="gp"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="7"
+      stroke-linecap="round"
+    />
+  </symbol>
 </svg>
 
 <div class="wrap">
-  <p class="intro">Same screen three times, only the motion changes. Try each one: tap a cover to open it, tap Random pick, tap Reload to see the loader. B keeps A’s 160 ms fades everywhere except a 320 ms sleeve pull and the groove loader, which in the app only shows on a real wait. With your system's reduce-motion setting on, every screen falls back to plain fades, which is what option A shows anyway. Covers are abstract stand-ins.</p>
+  <p class="intro">
+    Same screen three times, only the motion changes. Try each one: tap a cover
+    to open it, tap Random pick, tap Reload to see the loader. B keeps A’s 160
+    ms fades everywhere except a 320 ms sleeve pull and the groove loader, which
+    in the app only shows on a real wait. With your system's reduce-motion
+    setting on, every screen falls back to plain fades, which is what option A
+    shows anyway. Covers are abstract stand-ins.
+  </p>
   <div class="grid" id="grid"></div>
 </div>
 
 <script>
-const RECORDS = [
-  { t: 'Kind of Blue', a: 'Miles Davis', c: 'COLUMBIA CS 8163 · US · 1959', tint: 'rgba(29,58,107,.55)' },
-  { t: 'Homogenic', a: 'Björk', c: 'ONE LITTLE INDIAN TPLP 71 · 1997', tint: 'rgba(217,167,181,.55)' },
-  { t: 'In Rainbows', a: 'Radiohead', c: 'XL RECORDINGS XLLP 324 · 2007', tint: 'rgba(242,182,48,.45)' },
-  { t: 'Unknown Pleasures', a: 'Joy Division', c: 'FACTORY FACT 10 · UK · 1979', tint: 'rgba(160,160,160,.35)' },
-  { t: 'Discovery', a: 'Daft Punk', c: 'VIRGIN V 2940 · 2001', tint: 'rgba(185,193,201,.5)' },
-  { t: 'Blue Lines', a: 'Massive Attack', c: 'WILD BUNCH WBRLP 1 · 1991', tint: 'rgba(194,74,44,.5)' },
-];
-const EASE = { quiet: 'cubic-bezier(.2,0,0,1)', platter: 'cubic-bezier(.65,0,.15,1)', spring: 'cubic-bezier(.34,1.56,.64,1)' };
-const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const RECORDS = [
+    {
+      t: 'Kind of Blue',
+      a: 'Miles Davis',
+      c: 'COLUMBIA CS 8163 · US · 1959',
+      tint: 'rgba(29,58,107,.55)',
+    },
+    {
+      t: 'Homogenic',
+      a: 'Björk',
+      c: 'ONE LITTLE INDIAN TPLP 71 · 1997',
+      tint: 'rgba(217,167,181,.55)',
+    },
+    {
+      t: 'In Rainbows',
+      a: 'Radiohead',
+      c: 'XL RECORDINGS XLLP 324 · 2007',
+      tint: 'rgba(242,182,48,.45)',
+    },
+    {
+      t: 'Unknown Pleasures',
+      a: 'Joy Division',
+      c: 'FACTORY FACT 10 · UK · 1979',
+      tint: 'rgba(160,160,160,.35)',
+    },
+    {
+      t: 'Discovery',
+      a: 'Daft Punk',
+      c: 'VIRGIN V 2940 · 2001',
+      tint: 'rgba(185,193,201,.5)',
+    },
+    {
+      t: 'Blue Lines',
+      a: 'Massive Attack',
+      c: 'WILD BUNCH WBRLP 1 · 1991',
+      tint: 'rgba(194,74,44,.5)',
+    },
+  ]
+  const EASE = {
+    quiet: 'cubic-bezier(.2,0,0,1)',
+    platter: 'cubic-bezier(.65,0,.15,1)',
+    spring: 'cubic-bezier(.34,1.56,.64,1)',
+  }
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)')
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
-function spiralD(turns, r0, r1) {
-  const pts = [], steps = Math.ceil(turns * 72);
-  for (let i = 0; i <= steps; i++) { const t = i / steps, a = -Math.PI / 2 + t * turns * 2 * Math.PI, r = r1 - (r1 - r0) * t;
-    pts.push((50 + r * Math.cos(a)).toFixed(2) + ' ' + (50 + r * Math.sin(a)).toFixed(2)); }
-  return 'M' + pts.join(' L');
-}
-document.querySelector('#groove .gp').setAttribute('d', spiralD(3.5, 3, 45));
+  function spiralD(turns, r0, r1) {
+    const pts = [],
+      steps = Math.ceil(turns * 72)
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps,
+        a = -Math.PI / 2 + t * turns * 2 * Math.PI,
+        r = r1 - (r1 - r0) * t
+      pts.push(
+        (50 + r * Math.cos(a)).toFixed(2) +
+          ' ' +
+          (50 + r * Math.sin(a)).toFixed(2),
+      )
+    }
+    return 'M' + pts.join(' L')
+  }
+  document.querySelector('#groove .gp').setAttribute('d', spiralD(3.5, 3, 45))
 
-const VARIANTS = [
-  { k: 'a', name: 'A · Almost nothing', note: 'Fades, 160 ms' },
-  { k: 'h', name: 'B · Fast, two signatures', note: 'Fades + quick sleeve pull + groove loader' },
-  { k: 'b', name: 'C · Vinyl, as shown before', note: 'Needle drop, sleeve pull, crate dig' },
-];
+  const VARIANTS = [
+    { k: 'a', name: 'A · Almost nothing', note: 'Fades, 160 ms' },
+    {
+      k: 'h',
+      name: 'B · Fast, two signatures',
+      note: 'Fades + quick sleeve pull + groove loader',
+    },
+    {
+      k: 'b',
+      name: 'C · Vinyl, as shown before',
+      note: 'Needle drop, sleeve pull, crate dig',
+    },
+  ]
 
-function buildPhone(v) {
-  const el = document.createElement('section');
-  el.innerHTML = `<div class="tag"><b>${v.name}</b><span>${v.note}</span></div>
+  function buildPhone(v) {
+    const el = document.createElement('section')
+    el.innerHTML = `<div class="tag"><b>${v.name}</b><span>${v.note}</span></div>
   <div class="phone">
     <div class="home">
       <div class="hd"><svg aria-hidden="true"><use href="#groove"/></svg><span class="wm">sillon</span></div>
@@ -123,125 +447,334 @@ function buildPhone(v) {
     <div class="layer picker" hidden><span class="k">Random pick</span><div class="slot"></div>
       <div class="meta"><span class="a"></span><span class="n"></span><span class="c"></span></div>
       <div class="actions"><button class="btn lac again" type="button">Pick again</button><button class="btn ghost close" type="button">Close</button></div></div>
-  </div>`;
-  const $ = s => el.querySelector(s);
-  const phone = $('.phone'), covers = $('.covers'), detail = $('.detail'), dcover = $('.dcover'), loader = $('.loader'), picker = $('.picker'), slot = $('.slot');
-  let busy = false, openIdx = null;
-  const kind = () => reduce.matches ? 'a' : v.k;
-  const fast = v.k === 'h';
-  const fill = (root, r) => { root.querySelector('.a').textContent = r.a; root.querySelector('.n').textContent = r.t; root.querySelector('.c').textContent = r.c; };
-  const guard = fn => async (...args) => { if (busy) return; busy = true; try { await fn(...args); } finally { busy = false; } };
-  const fade = (node, from, to, ms = 160, delay = 0) => node.animate([{ opacity: from }, { opacity: to }], { duration: ms, delay, easing: EASE.quiet, fill: 'both' }).finished;
-
-  // Open a record
-  async function open(i) {
-    const r = RECORDS[i], src = covers.children[i], k = kind();
-    openIdx = i; dcover.className = 'dcover c' + i; fill(detail, r);
-    detail.querySelector('.glow').style.background = `radial-gradient(circle at 50% 30%, ${r.tint}, transparent 60%)`;
-    detail.hidden = false;
-    const meta = detail.querySelector('.meta'), back = detail.querySelector('.back');
-    if (k === 'a') { await fade(detail, 0, 1); return; }
-    if (k === 'b' || k === 'h') {
-      const p = phone.getBoundingClientRect(), s = src.getBoundingClientRect(), t = dcover.getBoundingClientRect();
-      const clone = document.createElement('div'); clone.className = 'cv c' + i;
-      Object.assign(clone.style, { position: 'absolute', left: t.left - p.left + 'px', top: t.top - p.top + 'px', width: t.width + 'px', height: t.height + 'px', transformOrigin: '0 0', zIndex: 5, cursor: 'default' });
-      phone.append(clone); dcover.style.visibility = 'hidden'; src.style.visibility = 'hidden';
-      const f = fast ? .52 : 1;
-      const from = `translate(${s.left - t.left}px, ${s.top - t.top}px) scale(${s.width / t.width})`;
-      fade(detail, 0, 1, 280 * f);
-      meta.animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 300 * f, delay: 300 * f, easing: EASE.quiet, fill: 'both' });
-      back.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200 * f, delay: 360 * f, fill: 'both' });
-      await clone.animate([{ transform: from, boxShadow: '0 0 0 rgba(0,0,0,0)' }, { transform: 'none', boxShadow: '0 18px 40px rgba(0,0,0,.28)' }], { duration: 620 * f, easing: EASE.platter }).finished;
-      dcover.style.visibility = ''; clone.remove(); src.style.visibility = '';
-      return;
+  </div>`
+    const $ = (s) => el.querySelector(s)
+    const phone = $('.phone'),
+      covers = $('.covers'),
+      detail = $('.detail'),
+      dcover = $('.dcover'),
+      loader = $('.loader'),
+      picker = $('.picker'),
+      slot = $('.slot')
+    let busy = false,
+      openIdx = null
+    const kind = () => (reduce.matches ? 'a' : v.k)
+    const fast = v.k === 'h'
+    const fill = (root, r) => {
+      root.querySelector('.a').textContent = r.a
+      root.querySelector('.n').textContent = r.t
+      root.querySelector('.c').textContent = r.c
     }
-    detail.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 620, easing: EASE.spring });
-    dcover.animate([{ transform: 'scale(.6) rotate(-6deg)' }, { transform: 'none' }], { duration: 700, delay: 120, easing: EASE.spring, fill: 'both' });
-    [...meta.children].forEach((n, j) => n.animate([{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'none' }], { duration: 520, delay: 260 + j * 80, easing: EASE.spring, fill: 'both' }));
-    await sleep(800);
-  }
-  async function close() {
-    const i = openIdx, src = covers.children[i], k = kind();
-    if (k === 'a') { await fade(detail, 1, 0); }
-    else if (k === 'b' || k === 'h') {
-      const f = fast ? .58 : 1;
-      const p = phone.getBoundingClientRect(), s = src.getBoundingClientRect(), t = dcover.getBoundingClientRect();
-      const clone = document.createElement('div'); clone.className = 'cv c' + i;
-      Object.assign(clone.style, { position: 'absolute', left: t.left - p.left + 'px', top: t.top - p.top + 'px', width: t.width + 'px', height: t.height + 'px', transformOrigin: '0 0', zIndex: 5, cursor: 'default' });
-      phone.append(clone); dcover.style.visibility = 'hidden'; src.style.visibility = 'hidden';
-      fade(detail, 1, 0, 260 * f);
-      await clone.animate([{ transform: 'none' }, { transform: `translate(${s.left - t.left}px, ${s.top - t.top}px) scale(${s.width / t.width})` }], { duration: 480 * f, easing: EASE.platter }).finished;
-      clone.remove(); src.style.visibility = ''; dcover.style.visibility = '';
-    } else {
-      await detail.animate([{ transform: 'none' }, { transform: 'translateY(100%)' }], { duration: 320, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'both' }).finished;
-    }
-    detail.getAnimations({ subtree: true }).forEach(a => a.cancel());
-    detail.hidden = true;
-  }
-
-  // Loader
-  async function reload() {
-    covers.getAnimations().forEach(a => a.cancel());
-    const k = kind();
-    if (k === 'a') {
-      covers.classList.add('skeleton');
-      await covers.animate([{ opacity: 1 }, { opacity: .45 }, { opacity: 1 }], { duration: 900, iterations: 1.5 }).finished;
-      covers.classList.remove('skeleton'); await fade(covers, 0, 1);
-      return;
-    }
-    covers.style.opacity = 0; loader.hidden = false;
-    if (k === 'b' || k === 'h') {
-      loader.innerHTML = `<svg viewBox="0 0 100 100"><path pathLength="1" d="${spiralD(6, 3, 45)}" fill="none" stroke="url(#lacg)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="1"/></svg>`;
-      await loader.querySelector('path').animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: fast ? 800 : 1300, easing: EASE.platter, fill: 'both' }).finished;
-      await fade(loader, 1, 0, fast ? 140 : 200);
-      loader.hidden = true; loader.getAnimations().forEach(a => a.cancel());
-      covers.style.opacity = ''; await fade(covers, 0, 1, fast ? 160 : 260);
-      return;
-    }
-    loader.innerHTML = `<div class="dot"></div>`;
-    await loader.firstChild.animate([{ transform: 'scale(.5)' }, { transform: 'scale(1.3)' }], { duration: 360, iterations: 4, direction: 'alternate', easing: EASE.spring }).finished;
-    loader.hidden = true; covers.style.opacity = '';
-    await Promise.all([...covers.children].map((n, j) => n.animate([{ opacity: 0, transform: 'scale(.4) translateY(20px)' }, { opacity: 1, transform: 'none' }], { duration: 560, delay: j * 70, easing: EASE.spring, fill: 'backwards' }).finished));
-  }
-
-  // Random pick
-  const show = i => { slot.innerHTML = `<div class="cv c${i}"></div>`; return slot.firstChild; };
-  async function pick(first) {
-    const k = kind(), target = Math.floor(Math.random() * RECORDS.length), meta = picker.querySelector('.meta');
-    if (first) { picker.hidden = false; await fade(picker, 0, 1, k === 'b' ? 220 : 160); }
-    meta.style.visibility = 'hidden';
-    if (k === 'a' || k === 'h') {
-      const n = show(target); await fade(n, 0, 1);
-    } else if (k === 'b') {
-      // Crate dig: sleeves flick past, slowing down, then the pick settles
-      let prev = -1;
-      const steps = 11;
-      for (let s = 0; s < steps; s++) {
-        let i = s === steps - 1 ? target : Math.floor(Math.random() * RECORDS.length);
-        if (i === prev && s !== steps - 1) i = (i + 1) % RECORDS.length; prev = i;
-        const d = 55 + Math.pow(s / steps, 2.4) * 380;
-        const n = show(i);
-        await n.animate([{ transform: 'translateY(-14%)', opacity: .35 }, { transform: 'none', opacity: 1 }], { duration: s === steps - 1 ? 520 : d, easing: s === steps - 1 ? EASE.platter : 'linear' }).finished;
+    const guard =
+      (fn) =>
+      async (...args) => {
+        if (busy) return
+        busy = true
+        try {
+          await fn(...args)
+        } finally {
+          busy = false
+        }
       }
-    } else {
-      for (let s = 0; s < 6; s++) {
-        const n = show(s === 5 ? target : Math.floor(Math.random() * RECORDS.length));
-        await n.animate([{ transform: 'rotateY(90deg) scale(.85)' }, { transform: 'none' }], { duration: s === 5 ? 700 : 200, easing: EASE.spring }).finished;
-      }
-    }
-    fill(picker, RECORDS[target]); meta.style.visibility = '';
-    if (k === 'c') [...meta.children].forEach((n, j) => n.animate([{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'none' }], { duration: 480, delay: j * 80, easing: EASE.spring, fill: 'backwards' }));
-    else await fade(meta, 0, 1, k === 'b' ? 260 : 160);
-  }
-  async function closePicker() { await fade(picker, 1, 0, 180); picker.getAnimations({ subtree: true }).forEach(a => a.cancel()); picker.hidden = true; }
+    const fade = (node, from, to, ms = 160, delay = 0) =>
+      node.animate([{ opacity: from }, { opacity: to }], {
+        duration: ms,
+        delay,
+        easing: EASE.quiet,
+        fill: 'both',
+      }).finished
 
-  covers.addEventListener('click', e => { const b = e.target.closest('.cv'); if (b) guard(open)(+b.dataset.i); });
-  $('.back').addEventListener('click', guard(close));
-  $('.reload').addEventListener('click', guard(reload));
-  $('.pick').addEventListener('click', () => guard(pick)(true));
-  $('.again').addEventListener('click', () => guard(pick)(false));
-  $('.close').addEventListener('click', guard(closePicker));
-  return el;
-}
-document.getElementById('grid').append(...VARIANTS.map(buildPhone));
+    // Open a record
+    async function open(i) {
+      const r = RECORDS[i],
+        src = covers.children[i],
+        k = kind()
+      openIdx = i
+      dcover.className = 'dcover c' + i
+      fill(detail, r)
+      detail.querySelector('.glow').style.background =
+        `radial-gradient(circle at 50% 30%, ${r.tint}, transparent 60%)`
+      detail.hidden = false
+      const meta = detail.querySelector('.meta'),
+        back = detail.querySelector('.back')
+      if (k === 'a') {
+        await fade(detail, 0, 1)
+        return
+      }
+      if (k === 'b' || k === 'h') {
+        const p = phone.getBoundingClientRect(),
+          s = src.getBoundingClientRect(),
+          t = dcover.getBoundingClientRect()
+        const clone = document.createElement('div')
+        clone.className = 'cv c' + i
+        Object.assign(clone.style, {
+          position: 'absolute',
+          left: t.left - p.left + 'px',
+          top: t.top - p.top + 'px',
+          width: t.width + 'px',
+          height: t.height + 'px',
+          transformOrigin: '0 0',
+          zIndex: 5,
+          cursor: 'default',
+        })
+        phone.append(clone)
+        dcover.style.visibility = 'hidden'
+        src.style.visibility = 'hidden'
+        const f = fast ? 0.52 : 1
+        const from = `translate(${s.left - t.left}px, ${s.top - t.top}px) scale(${s.width / t.width})`
+        fade(detail, 0, 1, 280 * f)
+        meta.animate(
+          [
+            { opacity: 0, transform: 'translateY(10px)' },
+            { opacity: 1, transform: 'none' },
+          ],
+          {
+            duration: 300 * f,
+            delay: 300 * f,
+            easing: EASE.quiet,
+            fill: 'both',
+          },
+        )
+        back.animate([{ opacity: 0 }, { opacity: 1 }], {
+          duration: 200 * f,
+          delay: 360 * f,
+          fill: 'both',
+        })
+        await clone.animate(
+          [
+            { transform: from, boxShadow: '0 0 0 rgba(0,0,0,0)' },
+            { transform: 'none', boxShadow: '0 18px 40px rgba(0,0,0,.28)' },
+          ],
+          { duration: 620 * f, easing: EASE.platter },
+        ).finished
+        dcover.style.visibility = ''
+        clone.remove()
+        src.style.visibility = ''
+        return
+      }
+      detail.animate(
+        [{ transform: 'translateY(100%)' }, { transform: 'none' }],
+        { duration: 620, easing: EASE.spring },
+      )
+      dcover.animate(
+        [{ transform: 'scale(.6) rotate(-6deg)' }, { transform: 'none' }],
+        { duration: 700, delay: 120, easing: EASE.spring, fill: 'both' },
+      )
+      ;[...meta.children].forEach((n, j) =>
+        n.animate(
+          [
+            { opacity: 0, transform: 'translateY(24px)' },
+            { opacity: 1, transform: 'none' },
+          ],
+          {
+            duration: 520,
+            delay: 260 + j * 80,
+            easing: EASE.spring,
+            fill: 'both',
+          },
+        ),
+      )
+      await sleep(800)
+    }
+    async function close() {
+      const i = openIdx,
+        src = covers.children[i],
+        k = kind()
+      if (k === 'a') {
+        await fade(detail, 1, 0)
+      } else if (k === 'b' || k === 'h') {
+        const f = fast ? 0.58 : 1
+        const p = phone.getBoundingClientRect(),
+          s = src.getBoundingClientRect(),
+          t = dcover.getBoundingClientRect()
+        const clone = document.createElement('div')
+        clone.className = 'cv c' + i
+        Object.assign(clone.style, {
+          position: 'absolute',
+          left: t.left - p.left + 'px',
+          top: t.top - p.top + 'px',
+          width: t.width + 'px',
+          height: t.height + 'px',
+          transformOrigin: '0 0',
+          zIndex: 5,
+          cursor: 'default',
+        })
+        phone.append(clone)
+        dcover.style.visibility = 'hidden'
+        src.style.visibility = 'hidden'
+        fade(detail, 1, 0, 260 * f)
+        await clone.animate(
+          [
+            { transform: 'none' },
+            {
+              transform: `translate(${s.left - t.left}px, ${s.top - t.top}px) scale(${s.width / t.width})`,
+            },
+          ],
+          { duration: 480 * f, easing: EASE.platter },
+        ).finished
+        clone.remove()
+        src.style.visibility = ''
+        dcover.style.visibility = ''
+      } else {
+        await detail.animate(
+          [{ transform: 'none' }, { transform: 'translateY(100%)' }],
+          { duration: 320, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'both' },
+        ).finished
+      }
+      detail.getAnimations({ subtree: true }).forEach((a) => a.cancel())
+      detail.hidden = true
+    }
+
+    // Loader
+    async function reload() {
+      covers.getAnimations().forEach((a) => a.cancel())
+      const k = kind()
+      if (k === 'a') {
+        covers.classList.add('skeleton')
+        await covers.animate(
+          [{ opacity: 1 }, { opacity: 0.45 }, { opacity: 1 }],
+          { duration: 900, iterations: 1.5 },
+        ).finished
+        covers.classList.remove('skeleton')
+        await fade(covers, 0, 1)
+        return
+      }
+      covers.style.opacity = 0
+      loader.hidden = false
+      if (k === 'b' || k === 'h') {
+        loader.innerHTML = `<svg viewBox="0 0 100 100"><path pathLength="1" d="${spiralD(6, 3, 45)}" fill="none" stroke="url(#lacg)" stroke-width="2.6" stroke-linecap="round" stroke-dasharray="1"/></svg>`
+        await loader
+          .querySelector('path')
+          .animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], {
+            duration: fast ? 800 : 1300,
+            easing: EASE.platter,
+            fill: 'both',
+          }).finished
+        await fade(loader, 1, 0, fast ? 140 : 200)
+        loader.hidden = true
+        loader.getAnimations().forEach((a) => a.cancel())
+        covers.style.opacity = ''
+        await fade(covers, 0, 1, fast ? 160 : 260)
+        return
+      }
+      loader.innerHTML = `<div class="dot"></div>`
+      await loader.firstChild.animate(
+        [{ transform: 'scale(.5)' }, { transform: 'scale(1.3)' }],
+        {
+          duration: 360,
+          iterations: 4,
+          direction: 'alternate',
+          easing: EASE.spring,
+        },
+      ).finished
+      loader.hidden = true
+      covers.style.opacity = ''
+      await Promise.all(
+        [...covers.children].map(
+          (n, j) =>
+            n.animate(
+              [
+                { opacity: 0, transform: 'scale(.4) translateY(20px)' },
+                { opacity: 1, transform: 'none' },
+              ],
+              {
+                duration: 560,
+                delay: j * 70,
+                easing: EASE.spring,
+                fill: 'backwards',
+              },
+            ).finished,
+        ),
+      )
+    }
+
+    // Random pick
+    const show = (i) => {
+      slot.innerHTML = `<div class="cv c${i}"></div>`
+      return slot.firstChild
+    }
+    async function pick(first) {
+      const k = kind(),
+        target = Math.floor(Math.random() * RECORDS.length),
+        meta = picker.querySelector('.meta')
+      if (first) {
+        picker.hidden = false
+        await fade(picker, 0, 1, k === 'b' ? 220 : 160)
+      }
+      meta.style.visibility = 'hidden'
+      if (k === 'a' || k === 'h') {
+        const n = show(target)
+        await fade(n, 0, 1)
+      } else if (k === 'b') {
+        // Crate dig: sleeves flick past, slowing down, then the pick settles
+        let prev = -1
+        const steps = 11
+        for (let s = 0; s < steps; s++) {
+          let i =
+            s === steps - 1
+              ? target
+              : Math.floor(Math.random() * RECORDS.length)
+          if (i === prev && s !== steps - 1) i = (i + 1) % RECORDS.length
+          prev = i
+          const d = 55 + Math.pow(s / steps, 2.4) * 380
+          const n = show(i)
+          await n.animate(
+            [
+              { transform: 'translateY(-14%)', opacity: 0.35 },
+              { transform: 'none', opacity: 1 },
+            ],
+            {
+              duration: s === steps - 1 ? 520 : d,
+              easing: s === steps - 1 ? EASE.platter : 'linear',
+            },
+          ).finished
+        }
+      } else {
+        for (let s = 0; s < 6; s++) {
+          const n = show(
+            s === 5 ? target : Math.floor(Math.random() * RECORDS.length),
+          )
+          await n.animate(
+            [{ transform: 'rotateY(90deg) scale(.85)' }, { transform: 'none' }],
+            { duration: s === 5 ? 700 : 200, easing: EASE.spring },
+          ).finished
+        }
+      }
+      fill(picker, RECORDS[target])
+      meta.style.visibility = ''
+      if (k === 'c')
+        [...meta.children].forEach((n, j) =>
+          n.animate(
+            [
+              { opacity: 0, transform: 'translateY(20px)' },
+              { opacity: 1, transform: 'none' },
+            ],
+            {
+              duration: 480,
+              delay: j * 80,
+              easing: EASE.spring,
+              fill: 'backwards',
+            },
+          ),
+        )
+      else await fade(meta, 0, 1, k === 'b' ? 260 : 160)
+    }
+    async function closePicker() {
+      await fade(picker, 1, 0, 180)
+      picker.getAnimations({ subtree: true }).forEach((a) => a.cancel())
+      picker.hidden = true
+    }
+
+    covers.addEventListener('click', (e) => {
+      const b = e.target.closest('.cv')
+      if (b) guard(open)(+b.dataset.i)
+    })
+    $('.back').addEventListener('click', guard(close))
+    $('.reload').addEventListener('click', guard(reload))
+    $('.pick').addEventListener('click', () => guard(pick)(true))
+    $('.again').addEventListener('click', () => guard(pick)(false))
+    $('.close').addEventListener('click', guard(closePicker))
+    return el
+  }
+  document.getElementById('grid').append(...VARIANTS.map(buildPhone))
 </script>

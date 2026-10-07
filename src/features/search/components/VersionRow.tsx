@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { Check, Heart, Library } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
+import { Button } from '#/shared/components/ui/button'
 
 import {
   useAddToCollection,
@@ -12,7 +15,6 @@ import {
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
-import { VinylDisc } from '#/shared/components/VinylDisc'
 import { versionsQueryOptions } from '../search.queries'
 import type { MasterVersion } from '../search.model'
 import type { VersionsPage } from '../search.schema'
@@ -103,26 +105,23 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
   }
 
   return (
-    <li className="island-shell rise-in flex items-center gap-3 rounded-2xl px-4 py-3">
+    <li className="flex items-center gap-3 py-3">
       <button
+        type="button"
         onClick={handleVersionClick}
-        className="flex flex-1 items-center gap-3 min-w-0 cursor-pointer text-left"
+        className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1 px-1 text-left transition-opacity duration-160 ease-fade hover:opacity-70"
       >
-        <VinylDisc colors={['#1a1a1a']} spinning={false} size={40} />
-
-        <div className="flex flex-1 flex-col gap-0.5 min-w-0">
-          <span className="font-semibold text-(--sea-ink) truncate">
-            {version.year > 0 ? version.year : '—'}
-            {version.country && (
-              <span className="font-mono text-xs text-(--sea-ink-soft) ml-2">
-                {version.country}
-              </span>
-            )}
-          </span>
-          <span className="text-xs text-(--sea-ink-soft) truncate">
-            {version.format}
-          </span>
-        </div>
+        <span className="type-catalogue text-sm text-foreground">
+          {version.year > 0 ? version.year : '—'}
+          {version.country && (
+            <span className="ml-2 text-muted-foreground">
+              {version.country}
+            </span>
+          )}
+        </span>
+        <span className="type-catalogue truncate text-[11px] text-muted-foreground">
+          {version.format}
+        </span>
       </button>
 
       {isAskingFulfilledWant ? (
@@ -132,8 +131,10 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
           variant="row"
         />
       ) : (
-        <div className="flex items-center gap-2 shrink-0">
-          <button
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            size="sm"
+            variant={version.inCollection > 0 ? 'default' : 'outline'}
             onClick={handleCollectionToggle}
             disabled={isCollectionPending}
             aria-label={
@@ -141,25 +142,16 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
                 ? 'Remove from collection'
                 : 'Add to collection'
             }
-            className={[
-              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition',
-              'disabled:opacity-50 cursor-pointer',
-              version.inCollection > 0
-                ? 'bg-(--sea-ink) text-(--chip-bg)'
-                : 'island-shell text-(--sea-ink)',
-            ].join(' ')}
           >
-            {version.inCollection > 0 ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Library className="h-3 w-3" />
-            )}
+            {version.inCollection > 0 ? <Check /> : <CollectionIcon />}
             <span className="hidden sm:inline">
               {version.inCollection > 0 ? 'Owned' : 'Collection'}
             </span>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            size="sm"
+            variant={version.inWantlist > 0 ? 'default' : 'outline'}
             onClick={handleWantlistToggle}
             disabled={isWantlistPending}
             aria-label={
@@ -167,23 +159,12 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
                 ? 'Remove from wantlist'
                 : 'Add to wantlist'
             }
-            className={[
-              'flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition',
-              'disabled:opacity-50 cursor-pointer',
-              version.inWantlist > 0
-                ? 'bg-(--sea-ink) text-(--chip-bg)'
-                : 'island-shell text-(--sea-ink)',
-            ].join(' ')}
           >
-            {version.inWantlist > 0 ? (
-              <Check className="h-3 w-3" />
-            ) : (
-              <Heart className="h-3 w-3" />
-            )}
+            {version.inWantlist > 0 ? <Check /> : <WantlistIcon />}
             <span className="hidden sm:inline">
               {version.inWantlist > 0 ? 'Wanted' : 'Wantlist'}
             </span>
-          </button>
+          </Button>
         </div>
       )}
     </li>

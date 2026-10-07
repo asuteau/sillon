@@ -3,6 +3,8 @@ import {
   formatDateAdded,
 } from '#/features/collection/collection.utils'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
+import { CoverGlow } from '#/shared/components/CoverGlow'
+import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
@@ -10,6 +12,7 @@ import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
+import { useRecordCover } from '#/shared/hooks/use-record-cover'
 
 interface ReleaseInfo {
   id: number
@@ -41,13 +44,18 @@ interface Props {
   removeIcon: React.ReactNode
 }
 
+interface ContentProps extends Omit<Props, 'onClose'> {
+  coverRef: React.Ref<HTMLDivElement>
+}
+
 function ReleaseSheetContent({
   release,
   onRemove,
   isRemoving,
   removeLabel,
   removeIcon,
-}: Omit<Props, 'onClose'>) {
+  coverRef,
+}: ContentProps) {
   const { basic_information: info } = release
   const fmt = info.formats?.[0]
   const formatParts = fmt
@@ -61,45 +69,36 @@ function ReleaseSheetContent({
     : null
 
   return (
-    <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
+    <div className="relative flex min-h-0 flex-col gap-5 overflow-y-auto">
       <SheetCover
         key={release.id}
+        ref={coverRef}
         coverKey={releaseCoverKey(release.id, info.master_id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
-        thumb={info.thumb}
         styles={info.styles}
       />
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        <p className="island-kicker">{formatArtists(info.artists)}</p>
-        <h2 className="display-title text-2xl font-bold tracking-tight text-(--sea-ink)">
-          {info.title}
-        </h2>
-        <p className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 font-mono text-sm text-(--sea-ink-soft)">
-          {info.year > 0 && <span>{info.year}</span>}
-          {info.year > 0 && <span aria-hidden>·</span>}
-          <span>{formatDateAdded(release.date_added)}</span>
-        </p>
-        {formatParts.length > 0 && (
-          <p className="font-mono text-sm text-(--sea-ink-soft)">
-            {formatParts.join(' · ')}
-          </p>
-        )}
-        {labelText && (
-          <p className="text-sm text-(--sea-ink-soft)">{labelText}</p>
-        )}
-      </div>
+      <RecordHeading
+        artist={formatArtists(info.artists)}
+        title={info.title}
+        catalogue={[
+          [
+            info.year > 0 ? String(info.year) : null,
+            formatDateAdded(release.date_added),
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          formatParts.join(' · '),
+          labelText,
+        ]}
+      />
 
       <MarketplaceSection releaseId={release.id} />
 
-      <div className="flex justify-center pt-1">
-        <Button
-          variant="destructive"
-          className="rounded-full"
-          disabled={isRemoving}
-          onClick={onRemove}
-        >
+      {/* Bottom padding inside the scroller, so button shadows aren't clipped */}
+      <div className="flex justify-center pt-1 pb-6">
+        <Button variant="destructive" disabled={isRemoving} onClick={onRemove}>
           {removeIcon}
           {removeLabel}
         </Button>
@@ -118,21 +117,32 @@ export function ReleaseSheet({
 }: Props) {
   const isMobile = useIsMobile()
   const { open, onOpenChange, onAnimationEnd } = useAnimatedClose(onClose)
+  const { tint, sheetCover, flyBack } = useRecordCover(release)
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) flyBack()
+    onOpenChange(next)
+  }
 
   if (isMobile) {
     return (
       <Drawer
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={handleOpenChange}
         onAnimationEnd={onAnimationEnd}
       >
-        <DrawerContent className="island-shell p-6">
+        <DrawerContent
+          className="sheet-fade px-6 pt-6"
+          style={{ '--cover-tint': tint ?? undefined }}
+        >
+          <CoverGlow tint={tint} />
           <ReleaseSheetContent
             release={release}
             onRemove={onRemove}
             isRemoving={isRemoving}
             removeLabel={removeLabel}
             removeIcon={removeIcon}
+            coverRef={sheetCover}
           />
         </DrawerContent>
       </Drawer>
@@ -142,22 +152,23 @@ export function ReleaseSheet({
   return (
     <Dialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       onOpenChangeComplete={onAnimationEnd}
     >
       <DialogContent
-        className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden px-6 pt-6"
+        style={{ '--cover-tint': tint ?? undefined }}
         showCloseButton={false}
       >
-        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
-          <ReleaseSheetContent
-            release={release}
-            onRemove={onRemove}
-            isRemoving={isRemoving}
-            removeLabel={removeLabel}
-            removeIcon={removeIcon}
-          />
-        </div>
+        <CoverGlow tint={tint} />
+        <ReleaseSheetContent
+          release={release}
+          onRemove={onRemove}
+          isRemoving={isRemoving}
+          removeLabel={removeLabel}
+          removeIcon={removeIcon}
+          coverRef={sheetCover}
+        />
       </DialogContent>
     </Dialog>
   )

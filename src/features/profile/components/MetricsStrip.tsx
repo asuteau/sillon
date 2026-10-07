@@ -63,14 +63,14 @@ export function MetricsStripView({
   wantlistCount,
 }: MetricsStripViewProps) {
   return (
-    <dl className="island-shell rise-in mb-8 rounded-2xl">
+    <dl className="mb-6 rounded-(--radius) border border-border bg-card">
       <Metric
         label="Estimated value"
         value={estimatedValue}
         hint={valueRange}
-        className="border-b border-(--line) py-3"
+        className="border-b border-border py-4"
       />
-      <div className="grid grid-cols-2 divide-x divide-(--line) py-3">
+      <div className="grid grid-cols-2 divide-x divide-border py-4">
         <Metric label="Records" value={recordCount} />
         <Metric label="Wanted" value={wantlistCount} />
       </div>
@@ -93,17 +93,18 @@ function Metric({ label, value, hint, className }: MetricProps) {
         className,
       )}
     >
-      <dt className="island-kicker">{label}</dt>
+      <dt className="type-caps text-[11px] text-muted-foreground">{label}</dt>
       <dd className="m-0 flex flex-col items-center gap-0.5">
         {value === undefined ? (
-          <span className="h-7 w-16 animate-pulse rounded-md bg-(--line)" />
+          <span className="h-7 w-16 rounded-(--radius) bg-muted" />
         ) : (
-          <span className="display-title text-2xl font-bold tabular-nums text-(--sea-ink)">
+          // Counts are catalogue data; set large here as the strip's headline
+          <span className="type-catalogue text-2xl leading-7 font-medium text-foreground">
             {value}
           </span>
         )}
         {hint && (
-          <span className="font-mono text-[10px] text-(--sea-ink-soft)">
+          <span className="type-catalogue text-[10px] text-muted-foreground">
             {hint}
           </span>
         )}

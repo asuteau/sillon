@@ -1,5 +1,7 @@
 import { useRandomPick } from '#/features/collection/hooks/use-random-pick'
-import { Shuffle } from 'lucide-react'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
+import { Button } from '#/shared/components/ui/button'
 import { RandomPickSpotlight } from './RandomPickSpotlight'
 
 export const RandomPickButton = () => {
@@ -7,15 +9,10 @@ export const RandomPickButton = () => {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={pick}
-        disabled={isPicking}
-        className="flex shrink-0 items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-sm font-semibold text-(--sea-ink) transition hover:bg-(--lagoon)/10 disabled:opacity-50 cursor-pointer"
-      >
-        <Shuffle className={`h-3.5 w-3.5 ${isPicking ? 'animate-spin' : ''}`} />
+      <Button variant="lacquer" onClick={pick} disabled={isPicking}>
+        {isPicking ? <GrooveLoader size={14} /> : <RandomPickIcon />}
         Pick for me
-      </button>
+      </Button>
 
       <RandomPickSpotlight
         record={record}

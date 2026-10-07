@@ -1,4 +1,5 @@
-import { HeartOff } from 'lucide-react'
+import { FulfilledWantIcon } from '#/shared/components/icons/FulfilledWantIcon'
+import { Button } from '#/shared/components/ui/button'
 
 import { useRemoveFromWantlist } from '../wantlist.mutations'
 
@@ -23,41 +24,67 @@ export const FulfilledWantPrompt = ({
     })
   }
 
-  const handleKeep = () => onResolved(false)
+  return (
+    <FulfilledWantPromptView
+      variant={variant}
+      onRemove={handleRemove}
+      onKeep={() => onResolved(false)}
+      isPending={removeFromWantlist.isPending}
+      isError={removeFromWantlist.isError}
+    />
+  )
+}
 
+interface FulfilledWantPromptViewProps {
+  onRemove: () => void
+  onKeep: () => void
+  isPending?: boolean
+  isError?: boolean
+  variant?: 'panel' | 'row'
+}
+
+// Presentational: also used by the landing page's still
+export const FulfilledWantPromptView = ({
+  onRemove,
+  onKeep,
+  isPending = false,
+  isError = false,
+  variant = 'panel',
+}: FulfilledWantPromptViewProps) => {
   if (variant === 'row') {
     return (
       <div
         role="group"
         aria-label="Remove from wantlist?"
-        className="flex items-center gap-2 shrink-0"
+        className="flex shrink-0 items-center gap-2"
       >
-        {removeFromWantlist.isError ? (
-          <span role="alert" className="text-xs text-(--sea-ink)">
-            Failed, retry?
+        {isError ? (
+          <span role="alert" className="text-xs text-foreground">
+            Failed. Retry?
           </span>
         ) : (
-          <span className="hidden text-xs text-(--sea-ink-soft) sm:inline">
+          <span className="hidden text-xs text-muted-foreground sm:inline">
             Remove from wantlist?
           </span>
         )}
-        <button
-          onClick={handleRemove}
-          disabled={removeFromWantlist.isPending}
+        <Button
+          size="sm"
+          onClick={onRemove}
+          disabled={isPending}
           aria-label="Remove from wantlist"
-          className="flex items-center gap-1.5 rounded-full bg-(--sea-ink) px-3 py-1.5 text-xs font-semibold text-(--chip-bg) transition disabled:opacity-50 cursor-pointer"
         >
-          <HeartOff className="h-3 w-3" />
+          <FulfilledWantIcon />
           Remove
-        </button>
-        <button
-          onClick={handleKeep}
-          disabled={removeFromWantlist.isPending}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onKeep}
+          disabled={isPending}
           aria-label="Keep in wantlist"
-          className="island-shell rounded-full px-3 py-1.5 text-xs font-semibold text-(--sea-ink) transition disabled:opacity-50 cursor-pointer"
         >
           Keep
-        </button>
+        </Button>
       </div>
     )
   }
@@ -65,32 +92,37 @@ export const FulfilledWantPrompt = ({
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <div>
-        <p className="font-semibold text-(--sea-ink)">Now in your collection</p>
-        <p className="mt-1 text-sm text-(--sea-ink-soft)">
+        <p className="type-title text-base text-foreground">
+          Now in your collection
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
           It's still on your wantlist. Remove it?
         </p>
-        {removeFromWantlist.isError && (
-          <p role="alert" className="mt-1 text-sm text-(--sea-ink)">
+        {isError && (
+          <p role="alert" className="mt-1 text-sm text-foreground">
             Couldn't remove from wantlist. Try again.
           </p>
         )}
       </div>
       <div className="flex w-full gap-2">
-        <button
-          onClick={handleKeep}
-          disabled={removeFromWantlist.isPending}
-          className="flex flex-1 items-center justify-center rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) disabled:opacity-50 cursor-pointer"
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={onKeep}
+          disabled={isPending}
+          className="flex-1"
         >
           Keep
-        </button>
-        <button
-          onClick={handleRemove}
-          disabled={removeFromWantlist.isPending}
-          className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-(--sea-ink) px-4 py-2 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
+        </Button>
+        <Button
+          size="lg"
+          onClick={onRemove}
+          disabled={isPending}
+          className="flex-1"
         >
-          <HeartOff className="h-3.5 w-3.5" />
+          <FulfilledWantIcon />
           Remove
-        </button>
+        </Button>
       </div>
     </div>
   )

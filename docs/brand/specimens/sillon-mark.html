@@ -1,136 +1,421 @@
 <title>Sillon Mark</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400..700&family=Martian+Mono:wdth,wght@75..112.5,300..600&display=swap"
+/>
 <style>
-/* Layout: four columns, one per mark candidate; each shows icon sizes, header lockup, splash */
-:root {
-  --bg: #f3f3f2; --surface: #fbfbfa; --fg: #121212; --muted: #6b6b69; --line: #dddcda;
-  --tile: radial-gradient(120% 90% at 30% 10%, #2b2c2f, #0a0a0b 70%);
-  --vinyl: #0c0c0c; --groove: #1e1e1e; --splash: #0a0a0b; --splash-fg: #ecebe8; --lac-flat: #c9ccd1;
-  --sans: 'Familjen Grotesk', system-ui, sans-serif;
-  --mono: 'Martian Mono', ui-monospace, monospace;
-}
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0d0d0d; --surface: #151515; --fg: #ebeae7; --muted: #8b8a87; --line: #262626; color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #0d0d0d; --surface: #151515; --fg: #ebeae7; --muted: #8b8a87; --line: #262626; color-scheme: dark }
+  /* Layout: four columns, one per mark candidate; each shows icon sizes, header lockup, splash */
+  :root {
+    --bg: #f3f3f2;
+    --surface: #fbfbfa;
+    --fg: #121212;
+    --muted: #6b6b69;
+    --line: #dddcda;
+    --tile: radial-gradient(120% 90% at 30% 10%, #2b2c2f, #0a0a0b 70%);
+    --vinyl: #0c0c0c;
+    --groove: #1e1e1e;
+    --splash: #0a0a0b;
+    --splash-fg: #ecebe8;
+    --lac-flat: #c9ccd1;
+    --sans: 'Familjen Grotesk', system-ui, sans-serif;
+    --mono: 'Martian Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --bg: #0d0d0d;
+      --surface: #151515;
+      --fg: #ebeae7;
+      --muted: #8b8a87;
+      --line: #262626;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --bg: #0d0d0d;
+    --surface: #151515;
+    --fg: #ebeae7;
+    --muted: #8b8a87;
+    --line: #262626;
+    color-scheme: dark;
+  }
 
-body { background: var(--bg); color: var(--fg); font-family: var(--sans); }
-.wrap { max-width: 1600px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 64px; display: grid; gap: 24px; }
-.intro { font-size: 13px; color: var(--muted); max-width: 66ch; margin: 0; line-height: 1.5; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 20px; }
-.opt { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 22px; display: grid; gap: 24px; align-content: start; min-width: 0; }
-.tag { font-family: var(--mono); font-size: 10.5px; font-variation-settings: 'wdth' 87.5; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
-.tag b { color: var(--fg); font-weight: 500; }
-.lbl { font-family: var(--mono); font-size: 9.5px; font-variation-settings: 'wdth' 87.5; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+  }
+  .wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-inline: 20px;
+    padding-block: 32px 64px;
+    display: grid;
+    gap: 24px;
+  }
+  .intro {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 66ch;
+    margin: 0;
+    line-height: 1.5;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+    gap: 20px;
+  }
+  .opt {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 22px;
+    display: grid;
+    gap: 24px;
+    align-content: start;
+    min-width: 0;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-variation-settings: 'wdth' 87.5;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .tag b {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .lbl {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-variation-settings: 'wdth' 87.5;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
 
-.sizes { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
-.sizes figure { margin: 0; display: grid; gap: 6px; justify-items: center; }
-.tile { background: var(--tile); display: grid; place-items: center; overflow: hidden; position: relative; box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 4px 14px rgba(0,0,0,.22); }
-.tile > * { width: 80%; height: 80%; }
-.tile.word > * { width: auto; height: auto; }
-.sheen { position: relative; border-radius: 50%; }
-.sheen::after { content: ""; position: absolute; inset: 0; border-radius: 50%; mix-blend-mode: screen; opacity: .45; pointer-events: none;
-  background: conic-gradient(from 30deg, transparent 0 8%, #fff 14%, transparent 22% 58%, #fff 64%, transparent 72%); }
-svg { display: block; width: 100%; height: 100%; }
-.m > * { width: 100%; height: 100%; }
+  .sizes {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .sizes figure {
+    margin: 0;
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+  }
+  .tile {
+    background: var(--tile);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 4px 14px rgba(0, 0, 0, 0.22);
+  }
+  .tile > * {
+    width: 80%;
+    height: 80%;
+  }
+  .tile.word > * {
+    width: auto;
+    height: auto;
+  }
+  .sheen {
+    position: relative;
+    border-radius: 50%;
+  }
+  .sheen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    opacity: 0.45;
+    pointer-events: none;
+    background: conic-gradient(
+      from 30deg,
+      transparent 0 8%,
+      #fff 14%,
+      transparent 22% 58%,
+      #fff 64%,
+      transparent 72%
+    );
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .m > * {
+    width: 100%;
+    height: 100%;
+  }
 
-.disc { border-radius: 50%; aspect-ratio: 1;
-  background:
-    radial-gradient(circle, var(--vinyl) 0 4%, transparent 4.5%),
-    radial-gradient(circle, transparent 0 30%, var(--vinyl) 30.5% 33%, transparent 33.5%),
-    repeating-radial-gradient(circle, var(--vinyl) 0 1.2px, var(--groove) 1.2px 2.2px); }
-.disc::before { content: ""; position: absolute; inset: 33%; border-radius: 50%; background: linear-gradient(135deg,#e9ebee,#8d9198 55%,#d4d7db); }
+  .disc {
+    border-radius: 50%;
+    aspect-ratio: 1;
+    background:
+      radial-gradient(circle, var(--vinyl) 0 4%, transparent 4.5%),
+      radial-gradient(
+        circle,
+        transparent 0 30%,
+        var(--vinyl) 30.5% 33%,
+        transparent 33.5%
+      ),
+      repeating-radial-gradient(
+        circle,
+        var(--vinyl) 0 1.2px,
+        var(--groove) 1.2px 2.2px
+      );
+  }
+  .disc::before {
+    content: '';
+    position: absolute;
+    inset: 33%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e9ebee, #8d9198 55%, #d4d7db);
+  }
 
-.wm { font-weight: 700; letter-spacing: -.055em; line-height: 1; color: var(--splash-fg); }
+  .wm {
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    color: var(--splash-fg);
+  }
 
-.lockup { display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--line); padding-top: 18px; }
-.lockup .m { width: 26px; height: 26px; flex: none; position: relative; }
-.lockup .wm { color: var(--fg); font-size: 24px; }
-.lockup .nav { margin-left: auto; display: flex; gap: 14px; font-size: 13px; color: var(--muted); }
+  .lockup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  .lockup .m {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    position: relative;
+  }
+  .lockup .wm {
+    color: var(--fg);
+    font-size: 24px;
+  }
+  .lockup .nav {
+    margin-left: auto;
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
 
-.splash { width: 100%; max-width: 180px; aspect-ratio: 9 / 19; border-radius: 22px; background: var(--splash); border: 4px solid #050505; display: grid; place-items: center; align-content: center; gap: 18px; overflow: hidden; justify-self: center; }
-.splash .m { width: 92px; height: 92px; position: relative; }
-.splash .wm { font-size: 22px; }
-.splash .load { width: 34%; height: 2px; background: rgba(255,255,255,.12); border-radius: 2px; overflow: hidden; }
-.splash .load i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg,#e6e8eb,#9a9ea5 60%,#cfd2d6); animation: slide 1.6s ease-in-out infinite; }
-.draw path.sp { stroke-dasharray: 1; animation: draw 2.6s cubic-bezier(.6,0,.3,1) infinite alternate; }
-.spin { animation: spin 3.2s linear infinite; }
-.splash.word .wm { font-size: 34px; }
-@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
-@media (prefers-reduced-motion: reduce) { .draw path.sp, .spin, .splash .load i { animation: none; } }
-.bottom { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .splash {
+    width: 100%;
+    max-width: 180px;
+    aspect-ratio: 9 / 19;
+    border-radius: 22px;
+    background: var(--splash);
+    border: 4px solid #050505;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 18px;
+    overflow: hidden;
+    justify-self: center;
+  }
+  .splash .m {
+    width: 92px;
+    height: 92px;
+    position: relative;
+  }
+  .splash .wm {
+    font-size: 22px;
+  }
+  .splash .load {
+    width: 34%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .splash .load i {
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, #e6e8eb, #9a9ea5 60%, #cfd2d6);
+    animation: slide 1.6s ease-in-out infinite;
+  }
+  .draw path.sp {
+    stroke-dasharray: 1;
+    animation: draw 2.6s cubic-bezier(0.6, 0, 0.3, 1) infinite alternate;
+  }
+  .spin {
+    animation: spin 3.2s linear infinite;
+  }
+  .splash.word .wm {
+    font-size: 34px;
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes slide {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(250%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .draw path.sp,
+    .spin,
+    .splash .load i {
+      animation: none;
+    }
+  }
+  .bottom {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 </style>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
   <defs>
     <linearGradient id="lac" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#eef0f3"/><stop offset=".45" stop-color="#8d9198"/><stop offset=".7" stop-color="#d9dce0"/><stop offset="1" stop-color="#7b7f86"/>
+      <stop offset="0" stop-color="#eef0f3" />
+      <stop offset=".45" stop-color="#8d9198" />
+      <stop offset=".7" stop-color="#d9dce0" />
+      <stop offset="1" stop-color="#7b7f86" />
     </linearGradient>
   </defs>
 </svg>
 
 <div class="wrap">
-  <p class="intro">Four candidate marks, in Lacquer with Familjen Grotesk. Each column shows the icon at 120, 60, 32 and 16 px (home screen down to browser tab), the header lockup on the page background, and the splash screen. The spiral marks drop turns at small sizes so the groove stays legible.</p>
+  <p class="intro">
+    Four candidate marks, in Lacquer with Familjen Grotesk. Each column shows
+    the icon at 120, 60, 32 and 16 px (home screen down to browser tab), the
+    header lockup on the page background, and the splash screen. The spiral
+    marks drop turns at small sizes so the groove stays legible.
+  </p>
   <div class="grid" id="grid"></div>
 </div>
 
 <script>
-// Archimedean spiral in a 100x100 box, outer end first so the stroke "draws in" from the edge like a needle.
-function spiral(turns, r0, r1) {
-  const pts = [], steps = Math.ceil(turns * 72);
-  for (let i = 0; i <= steps; i++) {
-    const t = i / steps, a = -Math.PI / 2 + t * turns * 2 * Math.PI, r = r1 - (r1 - r0) * t;
-    pts.push((50 + r * Math.cos(a)).toFixed(2) + ' ' + (50 + r * Math.sin(a)).toFixed(2));
+  // Archimedean spiral in a 100x100 box, outer end first so the stroke "draws in" from the edge like a needle.
+  function spiral(turns, r0, r1) {
+    const pts = [],
+      steps = Math.ceil(turns * 72)
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps,
+        a = -Math.PI / 2 + t * turns * 2 * Math.PI,
+        r = r1 - (r1 - r0) * t
+      pts.push(
+        (50 + r * Math.cos(a)).toFixed(2) +
+          ' ' +
+          (50 + r * Math.sin(a)).toFixed(2),
+      )
+    }
+    return 'M' + pts.join(' L')
   }
-  return 'M' + pts.join(' L');
-}
-const turnsFor = s => s >= 90 ? 9 : s >= 48 ? 6 : s >= 30 ? 4 : 2.5;
+  const turnsFor = (s) => (s >= 90 ? 9 : s >= 48 ? 6 : s >= 30 ? 4 : 2.5)
 
-// Recommended: black disc body, lacquer spiral, label, shine
-function recSVG(s, anim) {
-  const t = turnsFor(s), gap = 28 / t, w = Math.max(gap * 0.42, s < 24 ? 4.5 : 1.2);
-  return `<svg viewBox="0 0 100 100" class="${anim ? 'draw' : ''}"><circle cx="50" cy="50" r="48" fill="#070707"/>
+  // Recommended: black disc body, lacquer spiral, label, shine
+  function recSVG(s, anim) {
+    const t = turnsFor(s),
+      gap = 28 / t,
+      w = Math.max(gap * 0.42, s < 24 ? 4.5 : 1.2)
+    return `<svg viewBox="0 0 100 100" class="${anim ? 'draw' : ''}"><circle cx="50" cy="50" r="48" fill="#070707"/>
     <path class="sp" pathLength="1" d="${spiral(t, 16, 44)}" fill="none" stroke="url(#lac)" stroke-width="${w.toFixed(2)}" stroke-linecap="round"/>
-    <circle cx="50" cy="50" r="${s < 24 ? 12 : 11}" fill="url(#lac)"/><circle cx="50" cy="50" r="1.8" fill="#070707"/></svg>`;
-}
-// B: the groove alone, flat single colour
-function grooveSVG(s, anim, color) {
-  const t = turnsFor(s), gap = 40 / t, w = Math.max(gap * 0.38, s < 24 ? 5.5 : 1.6);
-  return `<svg viewBox="0 0 100 100" class="${anim ? 'draw' : ''}"><path class="sp" pathLength="1" d="${spiral(t, 3, 45)}" fill="none" stroke="${color}" stroke-width="${w.toFixed(2)}" stroke-linecap="round"/></svg>`;
-}
-const discEl = () => `<div class="disc sheen"></div>`;
-const radius = s => Math.round(s * 0.225);
+    <circle cx="50" cy="50" r="${s < 24 ? 12 : 11}" fill="url(#lac)"/><circle cx="50" cy="50" r="1.8" fill="#070707"/></svg>`
+  }
+  // B: the groove alone, flat single colour
+  function grooveSVG(s, anim, color) {
+    const t = turnsFor(s),
+      gap = 40 / t,
+      w = Math.max(gap * 0.38, s < 24 ? 5.5 : 1.6)
+    return `<svg viewBox="0 0 100 100" class="${anim ? 'draw' : ''}"><path class="sp" pathLength="1" d="${spiral(t, 3, 45)}" fill="none" stroke="${color}" stroke-width="${w.toFixed(2)}" stroke-linecap="round"/></svg>`
+  }
+  const discEl = () => `<div class="disc sheen"></div>`
+  const radius = (s) => Math.round(s * 0.225)
 
-const opts = [
-  { key: 'rec', name: 'Rec · Groove + shine', note: 'B on A’s black body',
-    icon: s => `<div class="sheen">${recSVG(s)}</div>`,
-    lock: () => `<div class="m sheen">${recSVG(26)}</div><span class="wm">sillon</span>`,
-    splash: () => `<div class="m sheen">${recSVG(120, true)}</div><span class="wm">sillon</span><div class="load"><i></i></div>` },
-  { key: 'disc', name: 'A · Disc', note: 'Literal record',
-    icon: s => discEl(),
-    lock: () => `<div class="m">${discEl()}</div><span class="wm">sillon</span>`,
-    splash: () => `<div class="m"><div class="disc sheen spin"></div></div><span class="wm">sillon</span><div class="load"><i></i></div>` },
-  { key: 'groove', name: 'B · Groove', note: 'One flat line',
-    icon: s => grooveSVG(s, false, 'var(--lac-flat)'),
-    lock: () => `<div class="m">${grooveSVG(26, false, 'currentColor')}</div><span class="wm">sillon</span>`,
-    splash: () => `<div class="m">${grooveSVG(120, true, 'url(#lac)')}</div><span class="wm">sillon</span><div class="load"><i></i></div>` },
-  { key: 'word', name: 'C · Wordmark', note: 'No symbol',
-    icon: s => `<span class="wm" style="font-size:${s < 40 ? s * 0.78 : s * 0.3}px">${s < 40 ? 's' : 'sillon'}</span>`,
-    lock: () => `<span class="wm">sillon</span>`,
-    splash: () => `<span class="wm">sillon</span><div class="load"><i></i></div>` },
-];
+  const opts = [
+    {
+      key: 'rec',
+      name: 'Rec · Groove + shine',
+      note: 'B on A’s black body',
+      icon: (s) => `<div class="sheen">${recSVG(s)}</div>`,
+      lock: () =>
+        `<div class="m sheen">${recSVG(26)}</div><span class="wm">sillon</span>`,
+      splash: () =>
+        `<div class="m sheen">${recSVG(120, true)}</div><span class="wm">sillon</span><div class="load"><i></i></div>`,
+    },
+    {
+      key: 'disc',
+      name: 'A · Disc',
+      note: 'Literal record',
+      icon: (s) => discEl(),
+      lock: () =>
+        `<div class="m">${discEl()}</div><span class="wm">sillon</span>`,
+      splash: () =>
+        `<div class="m"><div class="disc sheen spin"></div></div><span class="wm">sillon</span><div class="load"><i></i></div>`,
+    },
+    {
+      key: 'groove',
+      name: 'B · Groove',
+      note: 'One flat line',
+      icon: (s) => grooveSVG(s, false, 'var(--lac-flat)'),
+      lock: () =>
+        `<div class="m">${grooveSVG(26, false, 'currentColor')}</div><span class="wm">sillon</span>`,
+      splash: () =>
+        `<div class="m">${grooveSVG(120, true, 'url(#lac)')}</div><span class="wm">sillon</span><div class="load"><i></i></div>`,
+    },
+    {
+      key: 'word',
+      name: 'C · Wordmark',
+      note: 'No symbol',
+      icon: (s) =>
+        `<span class="wm" style="font-size:${s < 40 ? s * 0.78 : s * 0.3}px">${s < 40 ? 's' : 'sillon'}</span>`,
+      lock: () => `<span class="wm">sillon</span>`,
+      splash: () =>
+        `<span class="wm">sillon</span><div class="load"><i></i></div>`,
+    },
+  ]
 
-document.getElementById('grid').innerHTML = opts.map(o => `
+  document.getElementById('grid').innerHTML = opts
+    .map(
+      (o) => `
   <section class="opt">
     <div class="tag"><b>${o.name}</b><span>${o.note}</span></div>
-    <div class="sizes">${[120, 60, 32, 16].map(s => `
+    <div class="sizes">${[120, 60, 32, 16]
+      .map(
+        (s) => `
       <figure><div class="tile ${o.key === 'word' ? 'word' : ''}" style="width:${s}px;height:${s}px;border-radius:${radius(s)}px">${o.icon(s)}</div>
-      <figcaption class="lbl">${s}</figcaption></figure>`).join('')}</div>
+      <figcaption class="lbl">${s}</figcaption></figure>`,
+      )
+      .join('')}</div>
     <div class="lockup">${o.lock()}<span class="nav"><span>Collection</span><span>Wantlist</span></span></div>
     <div class="splash ${o.key === 'word' ? 'word' : ''}">${o.splash()}</div>
-  </section>`).join('');
+  </section>`,
+    )
+    .join('')
 </script>

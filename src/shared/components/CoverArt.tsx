@@ -1,8 +1,10 @@
 import { coverArtQueryOptions } from '#/features/collection/collection.queries'
+import { HouseSleeve } from '#/shared/components/HouseSleeve'
+import { useHdCover } from '#/shared/hooks/use-hd-cover'
 import { useInView } from '#/shared/hooks/use-in-view'
+import { coverState } from '#/shared/utils/cover-state'
 import { useQuery } from '@tanstack/react-query'
-import { Disc3 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 
 interface CoverArtProps {
   /** From masterCoverKey / releaseCoverKey */
@@ -13,55 +15,72 @@ interface CoverArtProps {
   styles: string[]
   size?: number
   className?: string
+  // The Cover box, e.g. for the cover → detail transition. Keep it stable.
+  ref?: React.Ref<HTMLDivElement>
 }
 
-export function CoverArt({
+export const CoverArt = ({
   coverKey,
   artist,
   title,
   thumb,
   size,
   className,
-}: CoverArtProps) {
-  const { ref, isInView } = useInView()
+  ref,
+}: CoverArtProps) => {
+  const { ref: inViewRef, isInView } = useInView()
+  const coverRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      inViewRef.current = node
+      if (typeof ref === 'function') return ref(node)
+      if (ref) ref.current = node
+    },
+    [inViewRef, ref],
+  )
   const [thumbLoaded, setThumbLoaded] = useState(false)
-  const [hdUrl, setHdUrl] = useState<string | null>(null)
-  const [hdVisible, setHdVisible] = useState(false)
-
-  const { data: hdSrc } = useQuery({
+  const [thumbFailed, setThumbFailed] = useState(false)
+  const { data: hdSrc, status: hdStatus } = useQuery({
     ...coverArtQueryOptions(coverKey, artist, title),
     enabled: isInView,
   })
 
-  useEffect(() => {
-    if (!hdSrc) return
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => {
-      setHdUrl(hdSrc)
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => setHdVisible(true)),
-      )
-    }
-    img.src = hdSrc
-  }, [hdSrc])
+  const { hdUrl, hdVisible, hdFailed } = useHdCover(hdSrc ?? null)
+
+  const state = coverState({
+    thumb,
+    thumbFailed,
+    hdSettled: hdStatus !== 'pending',
+    hdSrc: hdSrc ?? null,
+    hdFailed,
+  })
 
   return (
     <div
-      ref={ref}
+      ref={coverRef}
+      data-slot="cover"
       className={`relative ${className ?? ''}`}
       style={size ? { width: size, height: size } : undefined}
     >
-      <div className="absolute inset-0 bg-(--sand)" />
+      <div className="absolute inset-0 bg-muted" />
 
-      {thumb && (
+      {state === 'house' && (
+        <HouseSleeve
+          artist={artist}
+          title={title}
+          coverKey={coverKey}
+          className="absolute inset-0 size-full"
+        />
+      )}
+
+      {/* No crossOrigin: Discogs images send no CORS headers */}
+      {thumb && !thumbFailed && (
         <img
           src={thumb}
           alt=""
           loading="lazy"
-          crossOrigin="anonymous"
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-200 ${thumbLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setThumbLoaded(true)}
+          onError={() => setThumbFailed(true)}
         />
       )}
 
@@ -72,16 +91,6 @@ export function CoverArt({
           crossOrigin="anonymous"
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${hdVisible ? 'opacity-100' : 'opacity-0'}`}
         />
-      )}
-
-      {!hdVisible && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Disc3
-            style={{ width: '42%', height: '42%' }}
-            strokeWidth={0.75}
-            className="text-(--sea-ink-soft) opacity-60"
-          />
-        </div>
       )}
     </div>
   )

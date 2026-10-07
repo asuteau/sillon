@@ -4,7 +4,6 @@ import {
   useQueryClient,
   useQuery,
 } from '@tanstack/react-query'
-import { Check, Heart, Library } from 'lucide-react'
 
 import {
   useAddToCollection,
@@ -23,9 +22,11 @@ import {
 } from '#/features/search/search.queries'
 import type { VersionsPage } from '#/features/search/search.schema'
 import { extractColors } from '#/shared/utils/extractColors'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { RecordHeading } from '#/shared/components/RecordHeading'
+import { ReleaseListButtons } from '#/shared/components/ReleaseListButtons'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { masterCoverKey } from '#/shared/utils/cover-key'
-import { Button } from './ui/button'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Drawer, DrawerContent } from './ui/drawer'
 import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
@@ -127,47 +128,28 @@ function SearchReleaseSheetContent({
         coverKey={masterCoverKey(masterId)}
         artist={release.artists[0] ?? ''}
         title={release.title}
-        thumb={release.coverImage || null}
         styles={[]}
       />
 
-      <div className="flex flex-col items-center gap-2 text-center">
-        {release.artists.length > 0 && (
-          <p className="island-kicker">{release.artists.join(', ')}</p>
-        )}
-        <h2 className="display-title text-2xl font-bold tracking-tight text-(--lagoon-deep)">
-          {release.title}
-        </h2>
-      </div>
-
-      <div className="flex flex-col items-center gap-2 text-center font-mono text-sm">
-        {(release.year > 0 || release.country) && (
-          <p className="text-(--sea-ink-soft)">
-            {[
-              release.year > 0 ? String(release.year) : null,
-              release.country || null,
-            ]
+      <div className="flex flex-col items-center gap-3">
+        <RecordHeading
+          artist={release.artists.join(', ')}
+          title={release.title}
+          catalogue={[
+            [release.year > 0 ? String(release.year) : null, release.country]
               .filter(Boolean)
-              .join(' · ')}
-          </p>
-        )}
-
-        {release.formatText && (
-          <p
-            className="line-clamp-2 text-(--sea-ink-soft)"
-            title={release.formatText}
-          >
-            {release.formatText}
-          </p>
-        )}
+              .join(' · '),
+            release.formatText,
+          ]}
+        />
 
         {colors.length > 0 && (
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2">
             {colors.map((color) => (
               <span
                 key={color}
                 title={color}
-                className="h-4.5 w-4.5 rounded-full border border-(--line) shrink-0"
+                className="size-4.5 shrink-0 rounded-full border border-border"
                 style={{ background: color }}
               />
             ))}
@@ -183,35 +165,14 @@ function SearchReleaseSheetContent({
           onResolved={handleFulfilledWantResolved}
         />
       ) : (
-        <div className="flex justify-center gap-3 pt-1">
-          <Button
-            variant={inCollection > 0 ? 'default' : 'outline'}
-            className="rounded-full"
-            disabled={isCollectionPending}
-            onClick={handleCollectionToggle}
-          >
-            {inCollection > 0 ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Library className="h-4 w-4" />
-            )}
-            {inCollection > 0 ? 'Owned' : 'Collection'}
-          </Button>
-
-          <Button
-            variant={inWantlist > 0 ? 'default' : 'outline'}
-            className="rounded-full"
-            disabled={isWantlistPending}
-            onClick={handleWantlistToggle}
-          >
-            {inWantlist > 0 ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Heart className="h-4 w-4" />
-            )}
-            {inWantlist > 0 ? 'Wanted' : 'Wantlist'}
-          </Button>
-        </div>
+        <ReleaseListButtons
+          inCollection={inCollection > 0}
+          inWantlist={inWantlist > 0}
+          onCollectionToggle={handleCollectionToggle}
+          onWantlistToggle={handleWantlistToggle}
+          isCollectionPending={isCollectionPending}
+          isWantlistPending={isWantlistPending}
+        />
       )}
     </div>
   )
@@ -229,8 +190,8 @@ export function SearchReleaseSheet({
   const content = (
     <Suspense
       fallback={
-        <div className="py-8 text-center text-sm text-(--sea-ink-soft)">
-          Loading…
+        <div className="flex justify-center py-8">
+          <GrooveLoader size={32} />
         </div>
       }
     >
@@ -249,7 +210,7 @@ export function SearchReleaseSheet({
         onOpenChange={onOpenChange}
         onAnimationEnd={onAnimationEnd}
       >
-        <DrawerContent className="island-shell p-6">{content}</DrawerContent>
+        <DrawerContent className="p-6">{content}</DrawerContent>
       </Drawer>
     )
   }
@@ -261,12 +222,10 @@ export function SearchReleaseSheet({
       onOpenChangeComplete={onAnimationEnd}
     >
       <DialogContent
-        className="max-w-sm rounded-none border-0 bg-transparent p-0 ring-0 shadow-none"
+        className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
         showCloseButton={false}
       >
-        <div className="island-shell flex max-h-[90dvh] flex-col overflow-hidden rounded-3xl p-6">
-          {content}
-        </div>
+        {content}
       </DialogContent>
     </Dialog>
   )
