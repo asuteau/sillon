@@ -23,9 +23,11 @@ const FILES = [
   'routes/index.tsx',
 ]
 
+const TEMPLATE_TOKEN_PATTERN =
+  /--(sea-ink|lagoon|palm|sand|foam|surface|line|inset-glint|kicker|bg-base|header-bg|chip-bg|chip-line|link-bg-hover|hero-[ab])\b/
+
 const LEGACY_TEMPLATE_PATTERNS = [
-  // tokens
-  /--(sea-ink|lagoon|palm|sand|foam|surface|line|inset-glint|kicker|bg-base|header-bg|chip-bg|chip-line|link-bg-hover|hero-[ab])\b/,
+  TEMPLATE_TOKEN_PATTERN,
   // classes
   /\b(island-[a-z]+|display-title|page-wrap|feature-card|rise-in|nav-link|site-footer)\b/,
   // in-between radii and template colours
@@ -38,5 +40,23 @@ describe('feature screens', () => {
     const source = readFileSync(join(SRC, file), 'utf8')
     for (const pattern of LEGACY_TEMPLATE_PATTERNS)
       expect(source).not.toMatch(pattern)
+  })
+})
+
+// #14: the template token aliases are gone, so nothing may reference them
+describe('template token aliases', () => {
+  const sourceFiles = (path: string): string[] =>
+    readdirSync(join(SRC, path), { withFileTypes: true }).flatMap((entry) => {
+      const file = join(path, entry.name)
+      if (entry.isDirectory()) return sourceFiles(file)
+      return /\.(tsx?|css)$/.test(entry.name) && !/\.test\./.test(entry.name)
+        ? [file]
+        : []
+    })
+
+  it.each(sourceFiles('.'))('%s does not use them', (file) => {
+    expect(readFileSync(join(SRC, file), 'utf8')).not.toMatch(
+      TEMPLATE_TOKEN_PATTERN,
+    )
   })
 })

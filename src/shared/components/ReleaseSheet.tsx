@@ -3,6 +3,7 @@ import {
   formatDateAdded,
 } from '#/features/collection/collection.utils'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
+import { CoverGlow } from '#/shared/components/CoverGlow'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
@@ -11,6 +12,7 @@ import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
+import { useRecordCover } from '#/shared/hooks/use-record-cover'
 
 interface ReleaseInfo {
   id: number
@@ -42,13 +44,18 @@ interface Props {
   removeIcon: React.ReactNode
 }
 
+interface ContentProps extends Omit<Props, 'onClose'> {
+  coverRef: React.Ref<HTMLDivElement>
+}
+
 function ReleaseSheetContent({
   release,
   onRemove,
   isRemoving,
   removeLabel,
   removeIcon,
-}: Omit<Props, 'onClose'>) {
+  coverRef,
+}: ContentProps) {
   const { basic_information: info } = release
   const fmt = info.formats?.[0]
   const formatParts = fmt
@@ -62,9 +69,10 @@ function ReleaseSheetContent({
     : null
 
   return (
-    <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
+    <div className="relative flex min-h-0 flex-col gap-5 overflow-y-auto">
       <SheetCover
         key={release.id}
+        ref={coverRef}
         coverKey={releaseCoverKey(release.id, info.master_id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
@@ -109,21 +117,32 @@ export function ReleaseSheet({
 }: Props) {
   const isMobile = useIsMobile()
   const { open, onOpenChange, onAnimationEnd } = useAnimatedClose(onClose)
+  const { tint, sheetCover, flyBack } = useRecordCover(release)
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) flyBack()
+    onOpenChange(next)
+  }
 
   if (isMobile) {
     return (
       <Drawer
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={handleOpenChange}
         onAnimationEnd={onAnimationEnd}
       >
-        <DrawerContent className="p-6">
+        <DrawerContent
+          className="sheet-fade p-6"
+          style={{ '--cover-tint': tint ?? undefined }}
+        >
+          <CoverGlow tint={tint} />
           <ReleaseSheetContent
             release={release}
             onRemove={onRemove}
             isRemoving={isRemoving}
             removeLabel={removeLabel}
             removeIcon={removeIcon}
+            coverRef={sheetCover}
           />
         </DrawerContent>
       </Drawer>
@@ -133,19 +152,22 @@ export function ReleaseSheet({
   return (
     <Dialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       onOpenChangeComplete={onAnimationEnd}
     >
       <DialogContent
         className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
+        style={{ '--cover-tint': tint ?? undefined }}
         showCloseButton={false}
       >
+        <CoverGlow tint={tint} />
         <ReleaseSheetContent
           release={release}
           onRemove={onRemove}
           isRemoving={isRemoving}
           removeLabel={removeLabel}
           removeIcon={removeIcon}
+          coverRef={sheetCover}
         />
       </DialogContent>
     </Dialog>

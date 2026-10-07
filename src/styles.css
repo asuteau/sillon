@@ -122,29 +122,12 @@
     var(--lacquer-3)
   );
   --lacquer-foreground: #0d0d0e;
-  /* Set at runtime from the current Cover */
-  --cover-tint: oklch(0.6 0 0);
-
-  /* deprecated: removed in 07 */
-  --sea-ink: var(--foreground);
-  --sea-ink-soft: var(--muted-foreground);
-  --lagoon: var(--foreground);
-  --lagoon-deep: var(--foreground);
-  --palm: var(--muted-foreground);
-  --sand: var(--muted);
-  --foam: var(--background);
-  --surface: var(--card);
-  --surface-strong: var(--card);
-  --line: var(--border);
-  --inset-glint: transparent;
-  --kicker: var(--muted-foreground);
-  --bg-base: var(--background);
-  --header-bg: color-mix(in oklab, var(--background) 84%, transparent);
-  --chip-bg: var(--card);
-  --chip-line: var(--border);
-  --link-bg-hover: var(--accent);
-  --hero-a: transparent;
-  --hero-b: transparent;
+  /* Set at runtime from the current Cover (useCoverTint); neutral until then.
+     cover-glow relights it per theme so text on it stays AA — checked by
+     cover-tint.test.ts */
+  --cover-tint: oklch(0.62 0 0);
+  --cover-glow-lightness: 0.9;
+  --cover-glow-alpha: 0.35;
 }
 
 /* Dark: explicit .dark, or the OS preference unless .light overrides it.
@@ -174,6 +157,8 @@
   --chart-3: #8b8a87;
   --chart-4: #6b6b69;
   --chart-5: #4a4a48;
+  --cover-glow-lightness: 0.32;
+  --cover-glow-alpha: 0.35;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -201,6 +186,8 @@
     --chart-3: #8b8a87;
     --chart-4: #6b6b69;
     --chart-5: #4a4a48;
+    --cover-glow-lightness: 0.32;
+    --cover-glow-alpha: 0.35;
   }
 }
 
@@ -285,6 +272,19 @@
   font-family: var(--font-mono);
   font-stretch: 87.5%;
   font-variant-numeric: tabular-nums;
+}
+
+/* Faint radial glow from the Cover on record screens. Computed here, on the
+   element, so it picks up a --cover-tint set on an ancestor. */
+@utility cover-glow {
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    oklch(
+      from var(--cover-tint) var(--cover-glow-lightness) c h /
+        var(--cover-glow-alpha)
+    ),
+    transparent 70%
+  );
 }
 
 @layer base {
@@ -486,7 +486,38 @@
   }
 }
 
+/* Record screens: the bottom sheet fades instead of sliding, so the cover can
+   grow into it. Outranks vaul's injected slide (four attribute selectors). */
+[data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='open'].sheet-fade {
+  animation: sheet-fade-in 160ms var(--ease-fade) both;
+}
+
+[data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='closed'].sheet-fade {
+  animation: sheet-fade-out 160ms var(--ease-fade) both;
+}
+
+@keyframes sheet-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes sheet-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Every bottom sheet fades; data-slot outranks vaul's selector */
+  [data-slot='drawer-content'][data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='open'] {
+    animation: sheet-fade-in 160ms var(--ease-fade) both;
+  }
+
+  [data-slot='drawer-content'][data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='closed'] {
+    animation: sheet-fade-out 160ms var(--ease-fade) both;
+  }
+
   .groove-loader {
     animation: groove-fade 160ms var(--ease-fade) both;
   }

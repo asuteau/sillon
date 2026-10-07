@@ -30,7 +30,7 @@ interface RecordRowProps {
   meta?: React.ReactNode
   // Before the catalogue line, e.g. owned / wanted marks
   badges?: React.ReactNode
-  onClick: () => void
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 export const RecordRow = ({

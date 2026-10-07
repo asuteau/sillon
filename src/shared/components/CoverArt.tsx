@@ -4,7 +4,7 @@ import { useHdCover } from '#/shared/hooks/use-hd-cover'
 import { useInView } from '#/shared/hooks/use-in-view'
 import { coverState } from '#/shared/utils/cover-state'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 interface CoverArtProps {
   /** From masterCoverKey / releaseCoverKey */
@@ -15,6 +15,8 @@ interface CoverArtProps {
   styles: string[]
   size?: number
   className?: string
+  // The Cover box, e.g. for the cover → detail transition. Keep it stable.
+  ref?: React.Ref<HTMLDivElement>
 }
 
 export const CoverArt = ({
@@ -24,8 +26,17 @@ export const CoverArt = ({
   thumb,
   size,
   className,
+  ref,
 }: CoverArtProps) => {
-  const { ref, isInView } = useInView()
+  const { ref: inViewRef, isInView } = useInView()
+  const coverRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      inViewRef.current = node
+      if (typeof ref === 'function') return ref(node)
+      if (ref) ref.current = node
+    },
+    [inViewRef, ref],
+  )
   const [thumbLoaded, setThumbLoaded] = useState(false)
   const [thumbFailed, setThumbFailed] = useState(false)
   const { data: hdSrc, status: hdStatus } = useQuery({
@@ -45,7 +56,8 @@ export const CoverArt = ({
 
   return (
     <div
-      ref={ref}
+      ref={coverRef}
+      data-slot="cover"
       className={`relative ${className ?? ''}`}
       style={size ? { width: size, height: size } : undefined}
     >

@@ -5,6 +5,7 @@ import {
   RecordRow,
 } from '#/shared/components/RecordList'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
+import { setCoverOrigin } from '#/shared/utils/cover-transition'
 
 // Shared by Collection and Wantlist items
 interface ReleaseRowRelease {
@@ -30,7 +31,13 @@ export const ReleaseRow = ({ release, meta, onClick }: ReleaseRowProps) => {
 
   return (
     <RecordRow
-      onClick={onClick}
+      onClick={(event) => {
+        // The record screen grows from this Cover
+        setCoverOrigin(
+          event.currentTarget.querySelector<HTMLElement>('[data-slot="cover"]'),
+        )
+        onClick()
+      }}
       media={
         <CoverArt
           coverKey={releaseCoverKey(release.id, info.master_id)}

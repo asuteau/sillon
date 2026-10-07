@@ -6,6 +6,7 @@ import {
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { getDeezerCover } from '#/services/deezer.api'
+import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
 import type { CollectionPage } from './collection.schema'
@@ -64,6 +65,17 @@ export const coverArtQueryOptions = (
   queryOptions({
     queryKey: ['cover', 'v4', coverKey],
     queryFn: () => getDeezerCover({ data: { artist, title } }),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: false,
+  })
+
+// One tint per Cover, whichever image it was sampled from
+export const coverTintQueryOptions = (coverKey: string, src: string | null) =>
+  queryOptions({
+    queryKey: ['cover-tint', coverKey],
+    queryFn: () => (src ? sampleCoverTint(src) : null),
+    enabled: !!src,
     staleTime: Infinity,
     gcTime: Infinity,
     retry: false,

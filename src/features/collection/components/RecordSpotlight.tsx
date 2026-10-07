@@ -1,6 +1,7 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
+import { CoverGlow } from '#/shared/components/CoverGlow'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
@@ -8,6 +9,7 @@ import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
+import { useRecordCover } from '#/shared/hooks/use-record-cover'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 
@@ -20,13 +22,18 @@ interface Props {
   isRemoving?: boolean
 }
 
+interface ContentProps extends Omit<Props, 'onClose'> {
+  coverRef: React.Ref<HTMLDivElement>
+}
+
 const SpotlightContent = ({
   record,
   onPickAgain,
   isPicking,
   onRemove,
   isRemoving,
-}: Props) => {
+  coverRef,
+}: ContentProps) => {
   const { basic_information: info } = record
   const fmt = info.formats.at(0)
   const formatParts = fmt
@@ -40,9 +47,10 @@ const SpotlightContent = ({
     : null
 
   return (
-    <div className="flex min-h-0 flex-col gap-5 overflow-y-auto">
+    <div className="relative flex min-h-0 flex-col gap-5 overflow-y-auto">
       <SheetCover
         key={record.id}
+        ref={coverRef}
         coverKey={releaseCoverKey(record.id, info.master_id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
@@ -96,14 +104,24 @@ export const RecordSpotlight = ({
   isRemoving,
 }: Props) => {
   const isMobile = useIsMobile()
+  const { tint, sheetCover, flyBack } = useRecordCover(record)
+
+  const handleClose = () => {
+    flyBack()
+    onClose()
+  }
 
   if (isMobile) {
     return (
-      <Drawer open onOpenChange={onClose}>
-        <DrawerContent className="p-6">
+      <Drawer open onOpenChange={handleClose}>
+        <DrawerContent
+          className="sheet-fade p-6"
+          style={{ '--cover-tint': tint ?? undefined }}
+        >
+          <CoverGlow tint={tint} />
           <SpotlightContent
             record={record}
-            onClose={onClose}
+            coverRef={sheetCover}
             onPickAgain={onPickAgain}
             isPicking={isPicking}
             onRemove={onRemove}
@@ -115,14 +133,16 @@ export const RecordSpotlight = ({
   }
 
   return (
-    <Dialog open onOpenChange={onClose}>
+    <Dialog open onOpenChange={handleClose}>
       <DialogContent
         className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-6"
+        style={{ '--cover-tint': tint ?? undefined }}
         showCloseButton={false}
       >
+        <CoverGlow tint={tint} />
         <SpotlightContent
           record={record}
-          onClose={onClose}
+          coverRef={sheetCover}
           onPickAgain={onPickAgain}
           isPicking={isPicking}
           onRemove={onRemove}
