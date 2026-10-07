@@ -77,8 +77,8 @@ const loadImage = (src: string) =>
     img.src = src
   })
 
-// Samples a Cover image (served with CORS, as CoverArt loads it) into a CSS
-// colour. Null when the image can't be read, e.g. a tainted canvas.
+// Samples a Cover image into a CSS colour. The image must be served with CORS
+// (Deezer is, Discogs isn't). Null when the image can't be read, e.g. a tainted canvas.
 export const sampleCoverTint = async (src: string): Promise<string | null> => {
   try {
     const img = await loadImage(src)

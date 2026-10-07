@@ -9,7 +9,6 @@ interface RecordCoverRelease {
     master_id?: number
     title: string
     artists: { name: string }[]
-    thumb: string
   }
 }
 
@@ -20,7 +19,6 @@ export const useRecordCover = (release: RecordCoverRelease) => {
     coverKey: releaseCoverKey(release.id, info.master_id),
     artist: info.artists[0]?.name ?? '',
     title: info.title,
-    thumb: info.thumb,
   })
   const { sheetCover, flyBack } = useCoverTransition()
   return { tint, sheetCover, flyBack }
