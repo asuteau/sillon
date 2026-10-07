@@ -24,8 +24,33 @@ export const FulfilledWantPrompt = ({
     })
   }
 
-  const handleKeep = () => onResolved(false)
+  return (
+    <FulfilledWantPromptView
+      variant={variant}
+      onRemove={handleRemove}
+      onKeep={() => onResolved(false)}
+      isPending={removeFromWantlist.isPending}
+      isError={removeFromWantlist.isError}
+    />
+  )
+}
 
+interface FulfilledWantPromptViewProps {
+  onRemove: () => void
+  onKeep: () => void
+  isPending?: boolean
+  isError?: boolean
+  variant?: 'panel' | 'row'
+}
+
+// Presentational: also used by the landing page's still
+export const FulfilledWantPromptView = ({
+  onRemove,
+  onKeep,
+  isPending = false,
+  isError = false,
+  variant = 'panel',
+}: FulfilledWantPromptViewProps) => {
   if (variant === 'row') {
     return (
       <div
@@ -33,7 +58,7 @@ export const FulfilledWantPrompt = ({
         aria-label="Remove from wantlist?"
         className="flex shrink-0 items-center gap-2"
       >
-        {removeFromWantlist.isError ? (
+        {isError ? (
           <span role="alert" className="text-xs text-foreground">
             Failed. Retry?
           </span>
@@ -44,8 +69,8 @@ export const FulfilledWantPrompt = ({
         )}
         <Button
           size="sm"
-          onClick={handleRemove}
-          disabled={removeFromWantlist.isPending}
+          onClick={onRemove}
+          disabled={isPending}
           aria-label="Remove from wantlist"
         >
           <FulfilledWantIcon />
@@ -54,8 +79,8 @@ export const FulfilledWantPrompt = ({
         <Button
           size="sm"
           variant="outline"
-          onClick={handleKeep}
-          disabled={removeFromWantlist.isPending}
+          onClick={onKeep}
+          disabled={isPending}
           aria-label="Keep in wantlist"
         >
           Keep
@@ -73,7 +98,7 @@ export const FulfilledWantPrompt = ({
         <p className="mt-1 text-sm text-muted-foreground">
           It's still on your wantlist. Remove it?
         </p>
-        {removeFromWantlist.isError && (
+        {isError && (
           <p role="alert" className="mt-1 text-sm text-foreground">
             Couldn't remove from wantlist. Try again.
           </p>
@@ -83,16 +108,16 @@ export const FulfilledWantPrompt = ({
         <Button
           size="lg"
           variant="outline"
-          onClick={handleKeep}
-          disabled={removeFromWantlist.isPending}
+          onClick={onKeep}
+          disabled={isPending}
           className="flex-1"
         >
           Keep
         </Button>
         <Button
           size="lg"
-          onClick={handleRemove}
-          disabled={removeFromWantlist.isPending}
+          onClick={onRemove}
+          disabled={isPending}
           className="flex-1"
         >
           <FulfilledWantIcon />

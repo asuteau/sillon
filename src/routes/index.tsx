@@ -6,9 +6,10 @@ import { RandomPickCard } from '#/features/collection/components/RandomPickCard'
 import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
+import { Colophon } from '#/features/landing/components/Colophon'
+import { LandingPage } from '#/features/landing/components/LandingPage'
 import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
 import { ScanFab } from '#/shared/components/ScanFab'
-import { buttonVariants } from '#/shared/components/ui/button'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -32,29 +33,7 @@ function App() {
   const [selected, setSelected] = useState<CollectionRelease | null>(null)
   const removeFromCollection = useRemoveFromCollection()
 
-  // Placeholder until the landing page (#16)
-  if (!user) {
-    return (
-      <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-24 sm:pb-8">
-        <section className="rounded-(--radius) border border-border bg-card px-6 py-16 sm:px-10 sm:py-24">
-          <h1 className="type-display mb-6 max-w-2xl text-4xl text-foreground sm:text-6xl">
-            Every record you own, beautifully organized.
-          </h1>
-          <p className="mb-10 max-w-xl text-base text-muted-foreground sm:text-lg">
-            Sillon syncs your Discogs collection and pairs it with
-            high-definition artwork from Deezer — all in one quiet,
-            distraction-free place.
-          </p>
-          <a
-            href="/auth/login"
-            className={buttonVariants({ variant: 'lacquer', size: 'lg' })}
-          >
-            Connect with Discogs
-          </a>
-        </section>
-      </main>
-    )
-  }
+  if (!user) return <LandingPage />
 
   return (
     <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-32 sm:pb-8">
@@ -105,6 +84,9 @@ function App() {
           isRemoving={removeFromCollection.isPending}
         />
       )}
+
+      {/* /about lands here too once signed in */}
+      <Colophon />
 
       <ScanFab />
     </main>

@@ -56,7 +56,12 @@ export default function Header() {
               </Link>
             </>
           )}
-          <Link to="/about" className={NAV_LINK_CLASSES}>
+          <Link
+            to="/"
+            hash="colophon"
+            activeOptions={{ includeHash: true }}
+            className={NAV_LINK_CLASSES}
+          >
             About
           </Link>
         </div>

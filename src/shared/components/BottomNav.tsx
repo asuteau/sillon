@@ -52,8 +52,13 @@ export default function BottomNav() {
             </Link>
           </>
         )}
-        {/* Until #16 folds About into the landing page (no Header nav on mobile) */}
-        <Link to="/about" className={TAB_CLASSES}>
+        {/* The Colophon, at the foot of the landing page (no Header nav on mobile) */}
+        <Link
+          to="/"
+          hash="colophon"
+          activeOptions={{ includeHash: true }}
+          className={TAB_CLASSES}
+        >
           <Info className="size-4" />
           <span className={TAB_LABEL_CLASSES}>About</span>
         </Link>

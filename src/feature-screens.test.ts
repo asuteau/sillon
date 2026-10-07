@@ -14,6 +14,7 @@ const FILES = [
   ...componentFiles('features/search/components'),
   ...componentFiles('features/wantlist/components'),
   ...componentFiles('features/marketplace/components'),
+  ...componentFiles('features/landing/components'),
   'features/profile/components/MetricsStrip.tsx',
   'shared/components/ReleaseSheet.tsx',
   'shared/components/SearchReleaseSheet.tsx',
@@ -41,6 +42,18 @@ describe('feature screens', () => {
     for (const pattern of LEGACY_TEMPLATE_PATTERNS)
       expect(source).not.toMatch(pattern)
   })
+})
+
+// #16: the landing hero is sized to its content
+describe('landing page', () => {
+  it.each(componentFiles('features/landing/components'))(
+    '%s never fills the viewport height',
+    (file) => {
+      expect(readFileSync(join(SRC, file), 'utf8')).not.toMatch(
+        /\b(h-screen|min-h-screen|[hy]-(s|d|l)?vh|min-h-(s|d|l)vh)\b|100(s|d|l)?vh/,
+      )
+    },
+  )
 })
 
 // #14: the template token aliases are gone, so nothing may reference them
