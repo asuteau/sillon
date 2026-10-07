@@ -90,7 +90,7 @@ export const tokenize = (text: string): Set<string> =>
   )
 
 const isMixedScript = (text: string): boolean =>
-  /[a-zA-Z]/.test(text) && /[^\x00-\x7F]/.test(text)
+  /[a-zA-Z]/.test(text) && /[^\p{ASCII}]/u.test(text)
 
 export const jaccardSimilarity = (a: string, b: string): number => {
   const ta = tokenize(a)

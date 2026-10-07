@@ -25,11 +25,11 @@ const SpotlightContent = ({
   isRemoving,
 }: Props) => {
   const { basic_information: info } = record
-  const fmt = info.formats[0]
+  const fmt = info.formats.at(0)
   const formatParts = fmt
     ? [fmt.name, ...(fmt.descriptions ?? []), fmt.text].filter(Boolean)
     : []
-  const label = info.labels[0]
+  const label = info.labels.at(0)
   const catno =
     label?.catno && label.catno.toLowerCase() !== 'none' ? label.catno : null
   const labelText = label
