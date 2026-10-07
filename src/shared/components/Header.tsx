@@ -44,7 +44,7 @@ export default function Header() {
           {user && (
             <>
               <Link to="/search" className={NAV_LINK_CLASSES}>
-                Add
+                Search
               </Link>
               <Link to="/collection" className={NAV_LINK_CLASSES}>
                 Collection

@@ -60,6 +60,21 @@ describe('grooveSpiralPath', () => {
     expect(turnsOf(parsePoints(path))).toBeCloseTo(turns, 2)
   })
 
+  it('can be centred elsewhere, for 24px icons', () => {
+    const icon = parsePoints(
+      grooveSpiralPath({
+        turns: 2.5,
+        innerRadius: 1,
+        outerRadius: 9.5,
+        centre: { x: 12, y: 12 },
+      }),
+    )
+    expect(icon[0].x).toBeCloseTo(12, 1)
+    expect(icon[0].y).toBeCloseTo(2.5, 1)
+    const end = icon[icon.length - 1]
+    expect(Math.hypot(end.x - 12, end.y - 12)).toBeCloseTo(1, 1)
+  })
+
   it('stays inside the 100×100 box', () => {
     for (const { x, y } of points) {
       expect(x).toBeGreaterThanOrEqual(0)

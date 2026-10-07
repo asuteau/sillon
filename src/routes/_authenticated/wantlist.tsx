@@ -20,7 +20,8 @@ import {
 import type { SortKey } from '#/shared/utils/list-sort'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Disc3, Heart } from 'lucide-react'
+import { Disc3 } from 'lucide-react'
+import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 import { useState, useTransition } from 'react'
 
 export const Route = createFileRoute('/_authenticated/wantlist')({
@@ -143,7 +144,7 @@ function Wantlist() {
           }
           isRemoving={removeFromWantlist.isPending}
           removeLabel="Remove from wantlist"
-          removeIcon={<Heart className="h-4 w-4" />}
+          removeIcon={<WantlistIcon className="h-4 w-4" />}
         />
       )}
 

@@ -1,12 +1,7 @@
-import {
-  AlertCircle,
-  Check,
-  Heart,
-  Library,
-  RotateCcw,
-  ScanLine,
-  X,
-} from 'lucide-react'
+import { AlertCircle, Check, RotateCcw, X } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { ScanIcon } from '#/shared/components/icons/ScanIcon'
+import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 
 import { useBarcodeScanner } from '#/features/search/hooks/use-barcode-scanner'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
@@ -82,7 +77,7 @@ const BarcodeScannerContent = ({
 
     return (
       <div className="flex flex-col items-center gap-5 py-2 text-center">
-        <ScanLine className="h-12 w-12 text-(--sea-ink)" />
+        <ScanIcon className="h-12 w-12 text-(--sea-ink)" />
         <div>
           <p className="font-semibold text-(--sea-ink)">Scan a barcode</p>
           <p className="mt-1 text-sm text-(--sea-ink-soft)">
@@ -184,7 +179,7 @@ const BarcodeScannerContent = ({
   if (isPending) {
     return (
       <div className="flex items-center justify-center py-12">
-        <ScanLine className="h-8 w-8 animate-pulse text-(--sea-ink-soft)" />
+        <ScanIcon className="h-8 w-8 animate-pulse text-(--sea-ink-soft)" />
       </div>
     )
   }
@@ -269,7 +264,7 @@ const BarcodeScannerContent = ({
               {addedToCollection ? (
                 <Check className="h-3.5 w-3.5" />
               ) : (
-                <Library className="h-3.5 w-3.5" />
+                <CollectionIcon className="h-3.5 w-3.5" />
               )}
               {addedToCollection ? 'Added to collection!' : 'Add to collection'}
             </button>
@@ -281,7 +276,7 @@ const BarcodeScannerContent = ({
               {addedToWantlist || isWanted ? (
                 <Check className="h-3.5 w-3.5" />
               ) : (
-                <Heart className="h-3.5 w-3.5" />
+                <WantlistIcon className="h-3.5 w-3.5" />
               )}
               {addedToWantlist
                 ? 'Added to wantlist!'

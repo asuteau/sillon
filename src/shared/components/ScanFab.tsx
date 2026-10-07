@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ScanLine } from 'lucide-react'
 
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
+import { ScanIcon } from '#/shared/components/icons/ScanIcon'
 import { Button } from '#/shared/components/ui/button'
 
 export const ScanFab = () => {
@@ -23,7 +23,7 @@ export const ScanFab = () => {
         aria-label="Scan a barcode"
         className="fixed right-4 bottom-20 z-50 h-12 gap-2 px-5 sm:hidden"
       >
-        <ScanLine />
+        <ScanIcon />
         Scan
       </Button>
 

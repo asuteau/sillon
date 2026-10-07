@@ -4,7 +4,9 @@ import {
   useQueryClient,
   useQuery,
 } from '@tanstack/react-query'
-import { Check, Heart, Library } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 
 import {
   useAddToCollection,
@@ -193,7 +195,7 @@ function SearchReleaseSheetContent({
             {inCollection > 0 ? (
               <Check className="h-4 w-4" />
             ) : (
-              <Library className="h-4 w-4" />
+              <CollectionIcon className="h-4 w-4" />
             )}
             {inCollection > 0 ? 'Owned' : 'Collection'}
           </Button>
@@ -207,7 +209,7 @@ function SearchReleaseSheetContent({
             {inWantlist > 0 ? (
               <Check className="h-4 w-4" />
             ) : (
-              <Heart className="h-4 w-4" />
+              <WantlistIcon className="h-4 w-4" />
             )}
             {inWantlist > 0 ? 'Wanted' : 'Wantlist'}
           </Button>

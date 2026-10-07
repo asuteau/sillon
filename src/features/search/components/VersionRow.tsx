@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { Check, Heart, Library } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 
 import {
   useAddToCollection,
@@ -152,7 +154,7 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
             {version.inCollection > 0 ? (
               <Check className="h-3 w-3" />
             ) : (
-              <Library className="h-3 w-3" />
+              <CollectionIcon className="h-3 w-3" />
             )}
             <span className="hidden sm:inline">
               {version.inCollection > 0 ? 'Owned' : 'Collection'}
@@ -178,7 +180,7 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
             {version.inWantlist > 0 ? (
               <Check className="h-3 w-3" />
             ) : (
-              <Heart className="h-3 w-3" />
+              <WantlistIcon className="h-3 w-3" />
             )}
             <span className="hidden sm:inline">
               {version.inWantlist > 0 ? 'Wanted' : 'Wantlist'}

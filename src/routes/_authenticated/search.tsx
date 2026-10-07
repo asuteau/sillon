@@ -1,6 +1,7 @@
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ScanLine, Search as SearchIcon } from 'lucide-react'
+import { ScanIcon } from '#/shared/components/icons/ScanIcon'
+import { SearchIcon } from '#/shared/components/icons/SearchIcon'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
@@ -169,7 +170,7 @@ function Search() {
               className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-(--sea-ink-soft) transition-colors hover:text-(--sea-ink)"
               aria-label="Scan barcode"
             >
-              <ScanLine className="h-4 w-4" />
+              <ScanIcon className="h-4 w-4" />
             </button>
           </div>
         </>

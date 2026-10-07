@@ -18,7 +18,8 @@ import {
 import type { SortKey } from '#/shared/utils/list-sort'
 import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Disc3, Library } from 'lucide-react'
+import { Disc3 } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { useState, useTransition } from 'react'
 
 export const Route = createFileRoute('/_authenticated/collection')({
@@ -156,7 +157,7 @@ function Collection() {
           }
           isRemoving={removeFromCollection.isPending}
           removeLabel="Remove from collection"
-          removeIcon={<Library className="h-4 w-4" />}
+          removeIcon={<CollectionIcon className="h-4 w-4" />}
         />
       )}
 

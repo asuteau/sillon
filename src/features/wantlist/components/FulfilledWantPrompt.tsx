@@ -1,4 +1,4 @@
-import { HeartOff } from 'lucide-react'
+import { FulfilledWantIcon } from '#/shared/components/icons/FulfilledWantIcon'
 
 import { useRemoveFromWantlist } from '../wantlist.mutations'
 
@@ -47,7 +47,7 @@ export const FulfilledWantPrompt = ({
           aria-label="Remove from wantlist"
           className="flex items-center gap-1.5 rounded-full bg-(--sea-ink) px-3 py-1.5 text-xs font-semibold text-(--chip-bg) transition disabled:opacity-50 cursor-pointer"
         >
-          <HeartOff className="h-3 w-3" />
+          <FulfilledWantIcon className="h-3 w-3" />
           Remove
         </button>
         <button
@@ -88,7 +88,7 @@ export const FulfilledWantPrompt = ({
           disabled={removeFromWantlist.isPending}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-(--sea-ink) px-4 py-2 text-sm font-semibold text-(--chip-bg) disabled:opacity-50 cursor-pointer"
         >
-          <HeartOff className="h-3.5 w-3.5" />
+          <FulfilledWantIcon className="h-3.5 w-3.5" />
           Remove
         </button>
       </div>

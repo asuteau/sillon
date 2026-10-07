@@ -77,8 +77,7 @@ export function CoverArt({
       {!hdVisible && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Disc3
-            style={{ width: '42%', height: '42%' }}
-            strokeWidth={0.75}
+            style={{ width: '42%', height: '42%', strokeWidth: 0.75 }}
             className="text-(--sea-ink-soft) opacity-60"
           />
         </div>

@@ -266,6 +266,11 @@
     outline: 2px solid var(--foreground);
     outline-offset: 2px;
   }
+  /* Generic lucide icons match the custom icons' 1.5 stroke. CSS beats the
+     stroke-width attribute; override with an inline style, not the prop. */
+  .lucide {
+    stroke-width: 1.5;
+  }
 }
 
 /* Element defaults stay in the base layer so utilities always win */

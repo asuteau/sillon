@@ -1,19 +1,23 @@
-// The groove: a single Archimedean spiral in a 100×100 box, outer end first so
-// a stroke-dashoffset animation draws it in from the edge like a needle.
+// The groove: a single Archimedean spiral, centred in a 100×100 box by default,
+// outer end first so a stroke-dashoffset animation draws it in from the edge
+// like a needle.
 
 interface GrooveSpiralOptions {
   turns: number
   innerRadius: number
   outerRadius: number
+  /** Defaults to the centre of the 100×100 box; icons pass their own grid */
+  centre?: { x: number; y: number }
 }
 
-const CENTRE = 50
+const BOX_CENTRE = { x: 50, y: 50 }
 const STEPS_PER_TURN = 72
 
 export const grooveSpiralPath = ({
   turns,
   innerRadius,
   outerRadius,
+  centre = BOX_CENTRE,
 }: GrooveSpiralOptions): string => {
   const steps = Math.ceil(turns * STEPS_PER_TURN)
   const points: string[] = []
@@ -22,8 +26,8 @@ export const grooveSpiralPath = ({
     // Start at 12 o'clock, wind clockwise
     const angle = -Math.PI / 2 + t * turns * 2 * Math.PI
     const radius = outerRadius - (outerRadius - innerRadius) * t
-    const x = CENTRE + radius * Math.cos(angle)
-    const y = CENTRE + radius * Math.sin(angle)
+    const x = centre.x + radius * Math.cos(angle)
+    const y = centre.y + radius * Math.sin(angle)
     points.push(`${x.toFixed(2)} ${y.toFixed(2)}`)
   }
   return `M${points.join(' L')}`

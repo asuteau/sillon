@@ -1,5 +1,5 @@
 import { useRandomPick } from '#/features/collection/hooks/use-random-pick'
-import { Shuffle } from 'lucide-react'
+import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 import { RandomPickSpotlight } from './RandomPickSpotlight'
 
 export const RandomPickButton = () => {
@@ -13,7 +13,9 @@ export const RandomPickButton = () => {
         disabled={isPicking}
         className="flex shrink-0 items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-3 py-1.5 text-sm font-semibold text-(--sea-ink) transition hover:bg-(--lagoon)/10 disabled:opacity-50 cursor-pointer"
       >
-        <Shuffle className={`h-3.5 w-3.5 ${isPicking ? 'animate-spin' : ''}`} />
+        <RandomPickIcon
+          className={`size-3.5 ${isPicking ? 'animate-pulse' : ''}`}
+        />
         Pick for me
       </button>
 

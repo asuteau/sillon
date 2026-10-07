@@ -6,7 +6,8 @@ import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
-import { Library, Shuffle } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 
 interface Props {
   record: CollectionRelease
@@ -77,7 +78,7 @@ const SpotlightContent = ({
             disabled={isRemoving}
             onClick={onRemove}
           >
-            <Library className="h-4 w-4" />
+            <CollectionIcon className="h-4 w-4" />
             Remove from collection
           </Button>
         )}
@@ -87,8 +88,8 @@ const SpotlightContent = ({
             disabled={isPicking}
             className="flex items-center gap-1.5 rounded-full border border-(--chip-line) bg-(--chip-bg) px-4 py-2 text-sm font-semibold text-(--sea-ink) disabled:opacity-50 cursor-pointer"
           >
-            <Shuffle
-              className={`h-3.5 w-3.5 ${isPicking ? 'animate-spin' : ''}`}
+            <RandomPickIcon
+              className={`size-3.5 ${isPicking ? 'animate-pulse' : ''}`}
             />
             Pick again
           </button>

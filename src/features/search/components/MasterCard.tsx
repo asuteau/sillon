@@ -1,4 +1,5 @@
-import { Heart, Library } from 'lucide-react'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 
 import type { Master } from '../search.model'
 import { CoverArt } from '#/shared/components/CoverArt'
@@ -39,12 +40,12 @@ export function MasterCard({ master, onClick, index }: MasterCardProps) {
           <div className="flex items-center gap-2 shrink-0">
             {master.inCollection && (
               <span className="flex items-center gap-1 rounded-full bg-(--sea-ink) px-2 py-1 text-[10px] font-bold leading-tight text-(--chip-bg)">
-                <Library className="h-2.5 w-2.5" />
+                <CollectionIcon className="h-2.5 w-2.5" />
               </span>
             )}
             {master.inWantlist && (
               <span className="flex items-center gap-1 rounded-full bg-(--sea-ink) px-2 py-1 text-[10px] font-bold leading-tight text-(--chip-bg)">
-                <Heart className="h-2.5 w-2.5" />
+                <WantlistIcon className="h-2.5 w-2.5" />
               </span>
             )}
             {master.year !== null && (
