@@ -76,7 +76,6 @@ function ReleaseSheetContent({
         coverKey={releaseCoverKey(release.id, info.master_id)}
         artist={info.artists[0]?.name ?? ''}
         title={info.title}
-        thumb={info.thumb}
         styles={info.styles}
       />
 

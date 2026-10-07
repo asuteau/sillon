@@ -128,7 +128,6 @@ function SearchReleaseSheetContent({
         coverKey={masterCoverKey(masterId)}
         artist={release.artists[0] ?? ''}
         title={release.title}
-        thumb={release.coverImage || null}
         styles={[]}
       />
 

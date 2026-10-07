@@ -168,6 +168,7 @@ See `CONTEXT.md` → **House sleeve**. A generated Cover, shown only when a reco
 - Colours are fixed values, not theme tokens: a sleeve is an object and looks the same in light and dark.
 - Typeset with the artist (small uppercase, letter-spaced) and title (display weight and tracking). Below ~88px it shows the title's initial instead (container query).
 - **Loading state**: `coverState()` returns `loading` / `image` / `house`. While artwork may still arrive, show a flat `bg-muted` square; a House sleeve only once we know there is no artwork, so it never flashes.
+- **Record screens are Deezer HD only** (`SheetCover`): the Discogs thumb is ~150px and blurry at sheet size, so the sheet waits on grey for HD and shows a House sleeve when Deezer has no match, even if Discogs has a thumb.
 - The landing page uses the same generator with made-up artists and titles, so no third-party cover art appears on public pages.
 
 ---
