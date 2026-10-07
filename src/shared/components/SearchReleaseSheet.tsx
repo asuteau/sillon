@@ -4,9 +4,6 @@ import {
   useQueryClient,
   useQuery,
 } from '@tanstack/react-query'
-import { Check } from 'lucide-react'
-import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
-import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 
 import {
   useAddToCollection,
@@ -27,9 +24,9 @@ import type { VersionsPage } from '#/features/search/search.schema'
 import { extractColors } from '#/shared/utils/extractColors'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { RecordHeading } from '#/shared/components/RecordHeading'
+import { ReleaseListButtons } from '#/shared/components/ReleaseListButtons'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { masterCoverKey } from '#/shared/utils/cover-key'
-import { Button } from './ui/button'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Drawer, DrawerContent } from './ui/drawer'
 import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
@@ -169,33 +166,14 @@ function SearchReleaseSheetContent({
           onResolved={handleFulfilledWantResolved}
         />
       ) : (
-        <div className="flex justify-center gap-3 pt-1">
-          <Button
-            variant={inCollection > 0 ? 'default' : 'outline'}
-            disabled={isCollectionPending}
-            onClick={handleCollectionToggle}
-          >
-            {inCollection > 0 ? (
-              <Check className="size-4" />
-            ) : (
-              <CollectionIcon className="size-4" />
-            )}
-            {inCollection > 0 ? 'Owned' : 'Collection'}
-          </Button>
-
-          <Button
-            variant={inWantlist > 0 ? 'default' : 'outline'}
-            disabled={isWantlistPending}
-            onClick={handleWantlistToggle}
-          >
-            {inWantlist > 0 ? (
-              <Check className="size-4" />
-            ) : (
-              <WantlistIcon className="size-4" />
-            )}
-            {inWantlist > 0 ? 'Wanted' : 'Wantlist'}
-          </Button>
-        </div>
+        <ReleaseListButtons
+          inCollection={inCollection > 0}
+          inWantlist={inWantlist > 0}
+          onCollectionToggle={handleCollectionToggle}
+          onWantlistToggle={handleWantlistToggle}
+          isCollectionPending={isCollectionPending}
+          isWantlistPending={isWantlistPending}
+        />
       )}
     </div>
   )

@@ -1,12 +1,10 @@
 import { GrooveMark } from '#/shared/components/brand/GrooveMark'
 import { Wordmark } from '#/shared/components/brand/Wordmark'
-import { HouseSleeve } from '#/shared/components/HouseSleeve'
 
-import { LANDING_RECORDS } from '../landing.content'
 import { ConnectWithDiscogs } from './ConnectWithDiscogs'
+import { HeroAnimation } from './HeroAnimation'
 
-// Sized to its content, not the viewport. The grid is the still frame the hero
-// animation (#17) will start from: House sleeves filling a Collection.
+// Sized to its content, not the viewport
 export const LandingHero = () => (
   <section
     aria-labelledby="hero-title"
@@ -34,19 +32,6 @@ export const LandingHero = () => (
       <ConnectWithDiscogs />
     </div>
 
-    <div
-      data-slot="hero-still"
-      inert
-      className="grid min-w-0 grid-cols-3 gap-2 sm:gap-3"
-    >
-      {LANDING_RECORDS.map((record) => (
-        <HouseSleeve
-          key={record.title}
-          artist={record.artist}
-          title={record.title}
-          className="w-full shadow-[0_8px_24px_rgb(0_0_0/0.12)]"
-        />
-      ))}
-    </div>
+    <HeroAnimation />
   </section>
 )

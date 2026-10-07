@@ -2,7 +2,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  COVER_OPEN_MS,
+  PLATTER_EASING,
   flipTransform,
+  growCover,
   setCoverOrigin,
   takeCoverOrigin,
 } from './cover-transition'
@@ -58,5 +61,28 @@ describe('cover origin', () => {
     el.remove()
 
     expect(takeCoverOrigin()).toBeNull()
+  })
+})
+
+describe('growCover', () => {
+  it('grows the detail cover from the grid cover in 320ms, platter easing', () => {
+    const from = document.createElement('div')
+    const to = document.createElement('div')
+    from.getBoundingClientRect = () => new DOMRect(20, 40, 60, 60)
+    to.getBoundingClientRect = () => new DOMRect(40, 20, 240, 240)
+    const animate = vi.fn()
+    to.animate = animate
+
+    growCover(from, to)
+
+    expect(to.style.transformOrigin).toBe('0 0')
+    expect(animate).toHaveBeenCalledWith(
+      [
+        { transform: 'translate(-20px, 20px) scale(0.25, 0.25)' },
+        { transform: 'none' },
+      ],
+      { duration: COVER_OPEN_MS, easing: PLATTER_EASING },
+    )
+    expect(COVER_OPEN_MS).toBe(320)
   })
 })

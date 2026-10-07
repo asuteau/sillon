@@ -3,9 +3,9 @@
 // flies above the sheet (Web Animations, no layout work) while the sheet
 // itself only fades, so the sheet keeps its own layout and focus handling.
 
-const COVER_OPEN_MS = 320
+export const COVER_OPEN_MS = 320
 const COVER_CLOSE_MS = 280
-const PLATTER_EASING = 'cubic-bezier(.65,0,.15,1)'
+export const PLATTER_EASING = 'cubic-bezier(.65,0,.15,1)'
 // Above dialogs and drawers (z-50)
 const FLYING_COVER_Z_INDEX = '60'
 
@@ -105,4 +105,21 @@ export const flyCover = ({ row, sheet, direction }: FlyCoverInput) => {
     for (const el of hidden) el.style.visibility = ''
   }
   flight.finished.then(land, land)
+}
+
+// The same growth within one page, with no copy: `to` (the detail cover)
+// starts laid over `from` (the grid cover) and grows into place. The caller
+// handles reduced motion.
+export const growCover = (from: Element, to: HTMLElement): Animation => {
+  to.style.transformOrigin = '0 0'
+  const atFrom = {
+    transform: flipTransform(
+      from.getBoundingClientRect(),
+      to.getBoundingClientRect(),
+    ),
+  }
+  return to.animate([atFrom, { transform: 'none' }], {
+    duration: COVER_OPEN_MS,
+    easing: PLATTER_EASING,
+  })
 }

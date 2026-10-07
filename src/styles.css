@@ -485,6 +485,23 @@
   }
 }
 
+/* Landing hero: the groove draws in once, from the outer edge */
+.groove-draw-in path {
+  stroke-dasharray: 1;
+  animation: groove-draw-in 800ms var(--ease-platter) both;
+}
+
+@keyframes groove-draw-in {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+/* Landing hero: CSS animations hold while it's off-screen or the tab hidden */
+[data-slot='hero-animation'][data-paused] * {
+  animation-play-state: paused;
+}
+
 @keyframes groove-fade {
   from {
     opacity: 0;
@@ -527,7 +544,8 @@
     animation: groove-fade 160ms var(--ease-fade) both;
   }
 
-  .groove-loader path {
+  .groove-loader path,
+  .groove-draw-in path {
     stroke-dasharray: none;
     animation: none;
   }

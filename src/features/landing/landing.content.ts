@@ -1,3 +1,6 @@
+import { formatOklch } from '#/shared/utils/colour'
+import { TINT_LIGHTNESS, TINT_MAX_CHROMA } from '#/shared/utils/cover-tint'
+
 // Made-up records for the landing page. Only House sleeves appear on public
 // pages, so no third-party cover art and no real artist is implied.
 export interface LandingRecord {
@@ -93,6 +96,15 @@ export const LANDING_RECORDS = [
     added: '19 Jun 2026',
   },
 ] as const satisfies readonly LandingRecord[]
+
+// House sleeves are black, white and grey, so they give no tint in the app.
+// The hero's detail beat shows the tint a coloured Cover would give: a warm
+// amber, within the same lightness and chroma limits.
+export const HERO_DETAIL_TINT = formatOklch({
+  l: TINT_LIGHTNESS,
+  c: TINT_MAX_CHROMA,
+  h: 62,
+})
 
 // Picks records by position so each still stays stable and varied
 export const landingRecords = (...indexes: number[]): LandingRecord[] =>

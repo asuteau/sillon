@@ -1,10 +1,30 @@
 // @vitest-environment jsdom
 import { render, screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { LandingPage } from './LandingPage'
 
 const renderLanding = () => render(<LandingPage />)
+
+// jsdom has neither; the hero animation reads both
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  )
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 // Headings inside the inert stills are hidden from assistive tech in browsers
 const sectionHeadings = () =>
@@ -17,7 +37,12 @@ describe('LandingPage', () => {
   it('opens on the hero: wordmark, headline, the name and the CTA', () => {
     renderLanding()
     const hero = screen.getAllByRole('region')[0]
-    expect(within(hero).getByText('sillon')).toBeTruthy()
+    // The hero animation shows the wordmark too, inert
+    expect(
+      within(hero)
+        .getAllByText('sillon')
+        .filter((wordmark) => !wordmark.closest('[inert]')),
+    ).toHaveLength(1)
     expect(within(hero).getByRole('heading', { level: 1 })).toBeTruthy()
     expect(hero.textContent).toContain('French for the groove in a record.')
     expect(
@@ -64,7 +89,7 @@ describe('LandingPage', () => {
     expect(stills).toHaveLength(4)
     for (const still of [
       ...stills,
-      container.querySelector('[data-slot="hero-still"]'),
+      container.querySelector('[data-slot="hero-animation"]'),
     ])
       expect(still?.hasAttribute('inert')).toBe(true)
   })
