@@ -56,14 +56,17 @@ export default function Header() {
               </Link>
             </>
           )}
-          <Link
-            to="/"
-            hash="liner-notes"
-            activeOptions={{ includeHash: true }}
-            className={NAV_LINK_CLASSES}
-          >
-            About
-          </Link>
+          {/* The liner notes are on the landing page only */}
+          {!user && (
+            <Link
+              to="/"
+              hash="liner-notes"
+              activeOptions={{ includeHash: true }}
+              className={NAV_LINK_CLASSES}
+            >
+              About
+            </Link>
+          )}
         </div>
 
         <div className="ml-auto flex items-center gap-2">

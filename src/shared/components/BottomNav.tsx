@@ -57,16 +57,19 @@ export default function BottomNav() {
             </Link>
           </>
         )}
-        {/* The liner notes, at the foot of the landing page (no Header nav on mobile) */}
-        <Link
-          to="/"
-          hash="liner-notes"
-          activeOptions={{ includeHash: true }}
-          className={TAB_CLASSES}
-        >
-          <Info className="size-4" />
-          <span className={TAB_LABEL_CLASSES}>About</span>
-        </Link>
+        {/* The liner notes, at the foot of the landing page (no Header nav on
+            mobile); signed in, there's no landing page */}
+        {!user && (
+          <Link
+            to="/"
+            hash="liner-notes"
+            activeOptions={{ includeHash: true }}
+            className={TAB_CLASSES}
+          >
+            <Info className="size-4" />
+            <span className={TAB_LABEL_CLASSES}>About</span>
+          </Link>
+        )}
       </nav>
     </div>
   )
