@@ -2,16 +2,16 @@ interface CoverGlowProps {
   tint: string | null
 }
 
-// Faint radial glow from --cover-tint behind a record screen's cover. Place
-// it first in a positioned container that sets --cover-tint; it fades in once
-// the tint is known.
+// Faint glow and tinted top edge from --cover-tint across a record screen.
+// Place it first in a positioned container that sets --cover-tint; it fades
+// in once the tint is known.
 export const CoverGlow = ({ tint }: CoverGlowProps) => {
   if (!tint) return null
 
   return (
     <div
       aria-hidden
-      className="cover-glow pointer-events-none absolute inset-x-0 top-0 h-3/4 duration-160 ease-fade animate-in fade-in-0"
+      className="cover-glow pointer-events-none absolute inset-0 rounded-[inherit] duration-160 ease-fade animate-in fade-in-0"
     />
   )
 }

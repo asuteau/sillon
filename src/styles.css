@@ -274,17 +274,22 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Faint radial glow from the Cover on record screens. Computed here, on the
-   element, so it picks up a --cover-tint set on an ancestor. */
+/* Faint glow from the Cover on record screens, computed here on the element
+   so it picks up a --cover-tint set on an ancestor. Full strength across the
+   cover's band so it shows around the cover, fading out by the heading — AA
+   holds at full strength. A thin edge in the tint itself carries the colour
+   where the glow is faint (light theme); no text sits on it. */
 @utility cover-glow {
   background: radial-gradient(
-    ellipse at 50% 30%,
+    ellipse 120% 75% at 50% 30%,
     oklch(
-      from var(--cover-tint) var(--cover-glow-lightness) c h /
-        var(--cover-glow-alpha)
-    ),
-    transparent 70%
+        from var(--cover-tint) var(--cover-glow-lightness) c h /
+          var(--cover-glow-alpha)
+      )
+      45%,
+    transparent
   );
+  box-shadow: inset 0 2px 0 var(--cover-tint);
 }
 
 @layer base {
