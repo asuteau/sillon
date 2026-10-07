@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
+import { Info } from 'lucide-react'
 
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { CountBadge } from '#/shared/components/CountBadge'
@@ -51,6 +52,11 @@ export default function BottomNav() {
             </Link>
           </>
         )}
+        {/* Until #16 folds About into the landing page (no Header nav on mobile) */}
+        <Link to="/about" className={TAB_CLASSES}>
+          <Info className="size-4" />
+          <span className={TAB_LABEL_CLASSES}>About</span>
+        </Link>
       </nav>
     </div>
   )
