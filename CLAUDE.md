@@ -15,8 +15,9 @@ pnpm check && npx tsc --noEmit    # Run after every code change (prettier + esli
 ## Stack
 
 - TanStack Start + TanStack Router (file-based) + TanStack Query
-- Tailwind CSS v4 + shadcn/ui
-- Framer Motion
+- Tailwind CSS v4 + shadcn/ui (style `base-nova`, Base UI + vaul)
+- Familjen Grotesk + Martian Mono, self-hosted in `public/fonts/`
+- Motion: CSS + Web Animations API (no animation library)
 - Discogs OAuth 1.0a — auth & collection data
 - Deezer API — HD cover art
 - Zod — schema validation at API boundaries
@@ -29,7 +30,7 @@ src/
   features/    ← domain logic by feature (schema, model, queries, utils, components)
   services/    ← external connections (discogs.server.ts, deezer.server.ts, session.server.ts)
   shared/      ← cross-feature components, hooks, utils
-  styles/      ← globals.css, design tokens
+  styles.css   ← design tokens, type roles, motion
 ```
 
 ## Current phase
@@ -43,7 +44,7 @@ Auth (Phase 2) is complete.
 
 - `docs/roadmap.md` — full phased plan, file conventions (section 3.7), architecture decisions
 - `docs/react-best-practices.md` — apply every rule to every component generated
-- `docs/design-system.md` — CSS tokens, typography, theming, shadcn config
+- `docs/design-system.md` — brand identity: tokens, type, shapes, motion, icons, House sleeves, mark, PWA assets, voice
 
 ## Agent skills
 

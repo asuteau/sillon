@@ -1,453 +1,238 @@
 # Sillon — Design System
 
-## Stack
+What shipped, and why. The source of truth is the code; this doc points at it.
 
-- Tailwind CSS v4
-- shadcn/ui
-- Syne (headings) + Geist (UI) + Geist Mono (metadata)
-- Dual theme: dark/light via `prefers-color-scheme` + `.dark` class
-
----
-
-## 1. Fonts
-
-Fonts are self-hosted in `public/fonts/` — no third-party requests, works fully offline with the PWA.
-
-Download the required `.woff2` files from Google Fonts or Vercel (Geist) and place them in `public/fonts/`:
-
-```
-public/fonts/
-  syne-semibold.woff2      (600)
-  syne-bold.woff2          (700)
-  syne-extrabold.woff2     (800)
-  geist-regular.woff2      (400)
-  geist-medium.woff2       (500)
-  geist-mono-regular.woff2 (400)
-```
-
-Declare them in `src/styles/globals.css` via `@font-face`:
-
-```css
-@font-face {
-  font-family: 'Syne';
-  src: url('/fonts/syne-semibold.woff2') format('woff2');
-  font-weight: 600;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Syne';
-  src: url('/fonts/syne-bold.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Syne';
-  src: url('/fonts/syne-extrabold.woff2') format('woff2');
-  font-weight: 800;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/geist-regular.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist';
-  src: url('/fonts/geist-medium.woff2') format('woff2');
-  font-weight: 500;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/geist-mono-regular.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-```
-
-No npm package needed for fonts.
-
-### Typographic roles
-
-| Role       | Font       | Usage                                 |
-| ---------- | ---------- | ------------------------------------- |
-| Display    | Syne 800   | Hero titles, large artist names       |
-| Heading    | Syne 700   | Section titles, album names           |
-| Subheading | Syne 600   | Labels, navigation                    |
-| Body       | Geist 400  | Running text, descriptions            |
-| UI         | Geist 500  | Buttons, badges, tags                 |
-| Metadata   | Geist Mono | Years, cat numbers, durations, prices |
+- Tokens, type roles, motion CSS: `src/styles.css`
+- Brand components: `src/shared/components/brand/` (mark, wordmark, loader)
+- Icons: `src/shared/components/icons/`
+- shadcn primitives: `src/shared/components/ui/`
+- Specimens the decisions were made from (open in a browser): `docs/brand/specimens/`
 
 ---
 
-## 2. CSS Tokens (Tailwind v4 — `@theme`)
+## 1. Concept
 
-Place in `src/styles/globals.css`:
+**The groove.** _Sillon_ is French for the groove in a record. The visual signature is a single continuous spiral line: the mark, the loader, the Home icon and the launch screen are all that one line.
 
-```css
-@import 'tailwindcss';
-@import 'tw-animate-css';
-
-@custom-variant dark (&:is(.dark *));
-
-@theme {
-  /* ── Fonts ── */
-  --font-display: 'Syne', sans-serif;
-  --font-sans: var(--font-geist-sans), sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
-
-  /* ── Spacing scale ── */
-  --spacing-18: 4.5rem;
-  --spacing-22: 5.5rem;
-
-  /* ── Border radius ── */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
-
-  /* ── Color palette ── */
-
-  /* Violet accent */
-  --color-violet-50: #f3f1fe;
-  --color-violet-100: #e9e6fd;
-  --color-violet-200: #d5cffc;
-  --color-violet-300: #b8adf8;
-  --color-violet-400: #a89ef4;
-  --color-violet-500: #8b7fe8; /* ← brand primary */
-  --color-violet-600: #7b6fd8;
-  --color-violet-700: #6558c0;
-  --color-violet-800: #5247a0;
-  --color-violet-900: #3d3478;
-
-  /* Dark neutrals */
-  --color-ink-950: #080809;
-  --color-ink-900: #0d0d0f;
-  --color-ink-800: #111114;
-  --color-ink-700: #18181c;
-  --color-ink-600: #222228;
-  --color-ink-500: #2e2e36;
-  --color-ink-400: #3f3f4a;
-  --color-ink-300: #5a5a68;
-  --color-ink-200: #7e7e8e;
-  --color-ink-100: #a8a8b8;
-  --color-ink-50: #d4d4de;
-
-  /* Light neutrals */
-  --color-mist-950: #0f0f10;
-  --color-mist-900: #1a1a1c;
-  --color-mist-50: #f8f8fa;
-  --color-mist-100: #f0f0f4;
-  --color-mist-200: #e4e4ea;
-  --color-mist-300: #ccccd4;
-  --color-mist-400: #aaaab6;
-
-  /* Status */
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-error: #f87171;
-}
-
-/* ── Semantic tokens — Light (default) ── */
-:root {
-  /* Backgrounds */
-  --background: var(--color-mist-50);
-  --background-subtle: var(--color-mist-100);
-  --background-raised: #ffffff;
-  --background-overlay: rgba(0, 0, 0, 0.5);
-
-  /* Surfaces (cards, modals) */
-  --surface: #ffffff;
-  --surface-raised: var(--color-mist-50);
-  --surface-overlay: rgba(255, 255, 255, 0.8);
-
-  /* Borders */
-  --border: var(--color-mist-200);
-  --border-subtle: var(--color-mist-100);
-  --border-strong: var(--color-mist-300);
-
-  /* Text */
-  --text-primary: var(--color-mist-950);
-  --text-secondary: var(--color-mist-400);
-  --text-tertiary: var(--color-mist-300);
-  --text-inverse: var(--color-mist-50);
-  --text-on-accent: #ffffff;
-
-  /* Accent */
-  --accent: var(--color-violet-500);
-  --accent-hover: var(--color-violet-600);
-  --accent-subtle: var(--color-violet-100);
-  --accent-foreground: var(--color-violet-900);
-
-  /* shadcn compatibility */
-  --card: var(--surface);
-  --card-foreground: var(--text-primary);
-  --popover: var(--surface);
-  --popover-foreground: var(--text-primary);
-  --primary: var(--accent);
-  --primary-foreground: var(--text-on-accent);
-  --secondary: var(--background-subtle);
-  --secondary-foreground: var(--text-primary);
-  --muted: var(--background-subtle);
-  --muted-foreground: var(--text-secondary);
-  --input: var(--border);
-  --ring: var(--accent);
-}
-
-/* ── Semantic tokens — Dark ── */
-.dark {
-  /* Backgrounds */
-  --background: var(--color-ink-900);
-  --background-subtle: var(--color-ink-800);
-  --background-raised: var(--color-ink-700);
-  --background-overlay: rgba(0, 0, 0, 0.7);
-
-  /* Surfaces */
-  --surface: var(--color-ink-800);
-  --surface-raised: var(--color-ink-700);
-  --surface-overlay: rgba(13, 13, 15, 0.85);
-
-  /* Borders */
-  --border: var(--color-ink-600);
-  --border-subtle: var(--color-ink-500);
-  --border-strong: var(--color-ink-400);
-
-  /* Text */
-  --text-primary: var(--color-ink-50);
-  --text-secondary: var(--color-ink-200);
-  --text-tertiary: var(--color-ink-300);
-  --text-inverse: var(--color-ink-900);
-  --text-on-accent: #ffffff;
-
-  /* Accent */
-  --accent: var(--color-violet-500);
-  --accent-hover: var(--color-violet-400);
-  --accent-subtle: rgba(139, 127, 232, 0.12);
-  --accent-foreground: var(--color-violet-200);
-
-  /* shadcn compatibility */
-  --card: var(--surface);
-  --card-foreground: var(--text-primary);
-  --popover: var(--surface);
-  --popover-foreground: var(--text-primary);
-  --primary: var(--accent);
-  --primary-foreground: var(--text-on-accent);
-  --secondary: var(--background-raised);
-  --secondary-foreground: var(--text-primary);
-  --muted: var(--background-subtle);
-  --muted-foreground: var(--text-secondary);
-  --input: var(--border);
-  --ring: var(--accent);
-}
-
-/* ── Auto dark via system preference ── */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light) {
-    --background: var(--color-ink-900);
-    --background-subtle: var(--color-ink-800);
-    --background-raised: var(--color-ink-700);
-    --background-overlay: rgba(0, 0, 0, 0.7);
-    --surface: var(--color-ink-800);
-    --surface-raised: var(--color-ink-700);
-    --surface-overlay: rgba(13, 13, 15, 0.85);
-    --border: var(--color-ink-600);
-    --border-subtle: var(--color-ink-500);
-    --border-strong: var(--color-ink-400);
-    --text-primary: var(--color-ink-50);
-    --text-secondary: var(--color-ink-200);
-    --text-tertiary: var(--color-ink-300);
-    --text-inverse: var(--color-ink-900);
-    --text-on-accent: #ffffff;
-    --accent: var(--color-violet-500);
-    --accent-hover: var(--color-violet-400);
-    --accent-subtle: rgba(139, 127, 232, 0.12);
-    --accent-foreground: var(--color-violet-200);
-    --card: var(--surface);
-    --card-foreground: var(--text-primary);
-    --popover: var(--surface);
-    --popover-foreground: var(--text-primary);
-    --primary: var(--accent);
-    --primary-foreground: var(--text-on-accent);
-    --secondary: var(--background-raised);
-    --secondary-foreground: var(--text-primary);
-    --muted: var(--background-subtle);
-    --muted-foreground: var(--text-secondary);
-    --input: var(--border);
-    --ring: var(--accent);
-  }
-}
-```
+Typography is editorial and modernist, in the record-sleeve tradition (Blue Note, ECM): black, white and grey, hierarchy from weight and case, colour only where a record brings it.
 
 ---
 
-## 3. `components.json` (shadcn)
+## 2. Fonts
 
-```json
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
-  "rsc": false,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "src/styles/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "~/components",
-    "utils": "~/lib/utils",
-    "ui": "~/components/ui",
-    "lib": "~/lib",
-    "hooks": "~/hooks"
-  },
-  "iconLibrary": "lucide"
-}
-```
+Two variable fonts, self-hosted as `.woff2` in `public/fonts/` (OFL, licences alongside), declared with `@font-face` in `src/styles.css`, split into latin and latin-ext by `unicode-range`.
 
----
+No Google Fonts request: the PWA works offline and no third party sees who opens the app.
 
-## 4. Tailwind utility patterns
+| Token            | Font                                    | Role                                                  |
+| ---------------- | --------------------------------------- | ----------------------------------------------------- |
+| `--font-sans`    | Familjen Grotesk (400–700)              | Display and UI                                        |
+| `--font-display` | `var(--font-sans)`                      | Display role only — swap here to bring in a paid face |
+| `--font-mono`    | Martian Mono (100–800, `wdth` 75–112.5) | Catalogue data: cat no., year, format, counts         |
 
-### Semantic classes to compose
+### Type roles
 
-```
-bg-[var(--background)]
-bg-[var(--surface)]
-text-[var(--text-primary)]
-text-[var(--text-secondary)]
-text-[var(--text-tertiary)]
-border-[var(--border)]
-bg-[var(--accent)]
-text-[var(--accent-foreground)]
-bg-[var(--accent-subtle)]
-```
+Tailwind utilities in `src/styles.css`. They set family, weight, tracking and leading, never size: callers pick the size.
 
-### Common snippets
+| Utility          | Setting                                       | Used for                       |
+| ---------------- | --------------------------------------------- | ------------------------------ |
+| `type-display`   | display, 700, tracking −0.045em, leading 0.95 | Page and sheet titles          |
+| `type-title`     | display, 700, tracking −0.02em, leading 1.2   | Record titles in lists         |
+| `type-caps`      | 500, uppercase, tracking 0.08em               | Artist names, section labels   |
+| `type-catalogue` | mono, `font-stretch: 87.5%`, tabular numbers  | Catalogue lines, about 10–12px |
 
-```tsx
-// Standard card
-<div className="rounded-lg bg-[var(--surface)] border border-[var(--border)] p-4">
+Leading goes through `--tw-leading` so a `text-*` size utility doesn't reset it.
 
-// Metadata badge (cat number, year)
-<span className="font-mono text-xs text-[var(--text-tertiary)] tracking-wide">
-
-// Section heading
-<h2 className="font-display text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-
-// Secondary text
-<p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-
-// Primary button → use shadcn Button variant="default"
-
-// Accent focus ring
-<div className="ring-1 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--background)]">
-```
+**No italics.** Hierarchy comes from weight, case and tracking only. Familjen's italic is not shipped, and a sleeve-style system reads cleaner without a second voice; one less font file too.
 
 ---
 
-## 5. Sillon-specific visual effects
+## 3. Colour and tokens
 
-### Ambient glow (hero, dark mode)
+The interface is black, white and grey with a slight warm bias. Theme follows the OS (`prefers-color-scheme`); the theme toggle stores `light` / `dark` / `auto` in `localStorage` and sets `.light` or `.dark` on `<html>` (an inline script in `__root.tsx` does it before paint). Light and dark get equal care; the signature is strongest in dark.
 
-```css
-.sillon-hero-glow {
-  background: radial-gradient(
-    ellipse 800px 500px at 50% -100px,
-    rgba(139, 127, 232, 0.1) 0%,
-    transparent 70%
-  );
-}
-```
+### Why no hue accent
 
-### Cover art shimmer (progressive loading)
+Records are the colour. A fixed accent would fight every cover on screen, and a stock brand-hue accent is what makes an app look like every other SaaS template. So:
 
-```tsx
-// Tailwind
-<div className="animate-pulse bg-[var(--surface-raised)] rounded-sm aspect-square" />
-```
+- Colour on record screens comes from the current Cover (`--cover-tint`).
+- The only brand colour is **lacquer**, which has no hue.
 
-### Vinyl spinning (detail page)
+### Token contract
 
-```css
-@keyframes vinyl-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-.vinyl-playing {
-  animation: vinyl-spin 2s linear infinite;
-}
-.vinyl-paused {
-  animation-play-state: paused;
-}
-```
+The contract is **shadcn's variables**, defined for light (`:root`) and dark (`.dark`, and `@media (prefers-color-scheme: dark) { :root:not(.light) }` — keep the two dark blocks in sync). Components use the Tailwind colours they map to (`bg-background`, `text-muted-foreground`, `border-border`…), never raw values.
 
-### Cover overlay on hover
+| Variable                          | Light                 | Dark                  | Notes                                             |
+| --------------------------------- | --------------------- | --------------------- | ------------------------------------------------- |
+| `--background`                    | `#f5f5f3`             | `#0e0e0d`             | Mirrored by the `theme-color` metas               |
+| `--foreground`                    | `#141413`             | `#ebeae7`             |                                                   |
+| `--card` / `--popover`            | `#fbfbfa`             | `#151514` / `#181817` |                                                   |
+| `--primary`                       | `#141413`             | `#ebeae7`             | The text colour: solid black / solid white button |
+| `--secondary` / `--accent`        | `#e9e8e5`             | `#222220`             | Neutral fills, not a hue accent                   |
+| `--muted` / `--muted-foreground`  | `#ebeae7` / `#6b6b69` | `#1d1d1c` / `#8b8a87` |                                                   |
+| `--border` / `--input` / `--ring` | greys                 | greys                 | Focus outline itself uses `--foreground`          |
+| `--destructive`                   | oklch red             | oklch red             | The one hue in the UI chrome, for errors only     |
+| `--radius`                        | `2px`                 |                       | See the shape rule                                |
 
-```tsx
-<div className="group relative overflow-hidden rounded-sm">
-  <img className="transition-transform duration-500 group-hover:scale-105" />
-  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-end p-3 opacity-0 group-hover:opacity-100">
-    {/* metadata overlay */}
-  </div>
-</div>
-```
+### Sillon additions
+
+| Variable                                        | What                                                                                                                        |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `--lacquer`                                     | Cool silver gradient, `120deg` over `--lacquer-1..3` (`#e6e8eb`, `#9a9ea5`, `#cfd2d6`). Text on it: `--lacquer-foreground`. |
+| `--vinyl-black`                                 | `#0a0a0b` — the brand ground (icon, launch screen, vinyl house sleeve).                                                     |
+| `--cover-tint`                                  | Set at runtime from the current Cover; neutral `oklch(0.62 0 0)` until then.                                                |
+| `--cover-glow-lightness` / `--cover-glow-alpha` | Per-theme relighting of the tint for the glow, so text over it stays AA.                                                    |
+
+**Lacquer is for brand moments only**: app icon, launch screen, the landing CTA, the Random pick button, the scan button — plus the shapes on House sleeves, its one non-interactive use. Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Use it through `<Button variant="lacquer">` or `bg-(image:--lacquer)`. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
+
+### Cover tint
+
+On record screens (record detail, Random pick, the record spotlight) the container sets `style={{ '--cover-tint': tint }}` and renders `<CoverGlow tint={tint} />` first; the `cover-glow` utility draws a faint radial glow plus a 2px tinted top edge.
+
+- `useCoverTint` samples the **Deezer** Cover only: Discogs images send no CORS headers, so a canvas can't read them. No Deezer match → neutral.
+- `dominantTint` (`src/shared/utils/cover-tint.ts`) picks the dominant hue and fixes lightness at 0.62 and chroma at ≤ 0.09: the cover sets the hue, never how loud it is. Grey when the cover has no clear colour.
+- House sleeves get no tint.
+- `cover-tint.test.ts` checks text contrast over the glow in both themes.
 
 ---
 
-## 6. Theme summary
+## 4. Shapes: square like a sleeve, round like a record
 
-```
-                    Light         Dark
-──────────────────────────────────────────────
-background          #f8f8fa       #0d0d0f
-surface             #ffffff       #111114
-border              #e4e4ea       #222228
-text-primary        #0f0f10       #d4d4de
-text-secondary      #aaaab6       #7e7e8e
-accent              #8b7fe8       #8b7fe8   ← same in both
-accent-subtle       violet-100    violet/12% opacity
-```
+| Shape     | Radius                     | Applies to                                                                       |
+| --------- | -------------------------- | -------------------------------------------------------------------------------- |
+| Square    | `2px` (`--radius`)         | Covers, cards, surfaces, inputs, dialogs                                         |
+| Round     | `rounded-full`             | Anything pressable or record-like: buttons, chips, scan button, avatars, loaders |
+| Exception | `14px` (`rounded-t-sheet`) | Top corners of bottom sheets only                                                |
 
-The accent is intentionally identical in light and dark — it's neutral enough to hold in both contexts.
+Why: a sleeve is a square of card, a record is a disc. Surfaces that hold things (covers, cards, sheets) read as sleeves; things you press or that spin read as records. Two shapes, each with a meaning, so a glance tells you what's tappable.
+
+No in-between radius: the 8–12px "SaaS card" is exactly the look we're leaving. `src/feature-screens.test.ts` fails on `rounded-md` through `rounded-4xl` in feature screens.
+
+shadcn derives every radius from one `--radius`, which can't express "square surfaces, round controls". So `--radius` is 2px and `rounded-full` is written into the definitions of `Button` and `Chip` (the scan button is a `Button`; add it to any future avatar). Don't round a surface at a call site; `rounded-lg` there just resolves to 2px.
 
 ---
 
-## 7. Recommended shadcn components for Sillon
+## 5. Motion
+
+Fast and quiet: fades by default, two signatures, nothing else.
+
+| Motion                      | Duration                                         | Easing                                                 |
+| --------------------------- | ------------------------------------------------ | ------------------------------------------------------ |
+| Default (state, enter/exit) | 160ms opacity fade                               | `--ease-fade` = `cubic-bezier(.2,0,0,1)` (`ease-fade`) |
+| Cover → detail              | 320ms open, 280ms close                          | `--ease-platter` = `cubic-bezier(.65,0,.15,1)`         |
+| Groove loader               | ~800ms draw-in, short hold, loops (1100ms cycle) | platter                                                |
+
+**Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero uses `growCover` for the same move inside one page.
+
+**Signature 2 — groove loader** (`GrooveLoader`, `.groove-loader`). The spiral draws in from the outer edge like a needle, via `stroke-dashoffset` on a `pathLength="1"` path. Only on real waits — cold start (`AppShellPending`), long fetches — never as an added delay.
+
+Rules:
+
+- No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame.
+
+---
+
+## 6. Icons
+
+### Custom (`src/shared/components/icons/`)
+
+Seven icons in the groove's line language, built on `Icon`: 24px grid, 1.5 stroke, round caps and joins, `currentColor`. Same props as lucide, so the two swap freely. Decorative unless given `aria-label`. Paths come from `docs/brand/specimens/sillon-icons.html`.
+
+| Icon                | Drawing                                        |
+| ------------------- | ---------------------------------------------- |
+| `HomeIcon`          | The groove mark itself                         |
+| `CollectionIcon`    | A record half out of its sleeve                |
+| `WantlistIcon`      | A dashed empty sleeve                          |
+| `FulfilledWantIcon` | A closed sleeve holding a record               |
+| `ScanIcon`          | A barcode spaced like grooves, in a viewfinder |
+| `RandomPickIcon`    | A needle dropping onto a groove                |
+| `SearchIcon`        | A lens with one groove                         |
+
+These are the domain's own actions and places; they carry the brand.
+
+### lucide
+
+For generic actions only: back, close, more, add, sort, external link, theme, errors. A base rule in `styles.css` sets `.lucide { stroke-width: 1.5 }` to match the custom set. CSS beats the attribute, so to change a stroke use an inline style, not the `strokeWidth` prop.
+
+Prefer a text label over an icon wherever there is room.
+
+---
+
+## 7. House sleeves
+
+See `CONTEXT.md` → **House sleeve**. A generated Cover, shown only when a record has no artwork from Discogs or Deezer.
+
+- `houseSleeve()` (`src/shared/utils/house-sleeve.ts`) is deterministic per Master: seeded (FNV-1a) by the cover key, or artist + title when there is none. Never by Release details, so every Release of a Master gets the same sleeve, and it never shows the catalogue number.
+- Design space: 5 layouts (`band`, `block`, `rules`, `circle`, `stack`) × 4 greyscale compositions (`paper`, `vinyl`, `graphite`, `ash`) × 4 placements. Lacquer is the only accent.
+- Colours are fixed values, not theme tokens: a sleeve is an object and looks the same in light and dark.
+- Typeset with the artist (small uppercase, letter-spaced) and title (display weight and tracking). Below ~88px it shows the title's initial instead (container query).
+- **Loading state**: `coverState()` returns `loading` / `image` / `house`. While artwork may still arrive, show a flat `bg-muted` square; a House sleeve only once we know there is no artwork, so it never flashes.
+- The landing page uses the same generator with made-up artists and titles, so no third-party cover art appears on public pages.
+
+---
+
+## 8. The mark
+
+**The groove**: one Archimedean spiral drawn from the outer edge inwards (starting at 12 o'clock, clockwise), round caps. No disc body, no label. `grooveSpiralPath()` in `src/shared/utils/groove-spiral.ts`; `<GrooveMark size tone label?>` renders it.
+
+Turns and stroke depend on rendered size, so the groove stays legible:
+
+| Size   | Turns         |
+| ------ | ------------- |
+| ≥ 90px | 9             |
+| ≥ 48px | 6             |
+| ≥ 30px | 4             |
+| < 30px | 2.5 (favicon) |
+
+Stroke is ~38% of the gap between grooves, with a floor (thicker below 24px).
+
+Tones:
+
+- `lacquer` — lacquer gradient on vinyl black. Brand surfaces only: app icon, launch screen.
+- `current` (default) — `currentColor`. Header, loader, anywhere in the UI.
+
+**Wordmark**: "sillon", lowercase, Familjen 700, tracking −0.055em (`<Wordmark>`).
+
+---
+
+## 9. PWA assets
+
+All generated from the mark by `scripts/generate-pwa-assets.ts` (resvg). Specs live in `src/shared/utils/pwa-assets.ts` and `startup-images.ts`.
 
 ```bash
-pnpm dlx shadcn@latest add button
-pnpm dlx shadcn@latest add badge
-pnpm dlx shadcn@latest add input
-pnpm dlx shadcn@latest add dialog
-pnpm dlx shadcn@latest add sheet          # mobile drawer
-pnpm dlx shadcn@latest add command        # search
-pnpm dlx shadcn@latest add tooltip
-pnpm dlx shadcn@latest add skeleton
-pnpm dlx shadcn@latest add separator
-pnpm dlx shadcn@latest add avatar
-pnpm dlx shadcn@latest add dropdown-menu
-pnpm dlx shadcn@latest add tabs
+pnpm generate:pwa-assets   # re-run after changing the mark, lacquer stops or vinyl black
 ```
 
-Not needed: `calendar`, `date-picker`, `data-table` (virtualization handled manually).
+| File                                        | Size                                     | Notes                          |
+| ------------------------------------------- | ---------------------------------------- | ------------------------------ |
+| `public/favicon.svg` + `favicon.ico`        | 32 (ico: 16, 32, 48)                     |                                |
+| `public/icons/icon-192.png`, `icon-512.png` | 192, 512                                 | `purpose: any`                 |
+| `public/icons/icon-512-maskable.png`        | 512                                      | Mark inside the 80% safe zone  |
+| `public/icons/apple-touch-icon.png`         | 180                                      | Opaque; iOS rounds the corners |
+| `public/splash/apple-splash-*.png`          | one per current iPhone portrait viewport | Linked from `__root.tsx`       |
+
+**The system launch screen is always dark** — vinyl black with the lacquer groove, whatever the theme. It is a static image the OS shows before any of our code runs, so it can't follow the in-app toggle, and an iOS startup image can't switch with the OS theme either. Dark is where the signature is strongest, and a dark flash before a light app is gentler than a white flash before a dark one. Android uses the manifest's `background_color` (`#0a0a0b`) + icon; iOS uses the `apple-touch-startup-image` PNGs.
+
+Sillon's own loading screen (app shell, cold start) does follow the theme and uses the groove loader.
+
+`theme-color` has light (`#f5f5f3`) and dark (`#0e0e0d`) variants via `media="(prefers-color-scheme: …)"`, mirroring `--background`.
 
 ---
 
-## 8. Naming conventions
+## 10. Components
 
-| Concept       | Location                 | Example                         |
-| ------------- | ------------------------ | ------------------------------- |
-| Route page    | `routes/_authenticated/` | `collection.tsx`                |
-| Feature UI    | `components/sillon/`     | `CollectionGrid.tsx`            |
-| UI primitive  | `components/ui/`         | shadcn auto-generated           |
-| Sillon UI     | `components/sillon/`     | `VinylDisc.tsx`, `CoverArt.tsx` |
-| Query options | `lib/queries/`           | `collectionQueries.ts`          |
-| Server fn     | `lib/server/`            | `discogs.server.ts`             |
+- shadcn (style `base-nova`) + Base UI + vaul for behaviour and accessibility; all styling rewritten. Primitives live in `src/shared/components/ui/`.
+- `Button` variants: `default` (solid `--primary`), `outline`, `secondary`, `ghost`, `destructive`, `link`, `lacquer` (brand moments only).
+- `Chip`: round, active chip is solid foreground.
+- Bottom sheets: `Drawer` (vaul); 14px top corners.
+- Focus: a 2px `--foreground` outline on every control, both themes.
+
+---
+
+## 11. Voice
+
+- English UI. The French name is the only French touch; the landing says it once: "_Sillon_ — French for the groove in a record." Manifest and `<html>`: `lang="en"`.
+- Short, plain and knowledgeable, like a good record-shop clerk.
+- No exclamation marks, no "Oops", no cute errors.
+- Use the glossary terms exactly as in `CONTEXT.md` (Cover, Master, Release, Wantlist, Fulfilled want, House sleeve…).
