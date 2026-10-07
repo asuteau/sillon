@@ -30,7 +30,12 @@ export default function BottomNav() {
   return (
     <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center sm:hidden">
       <nav className="flex items-center gap-1 overflow-hidden rounded-full border border-border bg-card/90 px-2 py-1.5 shadow-[0_8px_24px_rgb(0_0_0/0.12)] backdrop-blur-lg">
-        <Link to="/" className={TAB_CLASSES}>
+        {/* Hash-aware, so About (/#liner-notes) isn't also Home */}
+        <Link
+          to="/"
+          activeOptions={{ includeHash: true }}
+          className={TAB_CLASSES}
+        >
           <HomeIcon className="size-4" />
           <span className={TAB_LABEL_CLASSES}>Home</span>
         </Link>

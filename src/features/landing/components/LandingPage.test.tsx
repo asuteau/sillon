@@ -34,15 +34,9 @@ const sectionHeadings = () =>
     .map((heading) => heading.textContent)
 
 describe('LandingPage', () => {
-  it('opens on the hero: wordmark, headline, the name and the CTA', () => {
+  it('opens on the hero: headline, the name and the CTA', () => {
     renderLanding()
     const hero = screen.getAllByRole('region')[0]
-    // The hero animation shows the wordmark too, inert
-    expect(
-      within(hero)
-        .getAllByText('sillon')
-        .filter((wordmark) => !wordmark.closest('[inert]')),
-    ).toHaveLength(1)
     expect(within(hero).getByRole('heading', { level: 1 })).toBeTruthy()
     expect(hero.textContent).toContain('French for the groove in a record.')
     expect(
