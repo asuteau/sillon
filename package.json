@@ -2,6 +2,9 @@
   "name": "sillon",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "imports": {
     "#/*": "./src/*"
   },
@@ -46,7 +49,7 @@
     "@tanstack/router-devtools": "^1.167.2",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^22.20.5",
+    "@types/node": "^24.19.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
@@ -65,6 +68,9 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "lightningcss"
-    ]
+    ],
+    "overrides": {
+      "seroval": "^1.6.3"
+    }
   }
 }

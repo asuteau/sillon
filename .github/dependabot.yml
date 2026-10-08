@@ -9,3 +9,7 @@ updates:
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
+    ignore:
+      # Types track the Node runtime (engines, Vercel 24.x): bump majors by hand
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
