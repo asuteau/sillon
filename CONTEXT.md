@@ -27,7 +27,7 @@ A Wantlist entry whose exact Release now has a Copy in the Collection. Another R
 _Avoid_: Owned want, completed want
 
 **Random pick**:
-One Copy drawn at random from the whole Collection, to answer "what do I play now?". Picking again draws a new one.
+One Copy drawn at random from the whole Collection, to answer "what do I play now?". Picking again draws a new one, never the same Copy twice in a row (unless the Collection holds only one). Shown whole or not at all: the record appears only once its Cover and the colour drawn from it are ready, never piecemeal.
 _Avoid_: Shuffle, surprise me
 
 ### Records

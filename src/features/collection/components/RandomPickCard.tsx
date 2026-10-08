@@ -5,7 +5,7 @@ import { Button } from '#/shared/components/ui/button'
 import { RandomPickSpotlight } from './RandomPickSpotlight'
 
 export const RandomPickCard = () => {
-  const { record, isPicking, pick, close } = useRandomPick()
+  const { record, isPicking, isError, pick, close } = useRandomPick()
 
   return (
     <section className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-(--radius) border border-border bg-card px-5 py-4">
@@ -16,6 +16,11 @@ export const RandomPickCard = () => {
         <p className="m-0 text-sm text-muted-foreground">
           Let Sillon pull a record from your collection.
         </p>
+        {isError && !record && (
+          <p role="alert" className="m-0 text-sm text-foreground">
+            Couldn't reach Discogs. Try again.
+          </p>
+        )}
       </div>
       <Button variant="lacquer" size="lg" onClick={pick} disabled={isPicking}>
         {isPicking ? <GrooveLoader size={14} /> : <RandomPickIcon />}
@@ -25,6 +30,7 @@ export const RandomPickCard = () => {
       <RandomPickSpotlight
         record={record}
         isPicking={isPicking}
+        isError={isError}
         onPickAgain={pick}
         onClose={close}
       />

@@ -22,6 +22,8 @@ interface Props {
   onClose: () => void
   onPickAgain?: () => void
   isPicking?: boolean
+  /** The last Pick again failed */
+  pickFailed?: boolean
   onRemove?: () => void
   isRemoving?: boolean
 }
@@ -34,6 +36,7 @@ const SpotlightContent = ({
   record,
   onPickAgain,
   isPicking,
+  pickFailed,
   onRemove,
   isRemoving,
   coverRef,
@@ -51,9 +54,11 @@ const SpotlightContent = ({
     : null
 
   return (
-    <div className="relative flex min-h-0 flex-col gap-5 overflow-y-auto">
+    // A new Random pick replaces the last one in a single fade
+    <div
+      className={`relative flex min-h-0 flex-col gap-5 overflow-y-auto ${onPickAgain ? 'duration-160 ease-fade animate-in fade-in-0' : ''}`}
+    >
       <SheetCover
-        key={record.id}
         ref={coverRef}
         coverKey={releaseCoverKey(record.id, info.master_id)}
         artist={leadArtist(info.artists)}
@@ -77,7 +82,7 @@ const SpotlightContent = ({
       />
 
       {/* Bottom padding inside the scroller, so button shadows aren't clipped */}
-      <div className="flex justify-center pt-1 pb-6">
+      <div className="flex flex-col items-center gap-2 pt-1 pb-6">
         {onRemove && (
           <Button
             variant="destructive"
@@ -94,6 +99,11 @@ const SpotlightContent = ({
             Pick again
           </Button>
         )}
+        {!onRemove && pickFailed && (
+          <p role="alert" className="m-0 text-sm text-foreground">
+            Couldn't reach Discogs. Try again.
+          </p>
+        )}
       </div>
     </div>
   )
@@ -104,6 +114,7 @@ export const RecordSpotlight = ({
   onClose,
   onPickAgain,
   isPicking,
+  pickFailed,
   onRemove,
   isRemoving,
 }: Props) => {
@@ -124,10 +135,12 @@ export const RecordSpotlight = ({
         >
           <CoverGlow tint={tint} />
           <SpotlightContent
+            key={record.id}
             record={record}
             coverRef={sheetCover}
             onPickAgain={onPickAgain}
             isPicking={isPicking}
+            pickFailed={pickFailed}
             onRemove={onRemove}
             isRemoving={isRemoving}
           />
@@ -145,10 +158,12 @@ export const RecordSpotlight = ({
       >
         <CoverGlow tint={tint} />
         <SpotlightContent
+          key={record.id}
           record={record}
           coverRef={sheetCover}
           onPickAgain={onPickAgain}
           isPicking={isPicking}
+          pickFailed={pickFailed}
           onRemove={onRemove}
           isRemoving={isRemoving}
         />

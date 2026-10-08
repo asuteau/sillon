@@ -76,54 +76,73 @@ export const getCollection = createServerFn()
     }
   })
 
-export const fetchRandomRecord = createServerFn().handler(async () => {
-  const { useAppSession } = await import('#/services/session.server')
-  const session = await useAppSession()
-
-  const { accessToken, accessTokenSecret, discogsUsername } = session.data
-  if (!accessToken || !accessTokenSecret || !discogsUsername) return null
-
-  const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
-  const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
-  const base = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases`
-
-  function makeHeaders() {
-    return {
-      Authorization: buildOAuthHeader({
-        oauth_consumer_key: consumerKey,
-        oauth_token: accessToken!,
-        oauth_signature_method: 'PLAINTEXT',
-        oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
-        oauth_nonce: nonce(),
-        oauth_timestamp: String(Math.floor(Date.now() / 1000)),
-      }),
-      'User-Agent': 'Sillon/1.0',
-    }
-  }
-
-  const { discogsRequest } = await import('#/services/discogs.server')
-  const countRes = await discogsRequest(`${base}?per_page=1&page=1`, {
-    headers: makeHeaders(),
-  })
-  if (!countRes.ok)
-    throw new Error(`Discogs count fetch failed: ${countRes.status}`)
-  const { pagination } = (await countRes.json()) as {
-    pagination: { items: number }
-  }
-  if (pagination.items === 0) return null
-
-  const randomPage = Math.ceil(Math.random() * pagination.items)
-  const itemRes = await discogsRequest(
-    `${base}?per_page=1&page=${randomPage}`,
-    {
-      headers: makeHeaders(),
-    },
+export const fetchRandomRecord = createServerFn()
+  .inputValidator(
+    z
+      .object({
+        // Record count the client already knows, to skip counting
+        count: z.number().int().positive().optional(),
+        excludeInstanceId: z.number().int().optional(),
+      })
+      .optional()
+      .default({}),
   )
-  if (!itemRes.ok)
-    throw new Error(`Discogs random fetch failed: ${itemRes.status}`)
-  const { releases } = (await itemRes.json()) as CollectionPage
-  return releases[0] ?? null
-})
+  .handler(async ({ data }) => {
+    const { useAppSession } = await import('#/services/session.server')
+    const session = await useAppSession()
+
+    const { accessToken, accessTokenSecret, discogsUsername } = session.data
+    if (!accessToken || !accessTokenSecret || !discogsUsername) return null
+
+    const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
+    const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
+    const base = `${DISCOGS_API}/users/${discogsUsername}/collection/folders/0/releases`
+
+    function makeHeaders() {
+      return {
+        Authorization: buildOAuthHeader({
+          oauth_consumer_key: consumerKey,
+          oauth_token: accessToken!,
+          oauth_signature_method: 'PLAINTEXT',
+          oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
+          oauth_nonce: nonce(),
+          oauth_timestamp: String(Math.floor(Date.now() / 1000)),
+        }),
+        'User-Agent': 'Sillon/1.0',
+      }
+    }
+
+    const { discogsRequest } = await import('#/services/discogs.server')
+
+    // One Copy per page: page n is the nth Copy. Null past the last one.
+    const fetchCopyPage = async (page: number) => {
+      const res = await discogsRequest(`${base}?per_page=1&page=${page}`, {
+        headers: makeHeaders(),
+      })
+      if (res.status === 404) return null
+      if (!res.ok) throw new Error(`Discogs random fetch failed: ${res.status}`)
+      return (await res.json()) as CollectionPage
+    }
+
+    const countCopies = async () =>
+      (await fetchCopyPage(1))?.pagination.items ?? 0
+
+    const drawFrom = async (items: number) => {
+      const position = Math.ceil(Math.random() * items)
+      const copy = (await fetchCopyPage(position))?.releases[0] ?? null
+      if (copy?.instance_id !== data.excludeInstanceId || items === 1)
+        return copy
+      // Drew the Copy on screen: its neighbour instead, never the same twice
+      return (await fetchCopyPage((position % items) + 1))?.releases[0] ?? null
+    }
+
+    // The caller's count saves a request; a stale one just means a recount
+    const hinted = data.count ? await drawFrom(data.count) : null
+    if (hinted) return hinted
+    const items = await countCopies()
+    if (items === 0) return null
+    return drawFrom(items)
+  })
 
 export const getCollectionValue = createServerFn().handler(async () => {
   const { useAppSession } = await import('#/services/session.server')
