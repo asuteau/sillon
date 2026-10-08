@@ -1,5 +1,9 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
-import { formatDateAdded } from '#/features/collection/collection.utils'
+import {
+  formatArtists,
+  formatDateAdded,
+  leadArtist,
+} from '#/features/collection/collection.utils'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { CoverGlow } from '#/shared/components/CoverGlow'
 import { RecordHeading } from '#/shared/components/RecordHeading'
@@ -52,13 +56,13 @@ const SpotlightContent = ({
         key={record.id}
         ref={coverRef}
         coverKey={releaseCoverKey(record.id, info.master_id)}
-        artist={info.artists[0]?.name ?? ''}
+        artist={leadArtist(info.artists)}
         title={info.title}
         styles={info.styles}
       />
 
       <RecordHeading
-        artist={info.artists.map((a) => a.name).join(', ')}
+        artist={formatArtists(info.artists)}
         title={info.title}
         catalogue={[
           [

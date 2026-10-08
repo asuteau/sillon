@@ -1,3 +1,4 @@
+import { stripDisambiguator } from '#/shared/utils/artist-name'
 import { AlertCircle, Check, RotateCcw, X } from 'lucide-react'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { ScanIcon } from '#/shared/components/icons/ScanIcon'
@@ -175,9 +176,10 @@ const BarcodeScannerContent = ({
 
   const rawTitle = barcodeResult?.title ?? ''
   const dashIndex = rawTitle.indexOf(' - ')
-  const artist = dashIndex !== -1 ? rawTitle.slice(0, dashIndex) : rawTitle
+  const artist = stripDisambiguator(
+    dashIndex !== -1 ? rawTitle.slice(0, dashIndex) : rawTitle,
+  )
   const albumTitle = dashIndex !== -1 ? rawTitle.slice(dashIndex + 3) : rawTitle
-  const thumb = barcodeResult?.thumb ?? barcodeResult?.cover_image ?? null
   const label = barcodeResult?.labels?.[0]?.name
   const catno = barcodeResult?.catno
   const format = barcodeResult?.formats?.[0]
@@ -198,7 +200,6 @@ const BarcodeScannerContent = ({
             )}
             artist={artist}
             title={albumTitle}
-            thumb={thumb}
             styles={[]}
             className="aspect-square w-full shrink-0 overflow-hidden rounded-(--radius)"
           />

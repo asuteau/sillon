@@ -25,7 +25,6 @@ export const DiscographyCard = ({
           coverKey={masterCoverKey(item.id)}
           artist={artistName}
           title={item.title}
-          thumb={item.thumb || null}
           styles={[]}
           className={RECORD_ROW_MEDIA_CLASSES}
         />

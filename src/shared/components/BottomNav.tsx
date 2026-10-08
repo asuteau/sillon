@@ -41,14 +41,15 @@ export default function BottomNav() {
         </Link>
         {user && (
           <>
+            {/* Same order as the Header nav */}
+            <Link to="/search" className={TAB_CLASSES}>
+              <SearchIcon className="size-4" />
+              <span className={TAB_LABEL_CLASSES}>Search</span>
+            </Link>
             <Link to="/collection" className={TAB_CLASSES}>
               <CollectionIcon className="size-4" />
               <span className={TAB_LABEL_CLASSES}>Collection</span>
               <CountBadge count={collectionCount} />
-            </Link>
-            <Link to="/search" className={TAB_CLASSES}>
-              <SearchIcon className="size-4" />
-              <span className={TAB_LABEL_CLASSES}>Search</span>
             </Link>
             <Link to="/wantlist" className={TAB_CLASSES}>
               <WantlistIcon className="size-4" />

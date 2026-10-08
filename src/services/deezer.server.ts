@@ -33,7 +33,9 @@ const deezerSearch = async (q: string): Promise<Candidate[]> => {
     `https://api.deezer.com/search/album?q=${encodeURIComponent(q)}&limit=5`,
     { headers: { 'User-Agent': 'Sillon/1.0' } },
   )
-  if (!res.ok) return []
+  // Throws on failure (network, quota, bad payload) so it's never mistaken
+  // for "no match", which callers remember
+  if (!res.ok) throw new Error(`Deezer search failed: ${res.status}`)
   const json = DeezerSearchSchema.parse(await res.json())
   return json.data.map((item) => ({
     artistName: item.artist?.name ?? '',
@@ -66,30 +68,27 @@ const bestMatch = (
   return best?.url ?? null
 }
 
+// Null only when Deezer answered and nothing matched
 export const fetchDeezerCover = async (
   artist: string,
   title: string,
 ): Promise<string | null> => {
-  try {
-    const qa = queryArtist(artist)
-    const a = firstArtist(artist)
-    const t = cleanTitle(title)
-    const tShort = stripSubtitle(t)
+  const qa = queryArtist(artist)
+  const a = firstArtist(artist)
+  const t = cleanTitle(title)
+  const tShort = stripSubtitle(t)
 
-    const queries = [
-      `artist:"${qa}" album:"${t}"`,
-      ...(tShort !== t ? [`artist:"${qa}" album:"${tShort}"`] : []),
-      `${qa} ${tShort}`,
-    ]
+  const queries = [
+    `artist:"${qa}" album:"${t}"`,
+    ...(tShort !== t ? [`artist:"${qa}" album:"${tShort}"`] : []),
+    `${qa} ${tShort}`,
+  ]
 
-    for (const q of queries) {
-      const candidates = await deezerSearch(q)
-      const match = bestMatch(candidates, a, t)
-      if (match) return match
-    }
-
-    return null
-  } catch {
-    return null
+  for (const q of queries) {
+    const candidates = await deezerSearch(q)
+    const match = bestMatch(candidates, a, t)
+    if (match) return match
   }
+
+  return null
 }

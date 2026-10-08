@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Mic2 } from 'lucide-react'
 
 import {
   RECORD_ROW_MEDIA_CLASSES,
   RecordRow,
 } from '#/shared/components/RecordList'
 import { cn } from '#/shared/utils/cn'
+import { monogram } from '#/shared/utils/monogram'
 
 import { artistDetailQueryOptions } from '../search.queries'
 import type { Artist } from '../search.model'
@@ -59,9 +59,9 @@ export const ArtistCard = ({ artist, onClick }: ArtistCardProps) => {
       <RecordRow
         onClick={onClick}
         media={
-          artist.thumb ? (
+          artist.picture ? (
             <img
-              src={artist.thumb}
+              src={artist.picture}
               alt=""
               className={cn(RECORD_ROW_MEDIA_CLASSES, 'object-cover')}
             />
@@ -69,10 +69,11 @@ export const ArtistCard = ({ artist, onClick }: ArtistCardProps) => {
             <span
               className={cn(
                 RECORD_ROW_MEDIA_CLASSES,
-                'flex items-center justify-center bg-muted',
+                'type-display flex items-center justify-center bg-muted text-lg text-muted-foreground',
               )}
+              aria-hidden
             >
-              <Mic2 className="size-5 text-muted-foreground" />
+              {monogram(artist.name)}
             </span>
           )
         }

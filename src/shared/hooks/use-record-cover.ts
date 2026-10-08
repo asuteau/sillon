@@ -1,3 +1,4 @@
+import { leadArtist } from '#/features/collection/collection.utils'
 import { useCoverTint } from '#/shared/hooks/use-cover-tint'
 import { useCoverTransition } from '#/shared/hooks/use-cover-transition'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
@@ -17,7 +18,7 @@ export const useRecordCover = (release: RecordCoverRelease) => {
   const { basic_information: info } = release
   const tint = useCoverTint({
     coverKey: releaseCoverKey(release.id, info.master_id),
-    artist: info.artists[0]?.name ?? '',
+    artist: leadArtist(info.artists),
     title: info.title,
   })
   const { sheetCover, flyBack } = useCoverTransition()

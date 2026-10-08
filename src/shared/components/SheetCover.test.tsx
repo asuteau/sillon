@@ -8,8 +8,6 @@ import { coverArtQueryOptions } from '#/features/collection/collection.queries'
 import { SheetCover } from './SheetCover'
 
 const RECORD = { coverKey: 'm:1', artist: 'Can', title: 'Tago Mago' }
-// Callers' records carry a Discogs thumb; the sheet must never show it
-const DISCOGS = { thumb: 'https://i.discogs.com/thumb.jpg' }
 
 class InView {
   constructor(private callback: IntersectionObserverCallback) {}
@@ -31,7 +29,7 @@ class NotInView {
 const renderSheetCover = (queryClient: QueryClient) =>
   render(
     <QueryClientProvider client={queryClient}>
-      <SheetCover {...RECORD} {...DISCOGS} styles={[]} />
+      <SheetCover {...RECORD} styles={[]} />
     </QueryClientProvider>,
   )
 

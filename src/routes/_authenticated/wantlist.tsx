@@ -21,6 +21,7 @@ import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 import { useState, useTransition } from 'react'
+import { Page } from '#/shared/components/Page'
 
 export const Route = createFileRoute('/_authenticated/wantlist')({
   validateSearch: listSortSchema,
@@ -47,7 +48,7 @@ function Wantlist() {
   const removeFromWantlist = useRemoveFromWantlist()
 
   return (
-    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-32 sm:pb-8">
+    <Page>
       <h1 className="type-display mb-6 text-4xl text-foreground">Wantlist</h1>
 
       <SortChips
@@ -116,6 +117,6 @@ function Wantlist() {
       )}
 
       <ScanFab />
-    </main>
+    </Page>
   )
 }

@@ -22,6 +22,7 @@ import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { useState, useTransition } from 'react'
+import { Page } from '#/shared/components/Page'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   validateSearch: listSortSchema,
@@ -49,7 +50,7 @@ function Collection() {
   const isEmpty = data.pages[0]?.releases.length === 0
 
   return (
-    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-32 sm:pb-8">
+    <Page>
       <header className="mb-6 flex items-end justify-between gap-4">
         <h1 className="type-display text-4xl text-foreground">Collection</h1>
         {!isEmpty && <RandomPickButton />}
@@ -132,6 +133,6 @@ function Collection() {
       )}
 
       <ScanFab />
-    </main>
+    </Page>
   )
 }

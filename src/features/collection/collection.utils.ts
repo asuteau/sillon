@@ -1,3 +1,5 @@
+import { stripDisambiguator } from '#/shared/utils/artist-name'
+
 export function formatDateAdded(dateAdded: string): string {
   return new Date(dateAdded).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -7,7 +9,12 @@ export function formatDateAdded(dateAdded: string): string {
 }
 
 export function formatArtists(artists: { name: string }[]): string {
-  return artists.map((a) => a.name).join(', ')
+  return artists.map((a) => stripDisambiguator(a.name)).join(', ')
+}
+
+// The first credited artist, for Covers and House sleeves
+export function leadArtist(artists: { name: string }[]): string {
+  return stripDisambiguator(artists[0]?.name ?? '')
 }
 
 // Parses a Discogs amount such as "€1,240.52" or "¥12,345".

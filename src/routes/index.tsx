@@ -12,6 +12,7 @@ import { ScanFab } from '#/shared/components/ScanFab'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+import { Page } from '#/shared/components/Page'
 
 export { recentAdditionsQueryOptions }
 
@@ -35,7 +36,7 @@ function App() {
   if (!user) return <LandingPage />
 
   return (
-    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-32 sm:pb-8">
+    <Page>
       <MetricsStrip username={user.username} />
 
       {data && data.releases.length > 0 && <RandomPickCard />}
@@ -85,6 +86,6 @@ function App() {
       )}
 
       <ScanFab />
-    </main>
+    </Page>
   )
 }

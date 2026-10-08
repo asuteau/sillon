@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatAmount, parseAmount } from './collection.utils'
+import {
+  formatAmount,
+  formatArtists,
+  leadArtist,
+  parseAmount,
+} from './collection.utils'
 
 describe('parseAmount', () => {
   it('parses a Discogs amount with thousands and cents', () => {
@@ -45,5 +50,17 @@ describe('formatAmount', () => {
 
   it('compacts millions', () => {
     expect(format(3_400_000)).toBe('€3.4M')
+  })
+})
+
+describe('artist names', () => {
+  it('drops Discogs disambiguators for display', () => {
+    const artists = [{ name: 'Behemoth (3)' }, { name: 'Vargrav (3)' }]
+    expect(formatArtists(artists)).toBe('Behemoth, Vargrav')
+    expect(leadArtist(artists)).toBe('Behemoth')
+  })
+
+  it('has no lead artist when there are none', () => {
+    expect(leadArtist([])).toBe('')
   })
 })

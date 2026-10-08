@@ -1,4 +1,7 @@
-import { formatArtists } from '#/features/collection/collection.utils'
+import {
+  formatArtists,
+  leadArtist,
+} from '#/features/collection/collection.utils'
 import { CoverArt } from '#/shared/components/CoverArt'
 import {
   RECORD_ROW_MEDIA_CLASSES,
@@ -14,7 +17,6 @@ interface ReleaseRowRelease {
     master_id?: number
     title: string
     artists: { name: string }[]
-    thumb: string
     styles: string[]
   }
 }
@@ -41,9 +43,8 @@ export const ReleaseRow = ({ release, meta, onClick }: ReleaseRowProps) => {
       media={
         <CoverArt
           coverKey={releaseCoverKey(release.id, info.master_id)}
-          artist={info.artists[0]?.name ?? ''}
+          artist={leadArtist(info.artists)}
           title={info.title}
-          thumb={info.thumb}
           styles={info.styles}
           className={RECORD_ROW_MEDIA_CLASSES}
         />

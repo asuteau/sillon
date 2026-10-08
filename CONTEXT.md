@@ -65,12 +65,22 @@ A record not sanctioned by the artist or their label (bootlegs, unlicensed press
 _Avoid_: Bootleg, pirate
 
 **Cover**:
-The HD artwork shown for a record. It belongs to the Master: every Release of a Master shows the same Cover. A Release without a Master has its own Cover.
+The HD artwork shown for a record, always from Deezer. Discogs images are never shown: they are community-uploaded, uneven in quality and per-Release. It belongs to the Master: every Release of a Master shows the same Cover, on every screen. A Release without a Master has its own Cover.
 _Avoid_: Artwork, image, thumb
 
 **House sleeve**:
-A Cover Sillon generates when a record has no artwork from Discogs or Deezer — or, on a record screen, none from Deezer, since the Discogs thumbnail is too small to show there — typeset with the artist and title. Like any Cover it belongs to the Master, so it is always the same for the same Master, and never shows Release details such as the catalogue number. Not shown while artwork is still loading.
+A Cover Sillon generates when Deezer has no artwork for a record, typeset with the artist and title. A record that gets one shows it everywhere, lists and record screen alike. Like any Cover it belongs to the Master, so it is always the same for the same Master, and never shows Release details such as the catalogue number. Not shown while artwork is still loading.
 _Avoid_: Placeholder, fallback cover, default art
+
+### Artists
+
+**Artist picture**:
+The photo shown for an artist in search results, from Discogs. The one Discogs image Sillon shows: an artist appears in one place only, so there is no other source to clash with.
+_Avoid_: Avatar, artist thumb, artist cover
+
+**Monogram**:
+The artist's initials typeset in Sillon's style, shown when there is no Artist picture. At most two letters, from the first two words, skipping a leading article (The, Les, Die) and a Discogs disambiguator such as "(2)"; a name that starts with a digit, symbol or non-Latin script keeps its first character as written. Records get House sleeves, artists get Monograms — never the other way round.
+_Avoid_: Initials, avatar placeholder
 
 ### Sorting
 

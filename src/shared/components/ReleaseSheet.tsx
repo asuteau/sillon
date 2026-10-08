@@ -1,5 +1,6 @@
 import {
   formatArtists,
+  leadArtist,
   formatDateAdded,
 } from '#/features/collection/collection.utils'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
@@ -22,8 +23,6 @@ interface ReleaseInfo {
     title: string
     year: number
     artists: { name: string }[]
-    cover_image: string
-    thumb: string
     styles: string[]
     formats?: {
       name: string
@@ -74,7 +73,7 @@ function ReleaseSheetContent({
         key={release.id}
         ref={coverRef}
         coverKey={releaseCoverKey(release.id, info.master_id)}
-        artist={info.artists[0]?.name ?? ''}
+        artist={leadArtist(info.artists)}
         title={info.title}
         styles={info.styles}
       />

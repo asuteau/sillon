@@ -42,6 +42,7 @@ import {
   isEp,
   isStudioAlbum,
 } from '#/features/search/search.utils'
+import { Page } from '#/shared/components/Page'
 
 export const Route = createFileRoute('/_authenticated/search')({
   validateSearch: z.object({
@@ -134,7 +135,7 @@ function Search() {
     : handleBackFromDiscography
 
   return (
-    <main className="mx-auto w-full max-w-270 px-4 pt-14 pb-24 sm:pb-8">
+    <Page className="pb-24">
       {backLabel ? (
         <Button
           variant="ghost"
@@ -213,7 +214,7 @@ function Search() {
           }}
         />
       )}
-    </main>
+    </Page>
   )
 }
 

@@ -4,14 +4,13 @@ import type {
   ReleaseDetail,
   Version,
 } from './search.schema'
+import { stripDisambiguator } from '#/shared/utils/artist-name'
 
 export type Master = {
   id: number
   title: string
   artist: string
   year: number | null
-  thumb: string
-  coverImage: string
   formats: string[]
   inCollection: boolean
   inWantlist: boolean
@@ -19,7 +18,6 @@ export type Master = {
 
 export type MasterVersion = {
   id: number
-  thumb: string
   year: number
   country: string
   majorFormat: string
@@ -35,13 +33,8 @@ export type ReleaseDetailModel = {
   year: number
   country: string
   artists: string[]
-  coverImage: string
   formatName: string
   formatText: string
-}
-
-function stripDisambiguator(name: string): string {
-  return name.replace(/\s*\(\d+\)$/, '')
 }
 
 export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
@@ -51,7 +44,6 @@ export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
     year: raw.year,
     country: raw.country ?? '',
     artists: raw.artists.map((a) => stripDisambiguator(a.name)),
-    coverImage: raw.images?.[0]?.uri ?? '',
     formatName: raw.formats?.[0]?.name ?? '',
     formatText: raw.formats?.[0]?.text ?? '',
   }
@@ -64,8 +56,6 @@ export function toMaster(raw: MasterResult): Master {
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
     artist: dashIdx >= 0 ? stripDisambiguator(raw.title.slice(0, dashIdx)) : '',
     year: raw.year ? parseInt(raw.year, 10) || null : null,
-    thumb: raw.thumb,
-    coverImage: raw.cover_image,
     formats: raw.format ?? [],
     inCollection: raw.user_data?.in_collection ?? false,
     inWantlist: raw.user_data?.in_wantlist ?? false,
@@ -75,7 +65,8 @@ export function toMaster(raw: MasterResult): Master {
 export type Artist = {
   id: number
   name: string
-  thumb: string
+  // Artist picture, the one Discogs image Sillon shows
+  picture: string
   genres: string[]
   styles: string[]
 }
@@ -86,7 +77,6 @@ export type ArtistDiscographyItem = {
   // Raw Discogs artist credit, disambiguation included, to tell homonyms apart
   credit: string
   year: number | null
-  thumb: string
   formats: string[]
 }
 
@@ -94,7 +84,7 @@ export function toArtist(raw: ArtistResult): Artist {
   return {
     id: raw.id,
     name: stripDisambiguator(raw.title),
-    thumb: raw.thumb,
+    picture: raw.thumb,
     genres: raw.genres ?? [],
     styles: raw.styles ?? [],
   }
@@ -109,7 +99,6 @@ export function toArtistDiscographyItem(
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
     credit: dashIdx >= 0 ? raw.title.slice(0, dashIdx) : '',
     year: raw.year ? parseInt(raw.year, 10) || null : null,
-    thumb: raw.thumb,
     formats: raw.format ?? [],
   }
 }
@@ -117,7 +106,6 @@ export function toArtistDiscographyItem(
 export function toMasterVersion(raw: Version): MasterVersion {
   return {
     id: raw.id,
-    thumb: raw.thumb,
     year: parseInt(raw.released, 10) || 0,
     country: raw.country,
     majorFormat: raw.major_formats[0] ?? '',

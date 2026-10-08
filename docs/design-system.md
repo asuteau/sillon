@@ -161,14 +161,16 @@ Prefer a text label over an icon wherever there is room.
 
 ## 7. House sleeves
 
-See `CONTEXT.md` → **House sleeve**. A generated Cover, shown only when a record has no artwork from Discogs or Deezer.
+See `CONTEXT.md` → **House sleeve**. A generated Cover, shown when Deezer has no artwork for a record.
 
 - `houseSleeve()` (`src/shared/utils/house-sleeve.ts`) is deterministic per Master: seeded (FNV-1a) by the cover key, or artist + title when there is none. Never by Release details, so every Release of a Master gets the same sleeve, and it never shows the catalogue number.
 - Design space: 5 layouts (`band`, `block`, `rules`, `circle`, `stack`) × 4 greyscale compositions (`paper`, `vinyl`, `graphite`, `ash`) × 4 placements. Lacquer is the only accent.
 - Colours are fixed values, not theme tokens: a sleeve is an object and looks the same in light and dark.
 - Typeset with the artist (small uppercase, letter-spaced) and title (display weight and tracking). Below ~88px it shows the title's initial instead (container query).
 - **Loading state**: `coverState()` returns `loading` / `image` / `house`. While artwork may still arrive, show a flat `bg-muted` square; a House sleeve only once we know there is no artwork, so it never flashes.
-- **Record screens are Deezer HD only** (`SheetCover`): the Discogs thumb is ~150px and blurry at sheet size, so the sheet waits on grey for HD and shows a House sleeve when Deezer has no match, even if Discogs has a thumb.
+- **Covers are Deezer only**, in lists and on record screens alike: Discogs images are community-uploaded, uneven and per-Release, so `CoverArt` never shows them. A record with no Deezer match gets the same House sleeve everywhere.
+- Lookups are remembered in `localStorage` (`src/shared/utils/cover-cache.ts`): matches for good, "no match" for 30 days. Deezer failures are never remembered, so they don't pin a House sleeve.
+- **Monogram**: artists without a Discogs Artist picture get their initials (`monogram()`, `src/shared/utils/monogram.ts`) in `type-display` on `bg-muted`. Records get House sleeves, artists get Monograms.
 - The landing page uses the same generator with made-up artists and titles, so no third-party cover art appears on public pages.
 
 ---
@@ -227,6 +229,7 @@ Sillon's own loading screen (app shell, cold start) does follow the theme and us
 - `Button` variants: `default` (solid `--primary`), `outline`, `secondary`, `ghost`, `destructive`, `link`, `lacquer` (brand moments only).
 - `Chip`: round, active chip is solid foreground.
 - Bottom sheets: `Drawer` (vaul); 14px top corners.
+- Screens: `Page` wraps every screen's content (the landing page excepted): `max-w-270`, 16px gutters, `24px` below the Header on mobile, `40px` from `sm`. Set it there, never per route.
 - Focus: a 2px `--foreground` outline on every control, both themes.
 
 ---

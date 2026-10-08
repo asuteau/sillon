@@ -6,6 +6,11 @@ import {
 import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
 import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { getDeezerCover } from '#/services/deezer.api'
+import {
+  COVER_LOOKUP_VERSION,
+  readCachedCover,
+  writeCachedCover,
+} from '#/shared/utils/cover-cache'
 import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
@@ -63,8 +68,15 @@ export const coverArtQueryOptions = (
   title: string,
 ) =>
   queryOptions({
-    queryKey: ['cover', 'v4', coverKey],
-    queryFn: () => getDeezerCover({ data: { artist, title } }),
+    queryKey: ['cover', COVER_LOOKUP_VERSION, coverKey],
+    queryFn: async () => {
+      const cached = readCachedCover(coverKey)
+      if (cached !== undefined) return cached
+      // Throws when Deezer fails, so only real answers are remembered
+      const src = await getDeezerCover({ data: { artist, title } })
+      writeCachedCover(coverKey, src)
+      return src
+    },
     staleTime: Infinity,
     gcTime: Infinity,
     retry: false,
