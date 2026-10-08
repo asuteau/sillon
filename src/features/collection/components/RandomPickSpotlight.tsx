@@ -4,6 +4,7 @@ import { RecordSpotlight } from './RecordSpotlight'
 interface RandomPickSpotlightProps {
   record: CollectionRelease | undefined
   isPicking: boolean
+  isError: boolean
   onPickAgain: () => void
   onClose: () => void
 }
@@ -11,6 +12,7 @@ interface RandomPickSpotlightProps {
 export const RandomPickSpotlight = ({
   record,
   isPicking,
+  isError,
   onPickAgain,
   onClose,
 }: RandomPickSpotlightProps) => {
@@ -22,6 +24,7 @@ export const RandomPickSpotlight = ({
       onClose={onClose}
       onPickAgain={onPickAgain}
       isPicking={isPicking}
+      pickFailed={isError}
     />
   )
 }

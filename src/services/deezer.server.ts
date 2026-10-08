@@ -10,6 +10,9 @@ import { z } from 'zod'
 
 const ARTIST_THRESHOLD = 0.5
 const ALBUM_THRESHOLD = 0.3
+// For a whole lookup, every query included: past it the lookup fails like any
+// Deezer error, so it isn't remembered and the record shows a House sleeve
+const LOOKUP_TIMEOUT_MS = 5000
 
 const DeezerSearchSchema = z.object({
   data: z.array(
@@ -28,10 +31,13 @@ type Candidate = {
   coverUrl: string | null
 }
 
-const deezerSearch = async (q: string): Promise<Candidate[]> => {
+const deezerSearch = async (
+  q: string,
+  signal: AbortSignal,
+): Promise<Candidate[]> => {
   const res = await fetch(
     `https://api.deezer.com/search/album?q=${encodeURIComponent(q)}&limit=5`,
-    { headers: { 'User-Agent': 'Sillon/1.0' } },
+    { headers: { 'User-Agent': 'Sillon/1.0' }, signal },
   )
   // Throws on failure (network, quota, bad payload) so it's never mistaken
   // for "no match", which callers remember
@@ -84,8 +90,9 @@ export const fetchDeezerCover = async (
     `${qa} ${tShort}`,
   ]
 
+  const signal = AbortSignal.timeout(LOOKUP_TIMEOUT_MS)
   for (const q of queries) {
-    const candidates = await deezerSearch(q)
+    const candidates = await deezerSearch(q, signal)
     const match = bestMatch(candidates, a, t)
     if (match) return match
   }

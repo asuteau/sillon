@@ -11,10 +11,13 @@ import {
   readCachedCover,
   writeCachedCover,
 } from '#/shared/utils/cover-cache'
+import { releaseCoverKey } from '#/shared/utils/cover-key'
+import { preloadCover } from '#/shared/utils/cover-preload'
 import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
-import type { CollectionPage } from './collection.schema'
+import type { CollectionPage, CollectionRelease } from './collection.schema'
+import { leadArtist } from './collection.utils'
 
 // Only changes with the Collection itself — mutations invalidate it
 export const collectionValueQueryOptions = (username: string) =>
@@ -93,13 +96,35 @@ export const coverTintQueryOptions = (coverKey: string, src: string | null) =>
     retry: false,
   })
 
-export const randomRecordQueryOptions = queryOptions({
-  queryKey: ['collection', 'random'],
-  queryFn: () => fetchRandomRecord(),
-  staleTime: 0,
-  gcTime: 0,
-  enabled: false,
-})
+interface RandomPickInput {
+  /** Record count the client already knows, to skip counting */
+  count?: number
+  /** The Copy on screen, never drawn twice in a row */
+  excludeInstanceId?: number
+}
+
+// A Random pick, whole: the Copy, its Cover decoded and its tint sampled, all
+// in the caches the record screen reads, so it shows in one go. A failed
+// Deezer lookup counts as done: the record gets its House sleeve.
+export const prepareRandomPick = async (
+  queryClient: QueryClient,
+  input: RandomPickInput,
+): Promise<CollectionRelease | null> => {
+  const record = await fetchRandomRecord({ data: input })
+  if (!record) return null
+
+  const { basic_information: info } = record
+  const coverKey = releaseCoverKey(record.id, info.master_id)
+  const src = await queryClient
+    .fetchQuery(
+      coverArtQueryOptions(coverKey, leadArtist(info.artists), info.title),
+    )
+    .catch(() => null)
+  if (src && (await preloadCover(src)))
+    await queryClient.fetchQuery(coverTintQueryOptions(coverKey, src))
+
+  return record
+}
 
 const withoutCopy = (
   page: CollectionPage,

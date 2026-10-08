@@ -278,7 +278,14 @@
    so it picks up a --cover-tint set on an ancestor. Full strength across the
    cover's band so it shows around the cover, fading out by the heading — AA
    holds at full strength. A thin edge in the tint itself carries the colour
-   where the glow is faint (light theme); no text sits on it. */
+   where the glow is faint (light theme); no text sits on it. Registered as
+   a colour so a new pick's tint cross-fades from the last one. */
+@property --cover-tint {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: oklch(0.62 0 0);
+}
+
 @utility cover-glow {
   background: radial-gradient(
     ellipse 120% 75% at 50% 30%,
@@ -290,6 +297,7 @@
     transparent
   );
   box-shadow: inset 0 2px 0 var(--cover-tint);
+  transition-property: --cover-tint;
 }
 
 @layer base {
