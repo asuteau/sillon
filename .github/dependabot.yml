@@ -13,3 +13,6 @@ updates:
       # Types track the Node runtime (engines, Vercel 24.x): bump majors by hand
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+      # Vitest 5 needs a deliberate migration: bump majors by hand
+      - dependency-name: 'vitest'
+        update-types: ['version-update:semver-major']
