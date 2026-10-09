@@ -1,0 +1,698 @@
+<title>Lacquer Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap"
+/>
+<style>
+  /* Layout: one study per lacquer option — a phone-sized Collection mock beside the brand surfaces it would paint */
+  :root {
+    --background: #f5f5f3;
+    --foreground: #141413;
+    --card: #fbfbfa;
+    --muted: #ebeae7;
+    --muted-foreground: #6b6b69;
+    --border: #dddcda;
+    --secondary: #e9e8e5;
+    --vinyl-black: #0a0a0b;
+    --font-sans: 'Familjen Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --radius: 2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --background: #0e0e0d;
+      --foreground: #ebeae7;
+      --card: #151514;
+      --muted: #1d1d1c;
+      --muted-foreground: #8b8a87;
+      --border: #262625;
+      --secondary: #222220;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --background: #0e0e0d;
+    --foreground: #ebeae7;
+    --card: #151514;
+    --muted: #1d1d1c;
+    --muted-foreground: #8b8a87;
+    --border: #262625;
+    --secondary: #222220;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    padding-inline: 16px;
+    padding-block: 32px 64px;
+  }
+  .wrap {
+    max-width: 1180px;
+    margin-inline: auto;
+    display: grid;
+    gap: 40px;
+  }
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 32px;
+    align-items: end;
+    justify-content: space-between;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .lede {
+    max-width: 62ch;
+    color: var(--muted-foreground);
+    margin: 8px 0 0;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .seg button {
+    font: 500 12px var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--muted-foreground);
+    border: 0;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .seg button[aria-pressed='true'] {
+    background: var(--foreground);
+    color: var(--background);
+  }
+  .seg button:focus-visible,
+  .lq:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+
+  /* Lineup: every option's swatch in one row, for a quick side-by-side */
+  .lineup {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .lineup a {
+    color: inherit;
+    text-decoration: none;
+    display: grid;
+    gap: 6px;
+  }
+  .lineup .sw {
+    height: 56px;
+    border-radius: var(--radius);
+    background: var(--lacquer);
+  }
+  .lineup .nm {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .group {
+    display: grid;
+    gap: 20px;
+  }
+  .group > h2 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .group > h2 .eyebrow {
+    font-weight: 400;
+  }
+  .group > p {
+    margin: -12px 0 0;
+    max-width: 64ch;
+    color: var(--muted-foreground);
+  }
+  .studies {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
+    gap: 20px;
+  }
+
+  .study {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+  }
+  .study-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .study-head h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .stops {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted-foreground);
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .stops i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    vertical-align: -1px;
+    margin-right: 4px;
+    border: 1px solid var(--border);
+  }
+  .note {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 13.5px;
+    max-width: 60ch;
+  }
+  .body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 560px) {
+    .body {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+
+  /* The lacquer button, as in button.tsx variant="lacquer" */
+  .lq {
+    background: var(--lacquer);
+    color: var(--lf);
+    border: 0;
+    border-radius: var(--radius);
+    font: 600 13px var(--font-sans);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    height: 32px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.25);
+    white-space: nowrap;
+    transition: opacity 120ms;
+  }
+  .lq:hover {
+    opacity: 0.9;
+  }
+  .lq svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Phone-sized Collection mock */
+  .phone {
+    width: 220px;
+    max-width: 100%;
+    aspect-ratio: 9 / 17;
+    border: 1px solid var(--border);
+    background: var(--background);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px 8px;
+    gap: 6px;
+  }
+  .phone-bar b {
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .phone-bar .lq {
+    height: 26px;
+    font-size: 11px;
+    padding: 0 8px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.22);
+  }
+  .phone-bar .lq svg {
+    width: 13px;
+    height: 13px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 0 10px;
+  }
+  .cv {
+    aspect-ratio: 1;
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+  }
+  .phone .fab {
+    position: absolute;
+    right: 10px;
+    bottom: 40px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: 999px;
+  }
+  .phone .fab svg {
+    width: 14px;
+    height: 14px;
+  }
+  .tabs {
+    margin-top: auto;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 9px 0 11px;
+  }
+  .tabs span {
+    width: 16px;
+    height: 3px;
+    background: var(--muted-foreground);
+    opacity: 0.5;
+    border-radius: 2px;
+  }
+  .tabs span:first-child {
+    background: var(--foreground);
+    opacity: 1;
+  }
+
+  .brand {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+  }
+  .row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .icon {
+    width: 76px;
+    height: 76px;
+    border-radius: 17px;
+    background: var(--vinyl-black);
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .splash {
+    width: 64px;
+    height: 112px;
+    border-radius: 8px;
+    background: var(--vinyl-black);
+    display: grid;
+    place-items: center;
+    flex: none;
+  }
+  .sleeve {
+    width: 96px;
+    height: 96px;
+    position: relative;
+    overflow: hidden;
+    flex: none;
+    border-radius: 1px;
+  }
+  .sleeve .t {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    right: 8px;
+    font: 500 7px/1.35 var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .sleeve.paper {
+    background: #ecebe7;
+    color: #141413;
+  }
+  .sleeve.vinyl {
+    background: #0a0a0b;
+    color: #ebeae7;
+  }
+  .sleeve.graphite {
+    background: #3a3a38;
+    color: #ebeae7;
+  }
+  .cta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .cta .lq {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+  .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  footer {
+    color: var(--muted-foreground);
+    font-size: 13px;
+    max-width: 70ch;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lq {
+      transition: none;
+    }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Sillon · design system · lacquer</div>
+      <h1>Lacquer studies</h1>
+      <p class="lede">
+        Each study swaps only the three lacquer stops and the text colour on
+        them. The chrome stays black, white and grey. The fake covers in each
+        mock are there to test how the lacquer sits next to records of every
+        hue.
+      </p>
+    </div>
+    <div class="seg" role="group" aria-label="Theme">
+      <button type="button" id="th-auto" data-t="auto" aria-pressed="true">
+        Auto
+      </button>
+      <button type="button" id="th-light" data-t="light" aria-pressed="false">
+        Light
+      </button>
+      <button type="button" id="th-dark" data-t="dark" aria-pressed="false">
+        Dark
+      </button>
+    </div>
+  </header>
+
+  <nav class="lineup" id="lineup" aria-label="All options"></nav>
+  <div id="groups" class="wrap" style="gap: 48px"></div>
+
+  <footer>
+    Stops are drawn at 120deg with the middle stop at 60%, same as
+    <code>--lacquer</code> today. Text on lacquer is checked for at least 4.5:1
+    against the darkest stop. The icon and splash use the same gradient on the
+    groove stroke, as <code>GrooveMark tone="lacquer"</code> does.
+  </footer>
+</div>
+
+<script>
+  const OPTIONS = [
+    {
+      group: 'Now',
+      key: 'silver',
+      name: 'Silver',
+      tag: 'current',
+      stops: ['#e6e8eb', '#9a9ea5', '#cfd2d6'],
+      lf: '#0d0d0e',
+      note: "Today's lacquer, a cool silver. Neutral by design, which is also why the app reads monochrome.",
+    },
+
+    {
+      group: 'A · Groove iridescence',
+      key: 'sheen',
+      name: 'Sheen',
+      tag: 'subtle',
+      stops: [
+        'oklch(0.92 0.035 300)',
+        'oklch(0.74 0.05 210)',
+        'oklch(0.88 0.06 85)',
+      ],
+      lf: '#0d0d0e',
+      note: 'Silver that catches the light: lilac to blue-grey to pale gold. It still reads as metal from across the room, and the colour shows up up close.',
+    },
+    {
+      group: 'A · Groove iridescence',
+      key: 'prism',
+      name: 'Prism',
+      tag: 'bolder',
+      stops: [
+        'oklch(0.90 0.07 320)',
+        'oklch(0.74 0.09 200)',
+        'oklch(0.89 0.10 95)',
+      ],
+      lf: '#0d0d0e',
+      note: 'Same path, more chroma: pink to teal to yellow. Clearly coloured, but no one hue wins. Holographic is the risk at this level.',
+    },
+    {
+      group: 'A · Groove iridescence',
+      key: 'oil',
+      name: 'Oil slick',
+      tag: 'dark base',
+      stops: [
+        'oklch(0.80 0.08 280)',
+        'oklch(0.62 0.08 170)',
+        'oklch(0.80 0.09 60)',
+      ],
+      lf: '#0d0d0e',
+      note: 'Deeper, like light on the black of a record: violet to green to amber. More weight on the light theme, less shine.',
+    },
+
+    {
+      group: 'B · Warm metal',
+      key: 'gold',
+      name: 'Gold disc',
+      tag: 'gold',
+      stops: ['#f4e6bf', '#b8923f', '#e8d397'],
+      lf: '#0d0d0e',
+      note: 'The gold record. Warm and celebratory, but it melts into yellow and orange covers.',
+    },
+    {
+      group: 'B · Warm metal',
+      key: 'copper',
+      name: 'Copper master',
+      tag: 'copper',
+      stops: ['#f2d3bf', '#b06d4a', '#e6b394'],
+      lf: '#0d0d0e',
+      note: 'The copper of a DMM master. Earthier than gold, and close to the warm-grey bias of the neutrals.',
+    },
+
+    {
+      group: 'C · Single-hue tint',
+      key: 'oxblood',
+      name: 'Oxblood',
+      tag: 'red vinyl',
+      stops: ['#a8474a', '#5b1a1f', '#8a3236'],
+      lf: '#f6eeee',
+      note: 'Coloured vinyl in red. Strong identity, and it sits right next to --destructive, so errors and brand moments get confused.',
+    },
+    {
+      group: 'C · Single-hue tint',
+      key: 'cobalt',
+      name: 'Cobalt',
+      tag: 'blue vinyl',
+      stops: ['#5a7fd6', '#1f3a8a', '#4566bd'],
+      lf: '#f2f5fc',
+      note: 'Coloured vinyl in blue. Reads as a link colour or a SaaS default, the look the design system warns against.',
+    },
+  ]
+
+  const GROUP_NOTES = {
+    Now: '',
+    'A · Groove iridescence':
+      "The rainbow that light splits into on a record's grooves. Several hues at low chroma, so no single cover hue clashes with it.",
+    'B · Warm metal':
+      'One warm metallic hue. Rich, but a single hue competes with covers of the same family.',
+    'C · Single-hue tint':
+      'Lacquer becomes a brand colour. The most "accent", and the route the design system argues against.',
+  }
+
+  /* Groove spiral, from src/shared/utils/groove-spiral.ts */
+  const spiral = (turns, inner = 3, outer = 45) => {
+    const steps = Math.ceil(turns * 72),
+      pts = []
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps,
+        a = -Math.PI / 2 + t * turns * 2 * Math.PI,
+        r = outer - (outer - inner) * t
+      pts.push(
+        `${(50 + r * Math.cos(a)).toFixed(2)} ${(50 + r * Math.sin(a)).toFixed(2)}`,
+      )
+    }
+    return 'M' + pts.join(' L')
+  }
+  const turnsFor = (s) => (s >= 90 ? 9 : s >= 48 ? 6 : s >= 30 ? 4 : 2.5)
+  const strokeFor = (s) =>
+    Math.max((40 / turnsFor(s)) * 0.38, s < 24 ? 5.5 : 1.6)
+  let gid = 0
+  const groove = (size, o, mode) => {
+    const id = 'g' + gid++
+    const stroke = mode === 'lacquer' ? `url(#${id})` : 'currentColor'
+    return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true">
+    ${
+      mode === 'lacquer'
+        ? `<defs><linearGradient id="${id}" x1="0" y1="0.2" x2="1" y2="0.8">
+      <stop offset="0" stop-color="${o.stops[0]}"/><stop offset="0.6" stop-color="${o.stops[1]}"/><stop offset="1" stop-color="${o.stops[2]}"/>
+    </linearGradient></defs>`
+        : ''
+    }
+    <path d="${spiral(turnsFor(size))}" fill="none" stroke="${stroke}" stroke-width="${strokeFor(size).toFixed(2)}" stroke-linecap="round"/></svg>`
+  }
+
+  const PICK_ICON = `<svg viewBox="0 0 24 24"><path d="${(() => {
+    /* small groove on the icon grid */
+    const steps = 2 * 72,
+      pts = []
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps,
+        a = -Math.PI / 2 + t * 2 * 2 * Math.PI,
+        r = 8.5 - 6 * t
+      pts.push(
+        `${(12 + r * Math.cos(a)).toFixed(2)} ${(12 + r * Math.sin(a)).toFixed(2)}`,
+      )
+    }
+    return 'M' + pts.join(' L')
+  })()}"/><path d="M21 3v5.5L15.2 13"/></svg>`
+  const SCAN_ICON = `<svg viewBox="0 0 24 24"><path d="M3.5 8V3.5H8M16 3.5h4.5V8M20.5 16v4.5H16M8 20.5H3.5V16"/><path d="M7.5 8v8M9.8 8v8M11.4 8v8M14 8v8M16.5 8v8"/></svg>`
+
+  /* Stand-in covers across the hue wheel: abstract, no real artwork */
+  const COVERS = [
+    'radial-gradient(circle at 70% 30%, #f6c453 0 22%, transparent 23%), linear-gradient(160deg, #e2622b, #8c2a1c)',
+    'linear-gradient(#1b3a6b 0 55%, #e9e2cf 55% 62%, #1b3a6b 62%)',
+    'radial-gradient(circle at 50% 50%, #0d0d0d 0 30%, #f2efe6 31% 34%, #0d0d0d 35%)',
+    'conic-gradient(from 45deg, #2f8f6b, #c9e265, #2f8f6b)',
+    'linear-gradient(120deg, #d43f8d 0 40%, #f3d6e4 40% 46%, #3b1d4a 46%)',
+    'linear-gradient(#f1d64a 0 70%, #111 70%)',
+    'radial-gradient(circle at 30% 70%, #9ad0e6 0 25%, transparent 26%), #23506b',
+    'linear-gradient(90deg, #b9b2a4 0 33%, #6f6a60 33% 66%, #2c2a26 66%)',
+    'linear-gradient(200deg, #f08a5d, #b83b5e 60%, #6a2c70)',
+  ]
+
+  const stopsMarkup = (o) =>
+    o.stops
+      .map((s) => `<span><i style="background:${s}"></i>${s}</span>`)
+      .join('')
+
+  const study = (o) => `
+  <article class="study" id="${o.key}" style="--lacquer: linear-gradient(120deg, ${o.stops[0]}, ${o.stops[1]} 60%, ${o.stops[2]}); --lf: ${o.lf}">
+    <div class="study-head">
+      <h3>${o.name} <span class="eyebrow">· ${o.tag}</span></h3>
+      <div class="stops">${stopsMarkup(o)}</div>
+    </div>
+    <p class="note">${o.note}</p>
+    <div class="body">
+      <div class="phone" aria-label="Collection screen mock">
+        <div class="phone-bar"><b>Collection</b><button type="button" class="lq">${PICK_ICON}Pick for me</button></div>
+        <div class="grid">${COVERS.map((c) => `<div class="cv" style="background:${c}"></div>`).join('')}</div>
+        <button type="button" class="lq fab">${SCAN_ICON}Scan</button>
+        <div class="tabs"><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="brand">
+        <div>
+          <div class="label">Landing CTA</div>
+          <div class="cta"><button type="button" class="lq">Connect with Discogs</button></div>
+        </div>
+        <div>
+          <div class="label">App icon · launch screen · mark</div>
+          <div class="row">
+            <div class="icon">${groove(60, o, 'lacquer')}</div>
+            <div class="splash">${groove(44, o, 'lacquer')}</div>
+            <div style="color:var(--foreground)">${groove(32, o, 'current')}</div>
+          </div>
+        </div>
+        <div>
+          <div class="label">House sleeves</div>
+          <div class="row">
+            <div class="sleeve paper"><div style="position:absolute;inset-inline:0;top:12%;height:22%;background:var(--lacquer)"></div><div class="t">Bill Evans<br>Peace Piece</div></div>
+            <div class="sleeve vinyl"><div style="position:absolute;top:0;right:0;width:46%;height:46%;background:var(--lacquer)"></div><div class="t">Hiroshi Yoshimura<br>Music for Nine Postcards</div></div>
+            <div class="sleeve graphite"><div style="position:absolute;width:56%;aspect-ratio:1;border-radius:50%;left:22%;top:12%;background:var(--lacquer)"></div><div class="t">Moondog<br>Moondog</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>`
+
+  const groups = [...new Set(OPTIONS.map((o) => o.group))]
+  document.getElementById('groups').innerHTML = groups
+    .map(
+      (g) => `
+  <section class="group">
+    <h2>${g}</h2>
+    ${GROUP_NOTES[g] ? `<p>${GROUP_NOTES[g]}</p>` : ''}
+    <div class="studies">${OPTIONS.filter((o) => o.group === g)
+      .map(study)
+      .join('')}</div>
+  </section>`,
+    )
+    .join('')
+
+  document.getElementById('lineup').innerHTML = OPTIONS.map(
+    (o) => `
+  <a href="#${o.key}" style="--lacquer: linear-gradient(120deg, ${o.stops[0]}, ${o.stops[1]} 60%, ${o.stops[2]})">
+    <div class="sw"></div><div class="nm">${o.name}</div><div class="eyebrow">${o.group.split(' · ')[0]} · ${o.tag}</div>
+  </a>`,
+  ).join('')
+
+  /* Theme toggle: page-local, defaults to the viewer's theme */
+  const btns = document.querySelectorAll('.seg button')
+  const setTheme = (t) => {
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme')
+    else document.documentElement.setAttribute('data-theme', t)
+    btns.forEach((b) =>
+      b.setAttribute('aria-pressed', String(b.dataset.t === t)),
+    )
+    try {
+      localStorage.setItem('lq-theme', t)
+    } catch (e) {}
+  }
+  btns.forEach((b) => b.addEventListener('click', () => setTheme(b.dataset.t)))
+  try {
+    const s = localStorage.getItem('lq-theme')
+    if (s) setTheme(s)
+  } catch (e) {}
+</script>
