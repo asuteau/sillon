@@ -410,7 +410,17 @@
   }
 }
 
-/* Landing hero: the groove draws in once, from the outer edge */
+/* Landing: the groove draws in once, from the outer edge. `.groove-undrawn`
+   hides it until the closing section scrolls into view (hidden, not a zero
+   dash: a round cap would leave a dot). */
+.groove-undrawn {
+  visibility: hidden;
+}
+
+.groove-fade-in {
+  animation: groove-fade 160ms var(--ease-fade) both;
+}
+
 .groove-draw-in path {
   stroke-dasharray: 1;
   animation: groove-draw-in 800ms var(--ease-platter) both;

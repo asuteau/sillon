@@ -58,7 +58,7 @@ Records are the colour. A fixed accent would fight every cover on screen, and a 
 - Colour on record screens comes from the current Cover (`--cover-tint`).
 - **Copper lacquer** is the one brand material, from the copper master a record is pressed from.
 - It's used only on brand moments, never for hover, selection, focus, links or any general interactive state.
-- It has two renderings of the same three stops: **sweep** for marks (icon, favicon, launch screen, the groove mark in lacquer tone, House sleeve shapes) and **satin** for buttons.
+- It has two renderings of the same three stops: **sweep** for marks (icon, favicon, launch screen, the groove mark in lacquer tone — the landing's closing mark above "Bring your crates." — House sleeve shapes) and **satin** for buttons.
 - **No text on the sweep.** Text on lacquer always goes on a satin button.
 
 ### Token contract
@@ -129,15 +129,18 @@ Fast and quiet: fades by default, two signatures, nothing else.
 | Default (state, enter/exit) | 160ms opacity fade                               | `--ease-fade` = `cubic-bezier(.2,0,0,1)` (`ease-fade`) |
 | Cover → detail              | 320ms open, 280ms close                          | `--ease-platter` = `cubic-bezier(.65,0,.15,1)`         |
 | Groove loader               | ~800ms draw-in, short hold, loops (1100ms cycle) | platter                                                |
+| Groove draw-in (landing)    | ~800ms draw-in, once                             | platter                                                |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero uses `growCover` for the same move inside one page.
 
 **Signature 2 — groove loader** (`GrooveLoader`, `.groove-loader`). The spiral draws in from the outer edge like a needle, via `stroke-dashoffset` on a `pathLength="1"` path. Only on real waits — cold start (`AppShellPending`), long fetches — never as an added delay.
 
+The same draw-in plays **once** on the landing (`.groove-draw-in`): in the hero's intro (text colour), and on the closing mark above "Bring your crates." (96px, lacquer tone). The closing mark stays undrawn (`.groove-undrawn`) until its section scrolls into view, then draws in and stops observing; it never replays during the page view.
+
 Rules:
 
 - No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
-- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame.
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`).
 
 ---
 
