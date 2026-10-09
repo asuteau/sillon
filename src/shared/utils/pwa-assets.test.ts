@@ -76,6 +76,10 @@ describe('PWA icons', () => {
 describe('brand colours', () => {
   const css = readFileSync(resolve(__dirname, '../../styles.css'), 'utf8')
 
+  it('uses the copper master stops for lacquer', () => {
+    expect(LACQUER_STOPS).toEqual(['#f2d3bf', '#b06d4a', '#e6b394'])
+  })
+
   it('mirrors --lacquer-1..3 in styles.css', () => {
     LACQUER_STOPS.forEach((stop, i) => {
       expect(css).toContain(`--lacquer-${i + 1}: ${stop};`)

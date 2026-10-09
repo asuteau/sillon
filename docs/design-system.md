@@ -51,12 +51,13 @@ Leading goes through `--tw-leading` so a `text-*` size utility doesn't reset it.
 
 The interface is black, white and grey with a slight warm bias. Theme follows the OS (`prefers-color-scheme`); the theme toggle stores `light` / `dark` / `auto` in `localStorage` and sets `.light` or `.dark` on `<html>` (an inline script in `__root.tsx` does it before paint). Light and dark get equal care; the signature is strongest in dark.
 
-### Why no hue accent
+### Copper is a material, not an accent
 
 Records are the colour. A fixed accent would fight every cover on screen, and a stock brand-hue accent is what makes an app look like every other SaaS template. So:
 
 - Colour on record screens comes from the current Cover (`--cover-tint`).
-- The only brand colour is **lacquer**, which has no hue.
+- **Copper lacquer** is the one brand material, from the copper master a record is pressed from.
+- It's used only on brand moments, never for hover, selection, focus, links or any general interactive state.
 
 ### Token contract
 
@@ -76,14 +77,14 @@ The contract is **shadcn's variables**, defined for light (`:root`) and dark (`.
 
 ### Sillon additions
 
-| Variable                                        | What                                                                                                                        |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `--lacquer`                                     | Cool silver gradient, `120deg` over `--lacquer-1..3` (`#e6e8eb`, `#9a9ea5`, `#cfd2d6`). Text on it: `--lacquer-foreground`. |
-| `--vinyl-black`                                 | `#0a0a0b` — the brand ground (icon, launch screen, vinyl house sleeve).                                                     |
-| `--cover-tint`                                  | Set at runtime from the current Cover; neutral `oklch(0.62 0 0)` until then.                                                |
-| `--cover-glow-lightness` / `--cover-glow-alpha` | Per-theme relighting of the tint for the glow, so text over it stays AA.                                                    |
+| Variable                                        | What                                                                                                                                             |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--lacquer`                                     | Copper master gradient, `120deg` over `--lacquer-1..3` (`#f2d3bf`, `#b06d4a` at 60%, `#e6b394`). Text on it: `--lacquer-foreground` (`#0d0d0e`). |
+| `--vinyl-black`                                 | `#0a0a0b` — the brand ground (icon, launch screen, vinyl house sleeve).                                                                          |
+| `--cover-tint`                                  | Set at runtime from the current Cover; neutral `oklch(0.62 0 0)` until then.                                                                     |
+| `--cover-glow-lightness` / `--cover-glow-alpha` | Per-theme relighting of the tint for the glow, so text over it stays AA.                                                                         |
 
-**Lacquer is for brand moments only**: app icon, launch screen, the landing CTA, the Random pick button, the scan button — plus the shapes on House sleeves, its one non-interactive use. Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Use it through `<Button variant="lacquer">` or `bg-(image:--lacquer)`. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
+**Copper lacquer is for brand moments only**: app icon, launch screen, the landing CTA, the Random pick button, the scan button — plus the shapes on House sleeves, its one non-interactive use. Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Use it through `<Button variant="lacquer">` or `bg-(image:--lacquer)`. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
 
 ### Cover tint
 
@@ -166,7 +167,7 @@ Prefer a text label over an icon wherever there is room.
 See `CONTEXT.md` → **House sleeve**. A generated Cover, shown when Deezer has no artwork for a record.
 
 - `houseSleeve()` (`src/shared/utils/house-sleeve.ts`) is deterministic per Master: seeded (FNV-1a) by the cover key, or artist + title when there is none. Never by Release details, so every Release of a Master gets the same sleeve, and it never shows the catalogue number.
-- Design space: 5 layouts (`band`, `block`, `rules`, `circle`, `stack`) × 4 greyscale compositions (`paper`, `vinyl`, `graphite`, `ash`) × 4 placements. Lacquer is the only accent.
+- Design space: 5 layouts (`band`, `block`, `rules`, `circle`, `stack`) × 4 greyscale compositions (`paper`, `vinyl`, `graphite`, `ash`) × 4 placements. Copper lacquer is the only brand material.
 - Colours are fixed values, not theme tokens: a sleeve is an object and looks the same in light and dark.
 - Typeset with the artist (small uppercase, letter-spaced) and title (display weight and tracking). Below ~88px it shows the title's initial instead (container query).
 - **Loading state**: `coverState()` returns `loading` / `image` / `house`. While artwork may still arrive, show a flat `bg-muted` square; a House sleeve only once we know there is no artwork, so it never flashes.
@@ -194,7 +195,7 @@ Stroke is ~38% of the gap between grooves, with a floor (thicker below 24px).
 
 Tones:
 
-- `lacquer` — lacquer gradient on vinyl black. Brand surfaces only: app icon, launch screen.
+- `lacquer` — copper lacquer gradient on vinyl black. Brand surfaces only: app icon, launch screen.
 - `current` (default) — `currentColor`. Header, loader, anywhere in the UI.
 
 **Wordmark**: "sillon", lowercase, Familjen 700, tracking −0.055em (`<Wordmark>`).

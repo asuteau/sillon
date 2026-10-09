@@ -14,7 +14,7 @@ import {
 export const VINYL_BLACK = '#0a0a0b'
 
 /** Same stops as --lacquer-1..3 in styles.css (checked by a test) */
-export const LACQUER_STOPS = ['#e6e8eb', '#9a9ea5', '#cfd2d6'] as const
+export const LACQUER_STOPS = ['#f2d3bf', '#b06d4a', '#e6b394'] as const
 
 interface BrandArtOptions {
   width: number

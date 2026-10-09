@@ -73,7 +73,7 @@
 }
 
 /* Tokens — black, white and grey with a slight warm bias. No hue accent:
-   colour comes from covers (--cover-tint) and lacquer on brand moments. */
+   colour comes from covers (--cover-tint) and copper lacquer on brand moments. */
 
 :root {
   --background: #f5f5f3;
@@ -112,9 +112,9 @@
   /* Sillon additions */
   --vinyl-black: #0a0a0b;
   /* Stops shared with the SVG groove mark's lacquer gradient */
-  --lacquer-1: #e6e8eb;
-  --lacquer-2: #9a9ea5;
-  --lacquer-3: #cfd2d6;
+  --lacquer-1: #f2d3bf;
+  --lacquer-2: #b06d4a;
+  --lacquer-3: #e6b394;
   --lacquer: linear-gradient(
     120deg,
     var(--lacquer-1),
