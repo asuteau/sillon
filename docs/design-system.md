@@ -225,6 +225,9 @@ pnpm generate:pwa-assets   # re-run after changing the mark, lacquer stops or vi
 | `public/icons/icon-512-maskable.png`        | 512                                      | Mark inside the 80% safe zone  |
 | `public/icons/apple-touch-icon.png`         | 180                                      | Opaque; iOS rounds the corners |
 | `public/splash/apple-splash-*.png`          | one per current iPhone portrait viewport | Linked from `__root.tsx`       |
+| `docs/brand/readme-banner-{light,dark}.png` | 1280×400                                 | README `<picture>`, see below  |
+
+**README banner**: groove left, wordmark and tagline ("Your Discogs collection, cover first.") right; dark on vinyl black, light on `--background`. resvg can't read WOFF2 or pick a variable font's weight, so the text renders from static Familjen 400/700 TTFs in `scripts/fonts/`.
 
 **The system launch screen is always dark** — vinyl black with the lacquer groove, whatever the theme. It is a static image the OS shows before any of our code runs, so it can't follow the in-app toggle, and an iOS startup image can't switch with the OS theme either. Dark is where the signature is strongest, and a dark flash before a light app is gentler than a white flash before a dark one. Android uses the manifest's `background_color` (`#0a0a0b`) + icon; iOS uses the `apple-touch-startup-image` PNGs.
 
