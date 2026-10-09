@@ -52,6 +52,13 @@ describe('buttonVariants', () => {
     expect(classes).toMatch(/\btext-lacquer-foreground\b/)
   })
 
+  // A transparent border would show the page as a ring around the satin
+  it('lacquer has no border, even without cn()', () => {
+    const classes = buttonVariants({ variant: 'lacquer' }).split(' ')
+    expect(classes).toContain('border-0')
+    expect(classes).not.toContain('border')
+  })
+
   it('fades over 160ms with the fade easing', () => {
     const classes = buttonVariants()
     expect(classes).toMatch(/\bduration-160\b/)
