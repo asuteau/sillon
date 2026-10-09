@@ -1,0 +1,618 @@
+<title>Copper Middle Stop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap"
+/>
+<style>
+  /* Layout: one section per surface; the two middle stops side by side, everything else identical */
+  :root {
+    --background: #f5f5f3;
+    --foreground: #141413;
+    --card: #fbfbfa;
+    --muted-foreground: #6b6b69;
+    --border: #dddcda;
+    --vinyl-black: #0a0a0b;
+    --font-sans: 'Familjen Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --radius: 2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --background: #0e0e0d;
+      --foreground: #ebeae7;
+      --card: #151514;
+      --muted-foreground: #8b8a87;
+      --border: #262625;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme='dark'] {
+    --background: #0e0e0d;
+    --foreground: #ebeae7;
+    --card: #151514;
+    --muted-foreground: #8b8a87;
+    --border: #262625;
+    color-scheme: dark;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    padding-inline: 16px;
+    padding-block: 28px 64px;
+  }
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin-inline: auto;
+    display: grid;
+    gap: 36px;
+  }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0;
+  }
+  .lede {
+    max-width: 66ch;
+    color: var(--muted-foreground);
+    margin: 6px 0 0;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .seg button {
+    font: 500 11.5px var(--font-mono);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--muted-foreground);
+    border: 0;
+    padding: 7px 11px;
+    cursor: pointer;
+  }
+  .seg button[aria-pressed='true'] {
+    background: var(--foreground);
+    color: var(--background);
+  }
+  .seg button:focus-visible,
+  .b:focus-visible {
+    outline: 2px solid var(--foreground);
+    outline-offset: 2px;
+  }
+  .top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 16px;
+  }
+
+  section.surface {
+    display: grid;
+    gap: 12px;
+  }
+  section.surface h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  section.surface > p {
+    margin: -6px 0 0;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    max-width: 68ch;
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  @media (max-width: 760px) {
+    .cols {
+      grid-template-columns: 1fr;
+    }
+  }
+  .col {
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    min-width: 0;
+  }
+  .col-h {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .col-h b {
+    font-size: 15px;
+  }
+  .col-h code {
+    color: var(--muted-foreground);
+  }
+
+  /* Copper tokens: only --mid differs between columns */
+  .col {
+    --hi: #f2d3bf;
+    --end: #e6b394;
+    --ink: #0d0d0e;
+    --sweep: linear-gradient(120deg, var(--hi), var(--mid) 60%, var(--end));
+  }
+  .deep {
+    --mid: #b06d4a;
+    --deep: #84482c;
+  }
+  .soft {
+    --mid: #ba7a55;
+    --deep: #8c5233;
+  }
+
+  .swatch {
+    height: 120px;
+    border-radius: var(--radius);
+    background: var(--sweep);
+  }
+  .split {
+    height: 120px;
+    border-radius: var(--radius);
+    background:
+      linear-gradient(120deg, #f2d3bf, #b06d4a 60%, #e6b394) top / 100% 50%
+        no-repeat,
+      linear-gradient(120deg, #f2d3bf, #ba7a55 60%, #e6b394) bottom / 100% 50%
+        no-repeat;
+    position: relative;
+  }
+  .split span {
+    position: absolute;
+    left: 10px;
+    font: 500 10px var(--font-mono);
+    letter-spacing: 0.06em;
+    color: #0d0d0e;
+  }
+  .chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font: 400 11px var(--font-mono);
+    color: var(--muted-foreground);
+  }
+  .chips i {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    vertical-align: -2px;
+    margin-right: 5px;
+  }
+  table.cr {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  table.cr td,
+  table.cr th {
+    padding: 5px 4px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    font-weight: 400;
+  }
+  table.cr th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .home {
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: end;
+    justify-content: center;
+    flex-wrap: wrap;
+    background: linear-gradient(160deg, #5b6b7a, #2a3138 60%, #1a1d21);
+  }
+  .home.light {
+    background: linear-gradient(160deg, #e9e4dc, #cfd6dc 60%, #b9c3cb);
+  }
+  .app {
+    display: grid;
+    gap: 4px;
+    justify-items: center;
+    font-size: 10px;
+    color: #fff;
+  }
+  .home.light .app {
+    color: #111;
+  }
+  .ic {
+    background: var(--vinyl-black);
+    display: grid;
+    place-items: center;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .splash {
+    background: var(--vinyl-black);
+    border-radius: 12px;
+    aspect-ratio: 9 / 16;
+    display: grid;
+    place-items: center;
+  }
+  .markbox {
+    border-radius: var(--radius);
+    display: grid;
+    place-items: center;
+    padding: 16px;
+  }
+
+  .sleeves {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .slv {
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    border-radius: 3px;
+    container-type: inline-size;
+  }
+  .slv .tx {
+    position: absolute;
+    inset-inline: 8%;
+    display: flex;
+    flex-direction: column;
+    gap: 3cqw;
+  }
+  .slv .a {
+    font-size: max(6px, 6cqw);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .slv .t {
+    font-size: max(8px, 12cqw);
+    font-weight: 700;
+    letter-spacing: -0.045em;
+    line-height: 0.95;
+  }
+  .slv.stack .t {
+    font-size: 16cqw;
+  }
+  .rowlabel {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    grid-column: 1 / -1;
+    margin-top: 4px;
+  }
+
+  /* Satin button: the middle stop only paints its bottom edge and shadow */
+  .panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .panel {
+    padding: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .panel.l {
+    background: #f5f5f3;
+  }
+  .panel.d {
+    background: #0e0e0d;
+  }
+  .b {
+    border: 0;
+    border-radius: var(--radius);
+    font: 600 14px var(--font-sans);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px;
+    height: 40px;
+    cursor: pointer;
+    white-space: nowrap;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--hi), var(--end));
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.6),
+      inset 0 -1px 0 color-mix(in oklab, var(--mid) 35%, transparent),
+      0 4px 14px color-mix(in oklab, var(--mid) 35%, transparent);
+  }
+  .b:hover {
+    background: linear-gradient(
+      180deg,
+      var(--hi),
+      color-mix(in oklab, var(--end) 80%, var(--mid))
+    );
+  }
+  .b.pill {
+    border-radius: 999px;
+    height: 48px;
+    padding: 0 20px;
+  }
+  .b svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  @media (max-width: 420px) {
+    .panels,
+    .pair {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  footer {
+    color: var(--muted-foreground);
+    font-size: 13px;
+    max-width: 70ch;
+  }
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="eyebrow">Sillon · design system · copper middle stop</div>
+      <h1>#b06d4a or #ba7a55</h1>
+      <p class="lede">
+        Copper master, with only the middle stop changing. Left is the original,
+        deeper stop. Right is the lightened one. Buttons are Satin, so the
+        middle stop only touches their edge and shadow. Most of the difference
+        shows in the marks and the sleeves.
+      </p>
+    </div>
+    <div class="seg" id="theme" role="group" aria-label="Page theme">
+      <button type="button" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" data-t="dark" aria-pressed="false">Dark</button>
+    </div>
+  </div>
+  <div id="surfaces" class="wrap"></div>
+  <footer>
+    Sleeve grounds are the fixed composition colours from
+    <code>house-sleeve.ts</code>. The contrast figures are for the middle stop
+    against each ground, which shows how much the darkest part of a lacquer
+    shape stands out. 3:1 is the WCAG threshold for graphics.
+  </footer>
+</div>
+
+<script>
+  const VARIANTS = [
+    { cls: 'deep', name: 'Original', mid: '#b06d4a' },
+    { cls: 'soft', name: 'Lightened', mid: '#ba7a55' },
+  ]
+  const HI = '#f2d3bf',
+    END = '#e6b394'
+
+  const lin = (h) => {
+    const n = parseInt(h.slice(1), 16)
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+      v /= 255
+      return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+    })
+  }
+  const lum = (h) => {
+    const [r, g, b] = lin(h)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const ratio = (a, b) => {
+    const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p)
+    return (x + 0.05) / (y + 0.05)
+  }
+
+  const spiral = (turns, inner = 3, outer = 45, cx = 50, cy = 50) => {
+    const steps = Math.ceil(turns * 72),
+      pts = []
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps,
+        a = -Math.PI / 2 + t * turns * 2 * Math.PI,
+        r = outer - (outer - inner) * t
+      pts.push(
+        `${(cx + r * Math.cos(a)).toFixed(2)} ${(cy + r * Math.sin(a)).toFixed(2)}`,
+      )
+    }
+    return 'M' + pts.join(' L')
+  }
+  const turnsFor = (s) => (s >= 90 ? 9 : s >= 48 ? 6 : s >= 30 ? 4 : 2.5)
+  const strokeFor = (s) =>
+    Math.max((40 / turnsFor(s)) * 0.38, s < 24 ? 5.5 : 1.6)
+  let gid = 0
+  const groove = (size, mid) => {
+    const id = 'g' + gid++
+    return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0.2" x2="1" y2="0.8">
+    <stop offset="0" stop-color="${HI}"/><stop offset="0.6" stop-color="${mid}"/><stop offset="1" stop-color="${END}"/></linearGradient></defs>
+    <path d="${spiral(turnsFor(size))}" fill="none" stroke="url(#${id})" stroke-width="${strokeFor(size).toFixed(2)}" stroke-linecap="round"/></svg>`
+  }
+  const PICK = `<svg viewBox="0 0 24 24"><path d="${spiral(2, 2.5, 8.5, 12, 12)}"/><path d="M21 3v5.5L15.2 13"/></svg>`
+  const SCAN = `<svg viewBox="0 0 24 24"><path d="M3.5 8V3.5H8M16 3.5h4.5V8M20.5 16v4.5H16M8 20.5H3.5V16"/><path d="M7.5 8v8M9.8 8v8M11.4 8v8M14 8v8M16.5 8v8"/></svg>`
+
+  const COMPS = [
+    { name: 'paper', ground: '#efede8', ink: '#0d0d0e' },
+    { name: 'vinyl', ground: '#0a0a0b', ink: '#efede8' },
+    { name: 'graphite', ground: '#3a3a39', ink: '#efede8' },
+    { name: 'ash', ground: '#b9b8b4', ink: '#0d0d0e' },
+  ]
+  const LAYOUTS = ['band', 'block', 'rules', 'circle', 'stack']
+  const RECS = [
+    ['Hiroshi Yoshimura', 'Music for Nine Postcards'],
+    ['Moondog', 'Moondog'],
+    ['Bill Evans', 'Peace Piece'],
+    ['Alice Coltrane', 'Ptah'],
+    ['Arthur Russell', 'World of Echo'],
+    ['Pharoah Sanders', 'Karma'],
+    ['Laraaji', 'Day of Radiance'],
+    ['Sun Ra', 'Lanquidity'],
+  ]
+  const shape = (layout, top, left, ink) => {
+    const L = 'background:var(--sweep)'
+    if (layout === 'band')
+      return `<div style="position:absolute;inset-inline:0;height:22%;${top ? 'top' : 'bottom'}:12%;${L}"></div>`
+    if (layout === 'block')
+      return `<div style="position:absolute;width:46%;height:46%;${top ? 'top' : 'bottom'}:0;${left ? 'left' : 'right'}:0;${L}"></div>`
+    if (layout === 'rules')
+      return `<div style="position:absolute;inset-inline:8%;height:42%;${top ? 'top' : 'bottom'}:8%;display:flex;flex-direction:column;justify-content:space-between">${Array.from(
+        { length: 7 },
+        (_, i) =>
+          `<div style="height:max(1px,1.2%);${i === 0 ? L : 'background:' + ink}"></div>`,
+      ).join('')}</div>`
+    if (layout === 'circle')
+      return `<div style="position:absolute;width:92%;height:92%;border-radius:50%;${top ? 'top' : 'bottom'}:-34%;${left ? 'left' : 'right'}:-34%;${L}"></div>`
+    return `<div style="position:absolute;left:8%;width:30%;height:3%;${top ? 'top' : 'bottom'}:8%;${L}"></div>`
+  }
+  const sleeve = (layout, comp, i) => {
+    const top = i % 2 === 0,
+      left = i % 3 !== 0,
+      [a, t] = RECS[i % RECS.length]
+    return `<div class="slv ${layout}" style="background:${comp.ground};color:${comp.ink}">${shape(layout, top, left, comp.ink)}
+    <div class="tx" style="${top ? 'bottom' : 'top'}:8%"><span class="a">${a}</span><span class="t">${t}</span></div></div>`
+  }
+
+  const SURFACES = [
+    {
+      title: 'Gradient',
+      note: 'The sweep on its own. The strip below splits the two at the same width, so you can see the band move.',
+      col: (v) =>
+        `<div class="swatch"></div><div class="chips"><span><i style="background:${HI}"></i>${HI}</span><span><i style="background:${v.mid}"></i>${v.mid} · 60%</span><span><i style="background:${END}"></i>${END}</span></div>`,
+      after: `<div class="split" aria-label="Original above, lightened below"><span style="top:6px">#b06d4a</span><span style="bottom:6px">#ba7a55</span></div>`,
+    },
+    {
+      title: 'How the band stands out',
+      note: 'Middle stop against each sleeve ground and each app background.',
+      col: (v) =>
+        `<table class="cr"><thead><tr><th>Ground</th><th>Ratio</th></tr></thead><tbody>${[
+          ...COMPS.map((c) => [c.name + ' sleeve', c.ground]),
+          ['light app', '#f5f5f3'],
+          ['dark app', '#0e0e0d'],
+        ]
+          .map(([n, g]) => {
+            const r = ratio(v.mid, g)
+            return `<tr><td><i style="display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px;background:${g};border:1px solid var(--border)"></i>${n}</td><td>${r.toFixed(2)}:1${r < 3 ? ' · below 3' : ''}</td></tr>`
+          })
+          .join('')}</tbody></table>`,
+    },
+    {
+      title: 'App icon',
+      note: 'Home-screen sizes on dark and light wallpapers. The band sets how much the groove reads as metal rather than a flat peach line.',
+      col: (v) => `<div class="home">${[
+        [84, 19],
+        [60, 13],
+        [44, 10],
+      ]
+        .map(
+          ([s, r]) =>
+            `<div class="app"><div class="ic" style="width:${s}px;height:${s}px;border-radius:${r}px">${groove(Math.round(s * 0.8), v.mid)}</div>Sillon</div>`,
+        )
+        .join('')}</div>
+      <div class="home light">${[
+        [60, 13],
+        [44, 10],
+      ]
+        .map(
+          ([s, r]) =>
+            `<div class="app"><div class="ic" style="width:${s}px;height:${s}px;border-radius:${r}px">${groove(Math.round(s * 0.8), v.mid)}</div>Sillon</div>`,
+        )
+        .join('')}</div>`,
+    },
+    {
+      title: 'Launch screen and groove mark',
+      note: 'The launch screen is always vinyl black. The large mark is the landing hero size.',
+      col: (
+        v,
+      ) => `<div class="pair"><div class="splash">${groove(96, v.mid)}</div>
+      <div style="display:grid;gap:10px"><div class="markbox" style="background:#f5f5f3">${groove(96, v.mid)}</div><div class="markbox" style="background:#0e0e0d">${groove(96, v.mid)}</div></div></div>`,
+    },
+    {
+      title: 'House sleeves',
+      note: 'Every layout on all four compositions. The paper and ash rows are where the band matters most.',
+      col: (v) =>
+        `<div class="sleeves">${LAYOUTS.map((l, li) => `<span class="rowlabel">${l}</span>${COMPS.map((c, ci) => sleeve(l, c, li * 4 + ci)).join('')}`).join('')}</div>`,
+    },
+    {
+      title: 'Satin buttons',
+      note: 'For completeness: here the middle stop only tints the bottom edge, the shadow and the hover. Expect almost no difference.',
+      col: (
+        v,
+      ) => `<div class="panels"><div class="panel l"><button type="button" class="b">${PICK}Pick for me</button><button type="button" class="b pill">${SCAN}Scan</button></div>
+      <div class="panel d"><button type="button" class="b">${PICK}Pick for me</button><button type="button" class="b pill">${SCAN}Scan</button></div></div>`,
+    },
+  ]
+
+  document.getElementById('surfaces').innerHTML = SURFACES.map(
+    (s) => `
+  <section class="surface"><h2>${s.title}</h2><p>${s.note}</p>
+    <div class="cols">${VARIANTS.map((v) => `<div class="col ${v.cls}"><div class="col-h"><b>${v.name}</b><code>${v.mid}</code></div>${s.col(v)}</div>`).join('')}</div>
+    ${s.after || ''}
+  </section>`,
+  ).join('')
+
+  const setTheme = (t) => {
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme')
+    else document.documentElement.setAttribute('data-theme', t)
+    document
+      .querySelectorAll('#theme button')
+      .forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.t === t)))
+    try {
+      localStorage.setItem('cm-theme', t)
+    } catch (e) {}
+  }
+  document.getElementById('theme').addEventListener('click', (e) => {
+    const b = e.target.closest('button')
+    if (b) setTheme(b.dataset.t)
+  })
+  try {
+    const s = localStorage.getItem('cm-theme')
+    if (s) setTheme(s)
+  } catch (e) {}
+</script>

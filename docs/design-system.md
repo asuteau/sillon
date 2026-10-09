@@ -61,6 +61,15 @@ Records are the colour. A fixed accent would fight every cover on screen, and a 
 - It has two renderings of the same three stops: **sweep** for marks (icon, favicon, launch screen, the groove mark in lacquer tone — the landing's closing mark above "Bring your crates." — House sleeve shapes) and **satin** for buttons.
 - **No text on the sweep.** Text on lacquer always goes on a satin button.
 
+How copper was chosen, in order (specimens in `docs/brand/specimens/`, open in a browser):
+
+| Specimen                            | What it compares                                                                                                                                       | Outcome                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| `sillon-lacquer-studies.html`       | 8 directions: silver (before), groove iridescence (Sheen, Prism, Oil slick), warm metal (Gold disc, Copper master), single-hue tints (Oxblood, Cobalt) | Shortlist Sheen, Gold disc, Copper master |
+| `sillon-lacquer-finalists.html`     | The finalists plus Warm sheen, on every lacquer surface, with contrast figures and a cover-hue picker                                                  | Gold disc or Copper master                |
+| `sillon-lacquer-buttons.html`       | 9 button paints in gold and copper: Sweep, Satin, Brushed, Grooved, Specular, Plate, Rim, Label on black, Solid                                        | Satin; Copper master                      |
+| `sillon-lacquer-copper-middle.html` | Copper's middle stop, `#b06d4a` vs a lightened `#ba7a55`, on marks, sleeves and satin buttons                                                          | `#b06d4a`: stays ≥ 3:1 on light grounds   |
+
 ### Token contract
 
 The contract is **shadcn's variables**, defined for light (`:root`) and dark (`.dark`, and `@media (prefers-color-scheme: dark) { :root:not(.light) }` — keep the two dark blocks in sync). Components use the Tailwind colours they map to (`bg-background`, `text-muted-foreground`, `border-border`…), never raw values.
