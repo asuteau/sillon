@@ -9,7 +9,7 @@ import { z } from 'zod'
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
 import { RecordList } from '#/shared/components/RecordList'
 import { Button } from '#/shared/components/ui/button'
-import { Chip } from '#/shared/components/ui/chip'
+import { Chip, ChipRow } from '#/shared/components/ui/chip'
 import { Input } from '#/shared/components/ui/input'
 import { SearchReleaseSheet } from '#/shared/components/SearchReleaseSheet'
 import { useDebounce } from '#/shared/hooks/use-debounce'
@@ -224,13 +224,13 @@ interface ModeToggleProps {
 
 function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
   return (
-    <div className="mb-6 flex gap-2">
+    <ChipRow className="mb-6">
       {(['artist', 'title'] as const).map((m) => (
         <Chip key={m} active={mode === m} onClick={() => onModeChange(m)}>
           {m === 'artist' ? 'By artist' : 'By title'}
         </Chip>
       ))}
-    </div>
+    </ChipRow>
   )
 }
 
@@ -408,7 +408,7 @@ function DiscographyList({
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap gap-2">
+      <ChipRow className="mb-6">
         {FILTER_CHIPS.map(({ key, label }) => {
           const count = key === 'all' ? null : classifiedItems[key].length
           if (count === 0) return null
@@ -417,6 +417,8 @@ function DiscographyList({
               key={key}
               active={activeFilter === key}
               onClick={() => setFilter(key)}
+              // Mono count and Grotesk label only line up on their baseline
+              className="items-baseline"
             >
               {label}
               {count !== null && (
@@ -427,7 +429,7 @@ function DiscographyList({
             </Chip>
           )
         })}
-      </div>
+      </ChipRow>
 
       {activeQuery.isPending ? (
         <p className="text-muted-foreground">Loading discography…</p>

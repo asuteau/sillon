@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
 
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { Chip } from '#/shared/components/ui/chip'
+import { Chip, ChipRow } from '#/shared/components/ui/chip'
 import { SORT_KEYS } from '#/shared/utils/list-sort'
 import type { ListSort, SortKey } from '#/shared/utils/list-sort'
 
@@ -22,7 +22,7 @@ export const SortChips = ({ value, onSelect, isPending }: SortChipsProps) => {
   const OrderIcon = value.order === 'asc' ? ArrowUp : ArrowDown
 
   return (
-    <div role="group" aria-label="Sort by" className="mb-6 flex gap-2">
+    <ChipRow role="group" aria-label="Sort by" className="mb-6">
       {SORT_KEYS.map((key) => {
         const isActive = value.sort === key
         return (
@@ -46,6 +46,6 @@ export const SortChips = ({ value, onSelect, isPending }: SortChipsProps) => {
           </Chip>
         )
       })}
-    </div>
+    </ChipRow>
   )
 }
