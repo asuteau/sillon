@@ -5,11 +5,6 @@ const sanitizeBase = (text: string): string =>
     .trim()
     .replace(/\s+/g, ' ')
 
-export const cleanArtist = (artist: string): string =>
-  sanitizeBase(artist)
-    .replace(/\s*\(\d+\)\s*$/, '')
-    .trim()
-
 export const cleanTitle = (title: string): string =>
   sanitizeBase(title)
     .replace(
@@ -18,14 +13,8 @@ export const cleanTitle = (title: string): string =>
     )
     .trim()
 
-export const firstArtist = (artist: string): string =>
-  cleanArtist(artist)
-    .split(/\s+\/\s+|,/)
-    .at(0)!
-    .trim()
-
 // For query construction — preserves special chars (≤, æ, ø…) that Deezer needs
-// to find the right artist. Only strips double quotes which break field syntax.
+// to find the right artist. Only strips what breaks field syntax.
 export const queryArtist = (artist: string): string =>
   artist
     .replace(/\[.*?\]/g, '')
@@ -33,9 +22,8 @@ export const queryArtist = (artist: string): string =>
     .replace(/["!]/g, '')
     .trim()
     .replace(/\s+/g, ' ')
-    .split(/\s+\/\s+|,/)
-    .at(0)!
-    .trim()
+
+export const queryTitle = (title: string): string => title.replace(/"/g, '')
 
 export const stripSubtitle = (title: string): string =>
   title.replace(/\s+[-:]\s+.+$/, '').trim() || title
@@ -76,32 +64,76 @@ const LATIN_EXT: Record<string, string> = {
 const transliterateLatinExt = (text: string): string =>
   [...text].map((c) => LATIN_EXT[c] ?? c).join('')
 
-export const tokenize = (text: string): Set<string> =>
-  new Set(
-    normalizeNumerals(
-      transliterateLatinExt(
-        text.normalize('NFKC').normalize('NFD').replace(/[̀-ͯ]/g, ''),
-      ),
-    )
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
-      .split(/\s+/)
-      .filter(Boolean),
+// Han, kana and hangul write words without spaces: they compare by
+// overlapping pairs of characters, the usual way to search CJK text
+const CJK_RUN_RE =
+  /([\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Hangul}ー]+)/u
+const CJK_RE = /^[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}\p{sc=Hangul}ー]/u
+
+const bigrams = (run: string): string[] => {
+  const chars = [...run]
+  if (chars.length < 2) return chars
+  return chars.slice(1).map((c, i) => chars[i] + c)
+}
+
+// Spaced-out names ("t e l e p a t h") read as one word
+const joinSpacedLetters = (words: string[]): string[] =>
+  words.reduce<string[]>((joined, word, i) => {
+    const spaced = [...word].length === 1 && /\p{L}/u.test(word)
+    const prevSpaced = i > 0 && [...words[i - 1]].length === 1
+    if (spaced && prevSpaced && /\p{L}/u.test(words[i - 1]))
+      joined[joined.length - 1] += word
+    else joined.push(word)
+    return joined
+  }, [])
+
+// Cyrillic letters standing in for Latin ones in a stylised name ("KoЯn")
+const FAUX_LATIN: Record<string, string> = {
+  я: 'r',
+  и: 'n',
+  д: 'a',
+  ш: 'w',
+  ц: 'u',
+  ф: 'o',
+  а: 'a',
+  е: 'e',
+  о: 'o',
+  с: 'c',
+  к: 'k',
+  м: 'm',
+  т: 't',
+  х: 'x',
+}
+
+const readFauxLatin = (word: string): string =>
+  /[a-z]/.test(word) ? [...word].map((c) => FAUX_LATIN[c] ?? c).join('') : word
+
+export const tokenize = (text: string): Set<string> => {
+  const words = normalizeNumerals(
+    transliterateLatinExt(
+      text.normalize('NFKC').normalize('NFD').replace(/\p{M}/gu, ''),
+    ),
   )
+    .toLowerCase()
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean)
+  return new Set(
+    joinSpacedLetters(words).flatMap((word) =>
+      readFauxLatin(word)
+        .split(CJK_RUN_RE)
+        .filter(Boolean)
+        .flatMap((run) => (CJK_RE.test(run) ? bigrams(run) : [run])),
+    ),
+  )
+}
 
-const isMixedScript = (text: string): boolean =>
-  /[a-zA-Z]/.test(text) && /[^\p{ASCII}]/u.test(text)
-
-export const jaccardSimilarity = (a: string, b: string): number => {
+// Token Jaccard, any script. Nothing in common, or nothing to compare, is 0:
+// a wrong Cover is worse than a House sleeve
+export const similarity = (a: string, b: string): number => {
   const ta = tokenize(a)
   const tb = tokenize(b)
-  // if either side has no Latin/ASCII tokens (e.g. Japanese title), trust the query
-  if (ta.size === 0 || tb.size === 0) return 1
+  if (ta.size === 0 || tb.size === 0) return 0
   const intersection = [...ta].filter((t) => tb.has(t)).length
   const union = new Set([...ta, ...tb]).size
-  const jaccard = intersection / union
-  // if tokens don't overlap but one string mixes Latin with non-ASCII (e.g. KoЯn),
-  // the mismatch is from stripping stylistic characters — trust the query
-  if (jaccard === 0 && (isMixedScript(a) || isMixedScript(b))) return 0.7
-  return jaccard
+  return intersection / union
 }

@@ -16,7 +16,8 @@
     "lint": "eslint",
     "format": "prettier --check .",
     "check": "prettier --write . && eslint --fix",
-    "generate:pwa-assets": "tsx scripts/generate-pwa-assets.ts"
+    "generate:pwa-assets": "tsx scripts/generate-pwa-assets.ts",
+    "audit:covers": "tsx scripts/cover-audit.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

@@ -7,7 +7,12 @@ import { coverArtQueryOptions } from '#/features/collection/collection.queries'
 
 import { SheetCover } from './SheetCover'
 
-const RECORD = { coverKey: 'm:1', artist: 'Can', title: 'Tago Mago' }
+const RECORD = {
+  coverKey: 'm:1',
+  artist: 'Can',
+  credits: ['Can'],
+  title: 'Tago Mago',
+}
 
 class InView {
   constructor(private callback: IntersectionObserverCallback) {}
@@ -49,7 +54,7 @@ describe('SheetCover', () => {
     vi.stubGlobal('IntersectionObserver', InView)
     const queryClient = new QueryClient()
     queryClient.setQueryData(
-      coverArtQueryOptions(RECORD.coverKey, RECORD.artist, RECORD.title)
+      coverArtQueryOptions(RECORD.coverKey, RECORD.credits, RECORD.title)
         .queryKey,
       null,
     )

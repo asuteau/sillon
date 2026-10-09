@@ -9,7 +9,10 @@ import { useCallback } from 'react'
 interface CoverArtProps {
   /** From masterCoverKey / releaseCoverKey */
   coverKey: string
+  /** Typeset on the House sleeve */
   artist: string
+  /** Every artist credited on the record, Lead credit first, to look the Cover up by */
+  credits: string[]
   title: string
   styles: string[]
   size?: number
@@ -22,6 +25,7 @@ interface CoverArtProps {
 export const CoverArt = ({
   coverKey,
   artist,
+  credits,
   title,
   size,
   className,
@@ -37,7 +41,7 @@ export const CoverArt = ({
     [inViewRef, ref],
   )
   const { data: hdSrc, status: hdStatus } = useQuery({
-    ...coverArtQueryOptions(coverKey, artist, title),
+    ...coverArtQueryOptions(coverKey, credits, title),
     enabled: isInView,
   })
 

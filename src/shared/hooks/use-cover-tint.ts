@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 
 export interface CoverTintInput {
   coverKey: string
-  artist: string
+  credits: string[]
   title: string
 }
 
@@ -16,12 +16,12 @@ export interface CoverTintInput {
 // canvas can't read them. Records without a Deezer match stay neutral.
 export const useCoverTint = ({
   coverKey,
-  artist,
+  credits,
   title,
 }: CoverTintInput): string | null => {
   // Same query CoverArt runs, so no extra request
   const { data: hdSrc } = useQuery(
-    coverArtQueryOptions(coverKey, artist, title),
+    coverArtQueryOptions(coverKey, credits, title),
   )
   const { data } = useQuery(coverTintQueryOptions(coverKey, hdSrc ?? null))
   return data ?? null

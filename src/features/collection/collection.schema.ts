@@ -9,7 +9,9 @@ export const CollectionReleaseSchema = z.object({
     master_id: z.number().optional(),
     title: z.string(),
     year: z.number(),
-    artists: z.array(z.object({ name: z.string() })),
+    artists: z.array(
+      z.object({ name: z.string(), anv: z.string().optional() }),
+    ),
     cover_image: z.string(),
     thumb: z.string(),
     styles: z.array(z.string()).optional().default([]),

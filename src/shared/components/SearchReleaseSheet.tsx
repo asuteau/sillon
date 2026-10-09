@@ -127,6 +127,7 @@ function SearchReleaseSheetContent({
       <SheetCover
         coverKey={masterCoverKey(masterId)}
         artist={release.artists[0] ?? ''}
+        credits={release.credits}
         title={release.title}
         styles={[]}
       />

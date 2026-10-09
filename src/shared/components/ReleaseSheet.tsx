@@ -7,6 +7,7 @@ import { MarketplaceSection } from '#/features/marketplace/components/Marketplac
 import { CoverGlow } from '#/shared/components/CoverGlow'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
+import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
@@ -74,6 +75,7 @@ function ReleaseSheetContent({
         ref={coverRef}
         coverKey={releaseCoverKey(release.id, info.master_id)}
         artist={leadArtist(info.artists)}
+        credits={recordCredits(info.artists)}
         title={info.title}
         styles={info.styles}
       />

@@ -7,6 +7,7 @@ import {
   RECORD_ROW_MEDIA_CLASSES,
   RecordRow,
 } from '#/shared/components/RecordList'
+import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { setCoverOrigin } from '#/shared/utils/cover-transition'
 
@@ -44,6 +45,7 @@ export const ReleaseRow = ({ release, meta, onClick }: ReleaseRowProps) => {
         <CoverArt
           coverKey={releaseCoverKey(release.id, info.master_id)}
           artist={leadArtist(info.artists)}
+          credits={recordCredits(info.artists)}
           title={info.title}
           styles={info.styles}
           className={RECORD_ROW_MEDIA_CLASSES}

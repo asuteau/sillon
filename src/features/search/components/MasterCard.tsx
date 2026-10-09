@@ -29,6 +29,7 @@ export const MasterCard = ({ master, onClick }: MasterCardProps) => {
           <CoverArt
             coverKey={masterCoverKey(master.id)}
             artist={master.artist}
+            credits={master.credits}
             title={master.title}
             styles={[]}
             className={RECORD_ROW_MEDIA_CLASSES}
