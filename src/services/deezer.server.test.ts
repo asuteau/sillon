@@ -126,4 +126,18 @@ describe('fetchDeezerCover', () => {
   ])('%s', async (_, credits, title, expected) => {
     expect(await coverId(credits, title)).toBe(expected)
   })
+
+  it('waits out an exceeded quota instead of failing', async () => {
+    vi.useFakeTimers()
+    const quotaExceeded = {
+      error: { message: 'Quota limit exceeded', code: 4 },
+    }
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(JSON.stringify(quotaExceeded)),
+    )
+    const lookup = coverId(['Korn'], 'Follow The Leader')
+    await vi.runAllTimersAsync()
+    expect(await lookup).toBe('35111a59f5d5ef0bf5a7ba2f3a203b25')
+    vi.useRealTimers()
+  })
 })

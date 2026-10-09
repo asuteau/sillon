@@ -11,9 +11,13 @@ import { z } from 'zod'
 const ARTIST_THRESHOLD = 0.5
 const ALBUM_THRESHOLD = 0.3
 const RESULTS_PER_QUERY = 10
-// For a whole lookup, every query included: past it the lookup fails like any
+// Per request, once it leaves the queue: past it the lookup fails like any
 // Deezer error, so it isn't remembered and the record shows a House sleeve
-const LOOKUP_TIMEOUT_MS = 5000
+const REQUEST_TIMEOUT_MS = 5000
+// Deezer allows 50 requests per 5 seconds, then answers "Quota limit exceeded"
+const QUOTA_WINDOW_MS = 5000
+const QUOTA_REQUESTS = 45
+const QUOTA_RETRIES = 2
 
 const DeezerSearchSchema = z.object({
   data: z.array(
@@ -26,6 +30,26 @@ const DeezerSearchSchema = z.object({
   ),
 })
 
+const DeezerErrorSchema = z.object({ error: z.object({ code: z.number() }) })
+const QUOTA_EXCEEDED = 4
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+// A whole list looks its Covers up at once: requests queue for a slot in the
+// quota rather than fail
+const sentAt: number[] = []
+const takeQuotaSlot = async (): Promise<void> => {
+  for (;;) {
+    const now = Date.now()
+    while (sentAt.length && now - sentAt[0] >= QUOTA_WINDOW_MS) sentAt.shift()
+    if (sentAt.length < QUOTA_REQUESTS) {
+      sentAt.push(now)
+      return
+    }
+    await sleep(sentAt[0] + QUOTA_WINDOW_MS - now)
+  }
+}
+
 type Candidate = {
   artistName: string
   albumTitle: string
@@ -34,16 +58,30 @@ type Candidate = {
 
 const deezerSearch = async (
   q: string,
-  signal: AbortSignal,
+  retries = QUOTA_RETRIES,
 ): Promise<Candidate[]> => {
+  await takeQuotaSlot()
   const res = await fetch(
     `https://api.deezer.com/search/album?q=${encodeURIComponent(q)}&limit=${RESULTS_PER_QUERY}`,
-    { headers: { 'User-Agent': 'Sillon/1.0' }, signal },
+    {
+      headers: { 'User-Agent': 'Sillon/1.0' },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    },
   )
   // Throws on failure (network, quota, bad payload) so it's never mistaken
   // for "no match", which callers remember
   if (!res.ok) throw new Error(`Deezer search failed: ${res.status}`)
-  const json = DeezerSearchSchema.parse(await res.json())
+  const body: unknown = await res.json()
+  const error = DeezerErrorSchema.safeParse(body)
+  if (error.success) {
+    // Another server instance, or another app on this IP, spent the quota
+    if (error.data.error.code === QUOTA_EXCEEDED && retries > 0) {
+      await sleep(QUOTA_WINDOW_MS)
+      return deezerSearch(q, retries - 1)
+    }
+    throw new Error(`Deezer search failed: error ${error.data.error.code}`)
+  }
+  const json = DeezerSearchSchema.parse(body)
   return json.data.map((item) => ({
     artistName: item.artist?.name ?? '',
     albumTitle: item.title ?? '',
@@ -100,14 +138,14 @@ export const fetchDeezerCover = async (
   const queries = [
     `artist:"${lead}" album:"${queryTitle(t)}"`,
     ...(tShort !== t ? [`artist:"${lead}" album:"${queryTitle(tShort)}"`] : []),
+    // Field search misses some artists outright ("Korn")
+    `${lead} ${tShort}`,
     // Deezer may know the record under another credited artist
     `album:"${queryTitle(t)}"`,
-    `${lead} ${tShort}`,
   ]
 
-  const signal = AbortSignal.timeout(LOOKUP_TIMEOUT_MS)
   for (const q of queries) {
-    const candidates = await deezerSearch(q, signal)
+    const candidates = await deezerSearch(q)
     const match = bestMatch(candidates, credits, t)
     if (match) return match
   }
