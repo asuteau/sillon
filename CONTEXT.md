@@ -45,7 +45,7 @@ The Release Discogs designates as the canonical one for a Master. It decides wha
 _Avoid_: Primary release, original pressing
 
 **Discography**:
-The Masters an artist is credited on as main artist, newest first, including splits and collaborations whatever the credit order. Excludes guest appearances, remixes and production credits. Best-effort for very prolific artists: it may be truncated.
+The Masters an artist is credited on as main artist, newest first, including splits and collaborations whatever the credit order. Credit is decided by who the artist is, not by name: homonyms and other artists whose name contains this one ("Schöner Sterben Mit Heroin & Korn") are excluded. Excludes guest appearances, remixes and production credits. Best-effort for very prolific artists: it may be truncated.
 _Avoid_: Releases, albums list
 
 **Studio album**:
@@ -81,6 +81,10 @@ _Avoid_: Avatar, artist thumb, artist cover
 **Monogram**:
 The artist's initials typeset in Sillon's style, shown when there is no Artist picture. At most two letters, from the first two words, skipping a leading article (The, Les, Die) and a Discogs disambiguator such as "(2)"; a name that starts with a digit, symbol or non-Latin script keeps its first character as written. Records get House sleeves, artists get Monograms — never the other way round.
 _Avoid_: Initials, avatar placeholder
+
+**Name variation**:
+Another name an artist is credited under on some records ("t e l e p a t h", "KoЯn"), as listed by Discogs. A Name variation can be another artist's real name, so it identifies the artist only when the credit is marked as a variation.
+_Avoid_: Alias (Discogs uses that for a different project by the same person), ANV
 
 ### Sorting
 

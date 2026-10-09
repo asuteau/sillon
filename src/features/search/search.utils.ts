@@ -70,15 +70,35 @@ const escapeRegExp = (text: string): string =>
 
 const CREDIT_JOIN = String.raw`\s(?:\/|\+|&|x|with|meets|vs\.?|and|feat\.?|featuring)\s|,\s`
 
-// Search matches artists by name, so homonyms ("The Beatles (4)") and tributes are weeded out:
-// one of the artist's names must stand whole in the credit, alone or joined to another artist
-export const isCreditedTo = (credit: string, names: string[]): boolean => {
-  // Drops the translated credit ("The Beatles = ビートルズ*") and name variation stars
-  const normalized = credit.split(' = ')[0].replaceAll('*', '').trim()
-  return names.some((name) =>
+export type CreditReading = 'credited' | 'unclear' | 'uncredited'
+
+const sameName = (a: string, b: string): boolean =>
+  a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
+
+// Search matches artists by name, so homonyms ("The Beatles (4)") and tributes are weeded out.
+// Discogs stars a Name variation, so only the canonical name or a starred variation is sure;
+// a name that stands whole in a longer credit may be a collaboration or another artist's name
+export const readCredit = (
+  credit: string,
+  artist: { name: string; variations: string[] },
+): CreditReading => {
+  // Drops the translated credit ("The Beatles = ビートルズ*")
+  const main = credit.split(' = ')[0].trim()
+  const isStarred = main.endsWith('*')
+  const bare = isStarred ? main.slice(0, -1) : main
+  if (
+    (!isStarred && sameName(bare, artist.name)) ||
+    (isStarred && artist.variations.some((name) => sameName(bare, name)))
+  ) {
+    return 'credited'
+  }
+
+  const unstarred = main.replaceAll('*', '')
+  const appears = [artist.name, ...artist.variations].some((name) =>
     new RegExp(
       `(?:^|${CREDIT_JOIN})${escapeRegExp(name)}(?:$|${CREDIT_JOIN})`,
       'i',
-    ).test(normalized),
+    ).test(unstarred),
   )
+  return appears ? 'unclear' : 'uncredited'
 }

@@ -22,3 +22,17 @@ export const Chip = ({ active = false, className, ...props }: ChipProps) => (
     {...props}
   />
 )
+
+// Chips always sit on one line; narrow screens scroll it sideways.
+// The inner padding keeps the focus outline clear of the scroll clip
+export const ChipRow = ({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<'div'>) => (
+  <div data-slot="chip-row" className={className} {...props}>
+    <div className="-m-1 flex gap-2 overflow-x-auto p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {children}
+    </div>
+  </div>
+)

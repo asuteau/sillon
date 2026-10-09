@@ -135,12 +135,24 @@ export const ArtistDetailSchema = z.object({
   namevariations: z.array(z.string()).optional(),
 })
 
+// Only the credited artists of a Master, to tell who a credit names
+export const MasterArtistsSchema = z.object({
+  artists: z.array(z.object({ id: z.number() })),
+})
+
 export type ArtistDetail = z.infer<typeof ArtistDetailSchema>
 export type ArtistResult = z.infer<typeof ArtistResultSchema>
 export type ArtistSearchPage = z.infer<typeof ArtistSearchPageSchema>
 
 // Discogs format tags each Discography filter searches by; null searches every Master
 export type DiscographyFormat = 'Album' | 'EP' | 'Compilation'
+
+export type DiscographyArtist = {
+  id: number
+  // Canonical Discogs name, disambiguator included
+  name: string
+  variations: string[]
+}
 
 export type ArtistMasters = {
   results: MasterResult[]

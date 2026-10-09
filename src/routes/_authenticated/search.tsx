@@ -9,7 +9,7 @@ import { z } from 'zod'
 import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
 import { RecordList } from '#/shared/components/RecordList'
 import { Button } from '#/shared/components/ui/button'
-import { Chip } from '#/shared/components/ui/chip'
+import { Chip, ChipRow } from '#/shared/components/ui/chip'
 import { Input } from '#/shared/components/ui/input'
 import { SearchReleaseSheet } from '#/shared/components/SearchReleaseSheet'
 import { useDebounce } from '#/shared/hooks/use-debounce'
@@ -38,7 +38,6 @@ import type {
 } from '#/features/search/search.schema'
 import {
   isCompilation,
-  isCreditedTo,
   isEp,
   isStudioAlbum,
 } from '#/features/search/search.utils'
@@ -225,13 +224,13 @@ interface ModeToggleProps {
 
 function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
   return (
-    <div className="mb-6 flex gap-2">
+    <ChipRow className="mb-6">
       {(['artist', 'title'] as const).map((m) => (
         <Chip key={m} active={mode === m} onClick={() => onModeChange(m)}>
           {m === 'artist' ? 'By artist' : 'By title'}
         </Chip>
       ))}
-    </div>
+    </ChipRow>
   )
 }
 
@@ -340,13 +339,22 @@ function DiscographyList({
 }: DiscographyListProps) {
   const [filter, setFilter] = useState<DiscographyFilter>('albums')
 
-  // Name variations tell the artist's own credits from homonyms'
-  const { data: artist, isPending: isArtistPending } = useQuery(
+  // Its ID and Name variations tell the artist's own credits from homonyms'
+  const { data: artistDetail, isPending: isArtistPending } = useQuery(
     artistDetailQueryOptions(artistId),
+  )
+  const artist = useMemo(
+    () =>
+      artistDetail && {
+        id: artistDetail.id,
+        name: artistDetail.name,
+        variations: artistDetail.namevariations ?? [],
+      },
+    [artistDetail],
   )
   const [albumsQuery, epsQuery, compilationsQuery] = useQueries({
     queries: FALLBACK_ORDER.map((key) =>
-      artistMastersQueryOptions(artistName, CLASSIFIED_FILTERS[key].format),
+      artistMastersQueryOptions(artist, CLASSIFIED_FILTERS[key].format),
     ),
   })
   const isClassifiedPending =
@@ -355,27 +363,17 @@ function DiscographyList({
     epsQuery.isPending ||
     compilationsQuery.isPending
 
-  const names = useMemo(
-    () =>
-      artist ? [artist.name, ...(artist.namevariations ?? [])] : [artistName],
-    [artist, artistName],
-  )
-
   const classifiedItems = useMemo(() => {
     const keep = (data: ArtistMasters | undefined, key: ClassifiedFilter) =>
       (data?.results ?? [])
         .map(toArtistDiscographyItem)
-        .filter(
-          (item) =>
-            isCreditedTo(item.credit, names) &&
-            CLASSIFIED_FILTERS[key].matches(item),
-        )
+        .filter(CLASSIFIED_FILTERS[key].matches)
     return {
       albums: keep(albumsQuery.data, 'albums'),
       eps: keep(epsQuery.data, 'eps'),
       compilations: keep(compilationsQuery.data, 'compilations'),
     } satisfies Record<ClassifiedFilter, ArtistDiscographyItem[]>
-  }, [names, albumsQuery.data, epsQuery.data, compilationsQuery.data])
+  }, [albumsQuery.data, epsQuery.data, compilationsQuery.data])
 
   // Artists without studio albums (singles-only DJs…) fall back to the first non-empty filter
   const activeFilter: DiscographyFilter =
@@ -385,17 +383,14 @@ function DiscographyList({
 
   const allQuery = useQuery(
     artistMastersQueryOptions(
-      artistName,
+      artist,
       null,
       !isClassifiedPending && activeFilter === 'all',
     ),
   )
   const allItems = useMemo(
-    () =>
-      (allQuery.data?.results ?? [])
-        .map(toArtistDiscographyItem)
-        .filter((item) => isCreditedTo(item.credit, names)),
-    [allQuery.data, names],
+    () => (allQuery.data?.results ?? []).map(toArtistDiscographyItem),
+    [allQuery.data],
   )
 
   if (isClassifiedPending) {
@@ -413,7 +408,7 @@ function DiscographyList({
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap gap-2">
+      <ChipRow className="mb-6">
         {FILTER_CHIPS.map(({ key, label }) => {
           const count = key === 'all' ? null : classifiedItems[key].length
           if (count === 0) return null
@@ -422,6 +417,8 @@ function DiscographyList({
               key={key}
               active={activeFilter === key}
               onClick={() => setFilter(key)}
+              // Mono count and Grotesk label only line up on their baseline
+              className="items-baseline"
             >
               {label}
               {count !== null && (
@@ -432,7 +429,7 @@ function DiscographyList({
             </Chip>
           )
         })}
-      </div>
+      </ChipRow>
 
       {activeQuery.isPending ? (
         <p className="text-muted-foreground">Loading discography…</p>

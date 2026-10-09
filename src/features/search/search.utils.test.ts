@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  isCompilation,
-  isCreditedTo,
-  isEp,
-  isStudioAlbum,
-} from './search.utils'
+import { isCompilation, isEp, isStudioAlbum, readCredit } from './search.utils'
 
 describe('isStudioAlbum', () => {
   it('accepts an album', () => {
@@ -104,47 +99,67 @@ describe('isCompilation', () => {
   })
 })
 
-describe('isCreditedTo', () => {
-  const beatles = ['The Beatles', 'Beatles']
-  const gizzard = [
-    'King Gizzard And The Lizard Wizard',
-    'King Gizzard & The Lizard Wizard',
-    'KGLW',
-  ]
+describe('readCredit', () => {
+  const beatles = { name: 'The Beatles', variations: ['Beatles'] }
+  const gizzard = {
+    name: 'King Gizzard And The Lizard Wizard',
+    variations: ['King Gizzard & The Lizard Wizard', 'KGLW'],
+  }
+  const korn = { name: 'Korn', variations: ['KoЯn'] }
+  const telepath = {
+    name: 'Telepath テレパシー能力者',
+    variations: ['Telepath', 't e l e p a t h テレパシー能力者'],
+  }
 
-  it('accepts the artist name and its variations', () => {
-    expect(isCreditedTo('The Beatles', beatles)).toBe(true)
-    expect(isCreditedTo('Beatles*', beatles)).toBe(true)
-    expect(isCreditedTo('King Gizzard & The Lizard Wizard*', gizzard)).toBe(
-      true,
+  it('credits the artist name and its starred variations', () => {
+    expect(readCredit('The Beatles', beatles)).toBe('credited')
+    expect(readCredit('Beatles*', beatles)).toBe('credited')
+    expect(readCredit('King Gizzard & The Lizard Wizard*', gizzard)).toBe(
+      'credited',
+    )
+    expect(readCredit('t e l e p a t h テレパシー能力者*', telepath)).toBe(
+      'credited',
     )
   })
 
   it('ignores the translated part of a credit', () => {
-    expect(isCreditedTo('The Beatles = ビートルズ*', beatles)).toBe(true)
+    expect(readCredit('The Beatles = ビートルズ*', beatles)).toBe('credited')
   })
 
-  it('accepts splits and collaborations whatever the credit order', () => {
-    expect(isCreditedTo('Tony Sheridan With The Beatles', beatles)).toBe(true)
-    expect(isCreditedTo('The Beatles / The Animals', beatles)).toBe(true)
+  it('leaves splits and collaborations unclear, whatever the credit order', () => {
+    expect(readCredit('Tony Sheridan With The Beatles', beatles)).toBe(
+      'unclear',
+    )
+    expect(readCredit('The Beatles / The Animals', beatles)).toBe('unclear')
     expect(
-      isCreditedTo(
+      readCredit(
         'King Gizzard & The Lizard Wizard* With Mild High Club',
         gizzard,
       ),
-    ).toBe(true)
+    ).toBe('unclear')
     expect(
-      isCreditedTo(
+      readCredit(
         'Tropical Fuck Storm + King Gizzard & The Lizard Wizard*',
         gizzard,
       ),
-    ).toBe(true)
-    expect(isCreditedTo('KGLW* x GIFT (29)', gizzard)).toBe(true)
+    ).toBe('unclear')
+    expect(readCredit('KGLW* x GIFT (29)', gizzard)).toBe('unclear')
+  })
+
+  it('leaves names that contain the artist name unclear', () => {
+    expect(readCredit('Schöner Sterben Mit Heroin & Korn', korn)).toBe(
+      'unclear',
+    )
+  })
+
+  it('leaves an unstarred variation unclear: it may be another artist', () => {
+    expect(readCredit('Telepath', telepath)).toBe('unclear')
   })
 
   it('rejects homonyms and tribute acts', () => {
-    expect(isCreditedTo('The Beatles (4)', beatles)).toBe(false)
-    expect(isCreditedTo('The Beatles Revival Band', beatles)).toBe(false)
-    expect(isCreditedTo('The Upbeat Beatles', beatles)).toBe(false)
+    expect(readCredit('The Beatles (4)', beatles)).toBe('uncredited')
+    expect(readCredit('The Beatles Revival Band', beatles)).toBe('uncredited')
+    expect(readCredit('The Upbeat Beatles', beatles)).toBe('uncredited')
+    expect(readCredit('Telepath (4)', telepath)).toBe('uncredited')
   })
 })
