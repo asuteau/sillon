@@ -86,6 +86,18 @@ describe('brand colours', () => {
     })
   })
 
+  it('derives the satin tokens from --lacquer-1..3, not hex', () => {
+    const token = (name: string) =>
+      css.match(new RegExp(`--lacquer-${name}:([^;]+);`))?.[1] ?? ''
+    for (const name of ['satin', 'satin-hover', 'satin-shadow']) {
+      expect(token(name)).toMatch(/var\(--lacquer-[123]\)/)
+      expect(token(name)).not.toMatch(/#[0-9a-f]{3,8}\b/i)
+    }
+    expect(token('satin')).toMatch(
+      /180deg,\s*var\(--lacquer-1\),\s*var\(--lacquer-3\)/,
+    )
+  })
+
   it('mirrors --vinyl-black in styles.css', () => {
     expect(css).toContain(`--vinyl-black: ${VINYL_BLACK};`)
   })

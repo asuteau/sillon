@@ -58,6 +58,8 @@ Records are the colour. A fixed accent would fight every cover on screen, and a 
 - Colour on record screens comes from the current Cover (`--cover-tint`).
 - **Copper lacquer** is the one brand material, from the copper master a record is pressed from.
 - It's used only on brand moments, never for hover, selection, focus, links or any general interactive state.
+- It has two renderings of the same three stops: **sweep** for marks (icon, favicon, launch screen, the groove mark in lacquer tone, House sleeve shapes) and **satin** for buttons.
+- **No text on the sweep.** Text on lacquer always goes on a satin button.
 
 ### Token contract
 
@@ -77,14 +79,17 @@ The contract is **shadcn's variables**, defined for light (`:root`) and dark (`.
 
 ### Sillon additions
 
-| Variable                                        | What                                                                                                                                             |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--lacquer`                                     | Copper master gradient, `120deg` over `--lacquer-1..3` (`#f2d3bf`, `#b06d4a` at 60%, `#e6b394`). Text on it: `--lacquer-foreground` (`#0d0d0e`). |
-| `--vinyl-black`                                 | `#0a0a0b` — the brand ground (icon, launch screen, vinyl house sleeve).                                                                          |
-| `--cover-tint`                                  | Set at runtime from the current Cover; neutral `oklch(0.62 0 0)` until then.                                                                     |
-| `--cover-glow-lightness` / `--cover-glow-alpha` | Per-theme relighting of the tint for the glow, so text over it stays AA.                                                                         |
+| Variable                                        | What                                                                                                                                 |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `--lacquer`                                     | Sweep: copper master gradient, `120deg` over `--lacquer-1..3` (`#f2d3bf`, `#b06d4a` at 60%, `#e6b394`). Marks only, never text.      |
+| `--lacquer-satin` / `--lacquer-satin-hover`     | Satin: `180deg` from `--lacquer-1` to `--lacquer-3`, lit from above, no dark band. Hover moves the bottom ~20% toward `--lacquer-2`. |
+| `--lacquer-satin-shadow`                        | Satin's box-shadow: white top highlight (60%), 1px bottom line and `0 4px 14px` shadow at 35% of `--lacquer-2`.                      |
+| `--lacquer-foreground`                          | `#0d0d0e`, the label on satin. It never sits on stop 2: ≈ 13.7:1 on stop 1, 10.4:1 on stop 3, ≈ 9:1 on the hover end.                |
+| `--vinyl-black`                                 | `#0a0a0b` — the brand ground (icon, launch screen, vinyl house sleeve).                                                              |
+| `--cover-tint`                                  | Set at runtime from the current Cover; neutral `oklch(0.62 0 0)` until then.                                                         |
+| `--cover-glow-lightness` / `--cover-glow-alpha` | Per-theme relighting of the tint for the glow, so text over it stays AA.                                                             |
 
-**Copper lacquer is for brand moments only**: app icon, launch screen, the landing CTA, the Random pick button, the scan button — plus the shapes on House sleeves, its one non-interactive use. Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Use it through `<Button variant="lacquer">` or `bg-(image:--lacquer)`. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
+**Copper lacquer is for brand moments only**: app icon, launch screen, and the lacquer buttons (Random pick, Pick again, Scan, the landing CTA) — plus the shapes on House sleeves, its one non-interactive use. Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Buttons use `<Button variant="lacquer">` (satin); marks use `bg-(image:--lacquer)` (sweep). Satin and sweep are the same in light and dark: lacquer is a material, not a theme colour, so the dark blocks don't redefine it. Satin is derived from the stop tokens, so changing the stops updates both. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
 
 ### Cover tint
 
@@ -229,7 +234,7 @@ Sillon's own loading screen (app shell, cold start) does follow the theme and us
 ## 10. Components
 
 - shadcn (style `base-nova`) + Base UI + vaul for behaviour and accessibility; all styling rewritten. Primitives live in `src/shared/components/ui/`.
-- `Button` variants: `default` (solid `--primary`), `outline`, `secondary`, `ghost`, `destructive`, `link`, `lacquer` (brand moments only).
+- `Button` variants: `default` (solid `--primary`), `outline`, `secondary`, `ghost`, `destructive`, `link`, `lacquer` (satin, brand moments only — see §3).
 - `Chip`: round, active chip is solid foreground.
 - Bottom sheets: `Drawer` (vaul); 14px top corners.
 - Screens: `Page` wraps every screen's content (the landing page excepted): `max-w-270`, 16px gutters, `24px` below the Header on mobile, `40px` from `sm`. Set it there, never per route.

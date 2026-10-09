@@ -20,9 +20,10 @@ const buttonVariants = cva(
         destructive:
           'bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:outline-destructive dark:bg-destructive/20 dark:hover:bg-destructive/30',
         link: 'text-foreground underline-offset-4 hover:underline',
-        // Brand moments only — never for general interactive state
+        // Brand moments only — never for general interactive state.
+        // Satin, not the sweep: no text on the sweep
         lacquer:
-          'bg-(image:--lacquer) text-lacquer-foreground shadow-[0_6px_18px_rgb(0_0_0/0.25)] hover:opacity-90',
+          'bg-(image:--lacquer-satin) text-lacquer-foreground shadow-(--lacquer-satin-shadow) hover:bg-(image:--lacquer-satin-hover)',
       },
       size: {
         default:

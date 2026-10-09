@@ -41,9 +41,14 @@ describe('buttonVariants', () => {
     expect(buttonVariants()).toMatch(/\btext-primary-foreground\b/)
   })
 
-  it('lacquer uses the lacquer gradient with dark text', () => {
+  it('lacquer paints with satin, not the sweep, with dark text', () => {
     const classes = buttonVariants({ variant: 'lacquer' })
-    expect(classes).toMatch(/bg-\(image:--lacquer\)/)
+    expect(classes).toMatch(/(^| )bg-\(image:--lacquer-satin\)( |$)/)
+    expect(classes).toMatch(/(^| )shadow-\(--lacquer-satin-shadow\)( |$)/)
+    expect(classes).toMatch(
+      /(^| )hover:bg-\(image:--lacquer-satin-hover\)( |$)/,
+    )
+    expect(classes).not.toMatch(/bg-\(image:--lacquer\)/)
     expect(classes).toMatch(/\btext-lacquer-foreground\b/)
   })
 

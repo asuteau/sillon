@@ -121,6 +121,18 @@
     var(--lacquer-2) 60%,
     var(--lacquer-3)
   );
+  /* Satin: the button rendering. Lit from above, stop 1 → 3 with no dark
+     band; edge and shadow tinted with the middle stop. Same in both themes. */
+  --lacquer-satin: linear-gradient(180deg, var(--lacquer-1), var(--lacquer-3));
+  --lacquer-satin-hover: linear-gradient(
+    180deg,
+    var(--lacquer-1),
+    color-mix(in oklab, var(--lacquer-3) 80%, var(--lacquer-2))
+  );
+  --lacquer-satin-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 -1px 0 color-mix(in oklab, var(--lacquer-2) 35%, transparent),
+    0 4px 14px color-mix(in oklab, var(--lacquer-2) 35%, transparent);
   --lacquer-foreground: #0d0d0e;
   /* Set at runtime from the current Cover (useCoverTint); neutral until then.
      cover-glow relights it per theme so text on it stays AA — checked by
