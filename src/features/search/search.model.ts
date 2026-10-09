@@ -4,12 +4,18 @@ import type {
   ReleaseDetail,
   Version,
 } from './search.schema'
-import { stripDisambiguator } from '#/shared/utils/artist-name'
+import {
+  creditNames,
+  recordCredits,
+  stripDisambiguator,
+} from '#/shared/utils/artist-name'
 
 export type Master = {
   id: number
   title: string
   artist: string
+  /** Every artist credited, Lead credit first, to look the Cover up by */
+  credits: string[]
   year: number | null
   formats: string[]
   inCollection: boolean
@@ -33,6 +39,8 @@ export type ReleaseDetailModel = {
   year: number
   country: string
   artists: string[]
+  /** Every artist credited, Lead credit first, to look the Cover up by */
+  credits: string[]
   formatName: string
   formatText: string
 }
@@ -44,6 +52,7 @@ export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
     year: raw.year,
     country: raw.country ?? '',
     artists: raw.artists.map((a) => stripDisambiguator(a.name)),
+    credits: recordCredits(raw.artists),
     formatName: raw.formats?.[0]?.name ?? '',
     formatText: raw.formats?.[0]?.text ?? '',
   }
@@ -55,6 +64,7 @@ export function toMaster(raw: MasterResult): Master {
     id: raw.id,
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
     artist: dashIdx >= 0 ? stripDisambiguator(raw.title.slice(0, dashIdx)) : '',
+    credits: dashIdx >= 0 ? creditNames(raw.title.slice(0, dashIdx)) : [],
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     formats: raw.format ?? [],
     inCollection: raw.user_data?.in_collection ?? false,
@@ -74,6 +84,8 @@ export type Artist = {
 export type ArtistDiscographyItem = {
   id: number
   title: string
+  /** Every artist credited, Lead credit first, to look the Cover up by */
+  credits: string[]
   year: number | null
   formats: string[]
 }
@@ -95,6 +107,7 @@ export function toArtistDiscographyItem(
   return {
     id: raw.id,
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
+    credits: dashIdx >= 0 ? creditNames(raw.title.slice(0, dashIdx)) : [],
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     formats: raw.format ?? [],
   }

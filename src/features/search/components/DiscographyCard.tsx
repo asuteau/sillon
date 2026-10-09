@@ -24,6 +24,8 @@ export const DiscographyCard = ({
         <CoverArt
           coverKey={masterCoverKey(item.id)}
           artist={artistName}
+          // The searched artist's own name last, should the record print another
+          credits={[...item.credits, artistName]}
           title={item.title}
           styles={[]}
           className={RECORD_ROW_MEDIA_CLASSES}

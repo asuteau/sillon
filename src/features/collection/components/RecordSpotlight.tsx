@@ -8,6 +8,7 @@ import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { CoverGlow } from '#/shared/components/CoverGlow'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
+import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
@@ -62,6 +63,7 @@ const SpotlightContent = ({
         ref={coverRef}
         coverKey={releaseCoverKey(record.id, info.master_id)}
         artist={leadArtist(info.artists)}
+        credits={recordCredits(info.artists)}
         title={info.title}
         styles={info.styles}
       />

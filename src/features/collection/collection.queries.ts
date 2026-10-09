@@ -11,13 +11,13 @@ import {
   readCachedCover,
   writeCachedCover,
 } from '#/shared/utils/cover-cache'
+import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { preloadCover } from '#/shared/utils/cover-preload'
 import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
 import type { CollectionPage, CollectionRelease } from './collection.schema'
-import { leadArtist } from './collection.utils'
 
 // Only changes with the Collection itself — mutations invalidate it
 export const collectionValueQueryOptions = (username: string) =>
@@ -65,9 +65,10 @@ export const collectionQueryOptions = (listSort: ListSort) =>
     refetchOnMount: false,
   })
 
+// Credits: every artist credited on the record, Lead credit first
 export const coverArtQueryOptions = (
   coverKey: string,
-  artist: string,
+  credits: string[],
   title: string,
 ) =>
   queryOptions({
@@ -76,7 +77,7 @@ export const coverArtQueryOptions = (
       const cached = readCachedCover(coverKey)
       if (cached !== undefined) return cached
       // Throws when Deezer fails, so only real answers are remembered
-      const src = await getDeezerCover({ data: { artist, title } })
+      const src = await getDeezerCover({ data: { credits, title } })
       writeCachedCover(coverKey, src)
       return src
     },
@@ -117,7 +118,7 @@ export const prepareRandomPick = async (
   const coverKey = releaseCoverKey(record.id, info.master_id)
   const src = await queryClient
     .fetchQuery(
-      coverArtQueryOptions(coverKey, leadArtist(info.artists), info.title),
+      coverArtQueryOptions(coverKey, recordCredits(info.artists), info.title),
     )
     .catch(() => null)
   if (src && (await preloadCover(src)))

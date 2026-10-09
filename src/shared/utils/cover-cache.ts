@@ -3,7 +3,7 @@
 // sleeve gets another chance if Deezer adds the album.
 
 // Bump with the matching algorithm: every lookup, here and in memory, is redone
-export const COVER_LOOKUP_VERSION = 'v4'
+export const COVER_LOOKUP_VERSION = 'v5'
 const PREFIX = `sillon-cover:${COVER_LOOKUP_VERSION}:`
 export const NO_MATCH_TTL_MS = 30 * 24 * 60 * 60 * 1000
 

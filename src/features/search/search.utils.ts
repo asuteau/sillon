@@ -1,3 +1,4 @@
+import { CREDIT_JOIN } from '#/shared/utils/artist-name'
 import { extractColors } from '#/shared/utils/extractColors'
 
 const COLOR_MAP: Record<string, string> = {
@@ -67,8 +68,6 @@ export const isCompilation = (formats: string[]): boolean =>
 
 const escapeRegExp = (text: string): string =>
   text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-const CREDIT_JOIN = String.raw`\s(?:\/|\+|&|x|with|meets|vs\.?|and|feat\.?|featuring)\s|,\s`
 
 export type CreditReading = 'credited' | 'unclear' | 'uncredited'
 

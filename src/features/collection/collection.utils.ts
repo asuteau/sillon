@@ -12,7 +12,7 @@ export function formatArtists(artists: { name: string }[]): string {
   return artists.map((a) => stripDisambiguator(a.name)).join(', ')
 }
 
-// The first credited artist, for Covers and House sleeves
+// The first credited artist, for House sleeves
 export function leadArtist(artists: { name: string }[]): string {
   return stripDisambiguator(artists[0]?.name ?? '')
 }

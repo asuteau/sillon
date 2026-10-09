@@ -1,0 +1,688 @@
+{
+  "artist:\"t e l e p a t h テレパシー能力者\" album:\"信仰\"": {
+    "data": []
+  },
+  "album:\"信仰\"": {
+    "data": [
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "木锦"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/a62bff22cd5c78ca97af68ce0ca16b7c/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰 (R&B)",
+        "artist": {
+          "name": "郑润泽"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/eae82d945fbba479da1f3dd3fe2f4234/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "月亮代表我的心"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/db9d44f3081d219b66a539fee6f913b9/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "卢卢（虚拟歌手）"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/57d65fc5ea036be316774f69fd70e43b/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "洋澜一"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/7e729355968a4051c16c2bc4733b5498/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "吉时享Yue"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/7d7e703b239f775d84cb6ae47e0723b4/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰 (R&B版)",
+        "artist": {
+          "name": "林诗曼"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/34fc14492840718b1c362666c47ede49/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "谢尔特"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/0485503955f7cdf2b90be694e1a5d150/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰 (烟嗓女版)",
+        "artist": {
+          "name": "金冬妍"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/82cd25a4a9d89e3ada4611f64bfc805e/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "信仰",
+        "artist": {
+          "name": "小阿枫"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/39623fa3a3f07db6a431e49189cb21bc/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "t e l e p a t h テレパシー能力者 信仰": {
+    "data": [
+      {
+        "title": "ロストエデンへのパス",
+        "artist": {
+          "name": "Nmesh"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f6af0b658285d0d9bf87811801d0f84a/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "時が我らを隔てる唯一のものであるならば、隔てるものなど何もない",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/107bbde85c87a544db060a1cfd841344/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "愛慕 ／ 悲哀",
+        "artist": {
+          "name": "HKE"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/07579ab2e09999602ec68e1d689c306d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Building a Better World",
+        "artist": {
+          "name": "猫 シ Corp."
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/e819709408558f0d0ddbe1023beaa833/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "来たれあなたは私をすべてのものから遠ざけこの世界で一人にした",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/bd0e462e726c69d1c03102836bd422f2/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "アンドロメダ",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/b056a4156b06d8c2d83c05e0141378e9/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "アンタラ通信",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/9af52c6e7cce17991706131f43738dbe/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Eternity",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/dcf02c43fd9908ecd3bcf1c76e6553a5/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "君のいない世界でまた一日が過ぎた",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/3d6c0fb7633970eb82a7d98d3f533c5d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "夜明けが訪れる",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/942a15416d4cb3915f26921137d9f9f4/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"t e l e p a t h\" album:\"A\"": {
+    "data": [
+      {
+        "title": "n eo d _ m a xi m o d",
+        "artist": {
+          "name": "AFTERVOLTER"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1d320d37eee1c482a07a247a010dd978/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Building a Better World",
+        "artist": {
+          "name": "猫 シ Corp."
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/e819709408558f0d0ddbe1023beaa833/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "album:\"A\"": {
+    "data": [
+      {
+        "title": "A LA VIE A LA MORT",
+        "artist": {
+          "name": "SDM"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/640220bd3d80561118391eef3a24fb53/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "One More Light",
+        "artist": {
+          "name": "Linkin Park"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/70cb26795a89b8be835667d762cb39fc/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Ladies & Gentlemen",
+        "artist": {
+          "name": "George Michael"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/4c9fd7e1257024bff5be2a795fc7e5ca/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Breakfast In America (Deluxe Edition)",
+        "artist": {
+          "name": "Supertramp"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/fee526711039ce10381a3091204faca4/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Mise à jour",
+        "artist": {
+          "name": "Jul"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/b2cdd210d46acac0e3751ef259c151af/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "À LA FRANÇAISE",
+        "artist": {
+          "name": "Hiba Tawaji"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/76cdde9c24b5970f31ff41e58edac88f/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Steal This Album!",
+        "artist": {
+          "name": "System of a Down"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/c7ebea8ff81c8934916a1b102f52918f/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "THIS & THAT",
+        "artist": {
+          "name": "Stray Kids"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/84ed07b8a200ffbf6676eba8cbb1647c/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Gravé dans la roche",
+        "artist": {
+          "name": "Sniper"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/4b5f39442c3d743e0e9fff603d9adf8d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Sweetener",
+        "artist": {
+          "name": "Ariana Grande"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/ec1976679a176cb4f448b12ce5966802/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "t e l e p a t h A": {
+    "data": [
+      {
+        "title": "Telepathy",
+        "artist": {
+          "name": "DECO*27"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/e08feac40e6561e651a9bc861aa47f89/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Telepath",
+        "artist": {
+          "name": "Conan Gray"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/4da0456ff3991f245be9f5d985ae7a37/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "ロストエデンへのパス",
+        "artist": {
+          "name": "Nmesh"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f6af0b658285d0d9bf87811801d0f84a/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Telepathic",
+        "artist": {
+          "name": "Massano"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/732195f863d5cc9dac19df0011fdea47/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Telepathy",
+        "artist": {
+          "name": "Bill Stewart"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1dac2d8d2cafed9ba166bd2b814d0291/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "時が我らを隔てる唯一のものであるならば、隔てるものなど何もない",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/107bbde85c87a544db060a1cfd841344/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Telepathy",
+        "artist": {
+          "name": "Carlita"
+        },
+        "cover_xl": null
+      },
+      {
+        "title": "Telepatía",
+        "artist": {
+          "name": "Santi & Tugce"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/e3b6fb1881d059f4e0e367773d312b43/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "愛慕 ／ 悲哀",
+        "artist": {
+          "name": "HKE"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/07579ab2e09999602ec68e1d689c306d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Telepat",
+        "artist": {
+          "name": "Klik & Frik"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/3f39983b06ebdd014bf9c84b8d44a2bd/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"t e l e p a t h テレパシー能力者\" album:\"永遠の愛\"": {
+    "data": []
+  },
+  "album:\"永遠の愛\"": {
+    "data": [
+      {
+        "title": "永遠の愛",
+        "artist": {
+          "name": "Airi Hoshizora"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/db18df16fde481b9b6f9a54b96d83773/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛",
+        "artist": {
+          "name": "Tiny Frank"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/cdc4cee11a6a4174af283428bf87cc28/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Start Again — 永遠の愛",
+        "artist": {
+          "name": "NAGIRO"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/ca7fa43aabd4170ac3495104309cfc38/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "うたかたの約束-永遠の愛",
+        "artist": {
+          "name": "velvet 404"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/3f23be630b17b9f07d2ba232d1b1d82d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛 Eternal Love",
+        "artist": {
+          "name": "Mira Sato"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1116ab56cfa26e8f8ec046990a123ca5/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛",
+        "artist": {
+          "name": "ジャズ音楽アカデミー"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/c55d3aec036e06748e65a858b97e48d0/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛",
+        "artist": {
+          "name": "DJ Kosho"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/d1bd97eca01dde6d01f6bf06ed4fd8e5/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛",
+        "artist": {
+          "name": "Trading Tunez"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/a5e2c849a261ffac724a834e1914f64d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛 (Eternal Love)",
+        "artist": {
+          "name": "Kairo-J"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/a0247aa037f546d29f8cdd3dac65e7c8/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "永遠の愛",
+        "artist": {
+          "name": "Rocking Metronomo"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/39bbbe547704956ea8bca946b2c85947/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "t e l e p a t h テレパシー能力者 永遠の愛": {
+    "data": []
+  },
+  "artist:\"t e l e p a t h テレパシー能力者\" album:\"アンタラ通信\"": {
+    "data": [
+      {
+        "title": "アンタラ通信",
+        "artist": {
+          "name": "t e l e p a t h テレパシー能力者"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/9af52c6e7cce17991706131f43738dbe/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Nmesh\" album:\"ロストエデンへのパス\"": {
+    "data": [
+      {
+        "title": "ロストエデンへのパス",
+        "artist": {
+          "name": "Nmesh"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f6af0b658285d0d9bf87811801d0f84a/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"w i n t e r q u i l t\" album:\"O'discordia\"": {
+    "data": []
+  },
+  "album:\"O'discordia\"": {
+    "data": [
+      {
+        "title": "Folk Discòrdia o l’Art del Fracàs",
+        "artist": {
+          "name": "Terra i Sal"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/7cae09da7c29d3f35cf77738606dce13/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "O Pomo da Discórdia",
+        "artist": {
+          "name": "LO CAOS 333"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/77fd5178a4ff5a2842d01a0c20f42ba1/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "O'discordia",
+        "artist": {
+          "name": "Winterquilt"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/80782bae47b6b7fb6ec68a7971906067/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "O'discordia (Remixes)",
+        "artist": {
+          "name": "Winterquilt"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/76f68e86f470ffff33a38031954d9763/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "O Discordia",
+        "artist": {
+          "name": "Christian Gonzalez"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/554cfc812d61e541163c86f81d0833d6/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Fortuna o Discordia",
+        "artist": {
+          "name": "Periferia"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/9ee10989da37e26cd8eeb637e7e96b45/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "O Presente da Discórdia",
+        "artist": {
+          "name": "GS Os Morenos A. R. C."
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/d27986cf4d5322c8fd015ebe105e7103/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "O pix da discordia",
+        "artist": {
+          "name": "Léozinho"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/198ab5abde50e0e2c06b5d698e05cebb/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "É o Corsão Da Discórdia",
+        "artist": {
+          "name": "DJ MALVADÃO ORIGINAL"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1ae55b3f11276f11afd11475d4640ec9/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Korn\" album:\"Follow The Leader\"": {
+    "data": []
+  },
+  "album:\"Follow The Leader\"": {
+    "data": [
+      {
+        "title": "Follow The Leader 2",
+        "artist": {
+          "name": "Various Artists"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1b34ce417574596d849bbc1f1e3e1306/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow the leader",
+        "artist": {
+          "name": "Andrew Grogan"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/81a4740dfc3a46df7670f4230bfa8096/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow the leader",
+        "artist": {
+          "name": "Chris Ellavar"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/6496baf9a527e4ef49e8162824341a53/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow the Leader (The Remixes)",
+        "artist": {
+          "name": "DJ Divine-1"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/1a81d7531f72e7185217d7b13ba0f546/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow the Leader",
+        "artist": {
+          "name": "Jaw Breaker"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/61c980769ed28dcf184d9eaf26fd1e5e/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow The Leader",
+        "artist": {
+          "name": "Kimani CEE"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/f76999b7636f5624c3dec7d464ce9fdf/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow the Leader (God Has a Plan for Me) [Hyfi Preschool]",
+        "artist": {
+          "name": "Lifeway Kids Worship"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/64283377316458afb3e46b16178c5559/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Follow The Leader",
+        "artist": {
+          "name": "Lazarus"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/964ec8852219faf5d1e38c5dd8440e7e/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "follow the leader",
+        "artist": {
+          "name": "EMK"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/754d29570ea0b3389f68ba59cf002808/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "FOLLOW THE LEADER FUN PARADE",
+        "artist": {
+          "name": "Williana GG"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/385e956e6e535416f948c323bd41e179/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "Korn Follow The Leader": {
+    "data": [
+      {
+        "title": "Follow The Leader",
+        "artist": {
+          "name": "KoЯn"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/35111a59f5d5ef0bf5a7ba2f3a203b25/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Claudio Simonetti's Goblin\" album:\"Profondo Rosso\"": {
+    "data": [
+      {
+        "title": "Profondo Rosso (Joe T Vannelli Remix)",
+        "artist": {
+          "name": "Claudio Simonetti's Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/d4bb6e684039a7b79ff67818f393cb42/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Profondo Rosso (Remix Part 2)",
+        "artist": {
+          "name": "Claudio Simonetti's Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/4e17a07eb709bf6e656f03f210e625a6/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Profondo rosso",
+        "artist": {
+          "name": "Claudio Simonetti's Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/e06d198fbd3902683e7d7a7379ee0f86/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Goblin\" album:\"Suspiria\"": {
+    "data": [
+      {
+        "title": "Suspiria (Colonna sonora originale del film Suspiria)",
+        "artist": {
+          "name": "Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/05997bba3bf6e3a38f0186b19bc46f6b/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Suspiria (40th Anniversary) (Original Motion Picture Soundtrack)",
+        "artist": {
+          "name": "Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/24ee786447a21425cf4c1e80936a7d20/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Suspiria",
+        "artist": {
+          "name": "Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/8a96c54c5c2a3f257e1cd0a3e850c92d/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Suspiria (Prog Rock Version)",
+        "artist": {
+          "name": "Claudio Simonetti's Goblin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/0f6049e4b9c12a5ba0b694aa9b76967a/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Sigur Rós\" album:\"Ágætis Byrjun\"": {
+    "data": [
+      {
+        "title": "Ágætis byrjun (A Good Beginning) (20th Anniversary Deluxe Edition)",
+        "artist": {
+          "name": "Sigur Rós"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/6f536b9aa9f7fa705801ff29a7d298bf/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Ágætis byrjun",
+        "artist": {
+          "name": "Sigur Rós"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/ae60fc6b15e0a01a4d1dfb1e42104cb9/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Ágætis byrjun (1998 Demo)",
+        "artist": {
+          "name": "Sigur Rós"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/523af293bad5620b643fc481a7b7b0b5/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Led Zeppelin\" album:\"Led Zeppelin IV\"": {
+    "data": [
+      {
+        "title": "Led Zeppelin IV (Remaster)",
+        "artist": {
+          "name": "Led Zeppelin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/2047754dc07232def42ec26a9a854544/1000x1000-000000-80-0-0.jpg"
+      },
+      {
+        "title": "Led Zeppelin IV (Deluxe Edition)",
+        "artist": {
+          "name": "Led Zeppelin"
+        },
+        "cover_xl": "https://cdn-images.dzcdn.net/images/cover/460a0edd96f743be03b7405eac38c633/1000x1000-000000-80-0-0.jpg"
+      }
+    ]
+  },
+  "artist:\"Bruit ≤\" album:\"The Machine Is Burning And Now Everyone Knows It Could Happen Again\"": {
+    "data": []
+  },
+  "album:\"The Machine Is Burning And Now Everyone Knows It Could Happen Again\"": {
+    "data": []
+  },
+  "Bruit ≤ The Machine Is Burning And Now Everyone Knows It Could Happen Again": {
+    "data": []
+  }
+}

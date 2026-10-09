@@ -65,7 +65,7 @@ A record not sanctioned by the artist or their label (bootlegs, unlicensed press
 _Avoid_: Bootleg, pirate
 
 **Cover**:
-The HD artwork shown for a record, always from Deezer. Discogs images are never shown: they are community-uploaded, uneven in quality and per-Release. It belongs to the Master: every Release of a Master shows the same Cover, on every screen. A Release without a Master has its own Cover.
+The HD artwork shown for a record, always from Deezer. Discogs images are never shown: they are community-uploaded, uneven in quality and per-Release. It belongs to the Master: every Release of a Master shows the same Cover, on every screen. A Release without a Master has its own Cover. Deezer artwork becomes the Cover only when it is clearly the same record — same title, and an artist credited on the record — whatever the script; when in doubt the record gets a House sleeve, since a wrong Cover passes one record off as another.
 _Avoid_: Artwork, image, thumb
 
 **House sleeve**:
@@ -85,6 +85,10 @@ _Avoid_: Initials, avatar placeholder
 **Name variation**:
 Another name an artist is credited under on some records ("t e l e p a t h", "KoЯn"), as listed by Discogs. A Name variation can be another artist's real name, so it identifies the artist only when the credit is marked as a variation.
 _Avoid_: Alias (Discogs uses that for a different project by the same person), ANV
+
+**Lead credit**:
+The first artist credited on a record, as printed on it — Name variation included ("Nmesh" on "Nmesh And t e l e p a t h テレパシー能力者 – ロストエデンへのパス"). What Sillon looks a Cover up by, whichever screen asks, so a Master always resolves to the same Cover.
+_Avoid_: Main artist, primary artist
 
 ### Sorting
 
