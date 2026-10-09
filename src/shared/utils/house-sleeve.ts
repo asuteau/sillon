@@ -14,7 +14,7 @@ export const SLEEVE_LAYOUTS = [
 
 export type SleeveLayout = (typeof SLEEVE_LAYOUTS)[number]
 
-// Greyscale grounds and inks; lacquer is the only accent. Fixed values, not
+// Greyscale grounds and inks; lacquer is the only brand material. Fixed values, not
 // theme tokens: a sleeve is an object and looks the same in light and dark.
 export const SLEEVE_COMPOSITIONS = [
   { name: 'paper', ground: '#efede8', ink: '#0d0d0e' },

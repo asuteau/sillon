@@ -14,7 +14,7 @@ export type GrooveTone = 'lacquer' | 'current'
 interface GrooveMarkProps {
   /** Rendered size in px; also sets the turns and stroke width */
   size: number
-  /** `lacquer` only on brand moments (icon, splash); `current` follows text colour */
+  /** `lacquer` only on brand moments (icon, splash, landing close); `current` follows text colour */
   tone?: GrooveTone
   /** Accessible name; omit when the mark is decorative */
   label?: string

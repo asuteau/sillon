@@ -1,23 +1,49 @@
 // @vitest-environment jsdom
-import { render, screen, within } from '@testing-library/react'
+import { act, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import {
+  GROOVE_INNER_RADIUS,
+  GROOVE_OUTER_RADIUS,
+  grooveSpiralPath,
+} from '#/shared/utils/groove-spiral'
 
 import { LandingPage } from './LandingPage'
 
 const renderLanding = () => render(<LandingPage />)
 
-// jsdom has neither; the hero animation reads both
+interface StubObserver {
+  callback: IntersectionObserverCallback
+  targets: Element[]
+  isDisconnected: boolean
+}
+
+let reducedMotion = false
+let observers: StubObserver[] = []
+
+// jsdom has neither; the hero animation and the closing groove read both
 beforeEach(() => {
+  reducedMotion = false
+  observers = []
   vi.stubGlobal('matchMedia', () => ({
-    matches: false,
+    matches: reducedMotion,
     addEventListener: () => {},
     removeEventListener: () => {},
   }))
   vi.stubGlobal(
     'IntersectionObserver',
     class {
-      observe() {}
-      disconnect() {}
+      stub: StubObserver
+      constructor(callback: IntersectionObserverCallback) {
+        this.stub = { callback, targets: [], isDisconnected: false }
+        observers.push(this.stub)
+      }
+      observe(target: Element) {
+        this.stub.targets.push(target)
+      }
+      disconnect() {
+        this.stub.isDisconnected = true
+      }
     },
   )
 })
@@ -32,6 +58,36 @@ const sectionHeadings = () =>
     .getAllByRole('heading', { level: 2 })
     .filter((heading) => !heading.closest('[inert]'))
     .map((heading) => heading.textContent)
+
+const ctaSection = () =>
+  screen.getByRole('region', { name: 'Bring your crates.' })
+
+const closingGroove = () => {
+  const groove = ctaSection().querySelector('svg')
+  if (!groove) throw new Error('No groove in the closing section')
+  return groove
+}
+
+const ctaObserver = () => {
+  const observer = observers.find((o) => o.targets.includes(ctaSection()))
+  if (!observer) throw new Error('The closing section is not observed')
+  return observer
+}
+
+const reportCta = (isIntersecting: boolean) => {
+  const observer = ctaObserver()
+  act(() =>
+    observer.callback(
+      [
+        {
+          isIntersecting,
+          target: ctaSection(),
+        } as Partial<IntersectionObserverEntry> as IntersectionObserverEntry,
+      ],
+      {} as IntersectionObserver,
+    ),
+  )
+}
 
 describe('LandingPage', () => {
   it('opens on the hero: headline, the name and the CTA', () => {
@@ -96,5 +152,53 @@ describe('LandingPage', () => {
     expect(text).not.toMatch(
       /\b(wishlist|library|shelf|shuffle|surprise me|artwork|placeholder|owned want|completed want)\b/i,
     )
+  })
+
+  describe('closing groove', () => {
+    it('is a 96px groove in lacquer tone', () => {
+      renderLanding()
+      const groove = closingGroove()
+      const path = groove.querySelector('path')
+      expect(groove.getAttribute('width')).toBe('96')
+      expect(path?.getAttribute('d')).toBe(
+        grooveSpiralPath({
+          turns: 9,
+          innerRadius: GROOVE_INNER_RADIUS,
+          outerRadius: GROOVE_OUTER_RADIUS,
+        }),
+      )
+      expect(path?.getAttribute('stroke')).toMatch(/^url\(#/)
+    })
+
+    it('stays undrawn until the section scrolls into view', () => {
+      renderLanding()
+      expect(closingGroove().classList).toContain('groove-undrawn')
+      reportCta(false)
+      expect(closingGroove().classList).toContain('groove-undrawn')
+      expect(closingGroove().classList).not.toContain('groove-draw-in')
+    })
+
+    it('draws in once on the first intersecting entry, then stops observing', () => {
+      renderLanding()
+      reportCta(true)
+      const groove = closingGroove()
+      expect(groove.classList).toContain('groove-draw-in')
+      expect(groove.classList).not.toContain('groove-undrawn')
+      expect(ctaObserver().isDisconnected).toBe(true)
+
+      reportCta(false)
+      reportCta(true)
+      expect(closingGroove()).toBe(groove)
+      expect(groove.classList).toContain('groove-draw-in')
+    })
+
+    it('fades the full groove in with reduced motion, no draw-in', () => {
+      reducedMotion = true
+      renderLanding()
+      reportCta(true)
+      expect(closingGroove().classList).toContain('groove-fade-in')
+      expect(closingGroove().classList).not.toContain('groove-undrawn')
+      expect(closingGroove().classList).not.toContain('groove-draw-in')
+    })
   })
 })
