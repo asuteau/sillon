@@ -10,7 +10,11 @@ import {
   searchArtists,
   searchMasters,
 } from './search.api'
-import type { BarcodeResult, DiscographyFormat } from './search.schema'
+import type {
+  BarcodeResult,
+  DiscographyArtist,
+  DiscographyFormat,
+} from './search.schema'
 
 export const mastersQueryOptions = (q: string) =>
   queryOptions({
@@ -44,15 +48,15 @@ export const artistsQueryOptions = (q: string) =>
   })
 
 export const artistMastersQueryOptions = (
-  artistName: string,
+  artist: DiscographyArtist | undefined,
   format: DiscographyFormat | null,
   enabled = true,
 ) =>
   queryOptions({
-    queryKey: ['search', 'artistMasters', artistName, format] as const,
-    queryFn: () => getArtistMasters({ data: { artistName, format } }),
-    enabled,
-    // Up to 10 Discogs requests per artist, and discographies rarely change
+    queryKey: ['search', 'artistMasters', artist?.id, format] as const,
+    queryFn: () => getArtistMasters({ data: { artist: artist!, format } }),
+    enabled: artist !== undefined && enabled,
+    // Up to 11 Discogs requests per artist plus one per unclear credit, and discographies rarely change
     staleTime: 24 * 60 * 60 * 1000,
   })
 

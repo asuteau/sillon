@@ -74,8 +74,6 @@ export type Artist = {
 export type ArtistDiscographyItem = {
   id: number
   title: string
-  // Raw Discogs artist credit, disambiguation included, to tell homonyms apart
-  credit: string
   year: number | null
   formats: string[]
 }
@@ -97,7 +95,6 @@ export function toArtistDiscographyItem(
   return {
     id: raw.id,
     title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
-    credit: dashIdx >= 0 ? raw.title.slice(0, dashIdx) : '',
     year: raw.year ? parseInt(raw.year, 10) || null : null,
     formats: raw.format ?? [],
   }

@@ -12,15 +12,20 @@ import type {
   ArtistMasters,
   ArtistSearchPage,
   BarcodeResult,
+  DiscographyArtist,
   DiscographyFormat,
+  MasterResult,
   ReleaseDetail,
   SearchPage,
   VersionsPage,
 } from './search.schema'
+import { readCredit } from './search.utils'
+import { stripDisambiguator } from '#/shared/utils/artist-name'
 import {
   ArtistDetailSchema,
   ArtistSearchPageSchema,
   BarcodeResultSchema,
+  MasterArtistsSchema,
   PaginatedSchema,
   ReleaseDetailSchema,
   SearchPageSchema,
@@ -272,10 +277,37 @@ export const getArtistDetail = createServerFn()
     return ArtistDetailSchema.parse(json)
   })
 
+// Who a Master credits never changes, so each Master is looked up once per server
+const masterArtistIds = new Map<number, Promise<number[]>>()
+
+const getMasterArtistIds = (
+  masterId: number,
+  tokens: DiscogsTokens,
+): Promise<number[]> => {
+  const cached = masterArtistIds.get(masterId)
+  if (cached) return cached
+  const ids = discogsGet(
+    `${DISCOGS_API}/masters/${masterId}`,
+    tokens,
+    'Discogs master fetch',
+  ).then((json) =>
+    MasterArtistsSchema.parse(json).artists.map((artist) => artist.id),
+  )
+  ids.catch(() => masterArtistIds.delete(masterId))
+  masterArtistIds.set(masterId, ids)
+  return ids
+}
+
+const creditedName = (result: MasterResult): string => {
+  const dashIdx = result.title.indexOf(' - ')
+  return dashIdx >= 0 ? result.title.slice(0, dashIdx) : ''
+}
+
 // Search by name rather than artist ID: it returns Masters only, with their Main release tags
 export const getArtistMasters = createServerFn()
   .inputValidator(
-    (data: { artistName: string; format: DiscographyFormat | null }) => data,
+    (data: { artist: DiscographyArtist; format: DiscographyFormat | null }) =>
+      data,
   )
   .handler(async ({ data }): Promise<ArtistMasters> => {
     const { useAppSession } = await import('#/services/session.server')
@@ -285,26 +317,51 @@ export const getArtistMasters = createServerFn()
     if (!accessToken || !accessTokenSecret) {
       return { results: [], truncated: false }
     }
+    const tokens = { accessToken, accessTokenSecret }
+    const { artist, format } = data
 
-    const params = new URLSearchParams({
-      artist: data.artistName,
-      type: 'master',
-      sort: 'year',
-      sort_order: 'desc',
-      per_page: '100',
-    })
-    if (data.format) params.set('format', data.format)
+    const searchAll = (field: 'artist' | 'q') => {
+      const params = new URLSearchParams({
+        [field]: stripDisambiguator(artist.name),
+        type: 'master',
+        sort: 'year',
+        sort_order: 'desc',
+        per_page: '100',
+      })
+      if (format) params.set('format', format)
+      return discogsGetAllPages(
+        (page) =>
+          `${DISCOGS_API}/database/search?${params.toString()}&page=${page}`,
+        tokens,
+        'Discogs artist masters search',
+      )
+    }
 
-    const { pages, truncated } = await discogsGetAllPages(
-      (page) =>
-        `${DISCOGS_API}/database/search?${params.toString()}&page=${page}`,
-      { accessToken, accessTokenSecret },
-      'Discogs artist masters search',
+    // The artist filter misses names with words of several CJK characters ("テレパシー能力者"),
+    // free text finds them, and credits weed out the Masters that only mention the name
+    let search = await searchAll('artist')
+    if (PaginatedSchema.parse(search.pages[0]).pagination.items === 0) {
+      search = await searchAll('q')
+    }
+
+    const results = search.pages.flatMap(
+      (json) => SearchPageSchema.parse(json).results,
+    )
+    const readings = results.map((result) =>
+      readCredit(creditedName(result), artist),
+    )
+    // Collaborations and names containing the artist's are settled by the Master's artist IDs
+    const credited = await Promise.all(
+      results.map(async (result, i) =>
+        readings[i] === 'unclear'
+          ? (await getMasterArtistIds(result.id, tokens)).includes(artist.id)
+          : readings[i] === 'credited',
+      ),
     )
 
     return {
-      results: pages.flatMap((json) => SearchPageSchema.parse(json).results),
-      truncated,
+      results: results.filter((_, i) => credited[i]),
+      truncated: search.truncated,
     }
   })
 
