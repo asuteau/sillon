@@ -89,7 +89,9 @@ export const LegalPage = () => (
           30 days, holds your Discogs sign-in token, username, currency and
           location, so Sillon can read and edit your Discogs account for you.
           Local storage remembers which Cover goes with which record, and your
-          theme.
+          theme. Your Collection list is kept on your device for up to 6 hours
+          after it was read from Discogs, so Sillon opens without reading it all
+          again.
         </p>
         <p>
           <strong>No tracking.</strong> No analytics, no ads, no third-party
@@ -104,9 +106,10 @@ export const LegalPage = () => (
         </p>
         <p>
           <strong>Your rights.</strong> Sillon uses this data only to provide
-          the service you asked for. Logging out deletes the session cookie;
-          clearing site data removes the rest. For any question or request under
-          the GDPR, write to <ContactLink />.
+          the service you asked for. Logging out deletes the session cookie and
+          the Collection list kept on your device; clearing site data removes
+          the rest. For any question or request under the GDPR, write to{' '}
+          <ContactLink />.
         </p>
       </Section>
 

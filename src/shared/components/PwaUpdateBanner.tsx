@@ -19,7 +19,8 @@ export const PwaUpdateBanner = () => {
   const handleDismiss = () => setDismissed(true)
 
   return (
-    <div className="flex items-center justify-between gap-2 bg-[#8B7FE8] px-4 py-2 text-sm text-white">
+    // Solid --primary like the default button: neutral, inverted per theme
+    <div className="flex items-center justify-between gap-2 bg-primary px-4 py-2 text-sm text-primary-foreground">
       <button
         type="button"
         onClick={handleUpdate}
@@ -31,7 +32,7 @@ export const PwaUpdateBanner = () => {
         type="button"
         onClick={handleDismiss}
         aria-label="Dismiss"
-        className="shrink-0 rounded p-0.5 hover:bg-white/20"
+        className="shrink-0 rounded-full p-1 hover:bg-primary-foreground/15"
       >
         <X size={14} />
       </button>

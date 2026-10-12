@@ -1,5 +1,8 @@
 import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
-import { collectionQueryOptions } from '#/features/collection/collection.queries'
+import {
+  collectionQueryOptions,
+  isPersistedListSort,
+} from '#/features/collection/collection.queries'
 import { formatDateAdded } from '#/features/collection/collection.utils'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { RecordList } from '#/shared/components/RecordList'
@@ -28,6 +31,11 @@ import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   validateSearch: listSortSchema,
+  // The newest-first list loads on the client, which may restore it from the
+  // device instead of asking Discogs
+  ssr: ({ search }) =>
+    search.status !== 'success' ||
+    !isPersistedListSort(resolveListSort(search.value)),
   loaderDeps: ({ search }) => resolveListSort(search),
   loader: ({ context: { queryClient }, deps }) =>
     queryClient.prefetchInfiniteQuery(collectionQueryOptions(deps)),

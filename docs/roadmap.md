@@ -1006,11 +1006,16 @@ useMutation({
 })
 ```
 
-### 5.2 Profile page
+### 5.2 Portrait
 
-- Collection stats (total value, genres, decades, dominant labels)
-- Simple charts (Recharts or pure CSS)
-- Disconnect button
+See **Portrait** in `CONTEXT.md` and parent issue #49. A view of the Collection as a whole, at `/portrait`: header icon button (mobile and desktop) plus a "Portrait" nav link on desktop. BottomNav stays at 4 tabs.
+
+- Headline figures Discogs gives whole, shown at once: Estimated value (median + range), Record count
+- Figures that need every Copy read, shown together once all are read: Top artists, Top styles, Pressing decade, Additions by year
+- Charts hand-built in HTML/CSS/SVG, typeset in the design system — no Recharts, no chart library for now
+- Logout at the Portrait's foot (no longer in the header); ThemeToggle stays in the header
+- One Discogs attribution for the whole Portrait, linking to the user's Discogs collection
+- No teaser on Home: the header's Portrait button is the way in
 
 ### 5.3 Quick check "already in my collection?"
 
@@ -1027,7 +1032,7 @@ Dropped: the Discogs API terms list using the API "with the intent to drive traf
 
 **Trigger**: "Pick for me" (`Shuffle` icon + label) in two places, hidden when the Collection is empty:
 
-- Home — `RandomPickCard` between `MetricsStrip` and Recently Added (primary entry)
+- Home — `RandomPickCard` above Recent additions (primary entry)
 - Collection page — `RandomPickButton` beside the title (secondary)
 
 Not in the global header: it is a Collection action, not app chrome. Not in `SortChips`: it is not an ordering.

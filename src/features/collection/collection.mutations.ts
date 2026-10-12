@@ -11,10 +11,11 @@ import {
 import { adjustProfileCount } from '#/features/profile/profile.queries'
 import { patchBarcodeUserData } from '#/features/search/search.queries'
 
+import { getCollection } from './collection.api'
 import {
+  addCopyToLists,
   collectionListQueryKey,
   collectionValueQueryOptions,
-  recentAdditionsQueryOptions,
   removeCopyFromLists,
 } from './collection.queries'
 
@@ -128,8 +129,16 @@ export function useAddToCollection() {
   const user = useMatch({ from: '__root__', select: (m) => m.context.user })
 
   return useMutation({
-    mutationFn: (releaseId: number) => addToCollection({ data: { releaseId } }),
-    onSuccess: (_, releaseId) => {
+    mutationFn: async (releaseId: number) => {
+      const { instanceId } = await addToCollection({ data: { releaseId } })
+      // One read gives the whole new Copy, to patch the lists with
+      const newest = await getCollection({
+        data: { perPage: 1, sort: 'added', order: 'desc' },
+      }).catch(() => null)
+      const copy = newest?.releases[0]
+      return copy?.instance_id === instanceId ? copy : null
+    },
+    onSuccess: (copy, releaseId) => {
       patchBarcodeUserData(queryClient, releaseId, { in_collection: true })
       if (user) {
         adjustProfileCount(queryClient, user.username, 'recordCount', 1)
@@ -137,12 +146,14 @@ export function useAddToCollection() {
           queryKey: collectionValueQueryOptions(user.username).queryKey,
         })
       }
-      queryClient.invalidateQueries({
-        queryKey: collectionListQueryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: recentAdditionsQueryOptions.queryKey,
-      })
+      if (copy) addCopyToLists(queryClient, copy)
+      // The read lagged behind the add: rereading now could miss it again,
+      // so the lists refetch on next visit
+      else
+        queryClient.invalidateQueries({
+          queryKey: collectionListQueryKey,
+          refetchType: 'none',
+        })
     },
   })
 }

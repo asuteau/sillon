@@ -7,6 +7,7 @@ import { grooveSpiralPath } from '#/shared/utils/groove-spiral'
 import { CollectionIcon } from './CollectionIcon'
 import { FulfilledWantIcon } from './FulfilledWantIcon'
 import { HomeIcon } from './HomeIcon'
+import { PortraitIcon } from './PortraitIcon'
 import { RandomPickIcon } from './RandomPickIcon'
 import { ScanIcon } from './ScanIcon'
 import { SearchIcon } from './SearchIcon'
@@ -20,6 +21,7 @@ const ICONS = [
   ['Scan', ScanIcon],
   ['RandomPick', RandomPickIcon],
   ['Search', SearchIcon],
+  ['Portrait', PortraitIcon],
 ] as const
 
 const svgOf = (container: HTMLElement) => {

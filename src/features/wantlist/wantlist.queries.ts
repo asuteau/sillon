@@ -9,11 +9,19 @@ import type { WantlistItem, WantlistPage } from './wantlist.schema'
 // Prefix shared by every sorted list, used for invalidation
 export const wantlistListQueryKey = ['wantlist', 'list'] as const
 
+// Discogs' largest page: fewest requests to read the whole Wantlist
+const WANTLIST_PER_PAGE = 100
+
 export const wantlistQueryOptions = (listSort: ListSort) =>
   infiniteQueryOptions({
-    queryKey: [...wantlistListQueryKey, { perPage: 20, ...listSort }],
+    queryKey: [
+      ...wantlistListQueryKey,
+      { perPage: WANTLIST_PER_PAGE, ...listSort },
+    ],
     queryFn: ({ pageParam }) =>
-      getWantlist({ data: { perPage: 20, page: pageParam, ...listSort } }),
+      getWantlist({
+        data: { perPage: WANTLIST_PER_PAGE, page: pageParam, ...listSort },
+      }),
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.pages

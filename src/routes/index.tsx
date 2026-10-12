@@ -7,9 +7,8 @@ import { RecordSpotlight } from '#/features/collection/components/RecordSpotligh
 import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { LandingPage } from '#/features/landing/components/LandingPage'
-import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
 import { ScanFab } from '#/shared/components/ScanFab'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Page } from '#/shared/components/Page'
@@ -20,15 +19,16 @@ export { recentAdditionsQueryOptions }
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { user, queryClient } }) => {
-    if (!user) return null
-    return queryClient.prefetchQuery(recentAdditionsQueryOptions)
+    // Left to the client, which may restore it from the device
+    if (!user || typeof window === 'undefined') return null
+    return queryClient.prefetchInfiniteQuery(recentAdditionsQueryOptions)
   },
   component: App,
 })
 
 function App() {
   const { user } = Route.useRouteContext()
-  const { data } = useQuery({
+  const { data } = useInfiniteQuery({
     ...recentAdditionsQueryOptions,
     enabled: !!user,
   })
@@ -39,15 +39,14 @@ function App() {
 
   return (
     <Page>
-      <MetricsStrip username={user.username} />
-
       {data && data.releases.length > 0 && <RandomPickCard />}
 
       <h1 className="type-display mb-6 text-4xl text-foreground">
         Recent additions
       </h1>
 
-      {!data || data.releases.length === 0 ? (
+      {/* Not loaded yet, server-side or restoring from the device: say nothing */}
+      {!data ? null : data.releases.length === 0 ? (
         <p className="text-muted-foreground">
           No records in your collection yet.
         </p>

@@ -1,6 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
+import { collectionPersistence } from '#/features/collection/collection.persist'
 import { AppShellPending } from '#/shared/components/AppShellPending'
 import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
 import { NotFound } from '#/shared/components/NotFound'
@@ -8,6 +9,7 @@ import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
   const queryClient = new QueryClient()
+  if (typeof window !== 'undefined') collectionPersistence.connect(queryClient)
 
   const router = createRouter({
     routeTree,

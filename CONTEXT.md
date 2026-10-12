@@ -105,6 +105,26 @@ The sort order a sort key starts with when chosen: descending for `added` and `y
 
 ### Metrics
 
+**Portrait**:
+A view of the Collection as a whole — who, what, when, how much — built from every Copy. Covers the Collection only, never the Wantlist. A figure that needs every Copy read appears only once all are read, never partial; figures Discogs gives whole (Estimated value, Record count) appear at once.
+_Avoid_: Stats, Insights, Dashboard
+
+**Top artists**:
+The artists the Collection holds the most Copies of. Every main artist credited on a record counts, splits and collaborations included, so one Copy can count for several artists. Artists are told apart by who they are, not by name: Name variations count for the artist they stand for, homonyms stay apart. "Various" is not an artist. The ten artists with the most Copies, ties A→Z; an artist with a single Copy is never a top artist, so the list can hold fewer than ten.
+_Avoid_: Favourite artists, most played
+
+**Top styles**:
+The Discogs styles (Shoegaze, Hard Bop, Deep House…) the Collection holds the most Copies of. A Copy counts once for each style it carries. Styles, not Discogs' broad genres (Rock, Electronic…), which say too little about a collection. The ten styles with the most Copies, ties A→Z.
+_Avoid_: Top genres, favourite genres
+
+**Pressing decade**:
+The decade a Copy's Release was pressed in, not when the music first came out: a 2016 reissue of a 1959 album counts in the 2010s. Copies whose Release has no year are left out and counted apart.
+_Avoid_: Decade, era, release decade
+
+**Additions by year**:
+The Copies in the Collection grouped by the year they were added to Discogs — not when they were bought. Only Copies still in the Collection count, so it is not a history of the Collection: a removed Copy leaves no trace.
+_Avoid_: Growth, purchases by year, collection history
+
 **Estimated value**:
 Discogs' marketplace-based estimate of what the Collection is worth, in the user's Discogs currency. Headline is the median; the minimum–maximum range is shown alongside to signal uncertainty. Not what the user paid.
 _Avoid_: Collection value, worth, price
@@ -134,5 +154,5 @@ _Avoid_: Market value, estimate
 ### Sources
 
 **Discogs attribution**:
-The "Data provided by Discogs" line shown at the foot of each block of Discogs data (Collection, Wantlist, Recent additions, Random pick, record screen, artist, search), linking to the discogs.com page holding that same data. One per block, never per record, never a single global line.
+The "Data provided by Discogs" line shown at the foot of each block of Discogs data (Collection, Wantlist, Recent additions, Random pick, Portrait, record screen, artist, search), linking to the discogs.com page holding that same data. One per block, never per record, never a single global line.
 _Avoid_: Credit (that word means an artist credited on a record), source link

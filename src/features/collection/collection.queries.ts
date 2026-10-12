@@ -3,7 +3,11 @@ import {
   getCollection,
   getCollectionValue,
 } from './collection.api'
-import { infiniteQueryOptions, queryOptions } from '@tanstack/react-query'
+import {
+  hashKey,
+  infiniteQueryOptions,
+  queryOptions,
+} from '@tanstack/react-query'
 import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import { getDeezerCover } from '#/services/deezer.api'
 import {
@@ -17,6 +21,7 @@ import { preloadCover } from '#/shared/utils/cover-preload'
 import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
+import { collectionPersistence } from './collection.persist'
 import type { CollectionPage, CollectionRelease } from './collection.schema'
 
 // Only changes with the Collection itself — mutations invalidate it
@@ -27,35 +32,35 @@ export const collectionValueQueryOptions = (username: string) =>
     staleTime: 60 * 60 * 1000,
   })
 
-const RECENT_ADDITIONS_COUNT = 10
-
-// Over-fetched so removals (patched from cache, see removeCopyFromLists) let
-// the next Copy slide in instead of shrinking the list
-export const recentAdditionsQueryOptions = queryOptions({
-  queryKey: ['collection', { perPage: RECENT_ADDITIONS_COUNT * 2 }],
-  queryFn: () =>
-    getCollection({
-      data: {
-        perPage: RECENT_ADDITIONS_COUNT * 2,
-        sort: 'added',
-        order: 'desc',
-      },
-    }),
-  select: (page): CollectionPage => ({
-    ...page,
-    releases: page.releases.slice(0, RECENT_ADDITIONS_COUNT),
-  }),
-  staleTime: 10 * 60 * 1000,
-})
-
 // Prefix shared by every sorted list, used for invalidation
 export const collectionListQueryKey = ['collection', 'list'] as const
 
+// Discogs' largest page: fewest requests to read the whole Collection
+const COLLECTION_PER_PAGE = 100
+
+/** A page stamped with when it was asked of Discogs, to tell its age */
+export type CollectionListPage = CollectionPage & { fetchedAt: number }
+
+// The newest-first list is the one Collection cache, persisted on device
+export const isPersistedListSort = ({ sort, order }: ListSort) =>
+  sort === 'added' && order === 'desc'
+
 export const collectionQueryOptions = (listSort: ListSort) =>
   infiniteQueryOptions({
-    queryKey: [...collectionListQueryKey, { perPage: 20, ...listSort }],
-    queryFn: ({ pageParam }) =>
-      getCollection({ data: { perPage: 20, page: pageParam, ...listSort } }),
+    queryKey: [
+      ...collectionListQueryKey,
+      { perPage: COLLECTION_PER_PAGE, ...listSort },
+    ],
+    queryFn: async ({ pageParam }): Promise<CollectionListPage> => {
+      const fetchedAt = Date.now()
+      const page = await getCollection({
+        data: { perPage: COLLECTION_PER_PAGE, page: pageParam, ...listSort },
+      })
+      return { ...page, fetchedAt }
+    },
+    persister: isPersistedListSort(listSort)
+      ? collectionPersistence.persister
+      : undefined,
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.pages
@@ -63,7 +68,30 @@ export const collectionQueryOptions = (listSort: ListSort) =>
         : undefined,
     staleTime: 10 * 60 * 1000,
     refetchOnMount: false,
+    // A refetch re-reads every loaded page back to back, unpaced: a read
+    // Collection would spend most of Discogs' minute on one tab focus
+    refetchOnWindowFocus: false,
   })
+
+export type CollectionPages = InfiniteData<CollectionListPage, number>
+
+// The one Collection cache: Collection page, Recent additions and Portrait
+export const newestFirstQueryOptions = collectionQueryOptions({
+  sort: 'added',
+  order: 'desc',
+})
+
+const RECENT_ADDITIONS_COUNT = 10
+
+// The first page of the newest-first Collection list: both share one cache,
+// and its 100 Copies let the next one slide in on removal
+export const recentAdditionsQueryOptions = infiniteQueryOptions({
+  ...newestFirstQueryOptions,
+  select: (data): CollectionPage => ({
+    releases: data.pages[0].releases.slice(0, RECENT_ADDITIONS_COUNT),
+    pagination: data.pages[0].pagination,
+  }),
+})
 
 // Credits: every artist credited on the record, Lead credit first
 export const coverArtQueryOptions = (
@@ -127,35 +155,76 @@ export const prepareRandomPick = async (
   return record
 }
 
-const withoutCopy = (
-  page: CollectionPage,
-  instanceId: number,
-): CollectionPage => ({
-  releases: page.releases.filter((r) => r.instance_id !== instanceId),
+const adjustItems = (
+  page: CollectionListPage,
+  delta: 1 | -1,
+): CollectionListPage => ({
+  ...page,
   pagination: {
     ...page.pagination,
-    items: Math.max(0, page.pagination.items - 1),
+    items: Math.max(0, page.pagination.items + delta),
   },
 })
 
 // Discogs reads lag behind writes, so cached lists are patched from the
 // mutation result instead of refetched
+export function addCopyToLists(
+  queryClient: QueryClient,
+  copy: CollectionRelease,
+) {
+  const isCopy = (r: CollectionRelease) => r.instance_id === copy.instance_id
+
+  queryClient.setQueryData<CollectionPages>(
+    newestFirstQueryOptions.queryKey,
+    (old) => {
+      if (!old || old.pages.some((page) => page.releases.some(isCopy)))
+        return old
+      // Each page's last Copy moves onto the next, as Discogs' pages will,
+      // so the next page fetched starts where the last loaded one ends
+      let carried = copy
+      return {
+        ...old,
+        pages: old.pages.map((page, index) => {
+          const releases = [carried, ...page.releases]
+          const isLastLoaded = index === old.pages.length - 1
+          const hasNext = page.pagination.page < page.pagination.pages
+          if (!isLastLoaded || hasNext) carried = releases.pop()!
+          return adjustItems({ ...page, releases }, 1)
+        }),
+      }
+    },
+  )
+  // Other sorts can't place the new Copy: refetch them on next visit only
+  queryClient.invalidateQueries({
+    queryKey: collectionListQueryKey,
+    predicate: (query) =>
+      query.queryHash !== hashKey(newestFirstQueryOptions.queryKey),
+    refetchType: 'none',
+  })
+}
+
 export function removeCopyFromLists(
   queryClient: QueryClient,
   instanceId: number,
 ) {
-  queryClient.setQueriesData<InfiniteData<CollectionPage, number>>(
+  queryClient.setQueriesData<CollectionPages>(
     { queryKey: collectionListQueryKey },
     (old) =>
       old
         ? {
             ...old,
-            pages: old.pages.map((page) => withoutCopy(page, instanceId)),
+            pages: old.pages.map((page) =>
+              adjustItems(
+                {
+                  ...page,
+                  releases: page.releases.filter(
+                    (r) => r.instance_id !== instanceId,
+                  ),
+                },
+                -1,
+              ),
+            ),
           }
         : old,
-  )
-  queryClient.setQueryData<CollectionPage>(
-    recentAdditionsQueryOptions.queryKey,
-    (old) => (old ? withoutCopy(old, instanceId) : old),
   )
 }
