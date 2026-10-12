@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query'
 import type { QueryClient } from '@tanstack/react-query'
+import { DISCOGS_MAX_AGE_MS } from '#/shared/utils/discogs-freshness'
 
 import {
   fetchDiscogsBarcode,
@@ -57,7 +58,7 @@ export const artistMastersQueryOptions = (
     queryFn: () => getArtistMasters({ data: { artist: artist!, format } }),
     enabled: artist !== undefined && enabled,
     // Up to 11 Discogs requests per artist plus one per unclear credit, and discographies rarely change
-    staleTime: 24 * 60 * 60 * 1000,
+    staleTime: DISCOGS_MAX_AGE_MS,
   })
 
 export const artistDetailQueryOptions = (artistId: string) =>
@@ -71,11 +72,11 @@ export const barcodeSearchQueryOptions = (barcode: string) =>
   queryOptions({
     queryKey: ['search', 'barcode', barcode] as const,
     queryFn: () => fetchDiscogsBarcode({ data: { barcode } }),
-    staleTime: Infinity,
+    staleTime: DISCOGS_MAX_AGE_MS,
     enabled: barcode.length > 0,
   })
 
-// Barcode results never go stale, so list changes must be patched into them
+// Barcode results stay fresh for hours, so list changes must be patched into them
 export const patchBarcodeUserData = (
   queryClient: QueryClient,
   releaseId: number,
