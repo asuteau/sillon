@@ -466,7 +466,7 @@
 }
 
 /* Portrait: scan-based sections reveal together once every Copy is read; the
-   hairline bars draw in from the start like the groove */
+   ranking bars draw in from the start like the groove */
 .portrait-reveal {
   animation: groove-fade 160ms var(--ease-fade) both;
 }
