@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -32,6 +32,19 @@ const READ: CollectionScan = {
   topStyles: [
     { name: 'Grunge', copies: 14 },
     { name: 'Nu Metal', copies: 3 },
+  ],
+  pressingDecades: {
+    decades: [
+      { decade: 1990, copies: 9 },
+      { decade: 2000, copies: 0 },
+      { decade: 2010, copies: 5 },
+    ],
+    noYear: 42,
+  },
+  additionsByYear: [
+    { year: 2024, copies: 7 },
+    { year: 2025, copies: 0 },
+    { year: 2026, copies: 4 },
   ],
 }
 
@@ -102,6 +115,8 @@ describe('PortraitPageView', () => {
     expect(screen.queryByText('Top artists')).toBeNull()
     expect(screen.queryByText('Top styles')).toBeNull()
     expect(screen.queryByText('Nirvana')).toBeNull()
+    expect(screen.queryByText('Pressing decade')).toBeNull()
+    expect(screen.queryByText('Additions by year')).toBeNull()
   })
 
   it('offers to read on when a page fails', () => {
@@ -155,5 +170,61 @@ describe('PortraitPageView', () => {
 
     expect(screen.queryByText('Top artists')).toBeNull()
     expect(screen.getByText('Top styles')).toBeTruthy()
+  })
+
+  it('charts Pressing decade, gaps included, as a list of values', () => {
+    render(<PortraitPageView {...FIGURES} isEmpty={false} />)
+
+    const items = within(
+      screen.getByRole('list', { name: 'Pressing decade' }),
+    ).getAllByRole('listitem')
+    expect(items.map((item) => item.textContent)).toEqual([
+      expect.stringContaining('1990s: 9 records'),
+      expect.stringContaining('2000s: 0 records'),
+      expect.stringContaining('2010s: 5 records'),
+    ])
+    expect(screen.getByText('42 records with no year')).toBeTruthy()
+  })
+
+  it('hides the no-year note when every Copy has a year', () => {
+    render(
+      <PortraitPageView
+        {...FIGURES}
+        isEmpty={false}
+        scan={{
+          ...READ,
+          pressingDecades: { ...READ.pressingDecades, noYear: 0 },
+        }}
+      />,
+    )
+
+    expect(screen.getByText('Pressing decade')).toBeTruthy()
+    expect(screen.queryByText(/with no year/)).toBeNull()
+  })
+
+  it('notes no-year Copies even with no decade to chart', () => {
+    render(
+      <PortraitPageView
+        {...FIGURES}
+        isEmpty={false}
+        scan={{ ...READ, pressingDecades: { decades: [], noYear: 1 } }}
+      />,
+    )
+
+    expect(screen.queryByRole('list', { name: 'Pressing decade' })).toBeNull()
+    expect(screen.getByText('1 record with no year')).toBeTruthy()
+  })
+
+  it('charts Additions by year, gaps included', () => {
+    render(<PortraitPageView {...FIGURES} isEmpty={false} />)
+
+    const items = within(
+      screen.getByRole('list', { name: 'Additions by year' }),
+    ).getAllByRole('listitem')
+    expect(items.map((item) => item.textContent)).toEqual([
+      expect.stringContaining('2024: 7 records'),
+      expect.stringContaining('2025: 0 records'),
+      expect.stringContaining('2026: 4 records'),
+    ])
   })
 })

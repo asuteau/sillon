@@ -147,12 +147,12 @@ Fast and quiet: fades by default, two signatures, nothing else.
 
 The same draw-in plays **once** on the landing (`.groove-draw-in`): in the hero's intro (text colour), and on the closing mark above "Bring your crates." (96px, lacquer tone). The closing mark stays undrawn (`.groove-undrawn`) until its section scrolls into view, then draws in and stops observing; it never replays during the page view.
 
-The Portrait's ranking bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`).
+The Portrait's ranking bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`). The time charts' columns (Pressing decade, Additions by year) draw up from the baseline the same way (`.portrait-column`), neutral, no copper.
 
 Rules:
 
 - No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
-- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars show whole as their section fades in.
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in.
 
 ---
 

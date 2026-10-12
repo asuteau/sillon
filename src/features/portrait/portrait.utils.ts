@@ -13,3 +13,6 @@ export const formatEstimatedValue = (
     range: `${formatAmount(value.minimum, currency, locale)} – ${formatAmount(value.maximum, currency, locale)}`,
   }
 }
+
+export const formatRecords = (count: number) =>
+  `${count.toLocaleString()} ${count === 1 ? 'record' : 'records'}`

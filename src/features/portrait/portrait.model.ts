@@ -57,6 +57,58 @@ export const topStyles = (releases: CollectionRelease[]): TopStyle[] => {
     .slice(0, TOP_COUNT)
 }
 
+export type DecadeCount = { decade: number; copies: number }
+export type YearCount = { year: number; copies: number }
+export type PressingDecades = {
+  /** First to last decade, gaps as zero */
+  decades: DecadeCount[]
+  /** Copies whose Release has no year (Discogs' 0), left out */
+  noYear: number
+}
+
+// Every step from the first key to the last, gaps as zero
+const fillSteps = (counts: Map<number, number>, step: number) => {
+  if (counts.size === 0) return []
+  const keys = [...counts.keys()]
+  const first = Math.min(...keys)
+  const last = Math.max(...keys)
+  return Array.from({ length: (last - first) / step + 1 }, (_, i) => {
+    const key = first + i * step
+    return { key, copies: counts.get(key) ?? 0 }
+  })
+}
+
+const increment = (counts: Map<number, number>, key: number) =>
+  counts.set(key, (counts.get(key) ?? 0) + 1)
+
+// The Release year, not the original year: a 2016 reissue counts in the 2010s
+export const pressingDecades = (
+  releases: CollectionRelease[],
+): PressingDecades => {
+  const counts = new Map<number, number>()
+  let noYear = 0
+  for (const release of uniqueCopies(releases)) {
+    const { year } = release.basic_information
+    if (year > 0) increment(counts, Math.floor(year / 10) * 10)
+    else noYear++
+  }
+  return {
+    decades: fillSteps(counts, 10).map(({ key, copies }) => ({
+      decade: key,
+      copies,
+    })),
+    noYear,
+  }
+}
+
+// The year added to Discogs, as Discogs dates it, not when it was bought
+export const additionsByYear = (releases: CollectionRelease[]): YearCount[] => {
+  const counts = new Map<number, number>()
+  for (const release of uniqueCopies(releases))
+    increment(counts, Number(release.date_added.slice(0, 4)))
+  return fillSteps(counts, 1).map(({ key, copies }) => ({ year: key, copies }))
+}
+
 // One page per 1.5s: at most 40 of Discogs' 60 requests a minute, leaving
 // headroom for the rest of the app
 export const SCAN_PACE_MS = 1500

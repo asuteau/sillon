@@ -482,6 +482,17 @@
   }
 }
 
+.portrait-column {
+  transform-origin: bottom;
+  animation: portrait-column-draw-up 800ms var(--ease-platter) both;
+}
+
+@keyframes portrait-column-draw-up {
+  from {
+    transform: scaleY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Every bottom sheet fades; data-slot outranks vaul's selector */
   [data-slot='drawer-content'][data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='open'] {
@@ -503,7 +514,8 @@
   }
 
   /* The section's fade carries the reveal */
-  .portrait-bar {
+  .portrait-bar,
+  .portrait-column {
     animation: none;
   }
 }

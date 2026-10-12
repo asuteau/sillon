@@ -5,17 +5,31 @@ import { newestFirstQueryOptions } from '#/features/collection/collection.querie
 import type { CollectionPages } from '#/features/collection/collection.queries'
 
 import {
+  additionsByYear,
   nextReadDelay,
+  pressingDecades,
   scanProgress,
   topArtists,
   topStyles,
 } from '../portrait.model'
-import type { ScanProgress, TopArtist, TopStyle } from '../portrait.model'
+import type {
+  PressingDecades,
+  ScanProgress,
+  TopArtist,
+  TopStyle,
+  YearCount,
+} from '../portrait.model'
 
 export type CollectionScan =
   | ({ status: 'reading' } & ScanProgress)
   | ({ status: 'failed' } & ScanProgress)
-  | { status: 'read'; topArtists: TopArtist[]; topStyles: TopStyle[] }
+  | {
+      status: 'read'
+      topArtists: TopArtist[]
+      topStyles: TopStyle[]
+      pressingDecades: PressingDecades
+      additionsByYear: YearCount[]
+    }
 
 // Reads the whole Collection through the shared Collection list cache, one
 // paced page at a time, from wherever it stands. Figures come only once every
@@ -74,6 +88,8 @@ export const useCollectionScan = (
       status: 'read',
       topArtists: topArtists(releases),
       topStyles: topStyles(releases),
+      pressingDecades: pressingDecades(releases),
+      additionsByYear: additionsByYear(releases),
     }
   }, [data, isError, isRead])
 

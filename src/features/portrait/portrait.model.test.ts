@@ -4,7 +4,9 @@ import type { CollectionListPage } from '#/features/collection/collection.querie
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 
 import {
+  additionsByYear,
   nextReadDelay,
+  pressingDecades,
   SCAN_PACE_MS,
   scanProgress,
   topArtists,
@@ -18,16 +20,21 @@ let nextInstance = 1
 const copy = ({
   artists = [],
   styles = [],
+  year = 0,
+  added = '2020-01-01T00:00:00-08:00',
   instanceId = nextInstance++,
 }: {
   artists?: Credit[]
   styles?: string[]
+  year?: number
+  added?: string
   instanceId?: number
 }) =>
   ({
     id: instanceId,
     instance_id: instanceId,
-    basic_information: { artists, styles },
+    date_added: added,
+    basic_information: { artists, styles, year },
   }) as unknown as CollectionRelease
 
 const times = (n: number, make: () => CollectionRelease) =>
@@ -274,5 +281,72 @@ describe('nextReadDelay', () => {
 
   it('reads at once when the last page is older than the pace', () => {
     expect(nextReadDelay(0, 60_000)).toBe(0)
+  })
+})
+
+describe('pressingDecades', () => {
+  it('counts Copies per decade of the Release year', () => {
+    const copies = [
+      copy({ year: 1991 }),
+      copy({ year: 1999 }),
+      copy({ year: 2016 }),
+    ]
+
+    expect(pressingDecades(copies)).toEqual({
+      decades: [
+        { decade: 1990, copies: 2 },
+        { decade: 2000, copies: 0 },
+        { decade: 2010, copies: 1 },
+      ],
+      noYear: 0,
+    })
+  })
+
+  it('leaves no-year Copies out and counts them apart', () => {
+    const copies = [copy({ year: 1975 }), copy({ year: 0 }), copy({ year: 0 })]
+
+    expect(pressingDecades(copies)).toEqual({
+      decades: [{ decade: 1970, copies: 1 }],
+      noYear: 2,
+    })
+  })
+
+  it('has no decades when no Copy has a year', () => {
+    expect(pressingDecades([copy({ year: 0 })])).toEqual({
+      decades: [],
+      noYear: 1,
+    })
+  })
+
+  it('counts a Copy read twice once', () => {
+    const copies = [
+      copy({ year: 1991, instanceId: 7 }),
+      copy({ year: 1991, instanceId: 7 }),
+    ]
+
+    expect(pressingDecades(copies).decades).toEqual([
+      { decade: 1990, copies: 1 },
+    ])
+  })
+})
+
+describe('additionsByYear', () => {
+  it('counts Copies per year added, gaps as zero', () => {
+    const copies = [
+      copy({ added: '2026-03-04T10:00:00-07:00' }),
+      copy({ added: '2023-12-31T23:59:59-08:00' }),
+      copy({ added: '2023-01-01T00:00:00-08:00' }),
+    ]
+
+    expect(additionsByYear(copies)).toEqual([
+      { year: 2023, copies: 2 },
+      { year: 2024, copies: 0 },
+      { year: 2025, copies: 0 },
+      { year: 2026, copies: 1 },
+    ])
+  })
+
+  it('is empty for no Copies', () => {
+    expect(additionsByYear([])).toEqual([])
   })
 })

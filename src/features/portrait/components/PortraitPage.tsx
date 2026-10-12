@@ -9,8 +9,9 @@ import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
 import { useCollectionScan } from '../hooks/use-collection-scan'
 import type { CollectionScan } from '../hooks/use-collection-scan'
-import { formatEstimatedValue } from '../portrait.utils'
+import { formatEstimatedValue, formatRecords } from '../portrait.utils'
 import { RankedList } from './RankedList'
+import { TimeChart } from './TimeChart'
 
 const UNAVAILABLE = '—'
 
@@ -134,7 +135,7 @@ const Figure = ({ label, value, hint }: FigureProps) => (
 const formatProgress = ({ read, total }: { read: number; total?: number }) =>
   total === undefined
     ? 'Reading records…'
-    : `Reading ${read.toLocaleString()} / ${total.toLocaleString()} records`
+    : `Reading ${read.toLocaleString()} / ${formatRecords(total)}`
 
 interface ScanFiguresProps {
   scan: CollectionScan
@@ -199,6 +200,31 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
             key: style.name,
             count: style.copies,
             label: style.name,
+          }))}
+        />
+      )}
+      {(scan.pressingDecades.decades.length > 0 ||
+        scan.pressingDecades.noYear > 0) && (
+        <TimeChart
+          title="Pressing decade"
+          entries={scan.pressingDecades.decades.map(({ decade, copies }) => ({
+            key: decade,
+            label: `${decade}s`,
+            count: copies,
+          }))}
+          note={
+            scan.pressingDecades.noYear > 0 &&
+            `${formatRecords(scan.pressingDecades.noYear)} with no year`
+          }
+        />
+      )}
+      {scan.additionsByYear.length > 0 && (
+        <TimeChart
+          title="Additions by year"
+          entries={scan.additionsByYear.map(({ year, copies }) => ({
+            key: year,
+            label: String(year),
+            count: copies,
           }))}
         />
       )}
