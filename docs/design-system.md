@@ -157,7 +157,7 @@ Rules:
 
 ### Custom (`src/shared/components/icons/`)
 
-Seven icons in the groove's line language, built on `Icon`: 24px grid, 1.5 stroke, round caps and joins, `currentColor`. Same props as lucide, so the two swap freely. Decorative unless given `aria-label`. Paths come from `docs/brand/specimens/sillon-icons.html`.
+Eight icons in the groove's line language, built on `Icon`: 24px grid, 1.5 stroke, round caps and joins, `currentColor`. Same props as lucide, so the two swap freely. Decorative unless given `aria-label`. Paths come from `docs/brand/specimens/sillon-icons.html`.
 
 | Icon                | Drawing                                        |
 | ------------------- | ---------------------------------------------- |
@@ -168,6 +168,7 @@ Seven icons in the groove's line language, built on `Icon`: 24px grid, 1.5 strok
 | `ScanIcon`          | A barcode spaced like grooves, in a viewfinder |
 | `RandomPickIcon`    | A needle dropping onto a groove                |
 | `SearchIcon`        | A lens with one groove                         |
+| `PortraitIcon`      | A portrait frame holding one groove            |
 
 These are the domain's own actions and places; they carry the brand.
 

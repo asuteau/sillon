@@ -7,7 +7,7 @@ import { RecordSpotlight } from '#/features/collection/components/RecordSpotligh
 import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { LandingPage } from '#/features/landing/components/LandingPage'
-import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
+import { PortraitTeaser } from '#/features/portrait/components/PortraitTeaser'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -39,7 +39,7 @@ function App() {
 
   return (
     <Page>
-      <MetricsStrip username={user.username} />
+      <PortraitTeaser username={user.username} />
 
       {data && data.releases.length > 0 && <RandomPickCard />}
 

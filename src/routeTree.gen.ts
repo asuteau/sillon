@@ -15,6 +15,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as AuthenticatedCollectionRouteImport } from './routes/_authenticated/collection'
+import { Route as AuthenticatedPortraitRouteImport } from './routes/_authenticated/portrait'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedWantlistRouteImport } from './routes/_authenticated/wantlist'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
@@ -50,6 +51,11 @@ const AuthenticatedCollectionRoute = AuthenticatedCollectionRouteImport.update({
   path: '/collection',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPortraitRoute = AuthenticatedPortraitRouteImport.update({
+  id: '/portrait',
+  path: '/portrait',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   id: '/search',
   path: '/search',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/legal': typeof LegalRoute
   '/offline': typeof OfflineRoute
   '/collection': typeof AuthenticatedCollectionRoute
+  '/portrait': typeof AuthenticatedPortraitRoute
   '/search': typeof AuthenticatedSearchRoute
   '/wantlist': typeof AuthenticatedWantlistRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/legal': typeof LegalRoute
   '/offline': typeof OfflineRoute
   '/collection': typeof AuthenticatedCollectionRoute
+  '/portrait': typeof AuthenticatedPortraitRoute
   '/search': typeof AuthenticatedSearchRoute
   '/wantlist': typeof AuthenticatedWantlistRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/legal': typeof LegalRoute
   '/offline': typeof OfflineRoute
   '/_authenticated/collection': typeof AuthenticatedCollectionRoute
+  '/_authenticated/portrait': typeof AuthenticatedPortraitRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/wantlist': typeof AuthenticatedWantlistRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/offline'
     | '/collection'
+    | '/portrait'
     | '/search'
     | '/wantlist'
     | '/auth/callback'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/offline'
     | '/collection'
+    | '/portrait'
     | '/search'
     | '/wantlist'
     | '/auth/callback'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/legal'
     | '/offline'
     | '/_authenticated/collection'
+    | '/_authenticated/portrait'
     | '/_authenticated/search'
     | '/_authenticated/wantlist'
     | '/auth/callback'
@@ -209,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCollectionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/portrait': {
+      id: '/_authenticated/portrait'
+      path: '/portrait'
+      fullPath: '/portrait'
+      preLoaderRoute: typeof AuthenticatedPortraitRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/search': {
       id: '/_authenticated/search'
       path: '/search'
@@ -249,12 +268,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCollectionRoute: typeof AuthenticatedCollectionRoute
+  AuthenticatedPortraitRoute: typeof AuthenticatedPortraitRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedWantlistRoute: typeof AuthenticatedWantlistRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCollectionRoute: AuthenticatedCollectionRoute,
+  AuthenticatedPortraitRoute: AuthenticatedPortraitRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedWantlistRoute: AuthenticatedWantlistRoute,
 }

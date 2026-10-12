@@ -2,62 +2,18 @@ import { Moon, Sun, SunMoon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { buttonVariants } from '#/shared/components/ui/button'
+import { applyThemeMode, readThemeMode } from '#/shared/utils/theme'
+import type { ThemeMode } from '#/shared/utils/theme'
 
-type ThemeMode = 'light' | 'dark' | 'auto'
-
-function getInitialMode(): ThemeMode {
-  if (typeof window === 'undefined') {
-    return 'auto'
-  }
-
-  const stored = window.localStorage.getItem('theme')
-  if (stored === 'light' || stored === 'dark' || stored === 'auto') {
-    return stored
-  }
-
-  return 'auto'
-}
-
-function applyThemeMode(mode: ThemeMode) {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  const resolved = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode
-
-  document.documentElement.classList.remove('light', 'dark')
-  document.documentElement.classList.add(resolved)
-
-  if (mode === 'auto') {
-    document.documentElement.removeAttribute('data-theme')
-  } else {
-    document.documentElement.setAttribute('data-theme', mode)
-  }
-
-  document.documentElement.style.colorScheme = resolved
-}
-
-export default function ThemeToggle() {
+export const ThemeToggle = () => {
   const [mode, setMode] = useState<ThemeMode>('auto')
 
+  // The stored mode is only readable once mounted (SSR)
   useEffect(() => {
-    const initialMode = getInitialMode()
-    setMode(initialMode)
-    applyThemeMode(initialMode)
+    setMode(readThemeMode())
   }, [])
 
-  useEffect(() => {
-    if (mode !== 'auto') {
-      return
-    }
-
-    const media = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = () => applyThemeMode('auto')
-
-    media.addEventListener('change', onChange)
-    return () => {
-      media.removeEventListener('change', onChange)
-    }
-  }, [mode])
-
-  function toggleMode() {
+  const toggleMode = () => {
     const nextMode: ThemeMode =
       mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light'
     setMode(nextMode)
@@ -78,12 +34,8 @@ export default function ThemeToggle() {
       title={label}
       className={buttonVariants({ variant: 'outline', size: 'sm' })}
     >
-      <span className="sm:hidden">
-        {mode === 'auto' ? <SunMoon /> : mode === 'dark' ? <Moon /> : <Sun />}
-      </span>
-      <span className="hidden sm:inline">
-        {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
-      </span>
+      {mode === 'auto' ? <SunMoon /> : mode === 'dark' ? <Moon /> : <Sun />}
+      {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}
     </button>
   )
 }

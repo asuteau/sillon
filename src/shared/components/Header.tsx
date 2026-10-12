@@ -1,12 +1,11 @@
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatch } from '@tanstack/react-router'
-import { LogOut } from 'lucide-react'
 import { CountBadge } from './CountBadge'
 import { GrooveMark } from './brand/GrooveMark'
+import { PortraitIcon } from './icons/PortraitIcon'
 import { Wordmark } from './brand/Wordmark'
 import { ScanButton } from './ScanButton'
-import ThemeToggle from './ThemeToggle'
 import { buttonVariants } from './ui/button'
 
 // Active state from the router's data-status; underline fades in
@@ -54,6 +53,9 @@ export default function Header() {
                 Wantlist
                 <CountBadge count={wantlistCount} />
               </Link>
+              <Link to="/portrait" className={NAV_LINK_CLASSES}>
+                Portrait
+              </Link>
             </>
           )}
           {/* The liner notes are on the landing page only */}
@@ -75,16 +77,14 @@ export default function Header() {
               <ScanButton />
             </div>
           )}
-          <ThemeToggle />
           {user ? (
-            <a
-              href="/auth/logout"
+            <Link
+              to="/portrait"
               className={buttonVariants({ variant: 'outline', size: 'sm' })}
-              aria-label={`Logout ${user.username}`}
+              aria-label="Your portrait"
             >
-              <LogOut className="sm:hidden" />
-              <span className="hidden sm:inline">{user.username} · Logout</span>
-            </a>
+              <PortraitIcon />
+            </Link>
           ) : (
             <a
               href="/auth/login"
