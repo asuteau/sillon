@@ -68,11 +68,15 @@ export const collectionQueryOptions = (listSort: ListSort) =>
         : undefined,
     staleTime: 10 * 60 * 1000,
     refetchOnMount: false,
+    // A refetch re-reads every loaded page back to back, unpaced: a read
+    // Collection would spend most of Discogs' minute on one tab focus
+    refetchOnWindowFocus: false,
   })
 
 export type CollectionPages = InfiniteData<CollectionListPage, number>
 
-const newestFirstQueryOptions = collectionQueryOptions({
+// The one Collection cache: Collection page, Recent additions and Portrait
+export const newestFirstQueryOptions = collectionQueryOptions({
   sort: 'added',
   order: 'desc',
 })

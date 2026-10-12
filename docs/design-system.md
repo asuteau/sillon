@@ -139,6 +139,7 @@ Fast and quiet: fades by default, two signatures, nothing else.
 | Cover → detail              | 320ms open, 280ms close                          | `--ease-platter` = `cubic-bezier(.65,0,.15,1)`         |
 | Groove loader               | ~800ms draw-in, short hold, loops (1100ms cycle) | platter                                                |
 | Groove draw-in (landing)    | ~800ms draw-in, once                             | platter                                                |
+| Groove draw-in (Portrait)   | ~800ms draw-in, once, on reveal                  | platter                                                |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero uses `growCover` for the same move inside one page.
 
@@ -146,10 +147,12 @@ Fast and quiet: fades by default, two signatures, nothing else.
 
 The same draw-in plays **once** on the landing (`.groove-draw-in`): in the hero's intro (text colour), and on the closing mark above "Bring your crates." (96px, lacquer tone). The closing mark stays undrawn (`.groove-undrawn`) until its section scrolls into view, then draws in and stops observing; it never replays during the page view.
 
+The Portrait's hairline bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`).
+
 Rules:
 
 - No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
-- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`).
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars show whole as their section fades in.
 
 ---
 

@@ -13,30 +13,29 @@ vi.mock('#/services/session', () => ({}))
 const NOW = 1_000_000_000_000
 const HOUR = 60 * 60 * 1000
 
-const page = (fetchedAt: number, ids: number[] = [1]): CollectionListPage =>
-  ({
-    releases: ids.map((id) => ({
-      id,
-      instance_id: id,
-      folder_id: 1,
-      date_added: '2026-10-12T10:00:00-07:00',
-      basic_information: {
-        title: 'Title',
-        year: 1979,
-        artists: [{ name: 'Artist' }],
-        cover_image: '',
-        thumb: '',
-        styles: [],
-        formats: [],
-        labels: [],
-      },
-    })),
-    pagination: { page: 1, pages: 1, items: ids.length },
-    fetchedAt,
-  })
+const page = (fetchedAt: number, ids: number[] = [1]): CollectionListPage => ({
+  releases: ids.map((id) => ({
+    id,
+    instance_id: id,
+    folder_id: 1,
+    date_added: '2026-10-12T10:00:00-07:00',
+    basic_information: {
+      title: 'Title',
+      year: 1979,
+      artists: [{ id: 1, name: 'Artist' }],
+      cover_image: '',
+      thumb: '',
+      styles: [],
+      formats: [],
+      labels: [],
+    },
+  })),
+  pagination: { page: 1, pages: 1, items: ids.length },
+  fetchedAt,
+})
 
 const entry = (username: string, ...fetchedAt: number[]) => ({
-  version: 1,
+  version: 2,
   username,
   data: {
     pages: fetchedAt.map((at) => page(at, [7])),
@@ -167,7 +166,7 @@ describe('collection persistence', () => {
   })
 
   it('ignores a stored copy of the wrong shape', async () => {
-    const { store } = memoryStore({ version: 1, username: 'ana', data: {} })
+    const { store } = memoryStore({ version: 2, username: 'ana', data: {} })
     const { queryClient, queryFn, options } = setup(store)
 
     await queryClient.fetchInfiniteQuery(options)

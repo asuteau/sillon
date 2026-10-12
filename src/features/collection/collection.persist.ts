@@ -18,7 +18,7 @@ import { CollectionPageSchema } from './collection.schema'
 // The Collection list cache kept on device, so a relaunch skips the rescan
 // (ADR 0004). Bump the version when the stored shape changes.
 const STORAGE_KEY = 'collection-list'
-const VERSION = 1
+const VERSION = 2
 
 const PersistedCollectionSchema = z.object({
   version: z.literal(VERSION),

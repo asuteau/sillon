@@ -465,6 +465,23 @@
   }
 }
 
+/* Portrait: scan-based sections reveal together once every Copy is read; the
+   hairline bars draw in from the start like the groove */
+.portrait-reveal {
+  animation: groove-fade 160ms var(--ease-fade) both;
+}
+
+.portrait-bar {
+  transform-origin: left;
+  animation: portrait-bar-draw-in 800ms var(--ease-platter) both;
+}
+
+@keyframes portrait-bar-draw-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Every bottom sheet fades; data-slot outranks vaul's selector */
   [data-slot='drawer-content'][data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='open'] {
@@ -482,6 +499,11 @@
   .groove-loader path,
   .groove-draw-in path {
     stroke-dasharray: none;
+    animation: none;
+  }
+
+  /* The section's fade carries the reveal */
+  .portrait-bar {
     animation: none;
   }
 }

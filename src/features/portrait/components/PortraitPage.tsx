@@ -4,10 +4,13 @@ import { Link } from '@tanstack/react-router'
 import { collectionValueQueryOptions } from '#/features/collection/collection.queries'
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
-import { buttonVariants } from '#/shared/components/ui/button'
+import { Button, buttonVariants } from '#/shared/components/ui/button'
 import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
+import { useCollectionScan } from '../hooks/use-collection-scan'
+import type { CollectionScan } from '../hooks/use-collection-scan'
 import { formatEstimatedValue } from '../portrait.utils'
+import { RankedList } from './RankedList'
 
 const UNAVAILABLE = '—'
 
@@ -20,6 +23,7 @@ export const PortraitPage = ({ username }: PortraitPageProps) => {
   const value = useQuery(collectionValueQueryOptions(username))
 
   const recordCount = profile?.recordCount ?? 0
+  const { scan, retry } = useCollectionScan(recordCount > 0)
   const estimate =
     value.data !== undefined && profile
       ? formatEstimatedValue(value.data, profile.currency)
@@ -34,6 +38,8 @@ export const PortraitPage = ({ username }: PortraitPageProps) => {
         value.isPending ? undefined : (estimate?.median ?? UNAVAILABLE)
       }
       valueRange={estimate?.range}
+      scan={scan}
+      onRetryScan={retry}
     />
   )
 }
@@ -45,6 +51,8 @@ interface PortraitPageViewProps {
   recordCount: string
   estimatedValue: string | undefined
   valueRange: string | undefined
+  scan: CollectionScan
+  onRetryScan: () => void
 }
 
 export const PortraitPageView = ({
@@ -53,6 +61,8 @@ export const PortraitPageView = ({
   recordCount,
   estimatedValue,
   valueRange,
+  scan,
+  onRetryScan,
 }: PortraitPageViewProps) => {
   if (isEmpty) {
     return (
@@ -81,8 +91,10 @@ export const PortraitPageView = ({
           />
           <Figure label="Records" value={recordCount} />
         </dl>
-        <DiscogsAttribution href={discogsCollectionUrl(username)} />
       </section>
+      <ScanFigures scan={scan} onRetry={onRetryScan} />
+      {/* One attribution for the whole Portrait */}
+      <DiscogsAttribution href={discogsCollectionUrl(username)} />
       <PortraitFoot username={username} />
     </>
   )
@@ -118,6 +130,81 @@ const Figure = ({ label, value, hint }: FigureProps) => (
     </dd>
   </div>
 )
+
+const formatProgress = ({ read, total }: { read: number; total?: number }) =>
+  total === undefined
+    ? 'Reading records…'
+    : `Reading ${read.toLocaleString()} / ${total.toLocaleString()} records`
+
+interface ScanFiguresProps {
+  scan: CollectionScan
+  onRetry: () => void
+}
+
+// Figures that need every Copy read: a progress line until all are, then
+// every section at once, never partial
+const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
+  if (scan.status === 'reading') {
+    return (
+      <p
+        role="status"
+        className="type-catalogue mt-10 text-sm text-muted-foreground"
+      >
+        {formatProgress(scan)}
+      </p>
+    )
+  }
+
+  if (scan.status === 'failed') {
+    return (
+      <p
+        role="alert"
+        className="type-catalogue mt-10 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
+      >
+        Couldn't reach Discogs.
+        <Button variant="outline" size="sm" onClick={onRetry}>
+          Try again
+        </Button>
+      </p>
+    )
+  }
+
+  return (
+    <>
+      {scan.topArtists.length > 0 && (
+        <RankedList
+          title="Top artists"
+          entries={scan.topArtists.map((artist) => ({
+            key: artist.id,
+            count: artist.copies,
+            label: (
+              <Link
+                to="/search"
+                search={{
+                  artistId: String(artist.id),
+                  artistName: artist.name,
+                }}
+                className="text-foreground no-underline hover:underline"
+              >
+                {artist.name}
+              </Link>
+            ),
+          }))}
+        />
+      )}
+      {scan.topStyles.length > 0 && (
+        <RankedList
+          title="Top styles"
+          entries={scan.topStyles.map((style) => ({
+            key: style.name,
+            count: style.copies,
+            label: style.name,
+          }))}
+        />
+      )}
+    </>
+  )
+}
 
 interface PortraitFootProps {
   username: string
