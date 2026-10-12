@@ -291,7 +291,7 @@ export const releaseQueryOptions = (releaseId: string) =>
   queryOptions({
     queryKey: ['release', releaseId],
     queryFn: () => fetchRelease({ data: releaseId }).then(toRecord),
-    staleTime: Infinity, // release is immutable
+    staleTime: 6 * 60 * 60 * 1000, // Discogs API terms: nothing older than 6h
   })
 ```
 
@@ -1017,177 +1017,9 @@ useMutation({
 - In-app search bar → instant result from cache
 - Useful while crate digging (cf. PWA mobile)
 
-### 5.4 Find elsewhere — curated seller directory
+### 5.4 ~~Find elsewhere~~ — dropped
 
-**Concept**: accessible from the release detail page, a ranked list of trusted external retailers where the user can search for the release. No scraping, no API calls — just pre-built search URLs opened in a new tab. The list is ranked based on user preferences (country, currency) and release metadata (genre).
-
-**Data model** — static file, no backend needed:
-
-```ts
-// src/data/sellers.ts
-type Seller = {
-  id: string
-  name: string
-  domain: string // used for favicon
-  url: (title: string, artist: string) => string
-  country: string // seller's country — 'FR' | 'GB' | 'DE' | ...
-  currency: string // 'EUR' | 'GBP' | 'USD' | ...
-  ships: string[] // ['worldwide'] or ['EU', 'GB', ...]
-  specialties: string[] // Discogs style tags — ['electronic', 'jazz', ...]
-}
-
-const SELLERS: Seller[] = [
-  {
-    id: 'boomkat',
-    name: 'Boomkat',
-    domain: 'boomkat.com',
-    url: (title, artist) =>
-      `https://boomkat.com/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
-    country: 'GB',
-    currency: 'GBP',
-    ships: ['worldwide'],
-    specialties: ['electronic', 'experimental', 'jazz', 'ambient'],
-  },
-  {
-    id: 'juno',
-    name: 'Juno Records',
-    domain: 'juno.co.uk',
-    url: (title, artist) =>
-      `https://www.juno.co.uk/search/?q=${encodeURIComponent(`${artist} ${title}`)}`,
-    country: 'GB',
-    currency: 'GBP',
-    ships: ['worldwide'],
-    specialties: ['electronic', 'dance', 'house', 'techno', 'drum-and-bass'],
-  },
-  {
-    id: 'decks',
-    name: 'Decks.de',
-    domain: 'decks.de',
-    url: (title, artist) =>
-      `https://www.decks.de/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
-    country: 'DE',
-    currency: 'EUR',
-    ships: ['EU', 'worldwide'],
-    specialties: ['electronic', 'dance', 'techno', 'house'],
-  },
-  {
-    id: 'norman',
-    name: 'Norman Records',
-    domain: 'normanrecords.com',
-    url: (title, artist) =>
-      `https://www.normanrecords.com/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
-    country: 'GB',
-    currency: 'GBP',
-    ships: ['worldwide'],
-    specialties: ['indie', 'alternative', 'electronic', 'experimental'],
-  },
-  {
-    id: 'clone',
-    name: 'Clone Records',
-    domain: 'clone.nl',
-    url: (title, artist) =>
-      `https://clone.nl/search?q=${encodeURIComponent(`${artist} ${title}`)}`,
-    country: 'NL',
-    currency: 'EUR',
-    ships: ['worldwide'],
-    specialties: ['electronic', 'techno', 'house', 'electro'],
-  },
-  // add more as needed
-]
-```
-
-**Ranking algorithm** — pure function, fully testable:
-
-```ts
-// src/data/sellers.ts
-function rankSellers(
-  sellers: Seller[],
-  release: Record,
-  prefs: { country: string; currency: string },
-): Seller[] {
-  return [...sellers].sort((a, b) => {
-    let scoreA = 0
-    let scoreB = 0
-
-    // Same country as user → +3
-    if (a.country === prefs.country) scoreA += 3
-    if (b.country === prefs.country) scoreB += 3
-
-    // Same currency as user → +2
-    if (a.currency === prefs.currency) scoreA += 2
-    if (b.currency === prefs.currency) scoreB += 2
-
-    // Genre match with release styles → +1 per match
-    const styles = release.styles?.map((s) => s.toLowerCase()) ?? []
-    scoreA += styles.filter((s) => a.specialties.includes(s)).length
-    scoreB += styles.filter((s) => b.specialties.includes(s)).length
-
-    return scoreB - scoreA
-  })
-}
-```
-
-**Favicon — no logos, no trademark issues:**
-
-```tsx
-// Served by Google — no hosting, always up to date, zero legal risk
-<img
-  src={`https://www.google.com/s2/favicons?domain=${seller.domain}&sz=32`}
-  alt={seller.name}
-  width={16}
-  height={16}
-/>
-```
-
-**User preferences** — sourced directly from the Discogs profile at login, no manual setup needed:
-
-The `GET /users/{username}` endpoint exposes `curr_abbr` (ISO currency code) and `location` (free text). Both are captured at OAuth callback and stored in the session:
-
-```ts
-// services/discogs.server.ts — in handleCallback
-const identity = await fetchDiscogsIdentity(accessToken, accessTokenSecret)
-
-await session.update({
-  accessToken,
-  accessTokenSecret,
-  discogsUsername: identity.username,
-  currency: identity.curr_abbr ?? 'EUR', // clean ISO code — EUR, GBP, USD...
-  country: parseCountry(identity.location) ?? 'FR', // best-effort parse of free text
-})
-```
-
-`parseCountry` is a simple utility that extracts a country code from strings like `"Nantes, France"` → `"FR"`. The user can override both values in their profile settings if the detection is wrong.
-
-In `rankSellers`, country and currency come from the route context — no `useLocalStorage` needed:
-
-```ts
-const { user } = useRouteContext({ from: '/_authenticated' })
-
-const ranked = rankSellers(SELLERS, release, {
-  country: user.country,
-  currency: user.currency,
-})
-```
-
-**UI** — accessible from the release detail page, below the main metadata:
-
-```
-Find elsewhere
-
-  🟦 Boomkat          [Search →]   ← ranked #1 (GB + electronic match)
-  🟦 Norman Records   [Search →]
-  🟦 Juno Records     [Search →]
-  🟦 Decks.de         [Search →]
-  🟦 Clone Records    [Search →]
-```
-
-Each row opens the pre-built search URL in a new tab. No request is made by Sillon.
-
-**Legal note**: favicons served via Google's favicon service — Sillon hosts no brand assets. Add a footer disclaimer: _"Sillon is not affiliated with or endorsed by any of these retailers."_
-
-**Technical scope**: `src/data/sellers.ts` only — no new service, no API, no Supabase table. Pure static data + client-side ranking.
-
-**Priority**: after 5.3, before 5.5. Low implementation cost, high perceived value for crate diggers.
+Dropped: the Discogs API terms list using the API "with the intent to drive traffic to other non-Discogs websites" as a prohibited commercial use. Pre-built retailer searches ranked from Discogs data are exactly that. Don't bring it back without written permission from Discogs.
 
 ### 5.5 Random pick — "Pick for me"
 
@@ -1276,7 +1108,7 @@ Tap "Pick for me"
 ```
 
 **v1 (now)**: no animation — direct open on fetch result.
-**v2 (Phase 5.4 polish)**: animated roulette overlay before reveal, using the `sillon-pioche.jsx` prototype as reference. Logic unchanged — animation wraps the same fetch + open sequence.
+**v2 (polish pass)**: animated roulette overlay before reveal, using the `sillon-pioche.jsx` prototype as reference. Logic unchanged — animation wraps the same fetch + open sequence.
 
 **Priority**: implement v1 now (simple, high value). Polish animation later as a dedicated half-day.
 
@@ -1284,7 +1116,6 @@ Tap "Pick for me"
 
 - Add/remove with optimistic feedback
 - Profile stats displayed
-- Find elsewhere accessible from release detail, ranked by user preferences
 - Random pick working with complete animation
 
 ---
@@ -1321,7 +1152,8 @@ VitePWA({
         handler: 'CacheFirst',
         options: {
           cacheName: 'discogs-images',
-          expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+          // Discogs API terms: no Content older than 6h
+          expiration: { maxEntries: 500, maxAgeSeconds: 6 * 60 * 60 },
         },
       },
       {
@@ -1347,14 +1179,18 @@ pnpm add -D @tanstack/start-server-fn-adapter-vercel
 ### ✅ Exit criteria
 
 - Installable on iOS and Android
-- Discogs covers cached offline
+- Deezer Covers cached offline (Discogs images for 6h at most)
 - `pnpm build && pnpm preview` without errors
 
 ---
 
 ## Phase 7 — Marketplace Feed (v1.5)
 
-**Prerequisite**: Supabase project created.
+**Prerequisites**:
+
+- Supabase project created.
+- Licence check: the design must respect the Discogs API terms before work starts. Storing Marketplace Data and user data server-side and refreshing it with a cron has to stay within the 6-hour freshness rule, cache nothing longer than needed, and never transfer Restricted Data to a third party.
+- The privacy notice on `/legal` is rewritten first: this phase is the first time Sillon stores user data on a server.
 
 ### 7.1 DB schema
 
@@ -1561,10 +1397,12 @@ Supabase Edge Function cron (every hour):
 
 ## Backlog v2 (post-launch)
 
+Never add affiliate links, ads, donations or a paid tier: see [ADR 0003](adr/0003-sillon-never-makes-money.md).
+
 - **Barcode scan** while crate digging (BarcodeDetector API or zxing-wasm)
 - **Advanced stats**: collection value over time (with Discogs marketplace history)
 - **Export**: CSV / PDF of the collection
-- **Sharing**: public read-only profile
+- **Sharing**: public read-only profile — opt-in only, since the collection is Restricted user data under the Discogs API terms
 - **Multi-account**: multiple collections (collectors sharing a family Discogs account)
 
 ---

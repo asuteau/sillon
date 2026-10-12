@@ -24,9 +24,11 @@ import type { VersionsPage } from '#/features/search/search.schema'
 import { extractColors } from '#/shared/utils/extractColors'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { RecordHeading } from '#/shared/components/RecordHeading'
+import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
 import { ReleaseListButtons } from '#/shared/components/ReleaseListButtons'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { masterCoverKey } from '#/shared/utils/cover-key'
+import { discogsReleaseUrl } from '#/shared/utils/discogs-urls'
 import { Dialog, DialogContent } from './ui/dialog'
 import { Drawer, DrawerContent } from './ui/drawer'
 import { useAnimatedClose } from '#/shared/hooks/use-animated-close'
@@ -159,6 +161,11 @@ function SearchReleaseSheetContent({
       </div>
 
       <MarketplaceSection releaseId={Number(releaseId)} />
+
+      <DiscogsAttribution
+        href={discogsReleaseUrl(releaseId)}
+        className="mt-0 text-center"
+      />
 
       {isAskingFulfilledWant ? (
         <FulfilledWantPrompt

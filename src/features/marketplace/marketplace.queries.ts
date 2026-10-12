@@ -1,5 +1,7 @@
 import { queryOptions } from '@tanstack/react-query'
 
+import { DISCOGS_MAX_AGE_MS } from '#/shared/utils/discogs-freshness'
+
 import { getMarketplaceStats, getSuggestedPrices } from './marketplace.api'
 
 // Fetched only when a release sheet opens, never from list cards: one Discogs
@@ -15,11 +17,11 @@ export const marketplaceStatsQueryOptions = (releaseId: number) =>
     retry: false,
   })
 
-// Based on sales history, moves slowly
+// Based on sales history, moves slowly: kept as long as Discogs allows
 export const suggestedPricesQueryOptions = (releaseId: number) =>
   queryOptions({
     queryKey: ['marketplace', releaseId, 'suggestions'] as const,
     queryFn: () => getSuggestedPrices({ data: { releaseId } }),
-    staleTime: 24 * 60 * 60 * 1000,
+    staleTime: DISCOGS_MAX_AGE_MS,
     retry: false,
   })

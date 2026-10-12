@@ -51,7 +51,8 @@ const config = defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'discogs-images',
-              expiration: { maxEntries: 500, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              // Discogs API terms: no Content older than 6 hours
+              expiration: { maxEntries: 500, maxAgeSeconds: 6 * 60 * 60 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },
@@ -61,24 +62,6 @@ const config = defineConfig({
             options: {
               cacheName: 'deezer-images',
               expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/coverartarchive\.org\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'caa-images',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/www\.google\.com\/s2\/favicons.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'favicons',
-              expiration: { maxEntries: 100 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

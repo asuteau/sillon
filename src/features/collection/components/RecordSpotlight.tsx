@@ -6,10 +6,12 @@ import {
 } from '#/features/collection/collection.utils'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { CoverGlow } from '#/shared/components/CoverGlow'
+import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { SheetCover } from '#/shared/components/SheetCover'
 import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
+import { discogsReleaseUrl } from '#/shared/utils/discogs-urls'
 import { Button } from '#/shared/components/ui/button'
 import { Dialog, DialogContent } from '#/shared/components/ui/dialog'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
@@ -81,6 +83,11 @@ const SpotlightContent = ({
           formatParts.join(' · '),
           labelText,
         ]}
+      />
+
+      <DiscogsAttribution
+        href={discogsReleaseUrl(record.id)}
+        className="mt-0 text-center"
       />
 
       {/* Bottom padding inside the scroller, so button shadows aren't clipped */}
