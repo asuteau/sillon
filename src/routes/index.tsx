@@ -7,7 +7,6 @@ import { RecordSpotlight } from '#/features/collection/components/RecordSpotligh
 import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { LandingPage } from '#/features/landing/components/LandingPage'
-import { PortraitTeaser } from '#/features/portrait/components/PortraitTeaser'
 import { ScanFab } from '#/shared/components/ScanFab'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -39,8 +38,6 @@ function App() {
 
   return (
     <Page>
-      <PortraitTeaser username={user.username} />
-
       {data && data.releases.length > 0 && <RandomPickCard />}
 
       <h1 className="type-display mb-6 text-4xl text-foreground">
