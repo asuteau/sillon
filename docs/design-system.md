@@ -98,7 +98,7 @@ The contract is **shadcn's variables**, defined for light (`:root`) and dark (`.
 | `--cover-tint`                                  | Set at runtime from the current Cover; neutral `oklch(0.62 0 0)` until then.                                                         |
 | `--cover-glow-lightness` / `--cover-glow-alpha` | Per-theme relighting of the tint for the glow, so text over it stays AA.                                                             |
 
-**Copper lacquer is for brand moments only**: app icon, launch screen, and the lacquer buttons (Random pick, Pick again, Scan, the landing CTA) — plus two non-interactive uses: the shapes on House sleeves, and the leading bar of each Portrait ranking (sweep, the #1 entry only; the other bars stay neutral). Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Buttons use `<Button variant="lacquer">` (satin); marks use `bg-(image:--lacquer)` (sweep). Satin and sweep are the same in light and dark: lacquer is a material, not a theme colour, so the dark blocks don't redefine it. Satin is derived from the stop tokens, so changing the stops updates both. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
+**Copper lacquer is for brand moments only**: app icon, launch screen, and the lacquer buttons (Random pick, Pick again, Scan, the landing CTA) — plus the shapes on House sleeves, its one non-interactive use. Never for hover, selection, focus or any general interactive state — that's what `--primary` and the neutrals are for. Buttons use `<Button variant="lacquer">` (satin); marks use `bg-(image:--lacquer)` (sweep). Satin and sweep are the same in light and dark: lacquer is a material, not a theme colour, so the dark blocks don't redefine it. Satin is derived from the stop tokens, so changing the stops updates both. SVG can't use a CSS gradient: `GrooveMark` builds a `<linearGradient>` from `var(--lacquer-1..3)`, and `pwa-assets.ts` repeats the stops as `LACQUER_STOPS` for resvg (`pwa-assets.test.ts` keeps them equal to `styles.css`).
 
 ### Cover tint
 
@@ -147,7 +147,7 @@ Fast and quiet: fades by default, two signatures, nothing else.
 
 The same draw-in plays **once** on the landing (`.groove-draw-in`): in the hero's intro (text colour), and on the closing mark above "Bring your crates." (96px, lacquer tone). The closing mark stays undrawn (`.groove-undrawn`) until its section scrolls into view, then draws in and stops observing; it never replays during the page view.
 
-The Portrait's ranking bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`). The time charts' columns (Pressing decade, Additions by year) draw up from the baseline the same way (`.portrait-column`), neutral, no copper.
+The Portrait's ranking bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`). The time charts' columns (Pressing decade, Additions by year) draw up from the baseline the same way (`.portrait-column`). Every Portrait bar and column is neutral, the #1 included: no copper.
 
 Rules:
 
