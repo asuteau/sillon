@@ -9,7 +9,7 @@ import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { LandingPage } from '#/features/landing/components/LandingPage'
 import { MetricsStrip } from '#/features/profile/components/MetricsStrip'
 import { ScanFab } from '#/shared/components/ScanFab'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Page } from '#/shared/components/Page'
@@ -21,14 +21,14 @@ export { recentAdditionsQueryOptions }
 export const Route = createFileRoute('/')({
   loader: async ({ context: { user, queryClient } }) => {
     if (!user) return null
-    return queryClient.prefetchQuery(recentAdditionsQueryOptions)
+    return queryClient.prefetchInfiniteQuery(recentAdditionsQueryOptions)
   },
   component: App,
 })
 
 function App() {
   const { user } = Route.useRouteContext()
-  const { data } = useQuery({
+  const { data } = useInfiniteQuery({
     ...recentAdditionsQueryOptions,
     enabled: !!user,
   })
