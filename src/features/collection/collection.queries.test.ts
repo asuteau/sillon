@@ -2,7 +2,8 @@ import { QueryClient } from '@tanstack/react-query'
 import type { InfiniteData } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { CollectionPage, CollectionRelease } from './collection.schema'
+import type { CollectionRelease } from './collection.schema'
+import type { CollectionListPage } from './collection.queries'
 import {
   addCopyToLists,
   collectionQueryOptions,
@@ -12,7 +13,7 @@ import {
 vi.mock('./collection.api', () => ({}))
 vi.mock('#/services/deezer.api', () => ({}))
 
-type Pages = InfiniteData<CollectionPage, number>
+type Pages = InfiniteData<CollectionListPage, number>
 
 const copy = (instanceId: number) =>
   ({ id: instanceId, instance_id: instanceId }) as unknown as CollectionRelease
@@ -21,6 +22,7 @@ const pages = (...releases: number[][]): Pages => ({
   pages: releases.map((ids, index) => ({
     releases: ids.map(copy),
     pagination: { page: index + 1, pages: releases.length, items: 4 },
+    fetchedAt: 0,
   })),
   pageParams: releases.map((_, index) => index + 1),
 })
@@ -28,7 +30,7 @@ const pages = (...releases: number[][]): Pages => ({
 const newestFirst = collectionQueryOptions({ sort: 'added', order: 'desc' })
 const byArtist = collectionQueryOptions({ sort: 'artist', order: 'asc' })
 
-const ids = (data: InfiniteData<CollectionPage> | undefined) =>
+const ids = (data: InfiniteData<CollectionListPage> | undefined) =>
   data?.pages.map((page) => page.releases.map((r) => r.instance_id))
 
 const setup = () => {

@@ -19,7 +19,8 @@ export { recentAdditionsQueryOptions }
 
 export const Route = createFileRoute('/')({
   loader: async ({ context: { user, queryClient } }) => {
-    if (!user) return null
+    // Left to the client, which may restore it from the device
+    if (!user || typeof window === 'undefined') return null
     return queryClient.prefetchInfiniteQuery(recentAdditionsQueryOptions)
   },
   component: App,

@@ -21,6 +21,7 @@ import { preloadCover } from '#/shared/utils/cover-preload'
 import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
+import { collectionPersistence } from './collection.persist'
 import type { CollectionPage, CollectionRelease } from './collection.schema'
 
 // Only changes with the Collection itself — mutations invalidate it
@@ -37,16 +38,29 @@ export const collectionListQueryKey = ['collection', 'list'] as const
 // Discogs' largest page: fewest requests to read the whole Collection
 const COLLECTION_PER_PAGE = 100
 
+/** A page stamped with when it was asked of Discogs, to tell its age */
+export type CollectionListPage = CollectionPage & { fetchedAt: number }
+
+// The newest-first list is the one Collection cache, persisted on device
+export const isPersistedListSort = ({ sort, order }: ListSort) =>
+  sort === 'added' && order === 'desc'
+
 export const collectionQueryOptions = (listSort: ListSort) =>
   infiniteQueryOptions({
     queryKey: [
       ...collectionListQueryKey,
       { perPage: COLLECTION_PER_PAGE, ...listSort },
     ],
-    queryFn: ({ pageParam }) =>
-      getCollection({
+    queryFn: async ({ pageParam }): Promise<CollectionListPage> => {
+      const fetchedAt = Date.now()
+      const page = await getCollection({
         data: { perPage: COLLECTION_PER_PAGE, page: pageParam, ...listSort },
-      }),
+      })
+      return { ...page, fetchedAt }
+    },
+    persister: isPersistedListSort(listSort)
+      ? collectionPersistence.persister
+      : undefined,
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.pages
@@ -56,7 +70,7 @@ export const collectionQueryOptions = (listSort: ListSort) =>
     refetchOnMount: false,
   })
 
-type CollectionPages = InfiniteData<CollectionPage, number>
+type CollectionPages = InfiniteData<CollectionListPage, number>
 
 const newestFirstQueryOptions = collectionQueryOptions({
   sort: 'added',
@@ -137,7 +151,10 @@ export const prepareRandomPick = async (
   return record
 }
 
-const adjustItems = (page: CollectionPage, delta: 1 | -1): CollectionPage => ({
+const adjustItems = (
+  page: CollectionListPage,
+  delta: 1 | -1,
+): CollectionListPage => ({
   ...page,
   pagination: {
     ...page.pagination,
