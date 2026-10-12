@@ -19,7 +19,7 @@ const done = (tx: IDBTransaction) =>
     tx.onabort = tx.onerror = () => reject(tx.error)
   })
 
-export function idbStore(dbName: string, storeName: string): KeyValueStore {
+export const idbStore = (dbName: string, storeName: string): KeyValueStore => {
   let db: Promise<IDBDatabase> | undefined
 
   const open = () => {

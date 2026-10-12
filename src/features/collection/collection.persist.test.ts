@@ -3,8 +3,8 @@ import { describe, expect, it, vi } from 'vitest'
 
 import { sessionUserQueryOptions } from '#/features/auth/auth.queries'
 import { DISCOGS_MAX_AGE_MS } from '#/shared/utils/discogs-freshness'
+import type { KeyValueStore } from '#/shared/utils/idb-store'
 
-import type { KeyValueStore } from './collection.persist'
 import { createCollectionPersistence } from './collection.persist'
 import type { CollectionListPage } from './collection.queries'
 
@@ -15,10 +15,25 @@ const HOUR = 60 * 60 * 1000
 
 const page = (fetchedAt: number, ids: number[] = [1]): CollectionListPage =>
   ({
-    releases: ids.map((id) => ({ instance_id: id })),
+    releases: ids.map((id) => ({
+      id,
+      instance_id: id,
+      folder_id: 1,
+      date_added: '2026-10-12T10:00:00-07:00',
+      basic_information: {
+        title: 'Title',
+        year: 1979,
+        artists: [{ name: 'Artist' }],
+        cover_image: '',
+        thumb: '',
+        styles: [],
+        formats: [],
+        labels: [],
+      },
+    })),
     pagination: { page: 1, pages: 1, items: ids.length },
     fetchedAt,
-  }) as unknown as CollectionListPage
+  })
 
 const entry = (username: string, ...fetchedAt: number[]) => ({
   version: 1,
@@ -134,6 +149,30 @@ describe('collection persistence', () => {
     expect(
       instanceIds((map.get('collection-list') as { data: unknown }).data),
     ).toEqual([2, 1])
+  })
+
+  it('drops the copy once invalidated without a patch', async () => {
+    const { store, map } = memoryStore()
+    const { queryClient, options } = setup(store)
+    await queryClient.fetchInfiniteQuery(options)
+    await settle()
+
+    await queryClient.invalidateQueries({
+      queryKey: options.queryKey,
+      refetchType: 'none',
+    })
+    await settle()
+
+    expect(map.has('collection-list')).toBe(false)
+  })
+
+  it('ignores a stored copy of the wrong shape', async () => {
+    const { store } = memoryStore({ version: 1, username: 'ana', data: {} })
+    const { queryClient, queryFn, options } = setup(store)
+
+    await queryClient.fetchInfiniteQuery(options)
+
+    expect(queryFn).toHaveBeenCalledOnce()
   })
 
   it('saves no other query', async () => {

@@ -70,7 +70,7 @@ export const collectionQueryOptions = (listSort: ListSort) =>
     refetchOnMount: false,
   })
 
-type CollectionPages = InfiniteData<CollectionListPage, number>
+export type CollectionPages = InfiniteData<CollectionListPage, number>
 
 const newestFirstQueryOptions = collectionQueryOptions({
   sort: 'added',

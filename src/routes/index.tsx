@@ -45,7 +45,8 @@ function App() {
         Recent additions
       </h1>
 
-      {!data || data.releases.length === 0 ? (
+      {/* Not loaded yet, server-side or restoring from the device: say nothing */}
+      {!data ? null : data.releases.length === 0 ? (
         <p className="text-muted-foreground">
           No records in your collection yet.
         </p>
