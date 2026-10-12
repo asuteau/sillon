@@ -15,7 +15,6 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import { sessionUserQueryOptions } from '#/features/auth/auth.queries'
-import { useFollowSystemTheme } from '#/shared/hooks/use-follow-system-theme'
 import { DefaultCatchBoundary } from '#/shared/components/DefaultCatchBoundary'
 import { NotFound } from '#/shared/components/NotFound'
 import { startupImageLinks } from '#/shared/utils/startup-images'
@@ -105,8 +104,6 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  useFollowSystemTheme()
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

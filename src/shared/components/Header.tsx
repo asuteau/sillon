@@ -6,6 +6,7 @@ import { GrooveMark } from './brand/GrooveMark'
 import { PortraitIcon } from './icons/PortraitIcon'
 import { Wordmark } from './brand/Wordmark'
 import { ScanButton } from './ScanButton'
+import ThemeToggle from './ThemeToggle'
 import { buttonVariants } from './ui/button'
 
 // Active state from the router's data-status; underline fades in
@@ -77,6 +78,7 @@ export default function Header() {
               <ScanButton />
             </div>
           )}
+          <ThemeToggle />
           {user ? (
             <Link
               to="/portrait"

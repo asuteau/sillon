@@ -49,10 +49,9 @@ describe('PortraitPageView', () => {
     ).toBeNull()
   })
 
-  it('holds the theme toggle and logout at its foot', () => {
+  it('holds logout at its foot', () => {
     render(<PortraitPageView {...FIGURES} isEmpty />)
 
-    expect(screen.getByRole('button', { name: /Theme mode/ })).toBeTruthy()
     expect(
       screen.getByRole('link', { name: /Logout/ }).getAttribute('href'),
     ).toBe('/auth/logout')

@@ -4,7 +4,6 @@ import { Link } from '@tanstack/react-router'
 import { collectionValueQueryOptions } from '#/features/collection/collection.queries'
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
-import { ThemeToggle } from '#/shared/components/ThemeToggle'
 import { buttonVariants } from '#/shared/components/ui/button'
 import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
@@ -124,10 +123,9 @@ interface PortraitFootProps {
   username: string
 }
 
-// The app's settings: theme and logout live here, not in the header
+// Logout lives here, not in the header
 const PortraitFoot = ({ username }: PortraitFootProps) => (
   <div className="mt-12 flex flex-wrap items-center gap-2 border-t border-border pt-6">
-    <ThemeToggle />
     <a
       href="/auth/logout"
       className={buttonVariants({ variant: 'outline', size: 'sm' })}

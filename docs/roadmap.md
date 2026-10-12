@@ -1013,7 +1013,7 @@ See **Portrait** in `CONTEXT.md` and parent issue #49. A view of the Collection 
 - Headline figures Discogs gives whole, shown at once: Estimated value (median + range), Record count
 - Figures that need every Copy read, shown together once all are read: Top artists, Top styles, Pressing decade, Additions by year
 - Charts hand-built in HTML/CSS/SVG, typeset in the design system — no Recharts, no chart library for now
-- Settings at the Portrait's foot: ThemeToggle and Logout (no longer in the header)
+- Logout at the Portrait's foot (no longer in the header); ThemeToggle stays in the header
 - One Discogs attribution for the whole Portrait, linking to the user's Discogs collection
 - Home keeps a one-line teaser to the Portrait from the cheap figures only (never reads the whole Collection)
 
