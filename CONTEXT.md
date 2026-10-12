@@ -130,3 +130,9 @@ _Avoid_: Starting price, from-price, cheapest
 **Suggested price**:
 Discogs' fair-price estimate for a Release in a given condition (Mint to Poor), in the Discogs currency. Unrelated to current Listings.
 _Avoid_: Market value, estimate
+
+### Sources
+
+**Discogs attribution**:
+The "Data provided by Discogs" line shown at the foot of each block of Discogs data (Collection, Wantlist, Recent additions, Random pick, record screen, artist, search), linking to the discogs.com page holding that same data. One per block, never per record, never a single global line.
+_Avoid_: Credit (that word means an artist credited on a record), source link
