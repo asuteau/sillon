@@ -13,6 +13,8 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Page } from '#/shared/components/Page'
+import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
+import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
 export { recentAdditionsQueryOptions }
 
@@ -50,17 +52,20 @@ function App() {
           No records in your collection yet.
         </p>
       ) : (
-        <RecordList>
-          {data.releases.map((release) => (
-            <li key={release.instance_id}>
-              <ReleaseRow
-                release={release}
-                meta={formatDateAdded(release.date_added)}
-                onClick={() => setSelected(release)}
-              />
-            </li>
-          ))}
-        </RecordList>
+        <>
+          <RecordList>
+            {data.releases.map((release) => (
+              <li key={release.instance_id}>
+                <ReleaseRow
+                  release={release}
+                  meta={formatDateAdded(release.date_added)}
+                  onClick={() => setSelected(release)}
+                />
+              </li>
+            ))}
+          </RecordList>
+          <DiscogsAttribution href={discogsCollectionUrl(user.username)} />
+        </>
       )}
 
       {selected && (

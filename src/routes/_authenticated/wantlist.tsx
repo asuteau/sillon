@@ -22,6 +22,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
 import { useState, useTransition } from 'react'
 import { Page } from '#/shared/components/Page'
+import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
+import { discogsWantlistUrl } from '#/shared/utils/discogs-urls'
 
 export const Route = createFileRoute('/_authenticated/wantlist')({
   validateSearch: listSortSchema,
@@ -32,6 +34,7 @@ export const Route = createFileRoute('/_authenticated/wantlist')({
 })
 
 function Wantlist() {
+  const { user } = Route.useRouteContext()
   const listSort = resolveListSort(Route.useSearch())
   const navigate = Route.useNavigate()
   const [isSortPending, startSortTransition] = useTransition()
@@ -78,6 +81,10 @@ function Wantlist() {
               )),
             )}
           </RecordList>
+
+          {user && (
+            <DiscogsAttribution href={discogsWantlistUrl(user.username)} />
+          )}
 
           {hasNextPage && (
             <div className="mt-6 flex justify-center">

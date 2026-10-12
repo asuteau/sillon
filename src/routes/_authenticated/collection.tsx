@@ -23,6 +23,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { useState, useTransition } from 'react'
 import { Page } from '#/shared/components/Page'
+import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
+import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   validateSearch: listSortSchema,
@@ -33,6 +35,7 @@ export const Route = createFileRoute('/_authenticated/collection')({
 })
 
 function Collection() {
+  const { user } = Route.useRouteContext()
   const listSort = resolveListSort(Route.useSearch())
   const navigate = Route.useNavigate()
   const [isSortPending, startSortTransition] = useTransition()
@@ -85,6 +88,10 @@ function Collection() {
               )),
             )}
           </RecordList>
+
+          {user && (
+            <DiscogsAttribution href={discogsCollectionUrl(user.username)} />
+          )}
 
           {hasNextPage && (
             <div className="mt-6 flex justify-center">

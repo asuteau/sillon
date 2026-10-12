@@ -18,6 +18,12 @@ import { ArtistCard } from '#/features/search/components/ArtistCard'
 import { DiscographyCard } from '#/features/search/components/DiscographyCard'
 import { MasterCard } from '#/features/search/components/MasterCard'
 import { VersionRow } from '#/features/search/components/VersionRow'
+import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
+import {
+  discogsArtistUrl,
+  discogsMasterUrl,
+  discogsSearchUrl,
+} from '#/shared/utils/discogs-urls'
 import type { ArtistDiscographyItem } from '#/features/search/search.model'
 import {
   toArtist,
@@ -278,15 +284,18 @@ function ArtistList({ q, onArtistClick }: ArtistListProps) {
   }
 
   return (
-    <RecordList>
-      {artists.map((artist) => (
-        <ArtistCard
-          key={artist.id}
-          artist={artist}
-          onClick={() => onArtistClick(artist.id, artist.name)}
-        />
-      ))}
-    </RecordList>
+    <>
+      <RecordList>
+        {artists.map((artist) => (
+          <ArtistCard
+            key={artist.id}
+            artist={artist}
+            onClick={() => onArtistClick(artist.id, artist.name)}
+          />
+        ))}
+      </RecordList>
+      <DiscogsAttribution href={discogsSearchUrl(q, 'artist')} />
+    </>
   )
 }
 
@@ -448,6 +457,10 @@ function DiscographyList({
         </RecordList>
       )}
 
+      {items.length > 0 && (
+        <DiscogsAttribution href={discogsArtistUrl(artistId)} />
+      )}
+
       {activeQuery.data?.truncated && (
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Older releases not shown. Search by title to find them.
@@ -501,15 +514,18 @@ function MastersList({ q, onMasterClick }: MastersListProps) {
   }
 
   return (
-    <RecordList>
-      {masters.map((master) => (
-        <MasterCard
-          key={master.id}
-          master={master}
-          onClick={() => onMasterClick(master.id)}
-        />
-      ))}
-    </RecordList>
+    <>
+      <RecordList>
+        {masters.map((master) => (
+          <MasterCard
+            key={master.id}
+            master={master}
+            onClick={() => onMasterClick(master.id)}
+          />
+        ))}
+      </RecordList>
+      <DiscogsAttribution href={discogsSearchUrl(q, 'master')} />
+    </>
   )
 }
 
@@ -534,10 +550,13 @@ function VersionsList({ masterId }: VersionsListProps) {
   }
 
   return (
-    <RecordList>
-      {versions.map((version) => (
-        <VersionRow key={version.id} version={version} masterId={masterId} />
-      ))}
-    </RecordList>
+    <>
+      <RecordList>
+        {versions.map((version) => (
+          <VersionRow key={version.id} version={version} masterId={masterId} />
+        ))}
+      </RecordList>
+      <DiscogsAttribution href={discogsMasterUrl(masterId)} />
+    </>
   )
 }
