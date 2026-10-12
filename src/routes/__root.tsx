@@ -1,5 +1,6 @@
 import BottomNav from '#/shared/components/BottomNav'
 import { DiscogsRateLimitDevTools } from '#/shared/components/DiscogsRateLimitDevTools'
+import { Footer } from '#/shared/components/Footer'
 import Header from '#/shared/components/Header'
 import { PwaUpdateBanner } from '#/shared/components/PwaUpdateBanner'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -114,6 +115,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <PwaUpdateBanner />
           <Header />
           {children}
+          <Footer />
           <BottomNav />
           <TanStackDevtools
             config={{

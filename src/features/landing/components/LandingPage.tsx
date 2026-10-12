@@ -9,7 +9,7 @@ import { WantlistStill } from './WantlistStill'
 
 // The signed-out `/`: show the product, then "Connect with Discogs"
 export const LandingPage = () => (
-  <main className="mx-auto w-full max-w-270 px-4 pb-24 sm:pb-8">
+  <main className="mx-auto w-full max-w-270 px-4 pb-8">
     <LandingHero />
 
     <FeatureSection
