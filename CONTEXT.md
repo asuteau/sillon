@@ -125,6 +125,10 @@ _Avoid_: Decade, era, release decade
 The Copies in the Collection grouped by the year they were added to Discogs — not when they were bought. Only Copies still in the Collection count, so it is not a history of the Collection: a removed Copy leaves no trace.
 _Avoid_: Growth, purchases by year, collection history
 
+**Leader**:
+The entry of a Portrait chart — Top artists, Top styles, Pressing decade, Additions by year — with the most Copies. Entries tied for the most all lead; when every entry ties, there is no Leader. A→Z order among tied artists or styles doesn't make the first one lead.
+_Avoid_: Top, #1, winner, peak
+
 **Estimated value**:
 Discogs' marketplace-based estimate of what the Collection is worth, in the user's Discogs currency. Headline is the median; the minimum–maximum range is shown alongside to signal uncertainty. Not what the user paid.
 _Avoid_: Collection value, worth, price

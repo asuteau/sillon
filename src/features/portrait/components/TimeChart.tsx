@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 
 import { cn } from '#/shared/utils/cn'
 
-import { formatRecords } from '../portrait.utils'
+import { formatRecords, leaderCount } from '../portrait.utils'
 
 export interface TimeEntry {
   key: number
@@ -26,11 +26,12 @@ const MAX_LABELLED = 8
 const MAX_TICKS = 6
 
 // Hand-built vertical bars on a hairline baseline; an empty step stays as an
-// empty bar. Read as a list of values; the bars draw up on reveal (fade under
-// reduced motion).
+// empty bar. Leaders get a copper column and a full-strength count. Read as a
+// list of values; the bars draw up on reveal (fade under reduced motion).
 export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
   const titleId = useId()
   const top = Math.max(1, ...entries.map((entry) => entry.count))
+  const leader = leaderCount(entries.map((entry) => entry.count))
   const isCrowded = entries.length > MAX_LABELLED
   // Anchored on the newest step, so the current year always carries a label
   const tickStep = Math.ceil(entries.length / MAX_TICKS)
@@ -51,7 +52,7 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
           className="m-0 flex list-none gap-1 p-0 sm:gap-2"
         >
           {entries.map((entry, index) => {
-            const isTop = entry.count === top
+            const isLeader = entry.count === leader
             return (
               <li key={entry.key} className="flex min-w-0 flex-1 flex-col">
                 <span className="sr-only">{`${entry.label}: ${formatRecords(entry.count)}`}</span>
@@ -59,11 +60,11 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
                   aria-hidden
                   className="flex h-32 flex-col items-center justify-end gap-1 border-b border-border"
                 >
-                  {(!isCrowded || isTop) && (
+                  {(!isCrowded || entry.count === top) && (
                     <span
                       className={cn(
                         'type-catalogue text-[10px] leading-3',
-                        isTop ? 'text-foreground' : 'text-muted-foreground',
+                        isLeader ? 'text-foreground' : 'text-muted-foreground',
                       )}
                     >
                       {entry.count.toLocaleString()}
@@ -72,10 +73,12 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
                   <span
                     className={cn(
                       'portrait-column block w-full max-w-8',
-                      entry.count > 0
-                        ? 'bg-foreground/80'
-                        : // An empty bar: a stub on the baseline, not a gap
-                          'bg-muted-foreground/40',
+                      isLeader
+                        ? 'bg-(--lacquer-2)'
+                        : entry.count > 0
+                          ? 'bg-foreground/80'
+                          : // An empty bar: a stub on the baseline, not a gap
+                            'bg-muted-foreground/40',
                     )}
                     // Room left above the tallest bar for its count
                     style={{
