@@ -4,9 +4,11 @@ import {
   formatDateAdded,
   leadArtist,
 } from '#/features/collection/collection.utils'
+import { discSurface } from '#/features/collection/disc-surface.utils'
 import { useIntroPull } from '#/features/collection/hooks/use-intro-pull'
 import { useSleevePull } from '#/features/collection/hooks/use-sleeve-pull'
 import { slidePosition } from '#/features/collection/sleeve-pull.utils'
+import { vinylColour } from '#/features/collection/vinyl-colour.utils'
 import { Disc } from '#/shared/components/brand/Disc'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Button } from '#/shared/components/ui/button'
@@ -37,8 +39,18 @@ interface SlideProps {
 const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
   const { basic_information: info } = record
   const cover = coverInput(record)
+  const coverArt = {
+    ...cover,
+    artist: leadArtist(info.artists),
+    styles: info.styles,
+  }
   // The disc's label; grey (the root --cover-tint) until known
   const tint = useCoverTint(cover)
+  // The Release's Vinyl colour, the same every time for this Release
+  const surface = useMemo(
+    () => discSurface(vinylColour(info.formats), record.id),
+    [info.formats, record.id],
+  )
 
   return (
     <button
@@ -52,17 +64,24 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
       style={{ '--cover-tint': tint ?? undefined }}
       onClick={(event) =>
         onSelect(
-          event.currentTarget.querySelector<HTMLElement>('[data-slot="cover"]'),
+          // The sleeve's Cover, not a picture disc's
+          event.currentTarget.querySelector<HTMLElement>(
+            '[data-slot="sleeve"] [data-slot="cover"]',
+          ),
         )
       }
     >
       <span className="sleeve-pull-body">
-        <Disc />
-        <span className="sleeve-pull-sleeve">
+        <Disc
+          surface={surface.background}
+          seeThrough={surface.seeThrough}
+          picture={
+            surface.picture && <CoverArt {...coverArt} className="size-full" />
+          }
+        />
+        <span data-slot="sleeve" className="sleeve-pull-sleeve">
           <CoverArt
-            {...cover}
-            artist={leadArtist(info.artists)}
-            styles={info.styles}
+            {...coverArt}
             className="size-full overflow-hidden rounded-(--radius)"
           />
         </span>

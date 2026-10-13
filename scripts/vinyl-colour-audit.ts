@@ -11,10 +11,9 @@ import { z } from 'zod'
 import { CollectionReleaseSchema } from '../src/features/collection/collection.schema'
 import {
   unrecognisedWords,
-  vinylColour
-  
+  vinylColour,
 } from '../src/features/collection/vinyl-colour.utils'
-import type {VinylColour} from '../src/features/collection/vinyl-colour.utils';
+import type { VinylColour } from '../src/features/collection/vinyl-colour.utils'
 
 // Only the formats: someone else's public Collection has no folder_id
 const PageSchema = z.object({
