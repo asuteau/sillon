@@ -72,6 +72,10 @@ _Avoid_: Artwork, image, thumb
 A Cover Sillon generates when Deezer has no artwork for a record, typeset with the artist and title. A record that gets one shows it everywhere, lists and record screen alike. Like any Cover it belongs to the Master, so it is always the same for the same Master, and never shows Release details such as the catalogue number. Not shown while artwork is still loading.
 _Avoid_: Placeholder, fallback cover, default art
 
+**Vinyl colour**:
+The colour and effect (splatter, marbled, split…) of a Release's discs, read from the free-text format note on Discogs, which has no colour field. It belongs to the Release, never to the Master: two Releases of one album share a Cover but each shows its own vinyl. When a Release's discs differ, the first disc's colour stands for the Release. When the note names no colour Sillon recognises, the disc is black, vinyl's default colour. A best guess: an occasional wrong colour is accepted, since unlike a wrong Cover it never passes one record off as another.
+_Avoid_: Variant, colourway, pressing colour
+
 ### Artists
 
 **Artist picture**:
