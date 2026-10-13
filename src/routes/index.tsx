@@ -27,8 +27,9 @@ function App() {
 
   if (!user) return <LandingPage />
 
+  // Home sits on the Sleeve pull's centre axis
   return (
-    <Page>
+    <Page className="text-center">
       <RecentAdditions records={data?.releases} username={user.username} />
       {data && data.releases.length > 0 && <RandomPickCard />}
       <ScanFab />
