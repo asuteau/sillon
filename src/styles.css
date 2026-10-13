@@ -67,7 +67,7 @@
   /* Display role — swap here only to bring in a paid display face */
   --font-display: var(--font-sans);
 
-  /* Motion — fades by default, platter for the two signatures */
+  /* Motion — fades by default, platter for the signatures */
   --ease-fade: cubic-bezier(0.2, 0, 0, 1);
   --ease-platter: cubic-bezier(0.65, 0, 0.15, 1);
 }
@@ -140,6 +140,8 @@
   --cover-tint: oklch(0.62 0 0);
   --cover-glow-lightness: 0.9;
   --cover-glow-alpha: 0.35;
+  /* Sleeve pull: sleeves and discs lift off the page */
+  --pull-shadow: oklch(0.2 0 0 / 0.22);
 }
 
 /* Dark: explicit .dark, or the OS preference unless .light overrides it.
@@ -171,6 +173,7 @@
   --chart-5: #4a4a48;
   --cover-glow-lightness: 0.32;
   --cover-glow-alpha: 0.35;
+  --pull-shadow: oklch(0 0 0 / 0.55);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -200,6 +203,7 @@
     --chart-5: #4a4a48;
     --cover-glow-lightness: 0.32;
     --cover-glow-alpha: 0.35;
+    --pull-shadow: oklch(0 0 0 / 0.55);
   }
 }
 
@@ -493,6 +497,166 @@
   }
 }
 
+/* The disc (Disc), a brand object: black vinyl, grooves, a sheen, the label
+   in the Cover tint (inherited --cover-tint, grey until known and for House
+   sleeves, cross-fading when it arrives) and the centre hole. */
+.disc {
+  position: absolute;
+  border-radius: 9999px;
+  box-shadow: 0 8px 28px var(--pull-shadow);
+}
+
+.disc-grooves {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background:
+    repeating-radial-gradient(
+      circle at center,
+      oklch(1 0 0 / 0.05) 0 1px,
+      oklch(0 0 0 / 0.14) 1px 2.6px
+    ),
+    #0a0a0b;
+}
+
+.disc-label {
+  position: absolute;
+  inset: 33%;
+  border-radius: 9999px;
+  background: var(--cover-tint);
+  transition: --cover-tint 320ms var(--ease-fade);
+}
+
+/* A printed line, so the label shows the disc turning */
+.disc-label::after {
+  content: '';
+  position: absolute;
+  top: 18%;
+  left: 27%;
+  width: 46%;
+  height: 2px;
+  background: oklch(1 0 0 / 0.55);
+}
+
+.disc-hole {
+  position: absolute;
+  inset: 48.6%;
+  border-radius: 9999px;
+  background: var(--background);
+}
+
+.disc-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 20deg,
+    transparent 0 8%,
+    oklch(1 0 0 / 0.14) 13%,
+    transparent 19% 52%,
+    oklch(1 0 0 / 0.09) 60%,
+    transparent 67%
+  );
+}
+
+/* Signature 3 — Sleeve pull (SleevePull). Scroll-driven: every frame the strip
+   writes each slide's --pull-distance (0 centred, 1 a slide away), and the
+   centred sleeve and its disc part around the centre by the same distance.
+   --pull-tuck puts the disc back: before the intro, and while the record
+   screen is open. */
+/* Registered so a removal's slide-in can ease it */
+@property --pull-distance {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --pull-tuck {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+.sleeve-pull-strip {
+  --sleeve: min(60vw, 320px);
+  position: relative;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding-block: 24px 32px;
+  transition: --pull-tuck 320ms var(--ease-platter);
+}
+
+.sleeve-pull-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.sleeve-pull-strip[data-tuck='in'] {
+  --pull-tuck: 1;
+}
+
+/* Back from the record screen: out once the Cover has landed */
+.sleeve-pull-strip[data-tuck='returning'] {
+  transition-delay: 280ms;
+}
+
+@media (min-width: 900px) {
+  .sleeve-pull-strip {
+    mask-image: linear-gradient(
+      90deg,
+      transparent,
+      #000 18%,
+      #000 82%,
+      transparent
+    );
+  }
+}
+
+/* Centres the first and last slides; never negative on a phone */
+.sleeve-pull-spacer {
+  flex-shrink: 0;
+  width: calc(50% - var(--sleeve) * 0.75);
+}
+
+.sleeve-pull-slide {
+  --pull-out: calc((1 - var(--pull-distance)) * (1 - var(--pull-tuck)));
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  width: var(--sleeve);
+  aspect-ratio: 1;
+  margin-inline: calc(var(--sleeve) / 4);
+  padding: 0;
+  scroll-snap-align: center;
+  cursor: pointer;
+}
+
+.sleeve-pull-body {
+  position: absolute;
+  inset: 0;
+  transform: scale(calc(1 - var(--pull-distance) * 0.18));
+  opacity: calc(1 - var(--pull-distance) * 0.5);
+}
+
+.sleeve-pull-sleeve {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px var(--pull-shadow);
+  transform: translateX(calc(var(--pull-out) * var(--sleeve) * -0.2));
+}
+
+.sleeve-pull-body .disc {
+  inset: 3%;
+  transform: translateX(calc(var(--pull-out) * var(--sleeve) * 0.2));
+}
+
+.sleeve-pull-body .disc-grooves {
+  transform: rotate(calc(var(--pull-out) * 140deg));
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Every bottom sheet fades; data-slot outranks vaul's selector */
   [data-slot='drawer-content'][data-vaul-drawer][data-vaul-drawer-direction][data-vaul-snap-points][data-state='open'] {
@@ -517,5 +681,19 @@
   .portrait-bar,
   .portrait-column {
     animation: none;
+  }
+
+  /* Sleeve pull: the disc stays in its sleeve; neighbours still scale and
+     dim, following the finger */
+  .sleeve-pull-strip {
+    transition: none;
+  }
+
+  .sleeve-pull-body .disc {
+    display: none;
+  }
+
+  .sleeve-pull-sleeve {
+    transform: none;
   }
 }

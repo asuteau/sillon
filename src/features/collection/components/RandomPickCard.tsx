@@ -8,7 +8,7 @@ export const RandomPickCard = () => {
   const { record, isPicking, isError, pick, close } = useRandomPick()
 
   return (
-    <section className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-(--radius) border border-border bg-card px-5 py-4">
+    <section className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-(--radius) border border-border bg-card px-5 py-4">
       <div className="flex flex-col gap-1">
         <p className="type-title m-0 text-base text-foreground">
           Not sure what to spin?

@@ -131,7 +131,7 @@ shadcn derives every radius from one `--radius`, which can't express "square sur
 
 ## 5. Motion
 
-Fast and quiet: fades by default, two signatures, nothing else.
+Fast and quiet: fades by default, three signatures, nothing else.
 
 | Motion                      | Duration                                         | Easing                                                 |
 | --------------------------- | ------------------------------------------------ | ------------------------------------------------------ |
@@ -140,6 +140,7 @@ Fast and quiet: fades by default, two signatures, nothing else.
 | Groove loader               | ~800ms draw-in, short hold, loops (1100ms cycle) | platter                                                |
 | Groove draw-in (landing)    | ~800ms draw-in, once                             | platter                                                |
 | Groove draw-in (Portrait)   | ~800ms draw-in, once, on reveal                  | platter                                                |
+| Sleeve pull                 | scroll-driven; timed moves 320ms                 | platter                                                |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero uses `growCover` for the same move inside one page.
 
@@ -149,10 +150,14 @@ The same draw-in plays **once** on the landing (`.groove-draw-in`): in the hero'
 
 The Portrait's ranking bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`). The time charts' columns (Pressing decade, Additions by year) draw up from the baseline the same way (`.portrait-column`). Every Portrait bar and column is neutral but the Leaders' (see §3): copper, nothing else changes — no larger type, which made the leading row a separate block. Entries tied for the most all lead; when every entry ties, none does.
 
+**Signature 3 — Sleeve pull** (`SleevePull`, `.sleeve-pull-*`, `src/features/collection/sleeve-pull.ts`). Recent additions on Home: a strip of sleeves, 320px on desktop (edges faded with a mask), ≈60vw on a phone. The centred sleeve and its disc part around a shared centre — sleeve −20%, disc +20% of the sleeve width — so the pair stays centred; neighbours scale to 0.82 and dim. Scroll-driven, not timed: every frame, each slide's distance to the centre (`--pull-distance`, from the native scroll position) drives the pull, scale, dimming and the disc's turn, and native `scroll-snap` gives the momentum and settling. Timed moves (arrows, ←/→, a tapped neighbour, removal) glide over 320ms platter. Touch, trackpad, keys and the arrow buttons beside the caption (≥640px) move it; no mouse drag. Tapping the centred record opens its record screen with Signature 1: the disc tucks back during the flight and slides out again once the Cover has landed on close. Removing the centred record slides the next older one into the centre (the previous one if it was the last). The disc pulls out once, on a fresh open of Home, when the centred Cover is ready; never on returning or closing a record screen.
+
+**The disc** (`Disc`, `.disc-*`) is a brand object, like the mark: black vinyl with fine grooves and a sheen, a label in the Cover tint (§3; grey for House sleeves, cross-fading from grey as the tint arrives), a printed line on the label so the turn shows, and a centre hole in `--background`. Square sleeve, round record (§4).
+
 Rules:
 
 - No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
-- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in.
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in. The Sleeve pull keeps the disc in its sleeve and never shows it; neighbours still scale and dim (they follow the finger), removal cross-fades and the arrows jump.
 
 ---
 
