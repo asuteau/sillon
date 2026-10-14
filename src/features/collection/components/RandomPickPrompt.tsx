@@ -4,11 +4,11 @@ import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 import { Button } from '#/shared/components/ui/button'
 import { RandomPickSpotlight } from './RandomPickSpotlight'
 
-export const RandomPickCard = () => {
+export const RandomPickPrompt = () => {
   const { record, isPicking, isError, pick, close } = useRandomPick()
 
   return (
-    <section className="mt-10 flex flex-col items-center gap-4 rounded-(--radius) border border-border bg-card px-5 py-4">
+    <section className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:gap-4">
       <div className="flex flex-col gap-1">
         <p className="type-title m-0 text-base text-foreground">
           Not sure what to spin?

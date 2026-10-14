@@ -606,7 +606,9 @@
 }
 
 .sleeve-pull-strip {
-  --sleeve: min(60vw, 320px);
+  /* Short phones shrink the sleeve so the Random pick prompt stays above the
+     fold; never below 160px, for a phone held sideways */
+  --sleeve: min(60vw, 320px, max(28svh, 160px));
   position: relative;
   display: flex;
   overflow-x: auto;
@@ -628,6 +630,12 @@
 /* Back from the record screen: out once the Cover has landed */
 .sleeve-pull-strip[data-tuck='returning'] {
   transition-delay: 280ms;
+}
+
+@media (min-width: 640px) {
+  .sleeve-pull-strip {
+    --sleeve: min(60vw, 320px);
+  }
 }
 
 @media (min-width: 900px) {

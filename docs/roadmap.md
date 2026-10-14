@@ -1032,7 +1032,7 @@ Dropped: the Discogs API terms list using the API "with the intent to drive traf
 
 **Trigger**: "Pick for me" (`Shuffle` icon + label) in two places, hidden when the Collection is empty:
 
-- Home — `RandomPickCard` above Recent additions (primary entry)
+- Home — `RandomPickPrompt` below Recent additions (primary entry)
 - Collection page — `RandomPickButton` beside the title (secondary)
 
 Not in the global header: it is a Collection action, not app chrome. Not in `SortChips`: it is not an ordering.

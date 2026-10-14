@@ -1,8 +1,7 @@
 import { recentAdditionsQueryOptions } from '#/features/collection/collection.queries'
-import { RandomPickCard } from '#/features/collection/components/RandomPickCard'
+import { RandomPickPrompt } from '#/features/collection/components/RandomPickPrompt'
 import { RecentAdditions } from '#/features/collection/components/RecentAdditions'
 import { LandingPage } from '#/features/landing/components/LandingPage'
-import { ScanFab } from '#/shared/components/ScanFab'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Page } from '#/shared/components/Page'
@@ -31,8 +30,7 @@ function App() {
   return (
     <Page className="text-center">
       <RecentAdditions records={data?.releases} username={user.username} />
-      {data && data.releases.length > 0 && <RandomPickCard />}
-      <ScanFab />
+      {data && data.releases.length > 0 && <RandomPickPrompt />}
     </Page>
   )
 }

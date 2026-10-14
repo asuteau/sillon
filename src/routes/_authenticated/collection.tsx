@@ -10,7 +10,6 @@ import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { Button } from '#/shared/components/ui/button'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
-import { ScanFab } from '#/shared/components/ScanFab'
 import { RandomPickButton } from '#/features/collection/components/RandomPickButton'
 import { SortChips } from '#/shared/components/SortChips'
 import {
@@ -146,8 +145,6 @@ function Collection() {
           removeIcon={<CollectionIcon className="size-4" />}
         />
       )}
-
-      <ScanFab />
     </Page>
   )
 }

@@ -73,11 +73,7 @@ export default function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {user && (
-            <div className="hidden sm:flex">
-              <ScanButton />
-            </div>
-          )}
+          {user && <ScanButton />}
           <ThemeToggle />
           {user ? (
             <Link

@@ -33,9 +33,9 @@ describe('Footer', () => {
     ).toBe('/legal')
   })
 
-  it('clears the mobile BottomNav and Scan button', () => {
+  it('clears the mobile BottomNav', () => {
     const { container } = render(<Footer />)
 
-    expect(container.querySelector('footer')?.className).toMatch(/\bpb-32\b/)
+    expect(container.querySelector('footer')?.className).toMatch(/\bpb-24\b/)
   })
 })
