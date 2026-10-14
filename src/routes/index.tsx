@@ -1,5 +1,5 @@
 import { recentAdditionsQueryOptions } from '#/features/collection/collection.queries'
-import { RandomPickCard } from '#/features/collection/components/RandomPickCard'
+import { RandomPickPrompt } from '#/features/collection/components/RandomPickPrompt'
 import { RecentAdditions } from '#/features/collection/components/RecentAdditions'
 import { LandingPage } from '#/features/landing/components/LandingPage'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -30,7 +30,7 @@ function App() {
   return (
     <Page className="text-center">
       <RecentAdditions records={data?.releases} username={user.username} />
-      {data && data.releases.length > 0 && <RandomPickCard />}
+      {data && data.releases.length > 0 && <RandomPickPrompt />}
     </Page>
   )
 }
