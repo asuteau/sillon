@@ -6,7 +6,7 @@ interface PageProps {
 }
 
 // Every screen's content column, below the Header. The Footer below it clears
-// the mobile BottomNav and Scan button.
+// the mobile BottomNav.
 export const Page = ({ children, className }: PageProps) => (
   <main
     className={cn(

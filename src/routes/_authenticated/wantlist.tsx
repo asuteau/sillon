@@ -7,7 +7,6 @@ import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { Button } from '#/shared/components/ui/button'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
-import { ScanFab } from '#/shared/components/ScanFab'
 import { SortChips } from '#/shared/components/SortChips'
 import {
   formatYear,
@@ -122,8 +121,6 @@ function Wantlist() {
           removeIcon={<WantlistIcon className="size-4" />}
         />
       )}
-
-      <ScanFab />
     </Page>
   )
 }

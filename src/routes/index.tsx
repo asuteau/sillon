@@ -2,7 +2,6 @@ import { recentAdditionsQueryOptions } from '#/features/collection/collection.qu
 import { RandomPickCard } from '#/features/collection/components/RandomPickCard'
 import { RecentAdditions } from '#/features/collection/components/RecentAdditions'
 import { LandingPage } from '#/features/landing/components/LandingPage'
-import { ScanFab } from '#/shared/components/ScanFab'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Page } from '#/shared/components/Page'
@@ -32,7 +31,6 @@ function App() {
     <Page className="text-center">
       <RecentAdditions records={data?.releases} username={user.username} />
       {data && data.releases.length > 0 && <RandomPickCard />}
-      <ScanFab />
     </Page>
   )
 }
