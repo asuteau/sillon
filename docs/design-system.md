@@ -175,6 +175,8 @@ The disc's colour (`discSurface()`, `src/features/collection/disc-surface.utils.
 | Sparkle, pearl, glow   | Approximated overlays: glints of white, a faint iridescent conic, a pale green halo                                                                                                                                 |
 | Picture disc           | The Cover on the disc, faint grooves over it                                                                                                                                                                        |
 
+**The disc row** (`DiscRow`, `.disc-row*`) shows a Release's discs on the record screen, under the catalogue lines and above Marketplace: one Disc per disc (Disc count, CONTEXT.md), each in its own Vinyl colour, left to right in disc order, overlapping by 40%, disc 1 on top. 48px below 640px wide, 64px above; every disc the same size (7" and 10" are not told apart). At most four are drawn; beyond that, a `×N` count in the catalogue face follows them. Disc 1 is seeded by the Release id like the Sleeve pull's, so the two match; each next disc by the id plus its index, so a splatter set doesn't repeat itself. Static, no entrance of its own, and `aria-hidden`: the catalogue line already gives the format in words. No vinyl, no row.
+
 Rules:
 
 - No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).

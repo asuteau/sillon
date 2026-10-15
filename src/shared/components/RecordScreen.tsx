@@ -6,7 +6,9 @@ import {
   formatDateAdded,
   leadArtist,
 } from '#/features/collection/collection.utils'
+import { DiscRow } from '#/features/collection/components/DiscRow'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
+import { CoverArt } from '#/shared/components/CoverArt'
 import { CoverGlow } from '#/shared/components/CoverGlow'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
 import { RecordHeading } from '#/shared/components/RecordHeading'
@@ -70,18 +72,19 @@ const RecordScreenContent = ({
     ? [label.name, catno].filter(Boolean).join(' · ')
     : null
 
+  const coverArt = {
+    coverKey: releaseCoverKey(record.id, info.master_id),
+    artist: leadArtist(info.artists),
+    credits: recordCredits(info.artists),
+    title: info.title,
+    styles: info.styles,
+  }
+
   return (
     <div
       className={`relative flex min-h-0 flex-col gap-5 overflow-y-auto ${isReplacement ? 'duration-160 ease-fade animate-in fade-in-0' : ''}`}
     >
-      <SheetCover
-        ref={coverRef}
-        coverKey={releaseCoverKey(record.id, info.master_id)}
-        artist={leadArtist(info.artists)}
-        credits={recordCredits(info.artists)}
-        title={info.title}
-        styles={info.styles}
-      />
+      <SheetCover ref={coverRef} {...coverArt} />
 
       <RecordHeading
         artist={formatArtists(info.artists)}
@@ -96,6 +99,12 @@ const RecordScreenContent = ({
           formatParts.join(' · '),
           labelText,
         ]}
+      />
+
+      <DiscRow
+        releaseId={record.id}
+        formats={info.formats}
+        picture={<CoverArt {...coverArt} className="size-full" />}
       />
 
       <MarketplaceSection releaseId={record.id} />
