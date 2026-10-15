@@ -1,5 +1,24 @@
 import { z } from 'zod'
 
+// A Release's formats and labels, as Discogs lists them on Collection and
+// Wantlist items alike
+export const ReleaseFormatsSchema = z
+  .array(
+    z.object({
+      name: z.string(),
+      qty: z.string().optional(),
+      descriptions: z.array(z.string()).optional(),
+      text: z.string().optional(),
+    }),
+  )
+  .optional()
+  .default([])
+
+export const ReleaseLabelsSchema = z
+  .array(z.object({ name: z.string(), catno: z.string().optional() }))
+  .optional()
+  .default([])
+
 export const CollectionReleaseSchema = z.object({
   id: z.number(),
   instance_id: z.number(),
@@ -20,21 +39,8 @@ export const CollectionReleaseSchema = z.object({
     cover_image: z.string(),
     thumb: z.string(),
     styles: z.array(z.string()).optional().default([]),
-    formats: z
-      .array(
-        z.object({
-          name: z.string(),
-          qty: z.string().optional(),
-          descriptions: z.array(z.string()).optional(),
-          text: z.string().optional(),
-        }),
-      )
-      .optional()
-      .default([]),
-    labels: z
-      .array(z.object({ name: z.string(), catno: z.string().optional() }))
-      .optional()
-      .default([]),
+    formats: ReleaseFormatsSchema,
+    labels: ReleaseLabelsSchema,
   }),
 })
 
@@ -47,6 +53,7 @@ export const CollectionPageSchema = z.object({
   }),
 })
 
+export type ReleaseFormat = z.infer<typeof ReleaseFormatsSchema>[number]
 export type CollectionRelease = z.infer<typeof CollectionReleaseSchema>
 export type CollectionPage = z.infer<typeof CollectionPageSchema>
 

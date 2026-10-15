@@ -16,7 +16,7 @@ const FILES = [
   ...componentFiles('features/marketplace/components'),
   ...componentFiles('features/landing/components'),
   ...componentFiles('features/portrait/components'),
-  'shared/components/ReleaseSheet.tsx',
+  'shared/components/RecordScreen.tsx',
   'shared/components/SearchReleaseSheet.tsx',
   'shared/components/SheetCover.tsx',
   'shared/components/BarcodeScanner.tsx',

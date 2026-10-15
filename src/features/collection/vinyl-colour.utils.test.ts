@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { unrecognisedWords, vinylColour } from './vinyl-colour.utils'
+import {
+  unrecognisedWords,
+  vinylColour,
+  vinylColours,
+} from './vinyl-colour.utils'
 
 // Format notes below are real, from Discogs Releases
 const vinyl = (text?: string, qty = '1') => ({ name: 'Vinyl', qty, text })
@@ -358,5 +362,65 @@ describe('unrecognisedWords', () => {
   it('leaves out the parts about the sleeve or the plant', () => {
     expect(unrecognisedWords('Pitman Pressing, Steamboat Label')).toEqual([])
     expect(unrecognisedWords('Red, Embossed Cover')).toEqual([])
+  })
+})
+
+describe('vinylColours', () => {
+  const families = (formats: Parameters<typeof vinylColours>[0]) =>
+    vinylColours(formats).map(({ colours }) => colours[0].family)
+
+  it('has one Vinyl colour per disc, across every vinyl format', () => {
+    expect(families([vinyl('Black', '3')])).toEqual(['black', 'black', 'black'])
+    expect(
+      families([
+        vinyl('Black', '2'),
+        { name: 'CD', qty: '1', text: 'Blue' },
+        vinyl('Red'),
+      ]),
+    ).toEqual(['black', 'black', 'red'])
+  })
+  it('counts a disc of unknown quantity as one', () => {
+    expect(families([{ name: 'Vinyl' }])).toEqual(['black'])
+    expect(families([vinyl('Red', '')])).toEqual(['red'])
+  })
+
+  it('has no disc when the Release has no vinyl', () => {
+    expect(vinylColours([{ name: 'CD', qty: '2', text: 'Blue' }])).toEqual([])
+    expect(vinylColours([])).toEqual([])
+  })
+  it('gives each disc its own colour when the note tells them apart', () => {
+    expect(families([vinyl('Disc 1: Red, Disc 2: Blue', '2')])).toEqual([
+      'red',
+      'blue',
+    ])
+    expect(
+      vinylColours([vinyl('LP1: Clear / LP2: Black Splatter', '2')]),
+    ).toEqual([
+      vinylColour([vinyl('Clear')]),
+      vinylColour([vinyl('Black Splatter')]),
+    ])
+    expect(families([vinyl('LP 2: Bone; LP 1: Oxblood', '2')])).toEqual([
+      'burgundy',
+      'beige',
+    ])
+  })
+
+  it('gives a disc the note doesn’t single out its format’s colour', () => {
+    expect(families([vinyl('Red, Disc 3: Blue', '3')])).toEqual([
+      'red',
+      'red',
+      'blue',
+    ])
+    expect(families([vinyl('Disc 1: Gold, Disc 2: Gatefold', '2')])).toEqual([
+      'gold',
+      'gold',
+    ])
+  })
+
+  it('starts with the disc vinylColour reads for the Release', () => {
+    for (const text of ['Disc 1: Red, Disc 2: Blue', 'Red, Disc 2: Blue'])
+      expect(vinylColours([vinyl(text, '2')])[0]).toEqual(
+        vinylColour([vinyl(text, '2')]),
+      )
   })
 })

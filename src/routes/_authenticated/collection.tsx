@@ -9,7 +9,7 @@ import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { Button } from '#/shared/components/ui/button'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
+import { RecordScreen, RemoveAction } from '#/shared/components/RecordScreen'
 import { RandomPickButton } from '#/features/collection/components/RandomPickButton'
 import { SortChips } from '#/shared/components/SortChips'
 import {
@@ -123,26 +123,28 @@ function Collection() {
       )}
 
       {selected && (
-        <ReleaseSheet
-          release={selected}
+        <RecordScreen
+          record={selected}
           onClose={() => setSelected(null)}
-          onRemove={() =>
-            removeFromCollection.mutate(
-              {
-                releaseId: selected.id,
-                copy: {
-                  instanceId: selected.instance_id,
-                  folderId: selected.folder_id,
-                },
-              },
-              {
-                onSuccess: () => setSelected(null),
-              },
-            )
+          actions={
+            <RemoveAction
+              label="Remove from collection"
+              icon={<CollectionIcon className="size-4" />}
+              isRemoving={removeFromCollection.isPending}
+              onRemove={() =>
+                removeFromCollection.mutate(
+                  {
+                    releaseId: selected.id,
+                    copy: {
+                      instanceId: selected.instance_id,
+                      folderId: selected.folder_id,
+                    },
+                  },
+                  { onSuccess: () => setSelected(null) },
+                )
+              }
+            />
           }
-          isRemoving={removeFromCollection.isPending}
-          removeLabel="Remove from collection"
-          removeIcon={<CollectionIcon className="size-4" />}
         />
       )}
     </Page>

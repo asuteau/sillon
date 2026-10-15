@@ -587,6 +587,42 @@
   );
 }
 
+/* The record screen's disc row (DiscRow): a Release's discs left to right,
+   40% overlapping, disc 1 on top. Static; all discs one size */
+.disc-row {
+  --disc-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .disc-row {
+    --disc-size: 64px;
+  }
+}
+
+.disc-row-slot {
+  position: relative;
+  flex: none;
+  width: var(--disc-size);
+  height: var(--disc-size);
+}
+
+.disc-row-slot + .disc-row-slot {
+  margin-left: calc(var(--disc-size) * -0.4);
+}
+
+.disc-row .disc {
+  inset: 0;
+  box-shadow: 0 4px 12px var(--pull-shadow);
+}
+
+/* The hole shows the record screen behind it */
+.disc-row .disc-hole {
+  background: var(--popover);
+}
+
 /* Signature 3 — Sleeve pull (SleevePull). Scroll-driven: every frame the strip
    writes each slide's --pull-distance (0 centred, 1 a slide away), and the
    centred sleeve and its disc part around the centre by the same distance.
@@ -682,6 +718,20 @@
   border-radius: var(--radius);
   box-shadow: 0 10px 30px var(--pull-shadow);
   transform: translateX(calc(var(--pull-out) * var(--sleeve) * -0.2));
+}
+
+/* While loading (SleevePullSkeleton): flat sleeves, as a Cover loads */
+.sleeve-pull-strip[data-skeleton] {
+  overflow: hidden;
+}
+
+[data-skeleton] .sleeve-pull-slide {
+  cursor: default;
+}
+
+[data-skeleton] .sleeve-pull-sleeve {
+  background: var(--muted);
+  box-shadow: none;
 }
 
 .sleeve-pull-body .disc {
