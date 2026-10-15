@@ -479,6 +479,63 @@ export const vinylColour = (formats: Format[]): VinylColour => {
   return parseNote(disc?.text ?? '', disc?.descriptions ?? [])
 }
 
+// Disc count (CONTEXT.md): a vinyl format's quantity, one when unknown
+const discCount = (format: Format) =>
+  Math.max(1, Number.parseInt(format.qty ?? '', 10) || 1)
+
+// "Disc 1:", "LP2 -", "Record #3": where the note turns to one disc
+const DISC_MARKER =
+  /\b(?:disc|lp|record|vinyl)\s*#?\s*(\d+|one|two|three|four|i{1,3}|iv)\b\s*[:–-]?/g
+const DISC_NUMBERS: Record<string, number> = {
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  i: 1,
+  ii: 2,
+  iii: 3,
+  iv: 4,
+}
+
+// The note's part about each disc it singles out, by disc number
+const discNotes = (note: string): Map<number, string> => {
+  const text = normalise(note)
+  const markers = [...text.matchAll(DISC_MARKER)]
+  return new Map(
+    markers.map((marker, i) => [
+      DISC_NUMBERS[marker[1]] ?? Number(marker[1]),
+      text.slice(marker.index + marker[0].length, markers.at(i + 1)?.index),
+    ]),
+  )
+}
+
+// The note says something about the disc: a colour, effect or material
+const namesTheDisc = (note: string) => {
+  const { main, bracketed } = noteParts(note)
+  const { colours, effects, materials } = read(bracketed)
+  return (
+    discSegment(main) !== undefined ||
+    colours.length + effects.length + materials.length > 0
+  )
+}
+
+// One Vinyl colour per disc, in disc order, across every vinyl format. A
+// disc the note doesn't single out takes the format's colour (vinylColour's)
+export const vinylColours = (formats: Format[]): VinylColour[] =>
+  formats
+    .filter((format) => format.name === 'Vinyl')
+    .flatMap((format) => {
+      const descriptions = format.descriptions ?? []
+      const overall = parseNote(format.text ?? '', descriptions)
+      const own = discNotes(format.text ?? '')
+      return Array.from({ length: discCount(format) }, (_, i) => {
+        const note = own.get(i + 1)
+        return note !== undefined && namesTheDisc(note)
+          ? parseNote(note, descriptions)
+          : overall
+      })
+    })
+
 // Words that never name a disc's colour, left out of the audit
 const NEVER_A_COLOUR = new Set(
   (

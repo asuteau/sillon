@@ -27,7 +27,7 @@ A Wantlist entry whose exact Release now has a Copy in the Collection. Another R
 _Avoid_: Owned want, completed want
 
 **Random pick**:
-One Copy drawn at random from the whole Collection, to answer "what do I play now?". Picking again draws a new one, never the same Copy twice in a row (unless the Collection holds only one). Shown whole or not at all: the record appears only once its Cover and the colour drawn from it are ready, never piecemeal.
+One Copy drawn at random from the whole Collection, to answer "what do I play now?". Picking again draws a new one, never the same Copy twice in a row (unless the Collection holds only one). Shown whole or not at all: the record appears only once its Cover and the colour drawn from it are ready, never piecemeal. Wholeness covers the record's identity only: marketplace prices are secondary and may arrive after.
 _Avoid_: Shuffle, surprise me
 
 ### Records
@@ -73,8 +73,12 @@ A Cover Sillon generates when Deezer has no artwork for a record, typeset with t
 _Avoid_: Placeholder, fallback cover, default art
 
 **Vinyl colour**:
-The colour and effect (splatter, marbled, split…) of a Release's discs, read from the free-text format note on Discogs, which has no colour field. It belongs to the Release, never to the Master: two Releases of one album share a Cover but each shows its own vinyl. When a Release's discs differ, the first disc's colour stands for the Release. When the note names no colour Sillon recognises, the disc is black, vinyl's default colour. A best guess: an occasional wrong colour is accepted, since unlike a wrong Cover it never passes one record off as another.
+The colour and effect (splatter, marbled, split…) of a Release's discs, read from the free-text format note on Discogs, which has no colour field. It belongs to the Release, never to the Master: two Releases of one album share a Cover but each shows its own vinyl. Each disc has its own Vinyl colour when the notes tell them apart ("Disc 1: Red, Disc 2: Blue"); a disc the notes don't single out takes its format's overall colour. Where only one disc is shown (the Sleeve pull), the first disc stands for the Release. When the note names no colour Sillon recognises, the disc is black, vinyl's default colour. A best guess: an occasional wrong colour is accepted, since unlike a wrong Cover it never passes one record off as another.
 _Avoid_: Variant, colourway, pressing colour
+
+**Disc count**:
+How many vinyl discs a Release holds: the quantities of all its vinyl formats added up. CDs, cassettes and other formats in the same Release don't count. Unknown quantity counts as one.
+_Avoid_: LP count, number of records
 
 ### Artists
 
