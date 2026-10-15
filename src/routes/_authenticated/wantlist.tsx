@@ -6,7 +6,7 @@ import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
 import { Button } from '#/shared/components/ui/button'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { ReleaseSheet } from '#/shared/components/ReleaseSheet'
+import { RecordScreen, RemoveAction } from '#/shared/components/RecordScreen'
 import { SortChips } from '#/shared/components/SortChips'
 import {
   formatYear,
@@ -108,17 +108,21 @@ function Wantlist() {
       )}
 
       {selected && (
-        <ReleaseSheet
-          release={selected}
+        <RecordScreen
+          record={selected}
           onClose={() => setSelected(null)}
-          onRemove={() =>
-            removeFromWantlist.mutate(selected.id, {
-              onSuccess: () => setSelected(null),
-            })
+          actions={
+            <RemoveAction
+              label="Remove from wantlist"
+              icon={<WantlistIcon className="size-4" />}
+              isRemoving={removeFromWantlist.isPending}
+              onRemove={() =>
+                removeFromWantlist.mutate(selected.id, {
+                  onSuccess: () => setSelected(null),
+                })
+              }
+            />
           }
-          isRemoving={removeFromWantlist.isPending}
-          removeLabel="Remove from wantlist"
-          removeIcon={<WantlistIcon className="size-4" />}
         />
       )}
     </Page>

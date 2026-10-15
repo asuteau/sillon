@@ -1,8 +1,9 @@
 import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
-import { RecordSpotlight } from '#/features/collection/components/RecordSpotlight'
 import { SleevePull } from '#/features/collection/components/SleevePull'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
+import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { RecordScreen, RemoveAction } from '#/shared/components/RecordScreen'
 import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 import { useState } from 'react'
 
@@ -50,23 +51,29 @@ export const RecentAdditions = ({
       />
 
       {selected && (
-        <RecordSpotlight
+        <RecordScreen
           record={selected}
           onClose={() => setSelected(null)}
-          onRemove={() =>
-            removeFromCollection.mutate(
-              {
-                releaseId: selected.id,
-                copy: {
-                  instanceId: selected.instance_id,
-                  folderId: selected.folder_id,
-                },
-              },
-              // The sheet fades; the next record slides into the centre
-              { onSuccess: () => setSelected(null) },
-            )
+          actions={
+            <RemoveAction
+              label="Remove from collection"
+              icon={<CollectionIcon />}
+              isRemoving={removeFromCollection.isPending}
+              onRemove={() =>
+                removeFromCollection.mutate(
+                  {
+                    releaseId: selected.id,
+                    copy: {
+                      instanceId: selected.instance_id,
+                      folderId: selected.folder_id,
+                    },
+                  },
+                  // The sheet fades; the next record slides into the centre
+                  { onSuccess: () => setSelected(null) },
+                )
+              }
+            />
           }
-          isRemoving={removeFromCollection.isPending}
         />
       )}
     </section>

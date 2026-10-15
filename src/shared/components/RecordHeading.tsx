@@ -15,7 +15,13 @@ export const RecordHeading = ({
     {artist && (
       <p className="type-caps text-xs text-muted-foreground">{artist}</p>
     )}
-    <h2 className="type-display text-3xl text-foreground">{title}</h2>
+    {/* Two lines at most; the full title shows on hover */}
+    <h2
+      title={title}
+      className="type-display line-clamp-2 text-3xl text-foreground"
+    >
+      {title}
+    </h2>
     {catalogue.filter(Boolean).map((line, i) => (
       <p
         key={i}

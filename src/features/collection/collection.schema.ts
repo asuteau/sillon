@@ -53,6 +53,7 @@ export const CollectionPageSchema = z.object({
   }),
 })
 
+export type ReleaseFormat = z.infer<typeof ReleaseFormatsSchema>[number]
 export type CollectionRelease = z.infer<typeof CollectionReleaseSchema>
 export type CollectionPage = z.infer<typeof CollectionPageSchema>
 
