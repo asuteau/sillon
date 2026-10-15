@@ -720,6 +720,20 @@
   transform: translateX(calc(var(--pull-out) * var(--sleeve) * -0.2));
 }
 
+/* While loading (SleevePullSkeleton): flat sleeves, as a Cover loads */
+.sleeve-pull-strip[data-skeleton] {
+  overflow: hidden;
+}
+
+[data-skeleton] .sleeve-pull-slide {
+  cursor: default;
+}
+
+[data-skeleton] .sleeve-pull-sleeve {
+  background: var(--muted);
+  box-shadow: none;
+}
+
 .sleeve-pull-body .disc {
   inset: 3%;
   transform: translateX(calc(var(--pull-out) * var(--sleeve) * 0.2));

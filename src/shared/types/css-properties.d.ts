@@ -6,5 +6,7 @@ declare module 'react' {
     '--cover-tint'?: string
     // The Disc's Vinyl colour (discSurface)
     '--disc-surface'?: string
+    // A Sleeve pull slide's distance to the centre (0 centred, 1 a slide away)
+    '--pull-distance'?: number
   }
 }

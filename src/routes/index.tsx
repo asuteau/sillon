@@ -30,7 +30,10 @@ function App() {
   return (
     <Page className="text-center">
       <RecentAdditions records={data?.releases} username={user.username} />
-      {data && data.releases.length > 0 && <RandomPickPrompt />}
+      {/* Its space is held while loading; an empty Collection drops it */}
+      {(!data || data.releases.length > 0) && (
+        <RandomPickPrompt isPending={!data} />
+      )}
     </Page>
   )
 }

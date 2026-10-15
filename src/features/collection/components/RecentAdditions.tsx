@@ -1,6 +1,7 @@
 import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { SleevePull } from '#/features/collection/components/SleevePull'
+import { SleevePullSkeleton } from '#/features/collection/components/SleevePullSkeleton'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { RecordScreen, RemoveAction } from '#/shared/components/RecordScreen'
@@ -27,8 +28,20 @@ export const RecentAdditions = ({
     </h1>
   )
 
-  // Not loaded yet, server-side or restoring from the device: say nothing
-  if (!records) return <section>{heading}</section>
+  // Not loaded yet, server-side or restoring from the device: the strip's
+  // shape, and the attribution's space
+  if (!records) {
+    return (
+      <section>
+        {heading}
+        <SleevePullSkeleton />
+        <DiscogsAttribution
+          href={discogsCollectionUrl(username)}
+          className="invisible mt-4"
+        />
+      </section>
+    )
+  }
 
   if (records.length === 0) {
     return (

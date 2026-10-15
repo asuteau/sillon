@@ -4,11 +4,21 @@ import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 import { Button } from '#/shared/components/ui/button'
 import { RandomPickSpotlight } from './RandomPickSpotlight'
 
-export const RandomPickPrompt = () => {
+interface RandomPickPromptProps {
+  /** Recent additions still loading: hold the prompt's space, unseen */
+  isPending?: boolean
+}
+
+export const RandomPickPrompt = ({
+  isPending = false,
+}: RandomPickPromptProps) => {
   const { record, isPicking, isError, pick, close } = useRandomPick()
 
   return (
-    <section className="mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:gap-4">
+    <section
+      aria-hidden={isPending || undefined}
+      className={`mt-8 flex flex-col items-center gap-3 sm:mt-10 sm:gap-4 ${isPending ? 'invisible' : 'animate-in duration-160 ease-fade fade-in-0'}`}
+    >
       <div className="flex flex-col gap-1">
         <p className="type-title m-0 text-base text-foreground">
           Not sure what to spin?
