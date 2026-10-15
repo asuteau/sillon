@@ -1,5 +1,10 @@
 import { z } from 'zod'
 
+import {
+  ReleaseFormatsSchema,
+  ReleaseLabelsSchema,
+} from '#/features/collection/collection.schema'
+
 export const WantlistItemSchema = z.object({
   id: z.number(),
   date_added: z.string(),
@@ -13,6 +18,8 @@ export const WantlistItemSchema = z.object({
     cover_image: z.string(),
     thumb: z.string(),
     styles: z.array(z.string()).optional().default([]),
+    formats: ReleaseFormatsSchema,
+    labels: ReleaseLabelsSchema,
   }),
 })
 
