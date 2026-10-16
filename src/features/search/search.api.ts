@@ -11,7 +11,6 @@ import type {
   ArtistDetail,
   ArtistMasters,
   ArtistSearchPage,
-  BarcodeResult,
   DiscographyArtist,
   DiscographyFormat,
   MasterResult,
@@ -24,7 +23,6 @@ import { stripDisambiguator } from '#/shared/utils/artist-name'
 import {
   ArtistDetailSchema,
   ArtistSearchPageSchema,
-  BarcodeResultSchema,
   MasterArtistsSchema,
   PaginatedSchema,
   ReleaseDetailSchema,
@@ -363,53 +361,4 @@ export const getArtistMasters = createServerFn()
       results: results.filter((_, i) => credited[i]),
       truncated: search.truncated,
     }
-  })
-
-export const fetchDiscogsBarcode = createServerFn()
-  .inputValidator((data: { barcode: string }) => data)
-  .handler(async ({ data }): Promise<BarcodeResult | null> => {
-    const { useAppSession } = await import('#/services/session.server')
-    const session = await useAppSession()
-
-    const { accessToken, accessTokenSecret } = session.data
-    if (!accessToken || !accessTokenSecret) {
-      return null
-    }
-
-    const consumerKey = process.env.DISCOGS_CONSUMER_KEY!
-    const consumerSecret = process.env.DISCOGS_CONSUMER_SECRET!
-
-    const params = new URLSearchParams({
-      barcode: data.barcode,
-      type: 'release',
-      per_page: '5',
-    })
-
-    const url = `${DISCOGS_API}/database/search?${params.toString()}`
-
-    const { discogsRequest } = await import('#/services/discogs.server')
-    const response = await discogsRequest(url, {
-      headers: {
-        Authorization: buildOAuthHeader({
-          oauth_consumer_key: consumerKey,
-          oauth_token: accessToken,
-          oauth_signature_method: 'PLAINTEXT',
-          oauth_signature: oauthSignature(consumerSecret, accessTokenSecret),
-          oauth_nonce: nonce(),
-          oauth_timestamp: String(Math.floor(Date.now() / 1000)),
-        }),
-        'User-Agent': 'Sillon/1.0',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Discogs barcode search failed: ${response.status}`)
-    }
-
-    const json = await response.json()
-    const parsed = BarcodeResultSchema.array().safeParse(
-      (json as { results?: unknown }).results ?? [],
-    )
-    const results = parsed.success ? parsed.data : []
-    return results[0] ?? null
   })

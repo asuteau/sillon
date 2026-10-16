@@ -54,6 +54,10 @@ export const LandingPage = () => (
         the release on Discogs, ready to add to your collection or your
         wantlist.
       </p>
+      <p>
+        Back home with a stack? Flip through it: every sleeve piles up, and one
+        tap adds them all.
+      </p>
     </FeatureSection>
 
     <FeatureSection

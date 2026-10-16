@@ -89,35 +89,6 @@ export type SearchPage = z.infer<typeof SearchPageSchema>
 export type Version = z.infer<typeof VersionSchema>
 export type VersionsPage = z.infer<typeof VersionsPageSchema>
 
-export const BarcodeResultSchema = z.object({
-  id: z.number(),
-  master_id: z.number().nullish(),
-  title: z.string(),
-  year: z.string().optional(),
-  thumb: z.string().optional(),
-  cover_image: z.string().optional(),
-  labels: z.array(z.object({ name: z.string() })).optional(),
-  formats: z
-    .array(
-      z.object({
-        name: z.string(),
-        descriptions: z.array(z.string()).optional(),
-      }),
-    )
-    .optional(),
-  genre: z.array(z.string()).optional(),
-  style: z.array(z.string()).optional(),
-  catno: z.string().optional(),
-  user_data: z
-    .object({
-      in_collection: z.boolean(),
-      in_wantlist: z.boolean(),
-    })
-    .optional(),
-})
-
-export type BarcodeResult = z.infer<typeof BarcodeResultSchema>
-
 export const ArtistResultSchema = z.object({
   id: z.number(),
   title: z.string(),

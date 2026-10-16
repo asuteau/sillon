@@ -6,7 +6,7 @@ import { SearchIcon } from '#/shared/components/icons/SearchIcon'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
-import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
+import { StackScanner } from '#/features/scan/components/StackScanner'
 import { RecordList } from '#/shared/components/RecordList'
 import { Button } from '#/shared/components/ui/button'
 import { Chip, ChipRow } from '#/shared/components/ui/chip'
@@ -211,7 +211,7 @@ function Search() {
       )}
 
       {isScannerOpen && (
-        <BarcodeScanner
+        <StackScanner
           onClose={() => setIsScannerOpen(false)}
           onSearchManually={() => {
             setIsScannerOpen(false)

@@ -469,6 +469,33 @@
   }
 }
 
+/* Scan: the viewfinder flashes on each hit; "Not on Discogs" holds long
+   enough to read, then fades; a row scanned again lights up. Fades only */
+.scan-flash {
+  animation: scan-fade-out 320ms var(--ease-fade) both;
+  opacity: 0.35;
+}
+
+.scan-notice {
+  animation: scan-fade-out 160ms var(--ease-fade) 1200ms both;
+}
+
+.stack-row-seen {
+  animation: stack-row-seen 640ms var(--ease-fade) both;
+}
+
+@keyframes scan-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes stack-row-seen {
+  from {
+    background-color: var(--muted);
+  }
+}
+
 /* Portrait: scan-based sections reveal together once every Copy is read; the
    ranking bars draw in from the start like the groove */
 .portrait-reveal {

@@ -73,7 +73,7 @@ export default function Header() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {user && <ScanButton />}
+          {user && <ScanButton username={user.username} />}
           <ThemeToggle />
           {user ? (
             <Link

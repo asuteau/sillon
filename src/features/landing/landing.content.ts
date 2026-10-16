@@ -157,7 +157,8 @@ export const LINER_NOTES_STACK = [
   },
   {
     name: 'BarcodeDetector API',
-    description: "Scans a sleeve's barcode, no dependency",
+    description:
+      "Scans a sleeve's barcode; ZXing WebAssembly where the browser has none",
     href: 'https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector',
   },
   {
