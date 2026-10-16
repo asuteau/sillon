@@ -16,6 +16,22 @@ import { Input } from '#/shared/components/ui/input'
 import { Drawer, DrawerContent } from '#/shared/components/ui/drawer'
 import { useIsMobile } from '#/shared/hooks/use-is-mobile'
 
+interface DevBarcodeInputProps {
+  onBarcode: (code: string) => void
+}
+
+// Dev only: type a barcode instead of pointing a camera
+const DevBarcodeInput = ({ onBarcode }: DevBarcodeInputProps) => (
+  <Input
+    type="text"
+    placeholder="Dev: enter barcode…"
+    className="type-catalogue mt-2 h-8 text-center text-xs sm:text-xs"
+    onKeyDown={(e) => {
+      if (e.key === 'Enter') onBarcode(e.currentTarget.value)
+    }}
+  />
+)
+
 interface BarcodeScannerProps {
   onClose: () => void
   onSearchManually?: () => void
@@ -36,7 +52,6 @@ const BarcodeScannerContent = ({
     isAskingFulfilledWant,
     isCollectionPending,
     isWantlistPending,
-    startCamera,
     handleCancel,
     handleScanAgain,
     handleAddToCollection,
@@ -45,78 +60,65 @@ const BarcodeScannerContent = ({
     handleManualBarcode,
   } = useBarcodeScanner(onClose)
 
-  if (scanState === 'idle') {
-    if (!isSupported) {
-      return (
-        <div className="flex flex-col items-center gap-5 py-2 text-center">
-          <AlertCircle className="size-12 text-muted-foreground" />
-          <div>
-            <p className="type-title text-lg text-foreground">
-              Barcode scanning is not supported on this browser.
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Search manually instead.
-            </p>
-          </div>
-          <Button variant="outline" size="lg" onClick={onSearchManually}>
-            Search manually →
-          </Button>
-          {import.meta.env.DEV && (
-            <Input
-              type="text"
-              placeholder="Dev: enter barcode…"
-              className="type-catalogue mt-2 h-8 text-center text-xs sm:text-xs"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter')
-                  handleManualBarcode(e.currentTarget.value)
-              }}
-            />
-          )}
-        </div>
-      )
-    }
-
+  if (!isSupported) {
     return (
       <div className="flex flex-col items-center gap-5 py-2 text-center">
-        <ScanIcon className="size-12 text-foreground" />
+        <AlertCircle className="size-12 text-muted-foreground" />
         <div>
-          <p className="type-title text-lg text-foreground">Scan a barcode</p>
+          <p className="type-title text-lg text-foreground">
+            Barcode scanning is not supported on this browser.
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Point your camera at the barcode
-            <br />
-            on the record sleeve or spine.
+            Search manually instead.
           </p>
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Button size="lg" onClick={startCamera}>
-            Start scanning →
-          </Button>
-          <Button variant="outline" size="lg" onClick={onClose}>
-            Cancel
-          </Button>
-        </div>
+        <Button variant="outline" size="lg" onClick={onSearchManually}>
+          Search manually →
+        </Button>
         {import.meta.env.DEV && (
-          <Input
-            type="text"
-            placeholder="Dev: enter barcode…"
-            className="type-catalogue mt-2 h-8 text-center text-xs sm:text-xs"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleManualBarcode(e.currentTarget.value)
-            }}
-          />
+          <DevBarcodeInput onBarcode={handleManualBarcode} />
         )}
       </div>
     )
   }
 
-  if (scanState === 'scanning') {
+  if (scanState === 'blocked') {
+    return (
+      <div className="flex flex-col items-center gap-5 py-2 text-center">
+        <ScanIcon className="size-12 text-muted-foreground" />
+        <div>
+          <p className="type-title text-lg text-foreground">
+            Camera access blocked
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Allow the camera for Sillon in your browser settings,
+            <br />
+            or search manually.
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button variant="outline" size="lg" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="lg" onClick={onSearchManually}>
+            Search manually →
+          </Button>
+        </div>
+        {import.meta.env.DEV && (
+          <DevBarcodeInput onBarcode={handleManualBarcode} />
+        )}
+      </div>
+    )
+  }
+
+  if (scanState === 'starting' || scanState === 'scanning') {
     return (
       <div className="relative aspect-4/3 w-full overflow-hidden rounded-(--radius) bg-vinyl-black">
         <video
           ref={videoRef}
           playsInline
           muted
-          className="h-full w-full object-cover"
+          className={`h-full w-full object-cover transition-opacity duration-160 ease-fade ${scanState === 'scanning' ? 'opacity-100' : 'opacity-0'}`}
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
           <div className="relative h-28 w-64">
@@ -126,7 +128,7 @@ const BarcodeScannerContent = ({
             <span className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-white" />
           </div>
           <p className="text-sm font-semibold text-white drop-shadow">
-            Point at barcode
+            {scanState === 'starting' ? 'Starting camera…' : 'Point at barcode'}
           </p>
         </div>
         <div className="absolute bottom-6 inset-x-0 flex justify-center">

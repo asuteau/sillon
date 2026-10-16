@@ -15,7 +15,8 @@ declare class BarcodeDetector {
   detect(source: HTMLVideoElement): Promise<BarcodeDetectorResult[]>
 }
 
-export type ScanState = 'idle' | 'scanning' | 'found' | 'not_found'
+export type ScanState =
+  'starting' | 'blocked' | 'scanning' | 'found' | 'not_found'
 
 export interface UseBarcodeScannerReturn {
   scanState: ScanState
@@ -28,7 +29,6 @@ export interface UseBarcodeScannerReturn {
   isAskingFulfilledWant: boolean
   isCollectionPending: boolean
   isWantlistPending: boolean
-  startCamera: () => Promise<void>
   handleCancel: () => void
   handleScanAgain: () => Promise<void>
   handleAddToCollection: () => Promise<void>
@@ -40,7 +40,7 @@ export interface UseBarcodeScannerReturn {
 export const useBarcodeScanner = (
   onClose: () => void,
 ): UseBarcodeScannerReturn => {
-  const [scanState, setScanState] = useState<ScanState>('idle')
+  const [scanState, setScanState] = useState<ScanState>('starting')
   const [detectedBarcode, setDetectedBarcode] = useState('')
   const [addedToCollection, setAddedToCollection] = useState(false)
   const [addedToWantlist, setAddedToWantlist] = useState(false)
@@ -49,7 +49,9 @@ export const useBarcodeScanner = (
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationFrameRef = useRef<number | null>(null)
-  const unmountedRef = useRef(false)
+  // Bumped on every camera start and on unmount: a stream granted for an
+  // older start is stopped at once
+  const cameraRunRef = useRef(0)
 
   const isSupported =
     typeof window !== 'undefined' && 'BarcodeDetector' in window
@@ -63,31 +65,19 @@ export const useBarcodeScanner = (
   const addToWantlist = useAddToWantlist()
 
   useEffect(() => {
-    unmountedRef.current = false
     return () => {
-      unmountedRef.current = true
+      cameraRunRef.current += 1
       stopCamera()
     }
   }, [])
 
-  // Skip the explainer screen when the camera was already granted before
+  // Straight onto the viewfinder: the browser asks for the camera over it
+  // the first time, and nothing is asked once it was allowed
   useEffect(() => {
-    if (!isSupported) return
-
-    void (async () => {
-      try {
-        const status = await navigator.permissions.query({
-          name: 'camera',
-        })
-        if (unmountedRef.current || status.state !== 'granted') return
-        await startCamera()
-      } catch {
-        // Permissions API unavailable (Safari) — keep the explainer screen
-      }
-    })()
+    if (isSupported) void startCamera()
   }, [isSupported])
 
-  // Attach stream to video element after scanning state triggers its mount
+  // Attach the stream once the viewfinder's video is mounted
   useEffect(() => {
     if (scanState !== 'scanning' || !streamRef.current || !videoRef.current)
       return
@@ -135,15 +125,22 @@ export const useBarcodeScanner = (
   }
 
   const startCamera = async () => {
+    const run = ++cameraRunRef.current
     try {
+      setScanState('starting')
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
       })
+      // Closed or restarted while the browser was asking
+      if (run !== cameraRunRef.current) {
+        stream.getTracks().forEach((t) => t.stop())
+        return
+      }
       streamRef.current = stream
       setScanState('scanning')
       startDetection()
     } catch {
-      // permission denied — stay idle
+      if (run === cameraRunRef.current) setScanState('blocked')
     }
   }
 
@@ -201,7 +198,6 @@ export const useBarcodeScanner = (
     isAskingFulfilledWant,
     isCollectionPending: addToCollection.isPending,
     isWantlistPending: addToWantlist.isPending,
-    startCamera,
     handleCancel,
     handleScanAgain,
     handleAddToCollection,
