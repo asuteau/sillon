@@ -5,6 +5,7 @@ import {
   RecordRow,
 } from '#/shared/components/RecordList'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
+import { Chip } from '#/shared/components/ui/chip'
 import { cn } from '#/shared/utils/cn'
 
 import type { AddState } from '../hooks/use-stack-commit'
@@ -51,6 +52,7 @@ interface StackRowProps {
   /** Lights the row up: it was just scanned again */
   highlightKey: number | undefined
   onClick: () => void
+  onToggleIncluded: () => void
 }
 
 export const StackRow = ({
@@ -59,30 +61,45 @@ export const StackRow = ({
   addState,
   highlightKey,
   onClick,
+  onToggleIncluded,
 }: StackRowProps) => {
   const pressing = chosenPressing(record)
-  const isLeftOut =
-    record.status === 'found' &&
-    pressing !== null &&
-    isInList(pressing, list) &&
-    !record.included
+  const isInTheList =
+    record.status === 'found' && pressing !== null && isInList(pressing, list)
+  const isLeftOut = isInTheList && !record.included
 
   return (
     <li
       key={highlightKey}
       className={cn(
-        'transition-opacity duration-160 ease-fade',
+        'flex items-center gap-2',
         highlightKey !== undefined && 'stack-row-seen',
-        isLeftOut && 'opacity-50',
       )}
     >
-      <StackRowContent
-        record={record}
-        list={list}
-        addState={addState}
-        isLeftOut={isLeftOut}
-        onClick={onClick}
-      />
+      <div
+        className={cn(
+          'min-w-0 flex-1 transition-opacity duration-160 ease-fade',
+          isLeftOut && 'opacity-50',
+        )}
+      >
+        <StackRowContent
+          record={record}
+          list={list}
+          addState={addState}
+          isLeftOut={isLeftOut}
+          onClick={onClick}
+        />
+      </div>
+      {/* Already in the list: left out, unless the user owns another copy */}
+      {isInTheList && !addState && (
+        <Chip
+          active={!isLeftOut}
+          onClick={onToggleIncluded}
+          className="shrink-0 px-2.5 py-1 text-xs"
+        >
+          {isLeftOut ? 'Add anyway' : 'Adding'}
+        </Chip>
+      )}
     </li>
   )
 }
@@ -156,16 +173,20 @@ const StackRowContent = ({
       media={<PressingCover pressing={pressing} />}
       artist={pressing.artist}
       title={pressing.title}
-      description={pressingDetails(pressing)}
+      description={
+        isLeftOut
+          ? `In your ${LIST_NAMES[list]}`
+          : record.included
+            ? ['Another copy', pressingDetails(pressing)]
+                .filter(Boolean)
+                .join(' · ')
+            : pressingDetails(pressing)
+      }
       badges={
         addState === 'adding' ? (
           <GrooveLoader size={20} />
         ) : addState === 'failed' ? (
           <Mark>Failed</Mark>
-        ) : isLeftOut ? (
-          <Mark>In {LIST_NAMES[list]}</Mark>
-        ) : record.included ? (
-          <Mark>Another copy</Mark>
         ) : list === 'collection' && pressing.inWantlist ? (
           <Mark>Wanted</Mark>
         ) : null

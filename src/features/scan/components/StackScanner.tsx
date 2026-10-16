@@ -18,7 +18,7 @@ import {
   choosePressing,
   chosenPressing,
   EMPTY_STACK,
-  isInList,
+  removeRecord,
   stackSummary,
   toggleIncluded,
 } from '../stack.model'
@@ -26,6 +26,7 @@ import type { StackEntry, StackList, StackRecord } from '../stack.model'
 import { updateStack, useStack } from '../stack.store'
 import { FulfilledWantsPrompt } from './FulfilledWantsPrompt'
 import { PressingChooser } from './PressingChooser'
+import { StackRecordScreen } from './StackRecordScreen'
 import { StackRow } from './StackRow'
 import { Viewfinder } from './Viewfinder'
 
@@ -118,6 +119,13 @@ const StackScannerContent = ({
   const [choosing, setChoosing] = useState<string | null>(null)
   // Records just added to the Collection that are still on the Wantlist
   const [fulfilledWants, setFulfilledWants] = useState<StackEntry[]>([])
+  // The record open on the Record screen: kept as opened, so removing it
+  // from the Stack doesn't pull the screen from under its exit animation
+  const [opened, setOpened] = useState<{
+    barcode: string
+    releaseId: number
+    canChangePressing: boolean
+  } | null>(null)
   const choosingRecord = stack.records.find(
     (r) => r.barcode === choosing && r.status === 'found',
   )
@@ -129,9 +137,11 @@ const StackScannerContent = ({
     if (record.status !== 'found') return
     const pressing = chosenPressing(record)
     if (!pressing) return setChoosing(record.barcode)
-    if (isInList(pressing, list)) {
-      updateStack((s) => toggleIncluded(s, record.barcode))
-    }
+    setOpened({
+      barcode: record.barcode,
+      releaseId: pressing.id,
+      canChangePressing: record.pressings.length > 1,
+    })
   }
 
   const handleChoose = (releaseId: number) => {
@@ -203,6 +213,9 @@ const StackScannerContent = ({
                       : undefined
                   }
                   onClick={() => handleRowClick(record)}
+                  onToggleIncluded={() =>
+                    updateStack((s) => toggleIncluded(s, record.barcode))
+                  }
                 />
               ))}
             </RecordList>
@@ -294,6 +307,16 @@ const StackScannerContent = ({
             )}
           </div>
         </>
+      )}
+
+      {opened && (
+        <StackRecordScreen
+          releaseId={opened.releaseId}
+          canChangePressing={opened.canChangePressing}
+          onRemove={() => updateStack((s) => removeRecord(s, opened.barcode))}
+          onChangePressing={() => setChoosing(opened.barcode)}
+          onClose={() => setOpened(null)}
+        />
       )}
     </div>
   )
