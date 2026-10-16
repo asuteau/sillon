@@ -67,15 +67,19 @@ export const ReleaseDetailSchema = z.object({
   year: z.number(),
   country: z.string().nullish(),
   artists: z.array(z.object({ name: z.string(), anv: z.string().optional() })),
-  images: z.array(z.object({ uri: z.string() })).nullish(),
+  styles: z.array(z.string()).nullish(),
   formats: z
     .array(
       z.object({
         name: z.string(),
-        qty: z.string(),
+        qty: z.string().nullish(),
+        descriptions: z.array(z.string()).nullish(),
         text: z.string().nullish(),
       }),
     )
+    .nullish(),
+  labels: z
+    .array(z.object({ name: z.string(), catno: z.string().nullish() }))
     .nullish(),
 })
 

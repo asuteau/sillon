@@ -16,6 +16,8 @@ import type {
   DiscographyArtist,
   DiscographyFormat,
 } from './search.schema'
+import { toSearchRecord } from './search.model'
+import { prepareRecordCover } from '#/features/collection/collection.queries'
 
 export const mastersQueryOptions = (q: string) =>
   queryOptions({
@@ -37,6 +39,25 @@ export const releaseDetailQueryOptions = (releaseId: string) =>
   queryOptions({
     queryKey: ['search', 'release', releaseId] as const,
     queryFn: () => getReleaseDetail({ data: { releaseId } }),
+    staleTime: 30 * 60 * 1000,
+  })
+
+// A Release from Search, whole like a Random pick: the Record screen shows it
+// only once its Cover is ready (prepareRecordCover)
+export const searchRecordQueryOptions = (
+  queryClient: QueryClient,
+  releaseId: string,
+) =>
+  queryOptions({
+    queryKey: ['search', 'record', releaseId] as const,
+    queryFn: async () => {
+      const raw = await queryClient.fetchQuery(
+        releaseDetailQueryOptions(releaseId),
+      )
+      const record = toSearchRecord(raw)
+      await prepareRecordCover(queryClient, record)
+      return record
+    },
     staleTime: 30 * 60 * 1000,
   })
 

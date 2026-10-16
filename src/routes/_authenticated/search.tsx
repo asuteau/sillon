@@ -11,7 +11,7 @@ import { RecordList } from '#/shared/components/RecordList'
 import { Button } from '#/shared/components/ui/button'
 import { Chip, ChipRow } from '#/shared/components/ui/chip'
 import { Input } from '#/shared/components/ui/input'
-import { SearchReleaseSheet } from '#/shared/components/SearchReleaseSheet'
+import { SearchRecordScreen } from '#/features/search/components/SearchRecordScreen'
 import { useDebounce } from '#/shared/hooks/use-debounce'
 
 import { ArtistCard } from '#/features/search/components/ArtistCard'
@@ -203,7 +203,7 @@ function Search() {
       )}
 
       {releaseId && masterId && (
-        <SearchReleaseSheet
+        <SearchRecordScreen
           releaseId={releaseId}
           masterId={masterId}
           onClose={handleCloseSheet}

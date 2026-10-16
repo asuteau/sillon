@@ -132,16 +132,22 @@ interface RandomPickInput {
   excludeInstanceId?: number
 }
 
-// A Random pick, whole: the Copy, its Cover decoded and its tint sampled, all
-// in the caches the record screen reads, so it shows in one go. A failed
-// Deezer lookup counts as done: the record gets its House sleeve.
-export const prepareRandomPick = async (
-  queryClient: QueryClient,
-  input: RandomPickInput,
-): Promise<CollectionRelease | null> => {
-  const record = await fetchRandomRecord({ data: input })
-  if (!record) return null
+interface RecordCoverInput {
+  id: number
+  basic_information: {
+    master_id?: number
+    title: string
+    artists: { name: string; anv?: string }[]
+  }
+}
 
+// A record's Cover decoded and its tint sampled, in the caches the record
+// screen reads, so the record shows in one go. A failed Deezer lookup counts
+// as done: the record gets its House sleeve.
+export const prepareRecordCover = async (
+  queryClient: QueryClient,
+  record: RecordCoverInput,
+): Promise<void> => {
   const { basic_information: info } = record
   const coverKey = releaseCoverKey(record.id, info.master_id)
   const src = await queryClient
@@ -150,8 +156,19 @@ export const prepareRandomPick = async (
     )
     .catch(() => null)
   if (src && (await preloadCover(src)))
-    await queryClient.fetchQuery(coverTintQueryOptions(coverKey, src))
+    await queryClient
+      .fetchQuery(coverTintQueryOptions(coverKey, src))
+      .catch(() => null)
+}
 
+// A Random pick, whole: the Copy with its Cover ready (prepareRecordCover)
+export const prepareRandomPick = async (
+  queryClient: QueryClient,
+  input: RandomPickInput,
+): Promise<CollectionRelease | null> => {
+  const record = await fetchRandomRecord({ data: input })
+  if (!record) return null
+  await prepareRecordCover(queryClient, record)
   return record
 }
 

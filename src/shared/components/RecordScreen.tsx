@@ -8,6 +8,7 @@ import {
 } from '#/features/collection/collection.utils'
 import { DiscRow } from '#/features/collection/components/DiscRow'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
+import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { CoverGlow } from '#/shared/components/CoverGlow'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
@@ -23,14 +24,17 @@ import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { discogsReleaseUrl } from '#/shared/utils/discogs-urls'
 
-// A Collection Copy or a Wantlist entry: both carry the Release this way
+// A Collection Copy, a Wantlist entry or a Release from Search: all carry the
+// Release this way. Copies and wants have a date added; Search gives the
+// country instead, to tell pressings apart
 export interface RecordScreenRecord {
   id: number
-  date_added: string
+  date_added?: string
   basic_information: {
     master_id?: number
     title: string
     year: number
+    country?: string
     artists: { name: string; anv?: string }[]
     styles: string[]
     formats: ReleaseFormat[]
@@ -38,12 +42,17 @@ export interface RecordScreenRecord {
   }
 }
 
+/** The screen's actions: Remove, Pick again, or Add. A function gets `close`,
+ * to close the screen with its exit animation */
+type RecordScreenActions =
+  React.ReactNode | ((close: () => void) => React.ReactNode)
+
 interface RecordScreenProps {
-  record: RecordScreenRecord
+  /** Undefined while the record is being prepared: the screen shows a loader */
+  record: RecordScreenRecord | undefined
   /** Runs once the screen has finished closing */
   onClose: () => void
-  /** The screen's actions: Remove, or Pick again */
-  actions: React.ReactNode
+  actions: RecordScreenActions
 }
 
 interface ContentProps {
@@ -92,7 +101,8 @@ const RecordScreenContent = ({
         catalogue={[
           [
             info.year > 0 ? String(info.year) : null,
-            formatDateAdded(record.date_added),
+            info.country || null,
+            record.date_added ? formatDateAdded(record.date_added) : null,
           ]
             .filter(Boolean)
             .join(' · '),
@@ -123,8 +133,8 @@ const RecordScreenContent = ({
 }
 
 // The record screen, wherever a record opens from (Home, Random pick,
-// Collection, Wantlist): drawer on mobile, dialog on desktop, closing with
-// its exit animation
+// Collection, Wantlist, Search): drawer on mobile, dialog on desktop, closing
+// with its exit animation
 export const RecordScreen = ({
   record,
   onClose,
@@ -133,25 +143,33 @@ export const RecordScreen = ({
   const isMobile = useIsMobile()
   const { open, onOpenChange, onAnimationEnd } = useAnimatedClose(onClose)
   const { tint, sheetCover, flyBack } = useRecordCover(record)
-  // Random pick swaps the record in place
-  const [firstId] = useState(record.id)
+  // Random pick swaps the record in place; a prepared one replaces the loader
+  const [firstId] = useState(record?.id)
 
   const handleOpenChange = (next: boolean) => {
     if (!next) flyBack()
     onOpenChange(next)
   }
 
-  const content = (
+  const content = record ? (
     <>
       <CoverGlow tint={tint} />
       <RecordScreenContent
         key={record.id}
         record={record}
-        actions={actions}
+        actions={
+          typeof actions === 'function'
+            ? actions(() => handleOpenChange(false))
+            : actions
+        }
         coverRef={sheetCover}
         isReplacement={record.id !== firstId}
       />
     </>
+  ) : (
+    <div className="flex justify-center py-8">
+      <GrooveLoader size={32} />
+    </div>
   )
 
   if (isMobile) {

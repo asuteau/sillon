@@ -102,13 +102,13 @@ The contract is **shadcn's variables**, defined for light (`:root`) and dark (`.
 
 ### Cover tint
 
-On record screens (record detail, Random pick, the record spotlight) the container sets `style={{ '--cover-tint': tint }}` and renders `<CoverGlow tint={tint} />` first; the `cover-glow` utility draws a faint radial glow plus a 2px tinted top edge.
+On record screens (`RecordScreen`, wherever a record opens from — Home, Random pick, Collection, Wantlist, Search) the container sets `style={{ '--cover-tint': tint }}` and renders `<CoverGlow tint={tint} />` first; the `cover-glow` utility draws a faint radial glow plus a 2px tinted top edge.
 
 - `useCoverTint` samples the **Deezer** Cover only: Discogs images send no CORS headers, so a canvas can't read them. No Deezer match → neutral.
 - `dominantTint` (`src/shared/utils/cover-tint.ts`) picks the dominant hue and fixes lightness at 0.62 and chroma at ≤ 0.09: the cover sets the hue, never how loud it is. Grey when the cover has no clear colour.
 - House sleeves get no tint.
 - `--cover-tint` is a registered `<color>` (`@property`), so a new tint cross-fades from the last one (160ms) instead of jumping.
-- A Random pick is prepared whole (`prepareRandomPick`): Cover decoded and tint sampled before the record screen shows, so cover, text and glow arrive in one fade.
+- A Random pick and a Release opened from Search are prepared whole (`prepareRecordCover`): Cover decoded and tint sampled before the record shows, so cover, text and glow arrive in one fade. Search shows the groove loader in the record screen meanwhile; Marketplace prices may follow.
 - `cover-tint.test.ts` checks text contrast over the glow in both themes.
 
 ---
