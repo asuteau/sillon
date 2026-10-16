@@ -64,29 +64,41 @@ interface CameraPanelProps {
 }
 
 // The viewfinder, or why there is no camera to scan with
+// Why there is nothing to scan with
+const NO_CAMERA: Partial<
+  Record<CameraState, { title: string; hint: string; icon: React.ReactNode }>
+> = {
+  blocked: {
+    title: 'Camera access blocked',
+    hint: 'Allow the camera for Sillon in your browser settings, or search manually.',
+    icon: <ScanIcon className="size-10 text-muted-foreground" />,
+  },
+  unsupported: {
+    title: 'No camera on this browser',
+    hint: 'Search manually instead.',
+    icon: <AlertCircle className="size-10 text-muted-foreground" />,
+  },
+  'no-reader': {
+    title: "Couldn't start the barcode reader",
+    hint: 'Check your connection and open Scan again, or search manually.',
+    icon: <AlertCircle className="size-10 text-muted-foreground" />,
+  },
+}
+
 const CameraPanel = ({
   cameraState,
   onSearchManually,
   children,
 }: CameraPanelProps) => {
-  if (cameraState === 'unsupported' || cameraState === 'blocked') {
-    const isBlocked = cameraState === 'blocked'
+  const noCamera = NO_CAMERA[cameraState]
+
+  if (noCamera) {
     return (
       <div className="flex shrink-0 flex-col items-center gap-4 py-2 text-center">
-        {isBlocked ? (
-          <ScanIcon className="size-10 text-muted-foreground" />
-        ) : (
-          <AlertCircle className="size-10 text-muted-foreground" />
-        )}
+        {noCamera.icon}
         <div>
-          <p className="type-title text-lg text-foreground">
-            {isBlocked ? 'Camera access blocked' : 'No camera on this browser'}
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {isBlocked
-              ? 'Allow the camera for Sillon in your browser settings, or search manually.'
-              : 'Search manually instead.'}
-          </p>
+          <p className="type-title text-lg text-foreground">{noCamera.title}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{noCamera.hint}</p>
         </div>
         <Button variant="outline" onClick={onSearchManually}>
           Search manually →
@@ -149,9 +161,9 @@ const StackScannerContent = ({
     setChoosing(null)
   }
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (only?: string) => {
     try {
-      const added = await commit(list)
+      const added = await commit(list, only)
       setAddedCount(added.length)
       if (list === 'collection') {
         setFulfilledWants(added.filter((e) => e.release.inWantlist))
@@ -167,7 +179,7 @@ const StackScannerContent = ({
     summary.unresolved > 0 && `${summary.unresolved} to choose`,
     failedCount > 0 &&
       !isCommitting &&
-      `${plural(failedCount, 'record')} couldn't be added — try again`,
+      `${plural(failedCount, 'record')} couldn't be added`,
   ].filter(Boolean)
 
   return (
@@ -213,6 +225,8 @@ const StackScannerContent = ({
                       : undefined
                   }
                   onClick={() => handleRowClick(record)}
+                  onRetry={() => void handleConfirm(record.barcode)}
+                  isCommitting={isCommitting}
                   onToggleIncluded={() =>
                     updateStack((s) => toggleIncluded(s, record.barcode))
                   }

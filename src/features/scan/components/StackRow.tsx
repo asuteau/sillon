@@ -53,6 +53,9 @@ interface StackRowProps {
   highlightKey: number | undefined
   onClick: () => void
   onToggleIncluded: () => void
+  onRetry: () => void
+  /** Records are being added: one can't be retried meanwhile */
+  isCommitting: boolean
 }
 
 export const StackRow = ({
@@ -62,6 +65,8 @@ export const StackRow = ({
   highlightKey,
   onClick,
   onToggleIncluded,
+  onRetry,
+  isCommitting,
 }: StackRowProps) => {
   const release = chosenRelease(record)
   const isInTheList =
@@ -90,6 +95,15 @@ export const StackRow = ({
           onClick={onClick}
         />
       </div>
+      {addState === 'failed' && (
+        <Chip
+          onClick={onRetry}
+          disabled={isCommitting}
+          className="shrink-0 px-2.5 py-1 text-xs"
+        >
+          Retry
+        </Chip>
+      )}
       {/* Already in the list: left out, unless the user owns another copy */}
       {isInTheList && !addState && (
         <Chip
@@ -185,8 +199,6 @@ const StackRowContent = ({
       badges={
         addState === 'adding' ? (
           <GrooveLoader size={20} />
-        ) : addState === 'failed' ? (
-          <Mark>Failed</Mark>
         ) : list === 'collection' && release.inWantlist ? (
           <Mark>Wanted</Mark>
         ) : null

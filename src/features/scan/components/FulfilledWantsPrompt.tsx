@@ -1,11 +1,14 @@
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useMatch } from '@tanstack/react-router'
 import { Check } from 'lucide-react'
 
-import { useRemoveFromWantlist } from '#/features/wantlist/wantlist.mutations'
 import { FulfilledWantIcon } from '#/shared/components/icons/FulfilledWantIcon'
 import { Button } from '#/shared/components/ui/button'
 import { cn } from '#/shared/utils/cn'
 
+import { removeStackWant } from '../scan.api'
+import { patchListsAfterWantsRemoved } from '../scan.queries'
 import { commitStack } from '../stack-commit'
 import type { StackEntry } from '../stack.model'
 
@@ -21,11 +24,13 @@ export const FulfilledWantsPrompt = ({
   wants,
   onResolved,
 }: FulfilledWantsPromptProps) => {
-  const removeFromWantlist = useRemoveFromWantlist()
+  const queryClient = useQueryClient()
+  const user = useMatch({ from: '__root__', select: (m) => m.context.user })
   const [ticked, setTicked] = useState(
     () => new Set(wants.map((w) => w.barcode)),
   )
   const [isRemoving, setIsRemoving] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
   const [failedCount, setFailedCount] = useState(0)
 
   const toggle = (barcode: string) =>
@@ -36,16 +41,35 @@ export const FulfilledWantsPrompt = ({
     })
 
   const handleRemove = async () => {
+    const toRemove = wants.filter((w) => ticked.has(w.barcode))
     setIsRemoving(true)
-    const { failed } = await commitStack({
-      entries: wants.filter((w) => ticked.has(w.barcode)),
-      add: ({ release }) => removeFromWantlist.mutateAsync(release.id),
-    })
-    setIsRemoving(false)
-    if (failed.length === 0) return onResolved()
-    // Only what's left to remove stays ticked
-    setTicked(new Set(failed.map((f) => f.barcode)))
-    setFailedCount(failed.length)
+    try {
+      // One after another, pausing while Discogs throttles, like the adds
+      const { added: removed, failed } = await commitStack({
+        entries: toRemove,
+        add: ({ release }) =>
+          removeStackWant({ data: { releaseId: release.id } }),
+        isThrottled: (result) => result.status === 'throttled',
+        onEvent: (event) => {
+          if (event.type === 'paused') setIsPaused(true)
+          if (event.type === 'resumed') setIsPaused(false)
+        },
+      })
+      patchListsAfterWantsRemoved(
+        queryClient,
+        user?.username,
+        removed.map(({ entry }) => entry.release.id),
+      )
+      if (failed.length === 0) return onResolved()
+      // Only what's left to remove stays ticked
+      setTicked(new Set(failed.map((f) => f.barcode)))
+      setFailedCount(failed.length)
+    } catch {
+      setFailedCount(toRemove.length)
+    } finally {
+      setIsRemoving(false)
+      setIsPaused(false)
+    }
   }
 
   return (
@@ -120,7 +144,9 @@ export const FulfilledWantsPrompt = ({
           onClick={() => void handleRemove()}
         >
           <FulfilledWantIcon />
-          Remove {ticked.size}
+          {isPaused
+            ? 'Pausing for Discogs…'
+            : `Remove ${ticked.size} from Wantlist`}
         </Button>
       </div>
     </div>

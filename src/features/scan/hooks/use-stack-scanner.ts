@@ -35,14 +35,23 @@ export const useStackScanner = () => {
     setFlash({ kind: 'not-found', key: Date.now() })
   }
 
-  const lookUp = async (barcode: string) => {
+  const showHit = () => {
+    vibrate(30)
+    setFlash({ kind: 'hit', key: Date.now() })
+  }
+
+  /** Signals the outcome once Discogs has answered, so a sleeve gets one
+   * signal: a hit, or Not on Discogs. The row shows meanwhile */
+  const lookUp = async (barcode: string, { signal = true } = {}) => {
     try {
       const raw = await queryClient.fetchQuery(
         barcodeMatchesQueryOptions(barcode),
       )
       const matches = raw.map(toReleaseMatch)
       updateStack((stack) => lookedUp(stack, barcode, matches))
+      if (!signal) return
       if (matches.length === 0) showNotFound()
+      else showHit()
     } catch {
       updateStack((stack) => lookupFailed(stack, barcode))
     }
@@ -57,8 +66,6 @@ export const useStackScanner = () => {
       vibrate(30)
       return setHighlight({ barcode, key: Date.now() })
     }
-    vibrate(30)
-    setFlash({ kind: 'hit', key: Date.now() })
     void lookUp(barcode)
   }
 
@@ -68,7 +75,9 @@ export const useStackScanner = () => {
   // reloaded); a lookup still running is shared, not repeated
   const resumeLookups = useEffectEvent(() => {
     for (const record of getStack().records) {
-      if (record.status === 'looking-up') void lookUp(record.barcode)
+      if (record.status === 'looking-up') {
+        void lookUp(record.barcode, { signal: false })
+      }
     }
   })
   useEffect(() => resumeLookups(), [])

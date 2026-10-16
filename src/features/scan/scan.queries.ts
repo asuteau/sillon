@@ -8,7 +8,10 @@ import {
   collectionValueQueryOptions,
 } from '#/features/collection/collection.queries'
 import { adjustProfileCount } from '#/features/profile/profile.queries'
-import { addWantToLists } from '#/features/wantlist/wantlist.queries'
+import {
+  addWantToLists,
+  removeWantFromLists,
+} from '#/features/wantlist/wantlist.queries'
 import { DISCOGS_MAX_AGE_MS } from '#/shared/utils/discogs-freshness'
 
 import { fetchBarcodeMatches } from './scan.api'
@@ -86,5 +89,18 @@ export const patchListsAfterStack = async (
       queryKey: collectionListQueryKey,
       refetchType: 'none',
     })
+  }
+}
+
+// Fulfilled wants removed after a Stack, out of the cached lists and counts
+export const patchListsAfterWantsRemoved = (
+  queryClient: QueryClient,
+  username: string | undefined,
+  releaseIds: number[],
+) => {
+  for (const releaseId of releaseIds) {
+    removeWantFromLists(queryClient, releaseId)
+    patchBarcodeUserData(queryClient, releaseId, { in_wantlist: false })
+    if (username) adjustProfileCount(queryClient, username, 'wantlistCount', -1)
   }
 }

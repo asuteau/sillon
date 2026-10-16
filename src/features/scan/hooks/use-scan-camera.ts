@@ -2,7 +2,9 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
 import { canScanBarcodes, createBarcodeReader } from '../barcode-reader'
 
-export type CameraState = 'unsupported' | 'starting' | 'live' | 'blocked'
+/** `no-reader`: the camera works, but the barcode reader couldn't load */
+export type CameraState =
+  'unsupported' | 'starting' | 'live' | 'blocked' | 'no-reader'
 
 // A sleeve held in frame is read many times a second: it is one sighting
 // until it has been out of sight this long
@@ -51,7 +53,15 @@ export const useScanCamera = (onBarcode: (barcode: string) => void) => {
         return
       }
 
-      const reader = await createBarcodeReader()
+      let reader: Awaited<ReturnType<typeof createBarcodeReader>>
+      try {
+        reader = await createBarcodeReader()
+      } catch {
+        // Offline before the WASM reader was ever fetched, most likely
+        stream.getTracks().forEach((t) => t.stop())
+        if (!isStopped()) setCameraState('no-reader')
+        return
+      }
 
       const read = async () => {
         const video = videoRef.current

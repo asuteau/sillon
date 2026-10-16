@@ -9,7 +9,7 @@ import { commitStack } from '../stack-commit'
 import type { CommitEvent } from '../stack-commit'
 import { recordsToAdd, removeRecord } from '../stack.model'
 import type { StackEntry, StackList } from '../stack.model'
-import { getStack, updateStack } from '../stack.store'
+import { getStack, updateStack, useStack } from '../stack.store'
 
 /** Where a record is in being added: absent until confirming reaches it */
 export type AddState = 'adding' | 'failed'
@@ -22,13 +22,14 @@ export const useStackCommit = () => {
   const [addStates, setAddStates] = useState<Record<string, AddState>>({})
   const [isCommitting, setIsCommitting] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
+  const stack = useStack()
 
   const handleEvent = (event: CommitEvent) => {
     if (event.type === 'paused' || event.type === 'resumed') {
       return setIsPaused(event.type === 'paused')
     }
     if (event.type === 'added') {
-      updateStack((stack) => removeRecord(stack, event.barcode))
+      updateStack((s) => removeRecord(s, event.barcode))
     }
     setAddStates((states) => {
       const { [event.barcode]: _, ...others } = states
@@ -38,12 +39,15 @@ export const useStackCommit = () => {
     })
   }
 
-  /** Resolves with what was added, once every record has been tried */
-  const commit = async (list: StackList) => {
+  /** Resolves with what was added, once every record has been tried.
+   * `only`: just these records, e.g. one that failed, to retry it */
+  const commit = async (list: StackList, only?: string) => {
     setIsCommitting(true)
     try {
       const { added } = await commitStack<StackAddResult>({
-        entries: recordsToAdd(getStack(), list),
+        entries: recordsToAdd(getStack(), list).filter(
+          (entry) => only === undefined || entry.barcode === only,
+        ),
         add: ({ release }: StackEntry) =>
           addStackRecord({ data: { releaseId: release.id, list } }),
         isThrottled: (result) => result.status === 'throttled',
@@ -61,8 +65,9 @@ export const useStackCommit = () => {
     }
   }
 
-  const failedCount = Object.values(addStates).filter(
-    (state) => state === 'failed',
+  // Only records still on the Stack: Clear stack takes their failures too
+  const failedCount = stack.records.filter(
+    (record) => addStates[record.barcode] === 'failed',
   ).length
 
   return { addStates, failedCount, isCommitting, isPaused, commit }

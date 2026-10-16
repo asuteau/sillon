@@ -113,3 +113,26 @@ export const addStackRecord = createServerFn({ method: 'POST' })
     const { instance_id } = AddedCopySchema.parse(json)
     return { status: 'added', instanceId: instance_id }
   })
+
+export type WantRemoveResult = { status: 'removed' } | { status: 'throttled' }
+
+// A Fulfilled want taken off the Wantlist after a Stack: throttling is a
+// result here too, so removals pause and carry on like adds
+export const removeStackWant = createServerFn({ method: 'POST' })
+  .inputValidator((data: { releaseId: number }) => data)
+  .handler(async ({ data }): Promise<WantRemoveResult> => {
+    const discogs = await discogsSession()
+    if (!discogs) throw new Error('Not authenticated')
+
+    const { discogsRequest } = await import('#/services/discogs.server')
+    const response = await discogsRequest(
+      `${DISCOGS_API}/users/${discogs.username}/wants/${data.releaseId}`,
+      { method: 'DELETE', headers: discogs.headers() },
+    )
+
+    if (response.status === 429) return { status: 'throttled' }
+    if (!response.ok) {
+      throw new Error(`Failed to remove from wantlist: ${response.status}`)
+    }
+    return { status: 'removed' }
+  })
