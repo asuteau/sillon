@@ -22,7 +22,12 @@ import {
   stackSummary,
   toggleIncluded,
 } from '../stack.model'
-import type { StackEntry, StackList, StackRecord } from '../stack.model'
+import type {
+  StackEntry,
+  StackList,
+  StackRecord,
+  StackSummary,
+} from '../stack.model'
 import { updateStack, useStack } from '../stack.store'
 import { FulfilledWantsPrompt } from './FulfilledWantsPrompt'
 import { ReleaseChooser } from './ReleaseChooser'
@@ -154,13 +159,15 @@ const EmptyStack = ({
 
 interface StackBarProps {
   list: StackList
-  toAdd: number
+  summary: StackSummary
   /** What's left out: already in the list, to choose, failed */
   notes: string[]
   recordCount: number
   isCommitting: boolean
   isPaused: boolean
   onConfirm: () => void
+  /** Opens the next Unresolved record's chooser */
+  onChooseNext: () => void
   onSwitchList: () => void
   onClear: () => void
   onClose: () => void
@@ -168,24 +175,69 @@ interface StackBarProps {
 
 const confirmLabel = ({
   list,
-  toAdd,
+  summary,
   isCommitting,
   isPaused,
-}: Pick<StackBarProps, 'list' | 'toAdd' | 'isCommitting' | 'isPaused'>) => {
+}: Pick<StackBarProps, 'list' | 'summary' | 'isCommitting' | 'isPaused'>) => {
   if (isPaused) return 'Pausing for Discogs…'
   if (isCommitting) return `Adding to ${LIST_NAMES[list]}…`
-  return `Add ${toAdd} to ${LIST_NAMES[list]}`
+  return `Add ${summary.toAdd} to ${LIST_NAMES[list]}`
+}
+
+interface StackBarActionProps extends Pick<
+  StackBarProps,
+  | 'list'
+  | 'summary'
+  | 'isCommitting'
+  | 'isPaused'
+  | 'onConfirm'
+  | 'onChooseNext'
+> {}
+
+// The bar's main action is always one that can be taken: add what's ready,
+// else choose a release, else nothing (everything is already in the list)
+const StackBarAction = ({
+  list,
+  summary,
+  isCommitting,
+  isPaused,
+  onConfirm,
+  onChooseNext,
+}: StackBarActionProps) => {
+  if (summary.toAdd === 0 && !isCommitting) {
+    if (summary.unresolved === 0) return null
+    return (
+      <Button size="lg" className="w-full" onClick={onChooseNext}>
+        {summary.unresolved === 1
+          ? 'Choose the release'
+          : `Choose ${summary.unresolved} releases`}
+      </Button>
+    )
+  }
+
+  return (
+    <Button
+      size="lg"
+      className="w-full"
+      disabled={isCommitting}
+      onClick={onConfirm}
+    >
+      {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
+      {confirmLabel({ list, summary, isCommitting, isPaused })}
+    </Button>
+  )
 }
 
 // Pinned under the Stack: confirm it, send it to the other list, or clear it
 const StackBar = ({
   list,
-  toAdd,
+  summary,
   notes,
   recordCount,
   isCommitting,
   isPaused,
   onConfirm,
+  onChooseNext,
   onSwitchList,
   onClear,
   onClose,
@@ -200,15 +252,14 @@ const StackBar = ({
           {notes.join(' · ')}
         </p>
       )}
-      <Button
-        size="lg"
-        className="w-full"
-        disabled={toAdd === 0 || isCommitting}
-        onClick={onConfirm}
-      >
-        {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
-        {confirmLabel({ list, toAdd, isCommitting, isPaused })}
-      </Button>
+      <StackBarAction
+        list={list}
+        summary={summary}
+        isCommitting={isCommitting}
+        isPaused={isPaused}
+        onConfirm={onConfirm}
+        onChooseNext={onChooseNext}
+      />
 
       {isConfirmingClear ? (
         <div className="flex items-center gap-2">
@@ -230,16 +281,20 @@ const StackBar = ({
         </div>
       ) : (
         <div className="flex gap-2">
+          {/* Only once a record's release is known can a list take it */}
+          {summary.toAdd + summary.alreadyIn > 0 && (
+            <Button
+              variant="ghost"
+              className="flex-1"
+              disabled={isCommitting}
+              onClick={onSwitchList}
+            >
+              To {LIST_NAMES[otherList]} instead
+            </Button>
+          )}
           <Button
             variant="ghost"
             className="flex-1"
-            disabled={isCommitting}
-            onClick={onSwitchList}
-          >
-            To {LIST_NAMES[otherList]} instead
-          </Button>
-          <Button
-            variant="ghost"
             disabled={isCommitting}
             onClick={() => setIsConfirmingClear(true)}
           >
@@ -299,6 +354,13 @@ const StackScannerContent = ({
     })
   }
 
+  const handleChooseNext = () => {
+    const next = stack.records.find(
+      (r) => r.status === 'found' && r.chosenId === null,
+    )
+    if (next) setChoosing(next.barcode)
+  }
+
   const handleChoose = (releaseId: number) => {
     if (choosing) updateStack((s) => chooseRelease(s, choosing, releaseId))
     setChoosing(null)
@@ -319,7 +381,10 @@ const StackScannerContent = ({
   const notes = [
     summary.alreadyIn > 0 &&
       `${summary.alreadyIn} already in ${LIST_NAMES[list]}`,
-    summary.unresolved > 0 && `${summary.unresolved} to choose`,
+    // With nothing ready to add, choosing is the bar's own action
+    summary.unresolved > 0 &&
+      summary.toAdd > 0 &&
+      `${summary.unresolved} to choose`,
     failedCount > 0 &&
       !isCommitting &&
       `${plural(failedCount, 'record')} couldn't be added`,
@@ -408,12 +473,13 @@ const StackScannerContent = ({
 
               <StackBar
                 list={list}
-                toAdd={summary.toAdd}
+                summary={summary}
                 notes={notes}
                 recordCount={stack.records.length}
                 isCommitting={isCommitting}
                 isPaused={isPaused}
                 onConfirm={() => void handleConfirm()}
+                onChooseNext={handleChooseNext}
                 onSwitchList={() => setList(OTHER_LIST[list])}
                 onClear={() => updateStack(() => EMPTY_STACK)}
                 onClose={onClose}
