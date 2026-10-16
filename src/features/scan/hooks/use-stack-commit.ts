@@ -21,8 +21,12 @@ export const useStackCommit = () => {
   const user = useMatch({ from: '__root__', select: (m) => m.context.user })
   const [addStates, setAddStates] = useState<Record<string, AddState>>({})
   const [isCommitting, setIsCommitting] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
 
   const handleEvent = (event: CommitEvent) => {
+    if (event.type === 'paused' || event.type === 'resumed') {
+      return setIsPaused(event.type === 'paused')
+    }
     if (event.type === 'added') {
       updateStack((stack) => removeRecord(stack, event.barcode))
     }
@@ -34,21 +38,15 @@ export const useStackCommit = () => {
     })
   }
 
-  const add = async ({ pressing }: StackEntry, list: StackList) => {
-    const result = await addStackRecord({
-      data: { releaseId: pressing.id, list },
-    })
-    if (result.status === 'throttled') throw new Error('Throttled')
-    return result
-  }
-
   /** Resolves with what was added, once every record has been tried */
   const commit = async (list: StackList) => {
     setIsCommitting(true)
     try {
       const { added } = await commitStack<StackAddResult>({
         entries: recordsToAdd(getStack(), list),
-        add: (entry) => add(entry, list),
+        add: ({ pressing }: StackEntry) =>
+          addStackRecord({ data: { releaseId: pressing.id, list } }),
+        isThrottled: (result) => result.status === 'throttled',
         onEvent: handleEvent,
       })
       await patchListsAfterStack(
@@ -59,8 +57,13 @@ export const useStackCommit = () => {
       return added.map((a) => a.entry)
     } finally {
       setIsCommitting(false)
+      setIsPaused(false)
     }
   }
 
-  return { addStates, isCommitting, commit }
+  const failedCount = Object.values(addStates).filter(
+    (state) => state === 'failed',
+  ).length
+
+  return { addStates, failedCount, isCommitting, isPaused, commit }
 }

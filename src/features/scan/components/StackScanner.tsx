@@ -108,7 +108,8 @@ const StackScannerContent = ({
   const stack = useStack()
   const { cameraState, videoRef, flash, highlight, scanManually } =
     useStackScanner()
-  const { addStates, isCommitting, commit } = useStackCommit()
+  const { addStates, failedCount, isCommitting, isPaused, commit } =
+    useStackCommit()
   const [list, setList] = useState<StackList>('collection')
   const [isConfirmingClear, setIsConfirmingClear] = useState(false)
   const [addedCount, setAddedCount] = useState<number | null>(null)
@@ -148,6 +149,9 @@ const StackScannerContent = ({
     summary.alreadyIn > 0 &&
       `${summary.alreadyIn} already in ${LIST_NAMES[list]}`,
     summary.unresolved > 0 && `${summary.unresolved} to choose`,
+    failedCount > 0 &&
+      !isCommitting &&
+      `${plural(failedCount, 'record')} couldn't be added — try again`,
   ].filter(Boolean)
 
   return (
@@ -225,9 +229,11 @@ const StackScannerContent = ({
               onClick={() => void handleConfirm()}
             >
               {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
-              {isCommitting
-                ? `Adding to ${LIST_NAMES[list]}…`
-                : `Add ${summary.toAdd} to ${LIST_NAMES[list]}`}
+              {isPaused
+                ? 'Pausing for Discogs…'
+                : isCommitting
+                  ? `Adding to ${LIST_NAMES[list]}…`
+                  : `Add ${summary.toAdd} to ${LIST_NAMES[list]}`}
             </Button>
 
             {isConfirmingClear ? (

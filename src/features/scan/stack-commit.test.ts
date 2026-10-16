@@ -67,3 +67,52 @@ describe('confirming a Stack', () => {
     ])
   })
 })
+
+describe('confirming a Stack while Discogs throttles', () => {
+  it('pauses and carries on by itself, without losing the record', async () => {
+    const events: CommitEvent[] = []
+    const waits: number[] = []
+    const answers = ['throttled', 'throttled', 'added', 'added']
+
+    const result = await commitStack({
+      entries: [entry('2'), entry('1')],
+      add: () => Promise.resolve(answers.shift()),
+      isThrottled: (answer) => answer === 'throttled',
+      wait: (ms) => {
+        waits.push(ms)
+        return Promise.resolve()
+      },
+      onEvent: (event) => events.push(event),
+    })
+
+    expect(result.added.map((a) => a.entry.barcode)).toEqual(['1', '2'])
+    expect(result.failed).toEqual([])
+    expect(waits).toHaveLength(2)
+    expect(events).toEqual([
+      { type: 'adding', barcode: '1' },
+      { type: 'paused' },
+      { type: 'paused' },
+      { type: 'resumed' },
+      { type: 'added', barcode: '1' },
+      { type: 'adding', barcode: '2' },
+      { type: 'added', barcode: '2' },
+    ])
+  })
+
+  it('gives a record up after a minute and more of throttling', async () => {
+    const waits: number[] = []
+
+    const result = await commitStack({
+      entries: [entry('1')],
+      add: () => Promise.resolve('throttled'),
+      isThrottled: (answer) => answer === 'throttled',
+      wait: (ms) => {
+        waits.push(ms)
+        return Promise.resolve()
+      },
+    })
+
+    expect(result.failed.map((f) => f.barcode)).toEqual(['1'])
+    expect(waits.reduce((a, b) => a + b, 0)).toBeGreaterThan(60_000)
+  })
+})
