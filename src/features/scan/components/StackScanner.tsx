@@ -15,6 +15,7 @@ import { useStackCommit } from '../hooks/use-stack-commit'
 import { useStackScanner } from '../hooks/use-stack-scanner'
 import type { CameraState } from '../hooks/use-scan-camera'
 import {
+  choosePressing,
   chosenPressing,
   EMPTY_STACK,
   isInList,
@@ -23,6 +24,7 @@ import {
 } from '../stack.model'
 import type { StackList, StackRecord } from '../stack.model'
 import { updateStack, useStack } from '../stack.store'
+import { PressingChooser } from './PressingChooser'
 import { StackRow } from './StackRow'
 import { Viewfinder } from './Viewfinder'
 
@@ -110,15 +112,27 @@ const StackScannerContent = ({
   const [list, setList] = useState<StackList>('collection')
   const [isConfirmingClear, setIsConfirmingClear] = useState(false)
   const [addedCount, setAddedCount] = useState<number | null>(null)
+  // The Unresolved record whose pressing is being chosen
+  const [choosing, setChoosing] = useState<string | null>(null)
+  const choosingRecord = stack.records.find(
+    (r) => r.barcode === choosing && r.status === 'found',
+  )
 
   const summary = stackSummary(stack, list)
   const otherList: StackList = list === 'collection' ? 'wantlist' : 'collection'
 
   const handleRowClick = (record: StackRecord) => {
+    if (record.status !== 'found') return
     const pressing = chosenPressing(record)
-    if (pressing && isInList(pressing, list)) {
+    if (!pressing) return setChoosing(record.barcode)
+    if (isInList(pressing, list)) {
       updateStack((s) => toggleIncluded(s, record.barcode))
     }
+  }
+
+  const handleChoose = (releaseId: number) => {
+    if (choosing) updateStack((s) => choosePressing(s, choosing, releaseId))
+    setChoosing(null)
   }
 
   const handleConfirm = async () => {
@@ -151,108 +165,119 @@ const StackScannerContent = ({
 
       {import.meta.env.DEV && <DevBarcodeInput onBarcode={scanManually} />}
 
-      {stack.records.length > 0 ? (
-        <RecordList className="min-h-0 flex-1 overflow-y-auto">
-          {stack.records.map((record) => (
-            <StackRow
-              key={record.barcode}
-              record={record}
-              list={list}
-              addState={addStates[record.barcode]}
-              highlightKey={
-                highlight?.barcode === record.barcode
-                  ? highlight.key
-                  : undefined
-              }
-              onClick={() => handleRowClick(record)}
-            />
-          ))}
-        </RecordList>
+      {choosingRecord?.status === 'found' ? (
+        <PressingChooser
+          pressings={choosingRecord.pressings}
+          chosenId={choosingRecord.chosenId}
+          onChoose={handleChoose}
+          onBack={() => setChoosing(null)}
+        />
       ) : (
-        <p className="shrink-0 py-2 text-center text-sm text-muted-foreground">
-          {addedCount
-            ? `${plural(addedCount, 'record')} added to your ${LIST_NAMES[list]}.`
-            : 'Scan sleeves one after another: they pile up here.'}
-        </p>
-      )}
+        <>
+          {stack.records.length > 0 ? (
+            <RecordList className="min-h-0 flex-1 overflow-y-auto">
+              {stack.records.map((record) => (
+                <StackRow
+                  key={record.barcode}
+                  record={record}
+                  list={list}
+                  addState={addStates[record.barcode]}
+                  highlightKey={
+                    highlight?.barcode === record.barcode
+                      ? highlight.key
+                      : undefined
+                  }
+                  onClick={() => handleRowClick(record)}
+                />
+              ))}
+            </RecordList>
+          ) : (
+            <p className="shrink-0 py-2 text-center text-sm text-muted-foreground">
+              {addedCount
+                ? `${plural(addedCount, 'record')} added to your ${LIST_NAMES[list]}.`
+                : 'Scan sleeves one after another: they pile up here.'}
+            </p>
+          )}
 
-      {summary.notFound > 0 && (
-        <p className="shrink-0 text-center text-xs text-muted-foreground">
-          {plural(summary.notFound, 'barcode')} not on Discogs —{' '}
-          <button
-            type="button"
-            onClick={onSearchManually}
-            className="cursor-pointer underline underline-offset-2 hover:text-foreground"
-          >
-            search manually
-          </button>
-        </p>
-      )}
-
-      <div className="flex shrink-0 flex-col gap-2">
-        {notes.length > 0 && (
-          <p className="text-center text-xs text-muted-foreground">
-            {notes.join(' · ')}
-          </p>
-        )}
-        <Button
-          size="lg"
-          className="w-full"
-          disabled={summary.toAdd === 0 || isCommitting}
-          onClick={() => void handleConfirm()}
-        >
-          {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
-          {isCommitting
-            ? `Adding to ${LIST_NAMES[list]}…`
-            : `Add ${summary.toAdd} to ${LIST_NAMES[list]}`}
-        </Button>
-
-        {isConfirmingClear ? (
-          <div className="flex items-center gap-2">
-            <span className="flex-1 text-sm text-muted-foreground">
-              Clear {plural(stack.records.length, 'record')}?
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => setIsConfirmingClear(false)}
-            >
-              Keep
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                updateStack(() => EMPTY_STACK)
-                setIsConfirmingClear(false)
-              }}
-            >
-              Clear
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              className="flex-1"
-              disabled={isCommitting}
-              onClick={() => setList(otherList)}
-            >
-              To {LIST_NAMES[otherList]} instead
-            </Button>
-            {stack.records.length + stack.notFound.length > 0 && (
-              <Button
-                variant="ghost"
-                disabled={isCommitting}
-                onClick={() => setIsConfirmingClear(true)}
+          {summary.notFound > 0 && (
+            <p className="shrink-0 text-center text-xs text-muted-foreground">
+              {plural(summary.notFound, 'barcode')} not on Discogs —{' '}
+              <button
+                type="button"
+                onClick={onSearchManually}
+                className="cursor-pointer underline underline-offset-2 hover:text-foreground"
               >
-                Clear stack
-              </Button>
+                search manually
+              </button>
+            </p>
+          )}
+
+          <div className="flex shrink-0 flex-col gap-2">
+            {notes.length > 0 && (
+              <p className="text-center text-xs text-muted-foreground">
+                {notes.join(' · ')}
+              </p>
             )}
-            <Button variant="ghost" onClick={onClose} aria-label="Close">
-              <X />
+            <Button
+              size="lg"
+              className="w-full"
+              disabled={summary.toAdd === 0 || isCommitting}
+              onClick={() => void handleConfirm()}
+            >
+              {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
+              {isCommitting
+                ? `Adding to ${LIST_NAMES[list]}…`
+                : `Add ${summary.toAdd} to ${LIST_NAMES[list]}`}
             </Button>
+
+            {isConfirmingClear ? (
+              <div className="flex items-center gap-2">
+                <span className="flex-1 text-sm text-muted-foreground">
+                  Clear {plural(stack.records.length, 'record')}?
+                </span>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsConfirmingClear(false)}
+                >
+                  Keep
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    updateStack(() => EMPTY_STACK)
+                    setIsConfirmingClear(false)
+                  }}
+                >
+                  Clear
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  className="flex-1"
+                  disabled={isCommitting}
+                  onClick={() => setList(otherList)}
+                >
+                  To {LIST_NAMES[otherList]} instead
+                </Button>
+                {stack.records.length + stack.notFound.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    disabled={isCommitting}
+                    onClick={() => setIsConfirmingClear(true)}
+                  >
+                    Clear stack
+                  </Button>
+                )}
+                <Button variant="ghost" onClick={onClose} aria-label="Close">
+                  <X />
+                </Button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   )
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { Pressing, Stack } from './stack.model'
 import {
+  choosePressing,
   EMPTY_STACK,
   lookedUp,
   lookupFailed,
@@ -141,5 +142,43 @@ describe('a lookup that fails', () => {
     const { stack, outcome } = scanBarcode(failed, '111')
     expect(outcome).toBe('retry')
     expect(stack.records[0].status).toBe('looking-up')
+  })
+})
+
+describe('a barcode matching several Releases', () => {
+  const stack = lookedUp(scanned('111'), '111', [pressing(1), pressing(2)])
+
+  it('is Unresolved, and left out until a pressing is chosen', () => {
+    expect(stackSummary(stack, 'collection')).toMatchObject({
+      toAdd: 0,
+      unresolved: 1,
+    })
+    expect(recordsToAdd(stack, 'collection')).toEqual([])
+  })
+
+  it('counts once its pressing is chosen', () => {
+    const chosen = choosePressing(stack, '111', 2)
+
+    expect(stackSummary(chosen, 'collection')).toMatchObject({
+      toAdd: 1,
+      unresolved: 0,
+    })
+    expect(
+      recordsToAdd(chosen, 'collection').map((r) => r.pressing.id),
+    ).toEqual([2])
+  })
+
+  it('judges "already in the list" on the chosen pressing', () => {
+    const owned = lookedUp(scanned('111'), '111', [
+      pressing(1),
+      pressing(2, { inCollection: true }),
+    ])
+
+    expect(
+      stackSummary(choosePressing(owned, '111', 2), 'collection'),
+    ).toMatchObject({
+      toAdd: 0,
+      alreadyIn: 1,
+    })
   })
 })

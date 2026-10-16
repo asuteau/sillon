@@ -135,6 +135,19 @@ export const removeRecord = (stack: Stack, barcode: string): Stack => ({
   records: stack.records.filter((r) => r.barcode !== barcode),
 })
 
+/** The user's pick among the Releases a barcode matched. Another pressing
+ * is another record: whether to include it is asked afresh */
+export const choosePressing = (
+  stack: Stack,
+  barcode: string,
+  releaseId: number,
+): Stack =>
+  updateFound(stack, barcode, (r) =>
+    r.pressings.some((p) => p.id === releaseId)
+      ? { ...r, chosenId: releaseId, included: false }
+      : r,
+  )
+
 /** Includes a record already in the list, or leaves it out again */
 export const toggleIncluded = (stack: Stack, barcode: string): Stack =>
   updateFound(stack, barcode, (r) => ({ ...r, included: !r.included }))
