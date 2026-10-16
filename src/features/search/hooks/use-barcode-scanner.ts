@@ -5,15 +5,7 @@ import { useAddToCollection } from '#/features/collection/collection.mutations'
 import { useAddToWantlist } from '#/features/wantlist/wantlist.mutations'
 import type { BarcodeResult } from '../search.schema'
 import { barcodeSearchQueryOptions } from '../search.queries'
-
-interface BarcodeDetectorResult {
-  rawValue: string
-}
-
-declare class BarcodeDetector {
-  constructor(options?: { formats?: string[] })
-  detect(source: HTMLVideoElement): Promise<BarcodeDetectorResult[]>
-}
+import { canScanBarcodes, createBarcodeReader } from '../barcode-reader'
 
 export type ScanState =
   'starting' | 'blocked' | 'scanning' | 'found' | 'not_found'
@@ -53,8 +45,7 @@ export const useBarcodeScanner = (
   // older start is stopped at once
   const cameraRunRef = useRef(0)
 
-  const isSupported =
-    typeof window !== 'undefined' && 'BarcodeDetector' in window
+  const isSupported = canScanBarcodes()
 
   const { data: barcodeResult, isPending } = useQuery({
     ...barcodeSearchQueryOptions(detectedBarcode),
@@ -99,10 +90,9 @@ export const useBarcodeScanner = (
     }
   }
 
-  const startDetection = () => {
-    const detector = new BarcodeDetector({
-      formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'],
-    })
+  const startDetection = async (run: number) => {
+    const detector = await createBarcodeReader()
+    if (run !== cameraRunRef.current) return
 
     const scan = async () => {
       if (videoRef.current?.readyState === HTMLMediaElement.HAVE_ENOUGH_DATA) {
@@ -138,7 +128,7 @@ export const useBarcodeScanner = (
       }
       streamRef.current = stream
       setScanState('scanning')
-      startDetection()
+      await startDetection(run)
     } catch {
       if (run === cameraRunRef.current) setScanState('blocked')
     }
