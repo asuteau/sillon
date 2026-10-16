@@ -80,6 +80,10 @@ _Avoid_: Variant, colourway, pressing colour
 How many vinyl discs a Release holds: the quantities of all its vinyl formats added up. CDs, cassettes and other formats in the same Release don't count. Unknown quantity counts as one.
 _Avoid_: LP count, number of records
 
+**Record screen**:
+The one screen a record opens into, wherever it is opened from — Home, Random pick, Collection, Wantlist, Search. Every record looks the same on it; only its actions differ (Remove, Pick again, Add to Collection or Wantlist).
+_Avoid_: Detail page, release sheet, record detail
+
 ### Artists
 
 **Artist picture**:

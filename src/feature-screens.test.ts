@@ -17,7 +17,6 @@ const FILES = [
   ...componentFiles('features/landing/components'),
   ...componentFiles('features/portrait/components'),
   'shared/components/RecordScreen.tsx',
-  'shared/components/SearchReleaseSheet.tsx',
   'shared/components/SheetCover.tsx',
   'shared/components/BarcodeScanner.tsx',
   ...componentFiles('routes/_authenticated'),

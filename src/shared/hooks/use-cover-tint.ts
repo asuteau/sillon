@@ -11,18 +11,16 @@ export interface CoverTintInput {
 }
 
 // The Cover's dominant, muted colour as a CSS colour, or null (neutral) while
-// it loads, when it can't be sampled, and for House sleeves.
+// it loads, when it can't be sampled, for House sleeves, and with no record.
 // Samples the Deezer Cover only: Discogs images send no CORS headers, so a
 // canvas can't read them. Records without a Deezer match stay neutral.
-export const useCoverTint = ({
-  coverKey,
-  credits,
-  title,
-}: CoverTintInput): string | null => {
+export const useCoverTint = (cover: CoverTintInput | null): string | null => {
+  const coverKey = cover?.coverKey ?? ''
   // Same query CoverArt runs, so no extra request
-  const { data: hdSrc } = useQuery(
-    coverArtQueryOptions(coverKey, credits, title),
-  )
+  const { data: hdSrc } = useQuery({
+    ...coverArtQueryOptions(coverKey, cover?.credits ?? [], cover?.title ?? ''),
+    enabled: !!cover,
+  })
   const { data } = useQuery(coverTintQueryOptions(coverKey, hdSrc ?? null))
   return data ?? null
 }

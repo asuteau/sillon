@@ -4,11 +4,8 @@ import type {
   ReleaseDetail,
   Version,
 } from './search.schema'
-import {
-  creditNames,
-  recordCredits,
-  stripDisambiguator,
-} from '#/shared/utils/artist-name'
+import type { RecordScreenRecord } from '#/shared/components/RecordScreen'
+import { creditNames, stripDisambiguator } from '#/shared/utils/artist-name'
 
 export type Master = {
   id: number
@@ -33,28 +30,29 @@ export type MasterVersion = {
   inWantlist: number
 }
 
-export type ReleaseDetailModel = {
-  id: number
-  title: string
-  year: number
-  country: string
-  artists: string[]
-  /** Every artist credited, Lead credit first, to look the Cover up by */
-  credits: string[]
-  formatName: string
-  formatText: string
-}
-
-export function toReleaseDetail(raw: ReleaseDetail): ReleaseDetailModel {
+// A Release from Search, as the Record screen shows it: no date added, since
+// it isn't a Copy or a want, but its country, to tell pressings apart
+export function toSearchRecord(raw: ReleaseDetail): RecordScreenRecord {
   return {
     id: raw.id,
-    title: raw.title,
-    year: raw.year,
-    country: raw.country ?? '',
-    artists: raw.artists.map((a) => stripDisambiguator(a.name)),
-    credits: recordCredits(raw.artists),
-    formatName: raw.formats?.[0]?.name ?? '',
-    formatText: raw.formats?.[0]?.text ?? '',
+    basic_information: {
+      master_id: raw.master_id ?? undefined,
+      title: raw.title,
+      year: raw.year,
+      country: raw.country ?? undefined,
+      artists: raw.artists,
+      styles: raw.styles ?? [],
+      formats: (raw.formats ?? []).map((f) => ({
+        name: f.name,
+        qty: f.qty ?? undefined,
+        descriptions: f.descriptions ?? undefined,
+        text: f.text ?? undefined,
+      })),
+      labels: (raw.labels ?? []).map((l) => ({
+        name: l.name,
+        catno: l.catno ?? undefined,
+      })),
+    },
   }
 }
 
