@@ -9,7 +9,7 @@ import {
   oauthSignature,
 } from '#/shared/utils/discogs-oauth'
 import { adjustProfileCount } from '#/features/profile/profile.queries'
-import { patchBarcodeUserData } from '#/features/search/search.queries'
+import { patchBarcodeUserData } from '#/features/scan/scan.queries'
 
 import { getCollection } from './collection.api'
 import {

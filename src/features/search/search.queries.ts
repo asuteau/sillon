@@ -3,7 +3,6 @@ import type { QueryClient } from '@tanstack/react-query'
 import { DISCOGS_MAX_AGE_MS } from '#/shared/utils/discogs-freshness'
 
 import {
-  fetchDiscogsBarcode,
   getArtistDetail,
   getArtistMasters,
   getMasterVersions,
@@ -11,11 +10,7 @@ import {
   searchArtists,
   searchMasters,
 } from './search.api'
-import type {
-  BarcodeResult,
-  DiscographyArtist,
-  DiscographyFormat,
-} from './search.schema'
+import type { DiscographyArtist, DiscographyFormat } from './search.schema'
 import { toSearchRecord } from './search.model'
 import { prepareRecordCover } from '#/features/collection/collection.queries'
 
@@ -88,26 +83,3 @@ export const artistDetailQueryOptions = (artistId: string) =>
     queryFn: () => getArtistDetail({ data: { artistId } }),
     staleTime: 30 * 60 * 1000,
   })
-
-export const barcodeSearchQueryOptions = (barcode: string) =>
-  queryOptions({
-    queryKey: ['search', 'barcode', barcode] as const,
-    queryFn: () => fetchDiscogsBarcode({ data: { barcode } }),
-    staleTime: DISCOGS_MAX_AGE_MS,
-    enabled: barcode.length > 0,
-  })
-
-// Barcode results stay fresh for hours, so list changes must be patched into them
-export const patchBarcodeUserData = (
-  queryClient: QueryClient,
-  releaseId: number,
-  patch: Partial<NonNullable<BarcodeResult['user_data']>>,
-) => {
-  queryClient.setQueriesData<BarcodeResult | null>(
-    { queryKey: ['search', 'barcode'] },
-    (old) =>
-      old?.id === releaseId && old.user_data
-        ? { ...old, user_data: { ...old.user_data, ...patch } }
-        : old,
-  )
-}

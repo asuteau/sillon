@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 
-import { BarcodeScanner } from '#/shared/components/BarcodeScanner'
+import { StackScanner } from '#/features/scan/components/StackScanner'
 import { ScanIcon } from '#/shared/components/icons/ScanIcon'
 import { Button } from '#/shared/components/ui/button'
 
@@ -27,7 +27,7 @@ export const ScanButton = () => {
       </Button>
 
       {open && (
-        <BarcodeScanner
+        <StackScanner
           onClose={() => setOpen(false)}
           onSearchManually={handleSearchManually}
         />
