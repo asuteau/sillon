@@ -35,6 +35,11 @@ const LIST_NAMES: Record<StackList, string> = {
   wantlist: 'Wantlist',
 }
 
+const OTHER_LIST: Record<StackList, StackList> = {
+  collection: 'wantlist',
+  wantlist: 'collection',
+}
+
 const plural = (count: number, one: string, many = `${one}s`) =>
   `${count} ${count === 1 ? one : many}`
 
@@ -110,6 +115,145 @@ const CameraPanel = ({
   return children
 }
 
+interface EmptyStackProps {
+  /** A camera to scan with: worth saying how it works */
+  canScan: boolean
+  /** What the last confirm added, once the Stack has emptied */
+  addedMessage: string | null
+  /** Forgets the barcodes Discogs didn't know, when there are any */
+  onClear?: () => void
+  onClose: () => void
+}
+
+// Nothing to confirm: no bar, no list to switch to, just a way out
+const EmptyStack = ({
+  canScan,
+  addedMessage,
+  onClear,
+  onClose,
+}: EmptyStackProps) => (
+  <>
+    {(addedMessage || canScan) && (
+      <p className="shrink-0 py-2 text-center text-sm text-muted-foreground">
+        {addedMessage ?? 'Scan sleeves one after another: they pile up here.'}
+      </p>
+    )}
+    <div className="flex shrink-0 justify-center gap-2">
+      {onClear && (
+        <Button variant="ghost" onClick={onClear}>
+          Clear
+        </Button>
+      )}
+      <Button variant="ghost" onClick={onClose}>
+        <X />
+        Close
+      </Button>
+    </div>
+  </>
+)
+
+interface StackBarProps {
+  list: StackList
+  toAdd: number
+  /** What's left out: already in the list, to choose, failed */
+  notes: string[]
+  recordCount: number
+  isCommitting: boolean
+  isPaused: boolean
+  onConfirm: () => void
+  onSwitchList: () => void
+  onClear: () => void
+  onClose: () => void
+}
+
+const confirmLabel = ({
+  list,
+  toAdd,
+  isCommitting,
+  isPaused,
+}: Pick<StackBarProps, 'list' | 'toAdd' | 'isCommitting' | 'isPaused'>) => {
+  if (isPaused) return 'Pausing for Discogs…'
+  if (isCommitting) return `Adding to ${LIST_NAMES[list]}…`
+  return `Add ${toAdd} to ${LIST_NAMES[list]}`
+}
+
+// Pinned under the Stack: confirm it, send it to the other list, or clear it
+const StackBar = ({
+  list,
+  toAdd,
+  notes,
+  recordCount,
+  isCommitting,
+  isPaused,
+  onConfirm,
+  onSwitchList,
+  onClear,
+  onClose,
+}: StackBarProps) => {
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false)
+  const otherList = OTHER_LIST[list]
+
+  return (
+    <div className="flex shrink-0 flex-col gap-2">
+      {notes.length > 0 && (
+        <p className="text-center text-xs text-muted-foreground">
+          {notes.join(' · ')}
+        </p>
+      )}
+      <Button
+        size="lg"
+        className="w-full"
+        disabled={toAdd === 0 || isCommitting}
+        onClick={onConfirm}
+      >
+        {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
+        {confirmLabel({ list, toAdd, isCommitting, isPaused })}
+      </Button>
+
+      {isConfirmingClear ? (
+        <div className="flex items-center gap-2">
+          <span className="flex-1 text-sm text-muted-foreground">
+            Clear {plural(recordCount, 'record')}?
+          </span>
+          <Button variant="outline" onClick={() => setIsConfirmingClear(false)}>
+            Keep
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onClear()
+              setIsConfirmingClear(false)
+            }}
+          >
+            Clear
+          </Button>
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            className="flex-1"
+            disabled={isCommitting}
+            onClick={onSwitchList}
+          >
+            To {LIST_NAMES[otherList]} instead
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={isCommitting}
+            onClick={() => setIsConfirmingClear(true)}
+          >
+            Clear stack
+          </Button>
+          <Button variant="ghost" onClick={onClose} aria-label="Close">
+            <X />
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface StackScannerProps {
   onClose: () => void
   onSearchManually?: () => void
@@ -125,7 +269,6 @@ const StackScannerContent = ({
   const { addStates, failedCount, isCommitting, isPaused, commit } =
     useStackCommit()
   const [list, setList] = useState<StackList>('collection')
-  const [isConfirmingClear, setIsConfirmingClear] = useState(false)
   const [addedCount, setAddedCount] = useState<number | null>(null)
   // The Unresolved record whose release is being chosen
   const [choosing, setChoosing] = useState<string | null>(null)
@@ -143,7 +286,7 @@ const StackScannerContent = ({
   )
 
   const summary = stackSummary(stack, list)
-  const otherList: StackList = list === 'collection' ? 'wantlist' : 'collection'
+  const canScan = cameraState === 'starting' || cameraState === 'live'
 
   const handleRowClick = (record: StackRecord) => {
     if (record.status !== 'found') return
@@ -180,7 +323,7 @@ const StackScannerContent = ({
     failedCount > 0 &&
       !isCommitting &&
       `${plural(failedCount, 'record')} couldn't be added`,
-  ].filter(Boolean)
+  ].filter((note) => typeof note === 'string')
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
@@ -211,36 +354,6 @@ const StackScannerContent = ({
         />
       ) : (
         <>
-          {stack.records.length > 0 ? (
-            <RecordList className="min-h-0 flex-1 overflow-y-auto">
-              {stack.records.map((record) => (
-                <StackRow
-                  key={record.barcode}
-                  record={record}
-                  list={list}
-                  addState={addStates[record.barcode]}
-                  highlightKey={
-                    highlight?.barcode === record.barcode
-                      ? highlight.key
-                      : undefined
-                  }
-                  onClick={() => handleRowClick(record)}
-                  onRetry={() => void handleConfirm(record.barcode)}
-                  isCommitting={isCommitting}
-                  onToggleIncluded={() =>
-                    updateStack((s) => toggleIncluded(s, record.barcode))
-                  }
-                />
-              ))}
-            </RecordList>
-          ) : (
-            <p className="shrink-0 py-2 text-center text-sm text-muted-foreground">
-              {addedCount
-                ? `${plural(addedCount, 'record')} added to your ${LIST_NAMES[list]}.`
-                : 'Scan sleeves one after another: they pile up here.'}
-            </p>
-          )}
-
           {summary.notFound > 0 && (
             <p className="shrink-0 text-center text-xs text-muted-foreground">
               {plural(summary.notFound, 'barcode')} not on Discogs —{' '}
@@ -254,72 +367,59 @@ const StackScannerContent = ({
             </p>
           )}
 
-          <div className="flex shrink-0 flex-col gap-2">
-            {notes.length > 0 && (
-              <p className="text-center text-xs text-muted-foreground">
-                {notes.join(' · ')}
-              </p>
-            )}
-            <Button
-              size="lg"
-              className="w-full"
-              disabled={summary.toAdd === 0 || isCommitting}
-              onClick={() => void handleConfirm()}
-            >
-              {list === 'collection' ? <CollectionIcon /> : <WantlistIcon />}
-              {isPaused
-                ? 'Pausing for Discogs…'
-                : isCommitting
-                  ? `Adding to ${LIST_NAMES[list]}…`
-                  : `Add ${summary.toAdd} to ${LIST_NAMES[list]}`}
-            </Button>
+          {stack.records.length === 0 ? (
+            <EmptyStack
+              canScan={canScan}
+              addedMessage={
+                addedCount
+                  ? `${plural(addedCount, 'record')} added to your ${LIST_NAMES[list]}.`
+                  : null
+              }
+              onClear={
+                stack.notFound.length > 0
+                  ? () => updateStack(() => EMPTY_STACK)
+                  : undefined
+              }
+              onClose={onClose}
+            />
+          ) : (
+            <>
+              <RecordList className="min-h-0 flex-1 overflow-y-auto">
+                {stack.records.map((record) => (
+                  <StackRow
+                    key={record.barcode}
+                    record={record}
+                    list={list}
+                    addState={addStates[record.barcode]}
+                    highlightKey={
+                      highlight?.barcode === record.barcode
+                        ? highlight.key
+                        : undefined
+                    }
+                    onClick={() => handleRowClick(record)}
+                    onRetry={() => void handleConfirm(record.barcode)}
+                    isCommitting={isCommitting}
+                    onToggleIncluded={() =>
+                      updateStack((s) => toggleIncluded(s, record.barcode))
+                    }
+                  />
+                ))}
+              </RecordList>
 
-            {isConfirmingClear ? (
-              <div className="flex items-center gap-2">
-                <span className="flex-1 text-sm text-muted-foreground">
-                  Clear {plural(stack.records.length, 'record')}?
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsConfirmingClear(false)}
-                >
-                  Keep
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    updateStack(() => EMPTY_STACK)
-                    setIsConfirmingClear(false)
-                  }}
-                >
-                  Clear
-                </Button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  className="flex-1"
-                  disabled={isCommitting}
-                  onClick={() => setList(otherList)}
-                >
-                  To {LIST_NAMES[otherList]} instead
-                </Button>
-                {stack.records.length + stack.notFound.length > 0 && (
-                  <Button
-                    variant="ghost"
-                    disabled={isCommitting}
-                    onClick={() => setIsConfirmingClear(true)}
-                  >
-                    Clear stack
-                  </Button>
-                )}
-                <Button variant="ghost" onClick={onClose} aria-label="Close">
-                  <X />
-                </Button>
-              </div>
-            )}
-          </div>
+              <StackBar
+                list={list}
+                toAdd={summary.toAdd}
+                notes={notes}
+                recordCount={stack.records.length}
+                isCommitting={isCommitting}
+                isPaused={isPaused}
+                onConfirm={() => void handleConfirm()}
+                onSwitchList={() => setList(OTHER_LIST[list])}
+                onClear={() => updateStack(() => EMPTY_STACK)}
+                onClose={onClose}
+              />
+            </>
+          )}
         </>
       )}
 
