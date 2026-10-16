@@ -22,8 +22,9 @@ import {
   stackSummary,
   toggleIncluded,
 } from '../stack.model'
-import type { StackList, StackRecord } from '../stack.model'
+import type { StackEntry, StackList, StackRecord } from '../stack.model'
 import { updateStack, useStack } from '../stack.store'
+import { FulfilledWantsPrompt } from './FulfilledWantsPrompt'
 import { PressingChooser } from './PressingChooser'
 import { StackRow } from './StackRow'
 import { Viewfinder } from './Viewfinder'
@@ -115,6 +116,8 @@ const StackScannerContent = ({
   const [addedCount, setAddedCount] = useState<number | null>(null)
   // The Unresolved record whose pressing is being chosen
   const [choosing, setChoosing] = useState<string | null>(null)
+  // Records just added to the Collection that are still on the Wantlist
+  const [fulfilledWants, setFulfilledWants] = useState<StackEntry[]>([])
   const choosingRecord = stack.records.find(
     (r) => r.barcode === choosing && r.status === 'found',
   )
@@ -140,6 +143,9 @@ const StackScannerContent = ({
     try {
       const added = await commit(list)
       setAddedCount(added.length)
+      if (list === 'collection') {
+        setFulfilledWants(added.filter((e) => e.pressing.inWantlist))
+      }
     } catch {
       // Rows that failed stay on the Stack, marked
     }
@@ -169,7 +175,12 @@ const StackScannerContent = ({
 
       {import.meta.env.DEV && <DevBarcodeInput onBarcode={scanManually} />}
 
-      {choosingRecord?.status === 'found' ? (
+      {fulfilledWants.length > 0 ? (
+        <FulfilledWantsPrompt
+          wants={fulfilledWants}
+          onResolved={() => setFulfilledWants([])}
+        />
+      ) : choosingRecord?.status === 'found' ? (
         <PressingChooser
           pressings={choosingRecord.pressings}
           chosenId={choosingRecord.chosenId}

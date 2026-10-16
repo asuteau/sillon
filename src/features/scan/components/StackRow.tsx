@@ -166,6 +166,8 @@ const StackRowContent = ({
           <Mark>In {LIST_NAMES[list]}</Mark>
         ) : record.included ? (
           <Mark>Another copy</Mark>
+        ) : list === 'collection' && pressing.inWantlist ? (
+          <Mark>Wanted</Mark>
         ) : null
       }
     />
