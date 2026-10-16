@@ -81,7 +81,7 @@ How many vinyl discs a Release holds: the quantities of all its vinyl formats ad
 _Avoid_: LP count, number of records
 
 **Record screen**:
-The one screen a record opens into, wherever it is opened from — Home, Random pick, Collection, Wantlist, Search, a Stack. Every record looks the same on it; only its actions differ (Remove, Pick again, Add to Collection or Wantlist, Remove from Stack, Change pressing).
+The one screen a record opens into, wherever it is opened from — Home, Random pick, Collection, Wantlist, Search, a Stack. Every record looks the same on it; only its actions differ (Remove, Pick again, Add to Collection or Wantlist, Remove from Stack, Change release).
 _Avoid_: Detail page, release sheet, record detail
 
 ### Scanning
@@ -91,7 +91,7 @@ The records scanned in one go, waiting to be confirmed — mirrors the pile of s
 _Avoid_: Batch, haul, queue, tray
 
 **Unresolved**:
-A Stack record whose barcode matches several Releases (labels reuse barcodes across pressings and colour variants). It stays out of the Stack's confirmed records until the user chooses the Release; Sillon never guesses, since the wrong Release means the wrong Vinyl colour, year and value.
+A Stack record whose barcode matches several Releases (labels reuse barcodes across represses and colour variants). It stays out of the Stack's confirmed records until the user chooses the Release; Sillon never guesses, since the wrong Release means the wrong Vinyl colour, year and value.
 _Avoid_: Ambiguous, pending, conflict
 
 ### Artists

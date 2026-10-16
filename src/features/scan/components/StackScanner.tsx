@@ -15,8 +15,8 @@ import { useStackCommit } from '../hooks/use-stack-commit'
 import { useStackScanner } from '../hooks/use-stack-scanner'
 import type { CameraState } from '../hooks/use-scan-camera'
 import {
-  choosePressing,
-  chosenPressing,
+  chooseRelease,
+  chosenRelease,
   EMPTY_STACK,
   removeRecord,
   stackSummary,
@@ -25,7 +25,7 @@ import {
 import type { StackEntry, StackList, StackRecord } from '../stack.model'
 import { updateStack, useStack } from '../stack.store'
 import { FulfilledWantsPrompt } from './FulfilledWantsPrompt'
-import { PressingChooser } from './PressingChooser'
+import { ReleaseChooser } from './ReleaseChooser'
 import { StackRecordScreen } from './StackRecordScreen'
 import { StackRow } from './StackRow'
 import { Viewfinder } from './Viewfinder'
@@ -115,7 +115,7 @@ const StackScannerContent = ({
   const [list, setList] = useState<StackList>('collection')
   const [isConfirmingClear, setIsConfirmingClear] = useState(false)
   const [addedCount, setAddedCount] = useState<number | null>(null)
-  // The Unresolved record whose pressing is being chosen
+  // The Unresolved record whose release is being chosen
   const [choosing, setChoosing] = useState<string | null>(null)
   // Records just added to the Collection that are still on the Wantlist
   const [fulfilledWants, setFulfilledWants] = useState<StackEntry[]>([])
@@ -124,7 +124,7 @@ const StackScannerContent = ({
   const [opened, setOpened] = useState<{
     barcode: string
     releaseId: number
-    canChangePressing: boolean
+    canChangeRelease: boolean
   } | null>(null)
   const choosingRecord = stack.records.find(
     (r) => r.barcode === choosing && r.status === 'found',
@@ -135,17 +135,17 @@ const StackScannerContent = ({
 
   const handleRowClick = (record: StackRecord) => {
     if (record.status !== 'found') return
-    const pressing = chosenPressing(record)
-    if (!pressing) return setChoosing(record.barcode)
+    const release = chosenRelease(record)
+    if (!release) return setChoosing(record.barcode)
     setOpened({
       barcode: record.barcode,
-      releaseId: pressing.id,
-      canChangePressing: record.pressings.length > 1,
+      releaseId: release.id,
+      canChangeRelease: record.matches.length > 1,
     })
   }
 
   const handleChoose = (releaseId: number) => {
-    if (choosing) updateStack((s) => choosePressing(s, choosing, releaseId))
+    if (choosing) updateStack((s) => chooseRelease(s, choosing, releaseId))
     setChoosing(null)
   }
 
@@ -154,7 +154,7 @@ const StackScannerContent = ({
       const added = await commit(list)
       setAddedCount(added.length)
       if (list === 'collection') {
-        setFulfilledWants(added.filter((e) => e.pressing.inWantlist))
+        setFulfilledWants(added.filter((e) => e.release.inWantlist))
       }
     } catch {
       // Rows that failed stay on the Stack, marked
@@ -191,8 +191,8 @@ const StackScannerContent = ({
           onResolved={() => setFulfilledWants([])}
         />
       ) : choosingRecord?.status === 'found' ? (
-        <PressingChooser
-          pressings={choosingRecord.pressings}
+        <ReleaseChooser
+          matches={choosingRecord.matches}
           chosenId={choosingRecord.chosenId}
           onChoose={handleChoose}
           onBack={() => setChoosing(null)}
@@ -312,9 +312,9 @@ const StackScannerContent = ({
       {opened && (
         <StackRecordScreen
           releaseId={opened.releaseId}
-          canChangePressing={opened.canChangePressing}
+          canChangeRelease={opened.canChangeRelease}
           onRemove={() => updateStack((s) => removeRecord(s, opened.barcode))}
-          onChangePressing={() => setChoosing(opened.barcode)}
+          onChangeRelease={() => setChoosing(opened.barcode)}
           onClose={() => setOpened(null)}
         />
       )}

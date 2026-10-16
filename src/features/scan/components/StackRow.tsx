@@ -9,31 +9,31 @@ import { Chip } from '#/shared/components/ui/chip'
 import { cn } from '#/shared/utils/cn'
 
 import type { AddState } from '../hooks/use-stack-commit'
-import { chosenPressing, isInList } from '../stack.model'
-import type { Pressing, StackList, StackRecord } from '../stack.model'
+import { chosenRelease, isInList } from '../stack.model'
+import type { ReleaseMatch, StackList, StackRecord } from '../stack.model'
 
 const LIST_NAMES: Record<StackList, string> = {
   collection: 'Collection',
   wantlist: 'Wantlist',
 }
 
-/** Year · label · cat no: what tells one pressing from another */
-export const pressingDetails = (pressing: Pressing) =>
+/** Year · label · cat no: what tells one release from another */
+export const releaseDetails = (release: ReleaseMatch) =>
   [
-    pressing.year > 0 ? String(pressing.year) : null,
-    pressing.country,
-    pressing.label,
-    pressing.catno,
+    release.year > 0 ? String(release.year) : null,
+    release.country,
+    release.label,
+    release.catno,
   ]
     .filter(Boolean)
     .join(' · ')
 
-const PressingCover = ({ pressing }: { pressing: Pressing }) => (
+const ReleaseCover = ({ release }: { release: ReleaseMatch }) => (
   <CoverArt
-    coverKey={releaseCoverKey(pressing.id, pressing.masterId)}
-    artist={pressing.artist}
-    credits={pressing.credits}
-    title={pressing.title}
+    coverKey={releaseCoverKey(release.id, release.masterId)}
+    artist={release.artist}
+    credits={release.credits}
+    title={release.title}
     styles={[]}
     className={RECORD_ROW_MEDIA_CLASSES}
   />
@@ -63,9 +63,9 @@ export const StackRow = ({
   onClick,
   onToggleIncluded,
 }: StackRowProps) => {
-  const pressing = chosenPressing(record)
+  const release = chosenRelease(record)
   const isInTheList =
-    record.status === 'found' && pressing !== null && isInList(pressing, list)
+    record.status === 'found' && release !== null && isInList(release, list)
   const isLeftOut = isInTheList && !record.included
 
   return (
@@ -151,18 +151,18 @@ const StackRowContent = ({
     )
   }
 
-  const pressing = chosenPressing(record)
+  const release = chosenRelease(record)
 
-  // Unresolved: the first pressing stands in until one is chosen
-  if (!pressing) {
-    const [first] = record.pressings
+  // Unresolved: the first release stands in until one is chosen
+  if (!release) {
+    const [first] = record.matches
     return (
       <RecordRow
         onClick={onClick}
-        media={<PressingCover pressing={first} />}
+        media={<ReleaseCover release={first} />}
         artist={first.artist}
         title={first.title}
-        description={`${record.pressings.length} pressings — choose`}
+        description={`${record.matches.length} releases — choose`}
       />
     )
   }
@@ -170,24 +170,24 @@ const StackRowContent = ({
   return (
     <RecordRow
       onClick={onClick}
-      media={<PressingCover pressing={pressing} />}
-      artist={pressing.artist}
-      title={pressing.title}
+      media={<ReleaseCover release={release} />}
+      artist={release.artist}
+      title={release.title}
       description={
         isLeftOut
           ? `In your ${LIST_NAMES[list]}`
           : record.included
-            ? ['Another copy', pressingDetails(pressing)]
+            ? ['Another copy', releaseDetails(release)]
                 .filter(Boolean)
                 .join(' · ')
-            : pressingDetails(pressing)
+            : releaseDetails(release)
       }
       badges={
         addState === 'adding' ? (
           <GrooveLoader size={20} />
         ) : addState === 'failed' ? (
           <Mark>Failed</Mark>
-        ) : list === 'collection' && pressing.inWantlist ? (
+        ) : list === 'collection' && release.inWantlist ? (
           <Mark>Wanted</Mark>
         ) : null
       }

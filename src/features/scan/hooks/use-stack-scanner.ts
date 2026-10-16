@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-import { toPressing } from '../scan.model'
+import { toReleaseMatch } from '../scan.model'
 import { barcodeMatchesQueryOptions } from '../scan.queries'
 import { lookedUp, lookupFailed, scanBarcode } from '../stack.model'
 import { getStack, updateStack } from '../stack.store'
@@ -37,12 +37,12 @@ export const useStackScanner = () => {
 
   const lookUp = async (barcode: string) => {
     try {
-      const matches = await queryClient.fetchQuery(
+      const raw = await queryClient.fetchQuery(
         barcodeMatchesQueryOptions(barcode),
       )
-      const pressings = matches.map(toPressing)
-      updateStack((stack) => lookedUp(stack, barcode, pressings))
-      if (pressings.length === 0) showNotFound()
+      const matches = raw.map(toReleaseMatch)
+      updateStack((stack) => lookedUp(stack, barcode, matches))
+      if (matches.length === 0) showNotFound()
     } catch {
       updateStack((stack) => lookupFailed(stack, barcode))
     }

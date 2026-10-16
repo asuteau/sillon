@@ -8,9 +8,9 @@ import { Button } from '#/shared/components/ui/button'
 interface StackRecordScreenProps {
   releaseId: number
   /** The barcode matched several Releases: the choice can be changed */
-  canChangePressing: boolean
+  canChangeRelease: boolean
   onRemove: () => void
-  onChangePressing: () => void
+  onChangeRelease: () => void
   onClose: () => void
 }
 
@@ -18,9 +18,9 @@ interface StackRecordScreenProps {
 // actions are the Stack's, not the lists': it isn't added from here
 export const StackRecordScreen = ({
   releaseId,
-  canChangePressing,
+  canChangeRelease,
   onRemove,
-  onChangePressing,
+  onChangeRelease,
   onClose,
 }: StackRecordScreenProps) => {
   const queryClient = useQueryClient()
@@ -34,16 +34,16 @@ export const StackRecordScreen = ({
       onClose={onClose}
       actions={(close) => (
         <div className="flex flex-wrap justify-center gap-2">
-          {canChangePressing && (
+          {canChangeRelease && (
             <Button
               variant="outline"
               onClick={() => {
-                onChangePressing()
+                onChangeRelease()
                 close()
               }}
             >
               <Disc3 />
-              Change pressing
+              Change release
             </Button>
           )}
           <Button

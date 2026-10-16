@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import { commitStack } from './stack-commit'
 import type { CommitEvent } from './stack-commit'
-import type { Pressing, StackEntry } from './stack.model'
+import type { ReleaseMatch, StackEntry } from './stack.model'
 
 const entry = (barcode: string): StackEntry => {
-  const pressing: Pressing = {
+  const release: ReleaseMatch = {
     id: Number(barcode),
     masterId: null,
     artist: 'Slowdive',
@@ -19,7 +19,7 @@ const entry = (barcode: string): StackEntry => {
     inCollection: false,
     inWantlist: false,
   }
-  return { barcode, pressing }
+  return { barcode, release }
 }
 
 describe('confirming a Stack', () => {

@@ -42,7 +42,7 @@ const SearchResultsSchema = z.object({
   results: z.array(z.unknown()).default([]),
 })
 
-// Every Release a barcode matches: labels reuse barcodes across pressings,
+// Every Release a barcode matches: labels reuse barcodes across matches,
 // so the first match isn't necessarily the record in hand
 export const fetchBarcodeMatches = createServerFn()
   .inputValidator((data: { barcode: string }) => data)

@@ -39,7 +39,7 @@ export const FulfilledWantsPrompt = ({
     setIsRemoving(true)
     const { failed } = await commitStack({
       entries: wants.filter((w) => ticked.has(w.barcode)),
-      add: ({ pressing }) => removeFromWantlist.mutateAsync(pressing.id),
+      add: ({ release }) => removeFromWantlist.mutateAsync(release.id),
     })
     setIsRemoving(false)
     if (failed.length === 0) return onResolved()
@@ -67,7 +67,7 @@ export const FulfilledWantsPrompt = ({
       </div>
 
       <ul className="min-h-0 flex-1 divide-y divide-border overflow-y-auto border-y border-border">
-        {wants.map(({ barcode, pressing }) => {
+        {wants.map(({ barcode, release }) => {
           const isTicked = ticked.has(barcode)
           return (
             <li key={barcode}>
@@ -91,10 +91,10 @@ export const FulfilledWantsPrompt = ({
                 </span>
                 <span className="flex min-w-0 flex-col">
                   <span className="type-caps truncate text-[11px] text-muted-foreground">
-                    {pressing.artist}
+                    {release.artist}
                   </span>
                   <span className="type-title truncate text-[15px] text-foreground">
-                    {pressing.title}
+                    {release.title}
                   </span>
                 </span>
               </button>

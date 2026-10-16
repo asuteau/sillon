@@ -44,8 +44,8 @@ export const useStackCommit = () => {
     try {
       const { added } = await commitStack<StackAddResult>({
         entries: recordsToAdd(getStack(), list),
-        add: ({ pressing }: StackEntry) =>
-          addStackRecord({ data: { releaseId: pressing.id, list } }),
+        add: ({ release }: StackEntry) =>
+          addStackRecord({ data: { releaseId: release.id, list } }),
         isThrottled: (result) => result.status === 'throttled',
         onEvent: handleEvent,
       })

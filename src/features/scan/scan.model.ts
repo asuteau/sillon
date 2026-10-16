@@ -1,7 +1,7 @@
 import { creditNames, stripDisambiguator } from '#/shared/utils/artist-name'
 
 import type { BarcodeMatch } from './scan.schema'
-import type { Pressing } from './stack.model'
+import type { ReleaseMatch } from './stack.model'
 
 // Discogs titles search results "Artist - Title"
 const splitTitle = (raw: string) => {
@@ -11,7 +11,7 @@ const splitTitle = (raw: string) => {
     : { credit: raw.slice(0, dash), title: raw.slice(dash + 3) }
 }
 
-export const toPressing = (raw: BarcodeMatch): Pressing => {
+export const toReleaseMatch = (raw: BarcodeMatch): ReleaseMatch => {
   const { credit, title } = splitTitle(raw.title)
   const format = raw.formats?.at(0)
   const formatParts = format

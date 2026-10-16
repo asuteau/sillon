@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { toPressing } from './scan.model'
+import { toReleaseMatch } from './scan.model'
 
-describe('a barcode match as a pressing', () => {
-  it('reads artist, title and the details that tell pressings apart', () => {
+describe('a barcode match as a release', () => {
+  it('reads artist, title and the details that tell Releases apart', () => {
     expect(
-      toPressing({
+      toReleaseMatch({
         id: 42,
         master_id: 7,
         title: 'Slowdive (2) - Souvlaki',
@@ -41,7 +41,7 @@ describe('a barcode match as a pressing', () => {
 
   it("leaves out what Discogs doesn't know", () => {
     expect(
-      toPressing({ id: 1, title: 'Untitled', catno: 'none' }),
+      toReleaseMatch({ id: 1, title: 'Untitled', catno: 'none' }),
     ).toMatchObject({
       masterId: null,
       artist: '',

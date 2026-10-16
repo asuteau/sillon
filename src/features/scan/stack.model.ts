@@ -2,7 +2,7 @@
 // confirmed. Pure: every change returns a new Stack
 
 /** A Release a barcode matched on Discogs */
-export interface Pressing {
+export interface ReleaseMatch {
   id: number
   masterId: number | null
   /** The credit as printed, without Discogs' "(2)" */
@@ -26,8 +26,8 @@ export type StackRecord =
   | {
       barcode: string
       status: 'found'
-      pressings: Pressing[]
-      /** Null while Unresolved: several pressings and none chosen yet */
+      matches: ReleaseMatch[]
+      /** Null while Unresolved: several Releases and none chosen yet */
       chosenId: number | null
       /** Added even though already in the list: another Copy */
       included: boolean
@@ -93,9 +93,9 @@ export const lookupFailed = (stack: Stack, barcode: string): Stack =>
 export const lookedUp = (
   stack: Stack,
   barcode: string,
-  pressings: Pressing[],
+  matches: ReleaseMatch[],
 ): Stack => {
-  if (pressings.length === 0) {
+  if (matches.length === 0) {
     return {
       records: stack.records.filter((r) => r.barcode !== barcode),
       notFound: [...stack.notFound, barcode],
@@ -109,8 +109,8 @@ export const lookedUp = (
         ? {
             barcode,
             status: 'found',
-            pressings,
-            chosenId: pressings.length === 1 ? pressings[0].id : null,
+            matches,
+            chosenId: matches.length === 1 ? matches[0].id : null,
             included: false,
           }
         : r,
@@ -135,15 +135,15 @@ export const removeRecord = (stack: Stack, barcode: string): Stack => ({
   records: stack.records.filter((r) => r.barcode !== barcode),
 })
 
-/** The user's pick among the Releases a barcode matched. Another pressing
+/** The user's pick among the Releases a barcode matched. Another release
  * is another record: whether to include it is asked afresh */
-export const choosePressing = (
+export const chooseRelease = (
   stack: Stack,
   barcode: string,
   releaseId: number,
 ): Stack =>
   updateFound(stack, barcode, (r) =>
-    r.pressings.some((p) => p.id === releaseId)
+    r.matches.some((p) => p.id === releaseId)
       ? { ...r, chosenId: releaseId, included: false }
       : r,
   )
@@ -152,27 +152,27 @@ export const choosePressing = (
 export const toggleIncluded = (stack: Stack, barcode: string): Stack =>
   updateFound(stack, barcode, (r) => ({ ...r, included: !r.included }))
 
-/** The pressing a record stands for, once there is no doubt about it */
-export const chosenPressing = (record: StackRecord): Pressing | null =>
+/** The release a record stands for, once there is no doubt about it */
+export const chosenRelease = (record: StackRecord): ReleaseMatch | null =>
   record.status === 'found'
-    ? (record.pressings.find((p) => p.id === record.chosenId) ?? null)
+    ? (record.matches.find((p) => p.id === record.chosenId) ?? null)
     : null
 
-export const isInList = (pressing: Pressing, list: StackList) =>
-  list === 'collection' ? pressing.inCollection : pressing.inWantlist
+export const isInList = (release: ReleaseMatch, list: StackList) =>
+  list === 'collection' ? release.inCollection : release.inWantlist
 
 export interface StackEntry {
   barcode: string
-  pressing: Pressing
+  release: ReleaseMatch
 }
 
 /** What confirming adds to the list, newest first */
 export const recordsToAdd = (stack: Stack, list: StackList): StackEntry[] =>
   stack.records.flatMap((record) => {
-    const pressing = chosenPressing(record)
-    if (!pressing || record.status !== 'found') return []
-    if (isInList(pressing, list) && !record.included) return []
-    return [{ barcode: record.barcode, pressing }]
+    const release = chosenRelease(record)
+    if (!release || record.status !== 'found') return []
+    if (isInList(release, list) && !record.included) return []
+    return [{ barcode: record.barcode, release }]
   })
 
 export interface StackSummary {
@@ -180,7 +180,7 @@ export interface StackSummary {
   toAdd: number
   /** Records already in the list, left out */
   alreadyIn: number
-  /** Records waiting for their pressing to be chosen */
+  /** Records waiting for their release to be chosen */
   unresolved: number
   notFound: number
 }

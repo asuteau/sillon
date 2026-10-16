@@ -31,7 +31,7 @@ export type BarcodeMatch = z.infer<typeof BarcodeMatchSchema>
 
 // The Stack as kept on the device: read back through this, so a Stack saved
 // by an older Sillon is dropped rather than trusted
-const PressingSchema = z.object({
+const ReleaseMatchSchema = z.object({
   id: z.number(),
   masterId: z.number().nullable(),
   artist: z.string(),
@@ -54,7 +54,7 @@ export const SavedStackSchema = z.object({
       z.object({
         barcode: z.string(),
         status: z.literal('found'),
-        pressings: z.array(PressingSchema).min(1),
+        matches: z.array(ReleaseMatchSchema).min(1),
         chosenId: z.number().nullable(),
         included: z.boolean(),
       }),

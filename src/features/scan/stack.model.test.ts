@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Pressing, Stack } from './stack.model'
+import type { ReleaseMatch, Stack } from './stack.model'
 import {
-  choosePressing,
+  chooseRelease,
   EMPTY_STACK,
   lookedUp,
   lookupFailed,
@@ -13,7 +13,10 @@ import {
   toggleIncluded,
 } from './stack.model'
 
-const pressing = (id: number, overrides: Partial<Pressing> = {}): Pressing => ({
+const release = (
+  id: number,
+  overrides: Partial<ReleaseMatch> = {},
+): ReleaseMatch => ({
   id,
   masterId: null,
   artist: 'Slowdive',
@@ -55,7 +58,7 @@ describe('scanning a barcode', () => {
 
 describe('looking a barcode up', () => {
   it('makes a single matching Release ready to add', () => {
-    const stack = lookedUp(scanned('111'), '111', [pressing(1)])
+    const stack = lookedUp(scanned('111'), '111', [release(1)])
 
     expect(stack.records[0]).toMatchObject({
       barcode: '111',
@@ -89,10 +92,10 @@ describe('looking a barcode up', () => {
 describe('records already in the list', () => {
   const stack = lookedUp(
     lookedUp(scanned('111', '222'), '111', [
-      pressing(1, { inCollection: true }),
+      release(1, { inCollection: true }),
     ]),
     '222',
-    [pressing(2, { inWantlist: true })],
+    [release(2, { inWantlist: true })],
   )
 
   it('are left out of what confirming adds', () => {
@@ -100,13 +103,13 @@ describe('records already in the list', () => {
       toAdd: 1,
       alreadyIn: 1,
     })
-    expect(recordsToAdd(stack, 'collection').map((r) => r.pressing.id)).toEqual(
-      [2],
-    )
+    expect(recordsToAdd(stack, 'collection').map((r) => r.release.id)).toEqual([
+      2,
+    ])
   })
 
   it('depend on the list the Stack goes to', () => {
-    expect(recordsToAdd(stack, 'wantlist').map((r) => r.pressing.id)).toEqual([
+    expect(recordsToAdd(stack, 'wantlist').map((r) => r.release.id)).toEqual([
       1,
     ])
   })
@@ -146,9 +149,9 @@ describe('a lookup that fails', () => {
 })
 
 describe('a barcode matching several Releases', () => {
-  const stack = lookedUp(scanned('111'), '111', [pressing(1), pressing(2)])
+  const stack = lookedUp(scanned('111'), '111', [release(1), release(2)])
 
-  it('is Unresolved, and left out until a pressing is chosen', () => {
+  it('is Unresolved, and left out until a release is chosen', () => {
     expect(stackSummary(stack, 'collection')).toMatchObject({
       toAdd: 0,
       unresolved: 1,
@@ -156,26 +159,26 @@ describe('a barcode matching several Releases', () => {
     expect(recordsToAdd(stack, 'collection')).toEqual([])
   })
 
-  it('counts once its pressing is chosen', () => {
-    const chosen = choosePressing(stack, '111', 2)
+  it('counts once its release is chosen', () => {
+    const chosen = chooseRelease(stack, '111', 2)
 
     expect(stackSummary(chosen, 'collection')).toMatchObject({
       toAdd: 1,
       unresolved: 0,
     })
-    expect(
-      recordsToAdd(chosen, 'collection').map((r) => r.pressing.id),
-    ).toEqual([2])
+    expect(recordsToAdd(chosen, 'collection').map((r) => r.release.id)).toEqual(
+      [2],
+    )
   })
 
-  it('judges "already in the list" on the chosen pressing', () => {
+  it('judges "already in the list" on the chosen release', () => {
     const owned = lookedUp(scanned('111'), '111', [
-      pressing(1),
-      pressing(2, { inCollection: true }),
+      release(1),
+      release(2, { inCollection: true }),
     ])
 
     expect(
-      stackSummary(choosePressing(owned, '111', 2), 'collection'),
+      stackSummary(chooseRelease(owned, '111', 2), 'collection'),
     ).toMatchObject({
       toAdd: 0,
       alreadyIn: 1,
