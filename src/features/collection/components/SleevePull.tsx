@@ -5,7 +5,6 @@ import {
   leadArtist,
 } from '#/features/collection/collection.utils'
 import { discSurface } from '#/features/collection/disc-surface.utils'
-import { useIntroPull } from '#/features/collection/hooks/use-intro-pull'
 import { useSleevePull } from '#/features/collection/hooks/use-sleeve-pull'
 import { slidePosition } from '#/features/collection/sleeve-pull.utils'
 import { vinylColour } from '#/features/collection/vinyl-colour.utils'
@@ -46,6 +45,8 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
   }
   // The disc's label; grey (the root --cover-tint) until known
   const tint = useCoverTint(cover)
+  // Flat, the skeleton's disc, until the Cover shows
+  const isCoverReady = useCoverReady(cover)
   // The Release's Vinyl colour, the same every time for this Release
   const surface = useMemo(
     () => discSurface(vinylColour(info.formats), record.id),
@@ -60,6 +61,7 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
       // One stop in the tab order: the centred record
       tabIndex={isCentred ? 0 : -1}
       aria-current={isCentred || undefined}
+      data-cover-pending={!isCoverReady || undefined}
       aria-label={`${formatArtists(info.artists)} – ${info.title}`}
       style={{ '--cover-tint': tint ?? undefined }}
       onClick={(event) =>
@@ -130,18 +132,17 @@ export const SleevePull = ({ records, isOpen, onOpen }: SleevePullProps) => {
   const ids = useMemo(() => records.map((r) => r.instance_id), [records])
   const { stripRef, slideRef, centred, glideTo } = useSleevePull(ids)
   const centredRecord = records.at(centred) ?? records[0]
-  const isPulled = useIntroPull(useCoverReady(coverInput(centredRecord)))
   // Back from the record screen, the disc waits for the Cover to land; after
   // a removal there is no flight back, so the next record's disc comes out
   const [openedId, setOpenedId] = useState<number | null>(null)
   if (isOpen && openedId !== centredRecord.instance_id)
     setOpenedId(centredRecord.instance_id)
-  const tuck =
-    isOpen || !isPulled
-      ? 'in'
-      : openedId === centredRecord.instance_id
-        ? 'returning'
-        : 'out'
+  // Opens pulled out, the skeleton's pose, so nothing moves as it fades in
+  const tuck = isOpen
+    ? 'in'
+    : openedId === centredRecord.instance_id
+      ? 'returning'
+      : 'out'
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const delta =

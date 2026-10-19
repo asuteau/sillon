@@ -653,8 +653,7 @@
 /* Signature 3 — Sleeve pull (SleevePull). Scroll-driven: every frame the strip
    writes each slide's --pull-distance (0 centred, 1 a slide away), and the
    centred sleeve and its disc part around the centre by the same distance.
-   --pull-tuck puts the disc back: before the intro, and while the record
-   screen is open. */
+   --pull-tuck puts the disc back while the record screen is open. */
 /* Registered so a removal's slide-in can ease it */
 @property --pull-distance {
   syntax: '<number>';
@@ -761,8 +760,30 @@
   box-shadow: none;
 }
 
+/* Until its Cover is ready (and in the skeleton), a slide's disc is flat, a
+   step off the sleeve so the two read apart; the vinyl fades in with the
+   Cover */
+.sleeve-pull-body .disc::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--muted), var(--foreground) 6%);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-fade);
+}
+
+[data-cover-pending] .disc {
+  box-shadow: none;
+}
+
+[data-cover-pending] .disc::after {
+  opacity: 1;
+}
+
 .sleeve-pull-body .disc {
   inset: 3%;
+  transition: box-shadow 300ms var(--ease-fade);
   transform: translateX(calc(var(--pull-out) * var(--sleeve) * 0.2));
 }
 
