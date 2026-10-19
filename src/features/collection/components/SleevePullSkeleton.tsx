@@ -5,7 +5,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 const SLOTS = [0, 1, 1]
 
 // The Sleeve pull while Recent additions loads: the strip's own geometry,
-// flat sleeves, nothing moving. The strip fades in over the same space.
+// flat sleeves and the centred disc pulled out, nothing moving. The strip
+// fades in over the same space, in the same pose.
 export const SleevePullSkeleton = () => (
   <div aria-hidden>
     <div data-skeleton className="sleeve-pull-strip -mx-4 min-[900px]:mx-0">
@@ -17,6 +18,12 @@ export const SleevePullSkeleton = () => (
           style={{ '--pull-distance': distance }}
         >
           <span className="sleeve-pull-body">
+            {/* Neighbours' discs stay tucked, out of sight */}
+            {distance === 0 && (
+              <span className="disc">
+                <span className="disc-hole" />
+              </span>
+            )}
             <span className="sleeve-pull-sleeve" />
           </span>
         </span>

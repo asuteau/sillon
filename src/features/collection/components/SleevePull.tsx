@@ -5,14 +5,12 @@ import {
   leadArtist,
 } from '#/features/collection/collection.utils'
 import { discSurface } from '#/features/collection/disc-surface.utils'
-import { useIntroPull } from '#/features/collection/hooks/use-intro-pull'
 import { useSleevePull } from '#/features/collection/hooks/use-sleeve-pull'
 import { slidePosition } from '#/features/collection/sleeve-pull.utils'
 import { vinylColour } from '#/features/collection/vinyl-colour.utils'
 import { Disc } from '#/shared/components/brand/Disc'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Button } from '#/shared/components/ui/button'
-import { useCoverReady } from '#/shared/hooks/use-cover-ready'
 import { useCoverTint } from '#/shared/hooks/use-cover-tint'
 import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
@@ -130,18 +128,17 @@ export const SleevePull = ({ records, isOpen, onOpen }: SleevePullProps) => {
   const ids = useMemo(() => records.map((r) => r.instance_id), [records])
   const { stripRef, slideRef, centred, glideTo } = useSleevePull(ids)
   const centredRecord = records.at(centred) ?? records[0]
-  const isPulled = useIntroPull(useCoverReady(coverInput(centredRecord)))
   // Back from the record screen, the disc waits for the Cover to land; after
   // a removal there is no flight back, so the next record's disc comes out
   const [openedId, setOpenedId] = useState<number | null>(null)
   if (isOpen && openedId !== centredRecord.instance_id)
     setOpenedId(centredRecord.instance_id)
-  const tuck =
-    isOpen || !isPulled
-      ? 'in'
-      : openedId === centredRecord.instance_id
-        ? 'returning'
-        : 'out'
+  // Opens pulled out, the skeleton's pose, so nothing moves as it fades in
+  const tuck = isOpen
+    ? 'in'
+    : openedId === centredRecord.instance_id
+      ? 'returning'
+      : 'out'
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const delta =

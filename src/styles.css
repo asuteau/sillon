@@ -761,6 +761,12 @@
   box-shadow: none;
 }
 
+/* A flat disc, a step off the sleeve so the two read apart */
+[data-skeleton] .disc {
+  background: color-mix(in oklab, var(--muted), var(--foreground) 6%);
+  box-shadow: none;
+}
+
 .sleeve-pull-body .disc {
   inset: 3%;
   transform: translateX(calc(var(--pull-out) * var(--sleeve) * 0.2));
