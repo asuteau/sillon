@@ -19,11 +19,7 @@ export const SleevePullSkeleton = () => (
         >
           <span className="sleeve-pull-body">
             {/* Neighbours' discs stay tucked, out of sight */}
-            {distance === 0 && (
-              <span className="disc">
-                <span className="disc-hole" />
-              </span>
-            )}
+            {distance === 0 && <span className="disc" />}
             <span className="sleeve-pull-sleeve" />
           </span>
         </span>

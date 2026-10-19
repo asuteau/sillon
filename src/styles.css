@@ -653,8 +653,7 @@
 /* Signature 3 — Sleeve pull (SleevePull). Scroll-driven: every frame the strip
    writes each slide's --pull-distance (0 centred, 1 a slide away), and the
    centred sleeve and its disc part around the centre by the same distance.
-   --pull-tuck puts the disc back: before the intro, and while the record
-   screen is open. */
+   --pull-tuck puts the disc back while the record screen is open. */
 /* Registered so a removal's slide-in can ease it */
 @property --pull-distance {
   syntax: '<number>';
