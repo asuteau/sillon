@@ -15,6 +15,7 @@ export const SleevePullSkeleton = () => (
         <span
           key={i}
           className="sleeve-pull-slide"
+          data-cover-pending
           style={{ '--pull-distance': distance }}
         >
           <span className="sleeve-pull-body">

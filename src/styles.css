@@ -760,14 +760,30 @@
   box-shadow: none;
 }
 
-/* A flat disc, a step off the sleeve so the two read apart */
-[data-skeleton] .disc {
+/* Until its Cover is ready (and in the skeleton), a slide's disc is flat, a
+   step off the sleeve so the two read apart; the vinyl fades in with the
+   Cover */
+.sleeve-pull-body .disc::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
   background: color-mix(in oklab, var(--muted), var(--foreground) 6%);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-fade);
+}
+
+[data-cover-pending] .disc {
   box-shadow: none;
+}
+
+[data-cover-pending] .disc::after {
+  opacity: 1;
 }
 
 .sleeve-pull-body .disc {
   inset: 3%;
+  transition: box-shadow 300ms var(--ease-fade);
   transform: translateX(calc(var(--pull-out) * var(--sleeve) * 0.2));
 }
 

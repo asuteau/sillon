@@ -11,6 +11,7 @@ import { vinylColour } from '#/features/collection/vinyl-colour.utils'
 import { Disc } from '#/shared/components/brand/Disc'
 import { CoverArt } from '#/shared/components/CoverArt'
 import { Button } from '#/shared/components/ui/button'
+import { useCoverReady } from '#/shared/hooks/use-cover-ready'
 import { useCoverTint } from '#/shared/hooks/use-cover-tint'
 import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
@@ -44,6 +45,8 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
   }
   // The disc's label; grey (the root --cover-tint) until known
   const tint = useCoverTint(cover)
+  // Flat, the skeleton's disc, until the Cover shows
+  const isCoverReady = useCoverReady(cover)
   // The Release's Vinyl colour, the same every time for this Release
   const surface = useMemo(
     () => discSurface(vinylColour(info.formats), record.id),
@@ -58,6 +61,7 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
       // One stop in the tab order: the centred record
       tabIndex={isCentred ? 0 : -1}
       aria-current={isCentred || undefined}
+      data-cover-pending={!isCoverReady || undefined}
       aria-label={`${formatArtists(info.artists)} – ${info.title}`}
       style={{ '--cover-tint': tint ?? undefined }}
       onClick={(event) =>
