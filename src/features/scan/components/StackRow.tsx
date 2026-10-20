@@ -28,7 +28,7 @@ export const releaseDetails = (release: ReleaseMatch) =>
     .filter(Boolean)
     .join(' · ')
 
-const ReleaseCover = ({ release }: { release: ReleaseMatch }) => (
+const releaseCover = (release: ReleaseMatch) => (
   <CoverArt
     coverKey={releaseCoverKey(release.id, release.masterId)}
     artist={release.artist}
@@ -56,6 +56,8 @@ interface StackRowProps {
   onRetry: () => void
   /** Records are being added: one can't be retried meanwhile */
   isCommitting: boolean
+  /** The release's Cover: its cover art, unless a still shows a House sleeve */
+  renderCover?: (release: ReleaseMatch) => React.ReactNode
 }
 
 export const StackRow = ({
@@ -67,6 +69,7 @@ export const StackRow = ({
   onToggleIncluded,
   onRetry,
   isCommitting,
+  renderCover = releaseCover,
 }: StackRowProps) => {
   const release = chosenRelease(record)
   const isInTheList =
@@ -93,6 +96,7 @@ export const StackRow = ({
           addState={addState}
           isLeftOut={isLeftOut}
           onClick={onClick}
+          renderCover={renderCover}
         />
       </div>
       {addState === 'failed' && (
@@ -124,6 +128,7 @@ interface StackRowContentProps {
   addState: AddState | undefined
   isLeftOut: boolean
   onClick: () => void
+  renderCover: (release: ReleaseMatch) => React.ReactNode
 }
 
 const StackRowContent = ({
@@ -132,6 +137,7 @@ const StackRowContent = ({
   addState,
   isLeftOut,
   onClick,
+  renderCover,
 }: StackRowContentProps) => {
   if (record.status === 'looking-up') {
     return (
@@ -173,7 +179,7 @@ const StackRowContent = ({
     return (
       <RecordRow
         onClick={onClick}
-        media={<ReleaseCover release={first} />}
+        media={renderCover(first)}
         artist={first.artist}
         title={first.title}
         description={`${record.matches.length} releases — choose`}
@@ -184,7 +190,7 @@ const StackRowContent = ({
   return (
     <RecordRow
       onClick={onClick}
-      media={<ReleaseCover release={release} />}
+      media={renderCover(release)}
       artist={release.artist}
       title={release.title}
       description={
