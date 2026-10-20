@@ -2,9 +2,6 @@ import type * as React from 'react'
 
 import { DiscRow } from '#/features/collection/components/DiscRow'
 import { SleevePullCaption } from '#/features/collection/components/SleevePull'
-import { discSurface } from '#/features/collection/disc-surface.utils'
-import { slidePosition } from '#/features/collection/sleeve-pull.utils'
-import { vinylColour } from '#/features/collection/vinyl-colour.utils'
 import { Disc } from '#/shared/components/brand/Disc'
 import { GrooveMark } from '#/shared/components/brand/GrooveMark'
 import { Wordmark } from '#/shared/components/brand/Wordmark'
@@ -18,12 +15,15 @@ import { useHeroPlayback } from '../hooks/use-hero-playback'
 import {
   HERO_CAST,
   LANDING_RECORDS,
+  catalogueLines,
   heroTint,
   landingPressing,
-} from '../landing.content'
+  pressingSurface,
+} from '../content/landing.content'
 import {
   HERO_CAST_SIZE,
   HERO_SLOTS,
+  HERO_STAGE_VARS,
   HERO_TRACKS,
   frameAt,
   heroCast,
@@ -36,19 +36,12 @@ import type { HeroClock, HeroSlot, HeroTrackName } from '../landing.timeline'
 const CAST = HERO_CAST.map(({ index, tintHue }) => {
   const record = LANDING_RECORDS[index]
   const pressing = landingPressing(index)
-  const [format] = pressing.formats
   return {
     record,
     pressing,
     tint: heroTint(tintHue),
-    surface: discSurface(vinylColour(pressing.formats), pressing.id),
-    catalogue: [
-      `${record.year} · ${record.added}`,
-      [format.name, ...(format.descriptions ?? []), format.text]
-        .filter(Boolean)
-        .join(' · '),
-      `${record.label} · ${record.catno}`,
-    ],
+    surface: pressingSurface(pressing),
+    catalogue: catalogueLines(record, { withAdded: true }),
   }
 })
 
@@ -110,7 +103,7 @@ const Slide = ({ slot, member, clock }: SlideProps) => {
     <Tracked
       name={`slide:${slot}`}
       clock={clock}
-      className="absolute top-[31cqw] left-[25cqw] size-[50cqw]"
+      className="hero-film-slide"
       style={{ '--cover-tint': tint }}
     >
       {slot === 0 || slot === 1 ? (
@@ -160,7 +153,9 @@ const Caption = ({ slot, pass, clock }: CaptionProps) => {
       <SleevePullCaption
         artist={record.artist}
         title={record.title}
-        catalogue={`${slidePosition(cast, HERO_CAST_SIZE)} · Added ${record.added}`}
+        index={cast}
+        count={HERO_CAST_SIZE}
+        added={record.added}
       />
     </Tracked>
   )
@@ -183,12 +178,9 @@ export const HeroAnimation = () => {
       inert
       aria-hidden
       className="hero-film @container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
+      style={HERO_STAGE_VARS}
     >
-      <Tracked
-        name="groove"
-        clock={clock}
-        className="absolute top-[34cqw] left-[28cqw] size-[44cqw]"
-      >
+      <Tracked name="groove" clock={clock} className="hero-film-mark">
         <Tracked
           name="grooveDraw"
           clock={clock}
@@ -261,7 +253,7 @@ export const HeroAnimation = () => {
       <Tracked
         name="flyer"
         clock={clock}
-        className="hero-film-sleeve absolute top-[5cqw] left-[27cqw] size-[46cqw]"
+        className="hero-film-flyer hero-film-sleeve"
       >
         <HouseSleeve
           artist={onScreen.record.artist}

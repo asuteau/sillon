@@ -160,7 +160,7 @@ describe('useHeroPlayback', () => {
     reducedMotion = true
     const { result } = renderPlayback()
     expect(result.current.isPlaying).toBe(false)
-    expect(result.current.clock).toEqual({ part: 'opening', ms: 5000 })
+    expect(result.current.clock).toEqual({ part: 'opening', ms: 6600 })
     advance(20_000)
     expect(result.current.scene.part).toBe('opening')
     expect(live()).toHaveLength(0)

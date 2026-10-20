@@ -1,4 +1,4 @@
-import { LINER_NOTES_STACK } from '../landing.content'
+import { LINER_NOTES_STACK } from '../content/landing.content'
 
 const LABEL_CLASSES = 'type-caps mb-3 text-[11px] text-muted-foreground'
 const BODY_CLASSES =

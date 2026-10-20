@@ -32,8 +32,9 @@ export interface HeroScene {
   screen: number
 }
 
-// Reduced motion: the Sleeve pull pose, the disc pulled out
-export const HERO_STILL: HeroClock = { part: 'opening', ms: 5000 }
+// Reduced motion: the opening's last frame, the strip in the Sleeve pull
+// pose: the centred disc pulled out, neighbours dimmed, caption shown
+export const HERO_STILL: HeroClock = { part: 'opening', ms: OPENING_MS }
 
 // Loop time since the loop's own 0, counting passes
 const loopTime = (elapsed: number) => elapsed - OPENING_MS + LOOP_ENTRY_MS
@@ -71,9 +72,13 @@ export const msUntilNextCue = (elapsed: number): number => {
 // Tracks: each animated element's keyframes, per part. Positions in cqw of the
 // 4:5 stage (width 100), so the film scales with its column.
 
-export const EASINGS = {
+// Web Animations can't read var(), so the tokens are copied here
+const EASINGS = {
+  // --ease-platter
   platter: 'cubic-bezier(0.65, 0, 0.15, 1)',
+  // --ease-fade
   fade: 'cubic-bezier(0.2, 0, 0, 1)',
+  // The film's own, no token: a soft landing, and the disc tucking in
   out: 'cubic-bezier(0.16, 1, 0.3, 1)',
   inout: 'cubic-bezier(0.45, 0, 0.1, 1)',
   linear: 'linear',
@@ -130,16 +135,18 @@ export type HeroTrackName =
 
 const IDENTITY: Pose = { x: 0, y: 0, s: 1, r: 0, ry: 0 }
 
-interface FrameInput extends Partial<Pose> {
-  o?: number
+// A frame's look; anything left out is at rest
+interface Look extends Partial<Pose> {
+  opacity?: number
   draw?: number
 }
 
-const k = (
+// The track's frame at `at` ms, eased into the next
+const cue = (
   at: number,
-  { o = 1, draw = 1, ...pose }: FrameInput = {},
+  { opacity = 1, draw = 1, ...pose }: Look = {},
   ease?: Easing,
-): Frame => ({ at, opacity: o, pose: { ...IDENTITY, ...pose }, draw, ease })
+): Frame => ({ at, opacity, pose: { ...IDENTITY, ...pose }, draw, ease })
 
 const round2 = (n: number) => Math.round(n * 100) / 100
 
@@ -149,179 +156,198 @@ const SLEEVE = 50
 const PULL = SLEEVE / 5
 // Slide to slide, along the strip
 const GAP = 58
-const NEIGHBOUR = { s: 0.82, o: 0.5 }
+const NEIGHBOUR = { s: 0.82, opacity: 0.5 }
 // The camera pulled back to the strip; scales about the centred slide
 const CAMERA = { y: -8, s: 0.58 }
-// The slide's centre, and the Record screen's Cover (size, centre)
-export const HERO_GEOMETRY = {
+// The stage's layout, horizontally centred: the slide (size, centre), the
+// groove there before it, and the Record screen's Cover (size, centre)
+const HERO_GEOMETRY = {
   sleeve: SLEEVE,
   slideY: 56,
+  groove: 44,
   cover: 46,
   coverY: 28,
 } as const
 
+// HERO_GEOMETRY as custom properties on the stage, for the CSS to place by
+export const HERO_STAGE_VARS = {
+  '--hero-sleeve': `${HERO_GEOMETRY.sleeve}cqw`,
+  '--hero-slide-y': `${HERO_GEOMETRY.slideY}cqw`,
+  '--hero-groove': `${HERO_GEOMETRY.groove}cqw`,
+  '--hero-cover': `${HERO_GEOMETRY.cover}cqw`,
+  '--hero-cover-y': `${HERO_GEOMETRY.coverY}cqw`,
+} as const
+
 // The flying Cover over the centred sleeve in the strip, pulled out
-const FLYER_FROM: FrameInput = {
+const FLYER_FROM: Look = {
   x: round2(-PULL * CAMERA.s),
   y: round2(HERO_GEOMETRY.slideY + CAMERA.y - HERO_GEOMETRY.coverY),
   s: round2((SLEEVE * CAMERA.s) / HERO_GEOMETRY.cover),
 }
 
 // Where the sleeve slides in from: off left, turned
-const SLEEVE_OFF: FrameInput = { x: -130, ry: 55, r: -8 }
-const WORLD_STRIP: FrameInput = CAMERA
-const RISE: FrameInput = { o: 0, y: 2 }
+const SLEEVE_OFF: Look = { x: -130, ry: 55, r: -8 }
+const WORLD_STRIP: Look = CAMERA
+const RISE: Look = { opacity: 0, y: 2 }
 
-const neighbourAt = (slot: number): FrameInput => ({
+const neighbourAt = (slot: number): Look => ({
   x: slot * GAP,
   s: NEIGHBOUR.s,
-  o: NEIGHBOUR.o,
+  opacity: NEIGHBOUR.opacity,
 })
 
-// Neighbours come in from beyond, nearest first
+// Neighbours come in from beyond, together
 const openingNeighbour = (slot: Exclude<HeroSlot, 0>): Track => {
-  const start = 5300 + Math.min(Math.abs(slot), 2) * 120
+  const start = 5300
   const from = { ...neighbourAt(slot), x: slot * GAP + Math.sign(slot) * 24 }
   return [
-    k(0, { ...from, o: 0 }),
-    k(start, { ...from, o: 0 }, 'out'),
-    k(start + 1000, neighbourAt(slot)),
+    cue(0, { ...from, opacity: 0 }),
+    cue(start, { ...from, opacity: 0 }, 'out'),
+    cue(start + 1000, neighbourAt(slot)),
   ]
 }
 
 const OPENING: Record<HeroTrackName, Track> = {
-  grooveDraw: [k(0, { draw: 0 }), k(250, { draw: 0 }, 'platter'), k(1350)],
+  grooveDraw: [
+    cue(0, { draw: 0 }),
+    cue(250, { draw: 0 }, 'platter'),
+    cue(1350),
+  ],
   groove: [
-    k(0, { r: -40, s: 0.94 }, 'out'),
-    k(1500),
-    k(1700, {}, 'fade'),
-    k(2150, { o: 0, s: 1.08 }),
+    cue(0, { r: -40, s: 0.94 }, 'out'),
+    cue(1500),
+    cue(1700, {}, 'fade'),
+    cue(2150, { opacity: 0, s: 1.08 }),
   ],
   wordmark: [
-    k(0, RISE),
-    k(850, RISE, 'out'),
-    k(1450),
-    k(1750, {}, 'fade'),
-    k(2150, { o: 0 }),
+    cue(0, RISE),
+    cue(850, RISE, 'out'),
+    cue(1450),
+    cue(1750, {}, 'fade'),
+    cue(2150, { opacity: 0 }),
   ],
-  world: [k(0), k(5100, {}, 'platter'), k(6400, WORLD_STRIP)],
+  world: [cue(0), cue(5100, {}, 'platter'), cue(6400, WORLD_STRIP)],
   'slide:-2': openingNeighbour(-2),
   'slide:-1': openingNeighbour(-1),
-  'slide:0': [k(0)],
+  'slide:0': [cue(0)],
   'slide:1': openingNeighbour(1),
   'slide:2': openingNeighbour(2),
   'slide:3': openingNeighbour(3),
   // Slides in, the disc tucks inside, then the two part
   'sleeve:0': [
-    k(0, { ...SLEEVE_OFF, o: 0 }),
-    k(2900, { ...SLEEVE_OFF, o: 0 }),
-    k(2901, SLEEVE_OFF, 'out'),
-    k(3900, { x: -PULL }),
+    cue(0, { ...SLEEVE_OFF, opacity: 0 }),
+    cue(2900, { ...SLEEVE_OFF, opacity: 0 }),
+    cue(2901, SLEEVE_OFF, 'out'),
+    cue(3900, { x: -PULL }),
   ],
   // The groove turns into the disc
   'disc:0': [
-    k(0, { o: 0, s: 0.86 }),
-    k(1700, { o: 0, s: 0.86 }, 'out'),
-    k(2500),
-    k(3200, {}, 'inout'),
-    k(3900, { x: -PULL }),
-    k(4200, { x: -PULL }, 'platter'),
-    k(5000, { x: PULL }),
+    cue(0, { opacity: 0, s: 0.86 }),
+    cue(1700, { opacity: 0, s: 0.86 }, 'out'),
+    cue(2500),
+    cue(3200, {}, 'inout'),
+    cue(3900, { x: -PULL }),
+    cue(4200, { x: -PULL }, 'platter'),
+    cue(5000, { x: PULL }),
   ],
-  'sleeve:1': [k(0)],
-  'disc:1': [k(0)],
-  'caption:0': [k(0, RISE), k(6000, RISE, 'out'), k(6500)],
-  'caption:1': [k(0, RISE)],
-  pick: [k(0, RISE), k(6000, RISE, 'out'), k(6500)],
-  screen: [k(0, { o: 0 })],
-  screenHeading: [k(0, { o: 0, y: 3 })],
-  screenDiscs: [k(0, { o: 0, y: 3 })],
-  flyer: [k(0, { ...FLYER_FROM, o: 0 })],
+  'sleeve:1': [cue(0)],
+  'disc:1': [cue(0)],
+  'caption:0': [cue(0, RISE), cue(6000, RISE, 'out'), cue(6500)],
+  'caption:1': [cue(0, RISE)],
+  pick: [cue(0, RISE), cue(6000, RISE, 'out'), cue(6500)],
+  screen: [cue(0, { opacity: 0 })],
+  screenHeading: [cue(0, { opacity: 0, y: 3 })],
+  screenDiscs: [cue(0, { opacity: 0, y: 3 })],
+  flyer: [cue(0, { ...FLYER_FROM, opacity: 0 })],
 }
 
 const loopNeighbour = (slot: Exclude<HeroSlot, 0>): Track => [
-  k(0, neighbourAt(slot)),
-  k(2300, neighbourAt(slot), 'platter'),
-  k(3300, slot === 1 ? {} : neighbourAt(slot - 1)),
+  cue(0, neighbourAt(slot)),
+  cue(2300, neighbourAt(slot), 'platter'),
+  cue(3300, slot === 1 ? {} : neighbourAt(slot - 1)),
 ]
 
 // From the Record screen open (the last pass's record) round to it again
 const LOOP: Record<HeroTrackName, Track> = {
-  grooveDraw: [k(0)],
-  groove: [k(0, { o: 0, s: 1.08 })],
-  wordmark: [k(0, { o: 0 })],
+  grooveDraw: [cue(0)],
+  groove: [cue(0, { opacity: 0, s: 1.08 })],
+  wordmark: [cue(0, { opacity: 0 })],
   // Back to the strip as the screen fades; away as the next Cover grows
   world: [
-    k(0, { ...WORLD_STRIP, o: 0 }),
-    k(1000, { ...WORLD_STRIP, o: 0 }, 'fade'),
-    k(1600, WORLD_STRIP),
-    k(4500, WORLD_STRIP, 'fade'),
-    k(4800, { ...WORLD_STRIP, o: 0 }),
+    cue(0, { ...WORLD_STRIP, opacity: 0 }),
+    cue(1000, { ...WORLD_STRIP, opacity: 0 }, 'fade'),
+    cue(1600, WORLD_STRIP),
+    cue(4500, WORLD_STRIP, 'fade'),
+    cue(4800, { ...WORLD_STRIP, opacity: 0 }),
   ],
   'slide:-2': loopNeighbour(-2),
   'slide:-1': loopNeighbour(-1),
   // The strip advances: the centred slide steps left, the next one in
-  'slide:0': [k(0), k(2300, {}, 'platter'), k(3300, neighbourAt(-1))],
+  'slide:0': [cue(0), cue(2300, {}, 'platter'), cue(3300, neighbourAt(-1))],
   'slide:1': loopNeighbour(1),
   'slide:2': loopNeighbour(2),
   'slide:3': loopNeighbour(3),
   // The centred record tucks back in as it leaves
-  'sleeve:0': [k(0, { x: -PULL }), k(2100, { x: -PULL }, 'platter'), k(2900)],
-  'disc:0': [k(0, { x: PULL }), k(2000, { x: PULL }, 'inout'), k(2700)],
+  'sleeve:0': [
+    cue(0, { x: -PULL }),
+    cue(2100, { x: -PULL }, 'platter'),
+    cue(2900),
+  ],
+  'disc:0': [cue(0, { x: PULL }), cue(2000, { x: PULL }, 'inout'), cue(2700)],
   // The next one pulls out as it arrives
-  'sleeve:1': [k(0), k(2700, {}, 'platter'), k(3500, { x: -PULL })],
-  'disc:1': [k(0), k(3000, {}, 'platter'), k(3900, { x: PULL })],
+  'sleeve:1': [cue(0), cue(2700, {}, 'platter'), cue(3500, { x: -PULL })],
+  'disc:1': [cue(0), cue(3000, {}, 'platter'), cue(3900, { x: PULL })],
   'caption:0': [
-    k(0, RISE),
-    k(1300, RISE, 'out'),
-    k(1800),
-    k(2250, {}, 'fade'),
-    k(2510, { o: 0 }),
+    cue(0, RISE),
+    cue(1300, RISE, 'out'),
+    cue(1800),
+    cue(2250, {}, 'fade'),
+    cue(2510, { opacity: 0 }),
   ],
   'caption:1': [
-    k(0, RISE),
-    k(3200, RISE, 'out'),
-    k(3700),
-    k(4500, {}, 'fade'),
-    k(4760, { o: 0 }),
+    cue(0, RISE),
+    cue(3200, RISE, 'out'),
+    cue(3700),
+    cue(4500, {}, 'fade'),
+    cue(4760, { opacity: 0 }),
   ],
   pick: [
-    k(0, RISE),
-    k(1300, RISE, 'out'),
-    k(1800),
-    k(4500, {}, 'fade'),
-    k(4750, { o: 0 }),
+    cue(0, RISE),
+    cue(1300, RISE, 'out'),
+    cue(1800),
+    cue(4500, {}, 'fade'),
+    cue(4750, { opacity: 0 }),
   ],
   screen: [
-    k(0),
-    k(1000, {}, 'fade'),
-    k(1600, { o: 0 }),
-    k(4450, { o: 0 }, 'fade'),
-    k(4850),
+    cue(0),
+    cue(1000, {}, 'fade'),
+    cue(1600, { opacity: 0 }),
+    cue(4450, { opacity: 0 }, 'fade'),
+    cue(4850),
   ],
   screenHeading: [
-    k(0),
-    k(1600),
-    k(1700, { o: 0, y: 3 }),
-    k(5100, { o: 0, y: 3 }, 'out'),
-    k(5700),
+    cue(0),
+    cue(1600),
+    cue(1700, { opacity: 0, y: 3 }),
+    cue(5100, { opacity: 0, y: 3 }, 'out'),
+    cue(5700),
   ],
   screenDiscs: [
-    k(0),
-    k(1600),
-    k(1700, { o: 0, y: 3 }),
-    k(5550, { o: 0, y: 3 }, 'out'),
-    k(6150),
+    cue(0),
+    cue(1600),
+    cue(1700, { opacity: 0, y: 3 }),
+    cue(5550, { opacity: 0, y: 3 }, 'out'),
+    cue(6150),
   ],
   // Shrinks back to the strip, hides over its sleeve; grows from the next
   flyer: [
-    k(0),
-    k(1000, {}, 'platter'),
-    k(1600, FLYER_FROM),
-    k(1601, { ...FLYER_FROM, o: 0 }),
-    k(4499, { ...FLYER_FROM, o: 0 }),
-    k(4500, FLYER_FROM, 'platter'),
-    k(5350),
+    cue(0),
+    cue(1000, {}, 'platter'),
+    cue(1600, FLYER_FROM),
+    cue(1601, { ...FLYER_FROM, opacity: 0 }),
+    cue(4499, { ...FLYER_FROM, opacity: 0 }),
+    cue(4500, FLYER_FROM, 'platter'),
+    cue(5350),
   ],
 }
 
@@ -367,7 +393,7 @@ export const poseTransform = ({ x, y, s, r, ry }: Pose): string =>
 const isIdentity = ({ x, y, s, r, ry }: Pose) =>
   x === 0 && y === 0 && s === 1 && r === 0 && ry === 0
 
-// A Web Animations Keyframe: the DOM lib's own type
+// A Web Animations Keyframe, narrowed to what the film sets
 export interface HeroKeyframe extends Keyframe {
   offset: number
   easing: string

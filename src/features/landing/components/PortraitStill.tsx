@@ -3,7 +3,7 @@ import { RankedList } from '#/features/portrait/components/RankedList'
 import { TimeChart } from '#/features/portrait/components/TimeChart'
 import { formatEstimatedValue } from '#/features/portrait/portrait.utils'
 
-import { LANDING_PORTRAIT } from '../landing.content'
+import { LANDING_PORTRAIT } from '../content/landing.content'
 import { LandingStill } from './LandingStill'
 
 const { currency, estimatedValue, topArtists, pressingDecades } =

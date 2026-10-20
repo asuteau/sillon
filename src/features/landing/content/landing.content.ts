@@ -1,4 +1,7 @@
 import type { ReleaseFormat } from '#/features/collection/collection.schema'
+import { discSurface } from '#/features/collection/disc-surface.utils'
+import type { DiscSurface } from '#/features/collection/disc-surface.utils'
+import { vinylColour } from '#/features/collection/vinyl-colour.utils'
 import { formatOklch } from '#/shared/utils/colour'
 import { TINT_LIGHTNESS, TINT_MAX_CHROMA } from '#/shared/utils/cover-tint'
 
@@ -108,12 +111,16 @@ export const heroTint = (hue: number): string =>
 export const landingRecords = (...indexes: number[]): LandingRecord[] =>
   indexes.map((i) => LANDING_RECORDS[i % LANDING_RECORDS.length])
 
-export const catalogueLines = ({
-  year,
+// The Record screen's catalogue lines, the first with the date added for
+// a record in the Collection
+export const catalogueLines = (
+  { year, format, label, catno, added }: LandingRecord,
+  { withAdded = false } = {},
+): string[] => [
+  withAdded ? `${year} · ${added}` : String(year),
   format,
-  label,
-  catno,
-}: LandingRecord): string[] => [String(year), format, `${label} · ${catno}`]
+  `${label} · ${catno}`,
+]
 
 // The liner notes' stack
 export const LINER_NOTES_STACK = [
@@ -292,6 +299,13 @@ export const LANDING_PRESSINGS: readonly LandingPressing[] = [
 
 export const landingPressing = (index: number): LandingPressing =>
   LANDING_PRESSINGS[index % LANDING_PRESSINGS.length]
+
+// The pressing's disc: its Vinyl colour, read from its formats as the app
+// reads it
+export const pressingSurface = ({
+  formats,
+  id,
+}: LandingPressing): DiscSurface => discSurface(vinylColour(formats), id)
 
 // The hero film's cast, taking turns at the strip's centre, by LANDING_RECORDS
 // index: each in a different Vinyl colour, the second with two discs. The
