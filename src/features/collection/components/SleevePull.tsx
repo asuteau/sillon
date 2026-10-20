@@ -13,6 +13,7 @@ import { CoverArt } from '#/shared/components/CoverArt'
 import { Button } from '#/shared/components/ui/button'
 import { useCoverReady } from '#/shared/hooks/use-cover-ready'
 import { useCoverTint } from '#/shared/hooks/use-cover-tint'
+import { cn } from '#/shared/utils/cn'
 import { recordCredits } from '#/shared/utils/artist-name'
 import { releaseCoverKey } from '#/shared/utils/cover-key'
 import { setCoverOrigin } from '#/shared/utils/cover-transition'
@@ -92,6 +93,39 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
   )
 }
 
+interface SleevePullCaptionProps {
+  artist: string
+  title: string
+  // "02 / 10 · Added 3 Sep 2026"
+  catalogue: string
+  className?: string
+}
+
+// The centred record's caption, under the strip. Pure, for the landing too
+export const SleevePullCaption = ({
+  artist,
+  title,
+  catalogue,
+  className,
+}: SleevePullCaptionProps) => (
+  <div
+    className={cn(
+      'flex min-w-0 flex-1 flex-col items-center gap-1 text-center',
+      className,
+    )}
+  >
+    <span className="type-caps max-w-full truncate text-[11px] text-muted-foreground">
+      {artist}
+    </span>
+    <span className="type-title max-w-full truncate text-xl text-foreground">
+      {title}
+    </span>
+    <span className="type-catalogue text-[11px] text-muted-foreground">
+      {catalogue}
+    </span>
+  </div>
+)
+
 interface CaptionProps {
   record: CollectionRelease
   index: number
@@ -103,18 +137,12 @@ const Caption = ({ record, index, count }: CaptionProps) => {
   const { basic_information: info } = record
 
   return (
-    <div className="flex min-w-0 flex-1 animate-in flex-col items-center gap-1 text-center duration-160 ease-fade fade-in-0">
-      <span className="type-caps max-w-full truncate text-[11px] text-muted-foreground">
-        {formatArtists(info.artists)}
-      </span>
-      <span className="type-title max-w-full truncate text-xl text-foreground">
-        {info.title}
-      </span>
-      <span className="type-catalogue text-[11px] text-muted-foreground">
-        {slidePosition(index, count)} · Added{' '}
-        {formatDateAdded(record.date_added)}
-      </span>
-    </div>
+    <SleevePullCaption
+      artist={formatArtists(info.artists)}
+      title={info.title}
+      catalogue={`${slidePosition(index, count)} · Added ${formatDateAdded(record.date_added)}`}
+      className="animate-in duration-160 ease-fade fade-in-0"
+    />
   )
 }
 

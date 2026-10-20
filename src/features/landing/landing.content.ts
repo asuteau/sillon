@@ -1,3 +1,4 @@
+import type { ReleaseFormat } from '#/features/collection/collection.schema'
 import { formatOklch } from '#/shared/utils/colour'
 import { TINT_LIGHTNESS, TINT_MAX_CHROMA } from '#/shared/utils/cover-tint'
 
@@ -195,3 +196,65 @@ export const LANDING_PORTRAIT = {
     { decade: 2020, copies: 12 },
   ],
 } as const
+
+// Each record's formats as Discogs writes them, read for its Vinyl colour and
+// Disc count like the app's. Indexed like LANDING_RECORDS; the id seeds the
+// disc's splatter and marbling, so the stills never change
+export interface LandingPressing {
+  id: number
+  formats: ReleaseFormat[]
+}
+
+export const LANDING_PRESSINGS: readonly LandingPressing[] = [
+  {
+    id: 104_101,
+    formats: [{ name: 'Vinyl', qty: '1', descriptions: ['LP', 'Album'] }],
+  },
+  {
+    id: 104_102,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '1',
+        descriptions: ['LP', 'Album', 'Mono'],
+        text: 'Seafoam Translucent',
+      },
+    ],
+  },
+  {
+    id: 104_103,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '1',
+        descriptions: ['LP', 'Album'],
+        text: 'Tangerine',
+      },
+    ],
+  },
+  {
+    id: 104_104,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '1',
+        descriptions: ['LP', 'Album'],
+        text: 'Oxblood',
+      },
+    ],
+  },
+  {
+    id: 104_105,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '1',
+        descriptions: ['12"', 'EP'],
+        text: 'Clear With Black Splatter',
+      },
+    ],
+  },
+]
+
+export const landingPressing = (index: number): LandingPressing =>
+  LANDING_PRESSINGS[index % LANDING_PRESSINGS.length]

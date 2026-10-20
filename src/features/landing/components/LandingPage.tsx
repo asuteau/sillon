@@ -24,6 +24,10 @@ export const LandingPage = () => (
         record. Sort by date added, artist, title or year.
       </p>
       <p>
+        Pull a record from its sleeve and the disc comes out in its own vinyl
+        colour, read from Discogs: seafoam, oxblood, clear with a splatter.
+      </p>
+      <p>
         No cover anywhere? The record gets a house sleeve, set in type with its
         artist and title.
       </p>
