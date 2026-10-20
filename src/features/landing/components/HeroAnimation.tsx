@@ -1,211 +1,179 @@
 import type * as React from 'react'
 
-import { FulfilledWantPromptView } from '#/features/wantlist/components/FulfilledWantPrompt'
+import { DiscRow } from '#/features/collection/components/DiscRow'
+import { SleevePullCaption } from '#/features/collection/components/SleevePull'
+import { discSurface } from '#/features/collection/disc-surface.utils'
+import { slidePosition } from '#/features/collection/sleeve-pull.utils'
+import { vinylColour } from '#/features/collection/vinyl-colour.utils'
+import { Disc } from '#/shared/components/brand/Disc'
 import { GrooveMark } from '#/shared/components/brand/GrooveMark'
 import { Wordmark } from '#/shared/components/brand/Wordmark'
 import { CoverGlow } from '#/shared/components/CoverGlow'
 import { HouseSleeve } from '#/shared/components/HouseSleeve'
+import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 import { RecordHeading } from '#/shared/components/RecordHeading'
-import { RecordList } from '#/shared/components/RecordList'
-import { ReleaseListButtons } from '#/shared/components/ReleaseListButtons'
-import { cn } from '#/shared/utils/cn'
+import { Button } from '#/shared/components/ui/button'
 
-import { HERO_GRID_SIZE, isCoverLoaded } from '../landing.timeline'
-import type { ScanStep } from '../landing.timeline'
-import { useCoverGrowth } from '../hooks/use-cover-growth'
 import { useHeroPlayback } from '../hooks/use-hero-playback'
 import {
-  HERO_DETAIL_TINT,
+  HERO_CAST,
   LANDING_RECORDS,
-  catalogueLines,
-  landingRecords,
+  heroTint,
+  landingPressing,
 } from '../landing.content'
-import { ScanViewfinder } from './ScanViewfinder'
-import { StillRow } from './StillRow'
+import {
+  HERO_CAST_SIZE,
+  HERO_SLOTS,
+  HERO_TRACKS,
+  frameAt,
+  heroCast,
+  poseTransform,
+} from '../landing.timeline'
+import type { HeroClock, HeroSlot, HeroTrackName } from '../landing.timeline'
 
-const GRID_RECORDS = LANDING_RECORDS.slice(0, HERO_GRID_SIZE)
-// The centre cover grows into its detail page
-const DETAIL_CELL = 4
-const DETAIL_RECORD = GRID_RECORDS[DETAIL_CELL]
-const [SCANNED_RECORD] = landingRecords(6)
+// The cast as the app would read it: Vinyl colour from the Discogs formats,
+// the Cover tint, the Record screen's catalogue lines
+const CAST = HERO_CAST.map(({ index, tintHue }) => {
+  const record = LANDING_RECORDS[index]
+  const pressing = landingPressing(index)
+  const [format] = pressing.formats
+  return {
+    record,
+    pressing,
+    tint: heroTint(tintHue),
+    surface: discSurface(vinylColour(pressing.formats), pressing.id),
+    catalogue: [
+      `${record.year} · ${record.added}`,
+      [format.name, ...(format.descriptions ?? []), format.text]
+        .filter(Boolean)
+        .join(' · '),
+      `${record.label} · ${record.catno}`,
+    ],
+  }
+})
 
-const FADE = 'transition-opacity duration-160 ease-fade'
+type CastMember = (typeof CAST)[number]
 
-interface SceneLayerProps {
-  isActive: boolean
-  className?: string
-  children: React.ReactNode
+// An element's look before its Web Animation takes over, or for good as the
+// reduced-motion still
+const restingStyle = (
+  clock: HeroClock,
+  name: HeroTrackName,
+): React.CSSProperties => {
+  const { opacity, pose, draw } = frameAt(
+    HERO_TRACKS[clock.part][name],
+    clock.ms,
+  )
+  return name === 'grooveDraw'
+    ? { '--groove-undrawn': 1 - draw }
+    : { opacity, transform: poseTransform(pose) }
 }
 
-// One beat's frame. Beats cross-fade; all stay laid out, so nothing shifts.
-const SceneLayer = ({ isActive, className, children }: SceneLayerProps) => (
+interface TrackedProps {
+  name: HeroTrackName
+  clock: HeroClock
+  className?: string
+  style?: React.CSSProperties
+  children?: React.ReactNode
+}
+
+// One element the film moves (`data-track`, see useHeroPlayback)
+const Tracked = ({ name, clock, className, style, children }: TrackedProps) => (
   <div
-    className={cn(
-      'absolute inset-0',
-      FADE,
-      isActive ? 'opacity-100' : 'opacity-0',
-      className,
-    )}
+    data-track={name}
+    className={className}
+    style={{ ...style, ...restingStyle(clock, name) }}
   >
     {children}
   </div>
 )
 
-interface IntroSceneProps {
-  isActive: boolean
-  showsWordmark: boolean
+interface SlideProps {
+  slot: HeroSlot
+  member: CastMember
+  clock: HeroClock
 }
 
-// Beat 1: the groove draws in, then the wordmark appears
-const IntroScene = ({ isActive, showsWordmark }: IntroSceneProps) => (
-  <SceneLayer
-    isActive={isActive}
-    className="flex flex-col items-center justify-center gap-5 text-foreground"
-  >
-    <GrooveMark size={96} className="groove-draw-in" />
-    <Wordmark
-      className={cn(
-        'text-5xl',
-        FADE,
-        showsWordmark ? 'opacity-100' : 'opacity-0',
-      )}
+// One slide of the strip: a House sleeve, and for the centred and next
+// slides, the disc that pulls out of it in its Vinyl colour
+const Slide = ({ slot, member, clock }: SlideProps) => {
+  const { record, surface, tint } = member
+  const sleeve = (
+    <HouseSleeve
+      artist={record.artist}
+      title={record.title}
+      className="size-full rounded-(--radius)"
     />
-  </SceneLayer>
-)
-
-interface CollectionSceneProps {
-  isActive: boolean
-  loaded: number
-  detailCoverRef: React.Ref<HTMLDivElement>
-}
-
-// Beat 2: House sleeves fill the grid, each over the flat grey loading state
-const CollectionScene = ({
-  isActive,
-  loaded,
-  detailCoverRef,
-}: CollectionSceneProps) => (
-  <SceneLayer isActive={isActive} className="p-4 sm:p-6">
-    <p className="type-display mb-4 text-3xl text-foreground">Collection</p>
-    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-      {GRID_RECORDS.map((record, cell) => (
-        <div
-          key={record.title}
-          ref={cell === DETAIL_CELL ? detailCoverRef : undefined}
-          className="relative aspect-square overflow-hidden rounded-(--radius) bg-muted"
-        >
-          <HouseSleeve
-            artist={record.artist}
-            title={record.title}
-            className={cn(
-              'absolute inset-0 size-full',
-              FADE,
-              isCoverLoaded(cell, loaded) ? 'opacity-100' : 'opacity-0',
-            )}
-          />
-        </div>
-      ))}
-    </div>
-  </SceneLayer>
-)
-
-interface ScanSceneProps {
-  isActive: boolean
-  step: ScanStep | null
-}
-
-// Beat 3: the scan matches a Release, it's added, the want is fulfilled.
-// The buttons and the prompt are the Release sheet's own views.
-const ScanScene = ({ isActive, step }: ScanSceneProps) => {
-  const isMatched = step !== null && step !== 'aim'
-  const isAdded = step === 'added' || step === 'fulfilled'
+  )
 
   return (
-    <SceneLayer isActive={isActive}>
-      <ScanViewfinder className="absolute inset-0 justify-start rounded-none pt-[16%]" />
-      <div
-        className={cn(
-          'absolute inset-x-0 bottom-0 flex flex-col gap-4 rounded-t-[14px] border-t border-border bg-background p-4 sm:p-5',
-          FADE,
-          isMatched ? 'opacity-100' : 'opacity-0',
-        )}
-      >
-        <div>
-          <p className="type-caps mb-1 text-[11px] text-muted-foreground">
-            Found on Discogs
-          </p>
-          <RecordList>
-            <li>
-              <StillRow
-                record={SCANNED_RECORD}
-                meta={String(SCANNED_RECORD.year)}
+    <Tracked
+      name={`slide:${slot}`}
+      clock={clock}
+      className="absolute top-[31cqw] left-[25cqw] size-[50cqw]"
+      style={{ '--cover-tint': tint }}
+    >
+      {slot === 0 || slot === 1 ? (
+        <>
+          <Tracked
+            name={`disc:${slot}`}
+            clock={clock}
+            className="hero-film-disc absolute inset-[3%]"
+          >
+            <span data-spin className="absolute inset-0">
+              <Disc
+                surface={surface.background}
+                seeThrough={surface.seeThrough}
               />
-            </li>
-          </RecordList>
-        </div>
-        {step === 'fulfilled' ? (
-          <div className="animate-in duration-160 ease-fade fade-in-0">
-            <FulfilledWantPromptView onRemove={() => {}} onKeep={() => {}} />
-          </div>
-        ) : (
-          <ReleaseListButtons inCollection={isAdded} inWantlist />
-        )}
-      </div>
-    </SceneLayer>
+            </span>
+          </Tracked>
+          <Tracked
+            name={`sleeve:${slot}`}
+            clock={clock}
+            className="hero-film-sleeve absolute inset-0"
+          >
+            {sleeve}
+          </Tracked>
+        </>
+      ) : (
+        <div className="hero-film-sleeve absolute inset-0">{sleeve}</div>
+      )}
+    </Tracked>
   )
 }
 
-interface DetailSceneProps {
-  isOpen: boolean
-  coverRef: React.Ref<HTMLDivElement>
+interface CaptionProps {
+  slot: 0 | 1
+  pass: number
+  clock: HeroClock
 }
 
-// Beat 4: the cover grows into its detail page; the page and its cover tint
-// fade in behind it
-const DetailScene = ({ isOpen, coverRef }: DetailSceneProps) => (
-  <div
-    className="absolute inset-0"
-    style={{ '--cover-tint': HERO_DETAIL_TINT }}
-  >
-    <div
-      className={cn(
-        'absolute inset-0 bg-background',
-        FADE,
-        isOpen ? 'opacity-100' : 'opacity-0',
-      )}
+const Caption = ({ slot, pass, clock }: CaptionProps) => {
+  const cast = heroCast(pass, slot)
+  const { record } = CAST[cast]
+  return (
+    <Tracked
+      name={`caption:${slot}`}
+      clock={clock}
+      className="absolute inset-x-[6cqw] top-[66cqw] flex"
     >
-      <CoverGlow tint={HERO_DETAIL_TINT} />
-    </div>
-    <div className="relative flex flex-col items-center gap-5 p-6 sm:p-8">
-      {/* Shows at once to grow from the grid; fades out with the page */}
-      <div
-        ref={coverRef}
-        className={cn('w-3/5', isOpen ? 'opacity-100' : `opacity-0 ${FADE}`)}
-      >
-        <HouseSleeve
-          artist={DETAIL_RECORD.artist}
-          title={DETAIL_RECORD.title}
-          className="w-full rounded-(--radius)"
-        />
-      </div>
-      <div className={cn(FADE, isOpen ? 'opacity-100' : 'opacity-0')}>
-        <RecordHeading
-          artist={DETAIL_RECORD.artist}
-          title={DETAIL_RECORD.title}
-          catalogue={catalogueLines(DETAIL_RECORD)}
-        />
-      </div>
-    </div>
-  </div>
-)
+      <SleevePullCaption
+        artist={record.artist}
+        title={record.title}
+        catalogue={`${slidePosition(cast, HERO_CAST_SIZE)} · Added ${record.added}`}
+      />
+    </Tracked>
+  )
+}
 
-// The landing hero: ~12s of the app, built from its own components and House
-// sleeves. Decorative and inert; pauses off-screen or in a hidden tab, and
-// holds one still frame with reduced motion.
+// The landing hero, Pull: the groove draws in and becomes a disc, its House
+// sleeve slides in, the disc pulls out (the Sleeve pull); then the strip
+// advances, record after record, each Cover growing into its Record screen.
+// Built from the app's own pieces; decorative and inert; pauses off-screen or
+// in a hidden tab, and holds one still frame with reduced motion.
 export const HeroAnimation = () => {
-  const { stageRef, scene, isPlaying } = useHeroPlayback()
-  const isDetailOpen = scene.beat === 'detail' && scene.open
-  const { fromRef, toRef } = useCoverGrowth(isDetailOpen)
+  const { stageRef, scene, clock, isPlaying } = useHeroPlayback()
+  const onScreen = CAST[heroCast(scene.screen, 0)]
 
   return (
     <div
@@ -214,22 +182,93 @@ export const HeroAnimation = () => {
       data-paused={isPlaying ? undefined : ''}
       inert
       aria-hidden
-      className="relative aspect-4/5 w-full min-w-0 overflow-hidden rounded-(--radius) border border-border bg-background select-none"
+      className="hero-film @container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
     >
-      <IntroScene
-        isActive={scene.beat === 'intro'}
-        showsWordmark={scene.beat === 'intro' && scene.wordmark}
-      />
-      <CollectionScene
-        isActive={scene.beat === 'collection' || scene.beat === 'detail'}
-        loaded={scene.beat === 'collection' ? scene.loaded : HERO_GRID_SIZE}
-        detailCoverRef={fromRef}
-      />
-      <ScanScene
-        isActive={scene.beat === 'scan'}
-        step={scene.beat === 'scan' ? scene.step : null}
-      />
-      <DetailScene isOpen={isDetailOpen} coverRef={toRef} />
+      <Tracked
+        name="groove"
+        clock={clock}
+        className="absolute top-[34cqw] left-[28cqw] size-[44cqw]"
+      >
+        <Tracked
+          name="grooveDraw"
+          clock={clock}
+          className="hero-film-groove size-full"
+        >
+          <GrooveMark size={160} tone="lacquer" className="size-full" />
+        </Tracked>
+      </Tracked>
+      <Tracked
+        name="wordmark"
+        clock={clock}
+        className="absolute inset-x-0 top-[84cqw] text-center text-foreground"
+      >
+        <Wordmark className="text-[11cqw]" />
+      </Tracked>
+
+      <Tracked
+        name="world"
+        clock={clock}
+        className="hero-film-world absolute inset-0"
+      >
+        {HERO_SLOTS.map((slot) => (
+          <Slide
+            key={slot}
+            slot={slot}
+            member={CAST[heroCast(scene.pass, slot)]}
+            clock={clock}
+          />
+        ))}
+      </Tracked>
+
+      <Caption slot={0} pass={scene.pass} clock={clock} />
+      <Caption slot={1} pass={scene.pass} clock={clock} />
+      <Tracked
+        name="pick"
+        clock={clock}
+        className="absolute inset-x-0 top-[92cqw] flex justify-center"
+      >
+        <Button variant="lacquer" size="lg">
+          <RandomPickIcon />
+          Pick for me
+        </Button>
+      </Tracked>
+
+      {/* The Record screen; its Cover is the flying one, above */}
+      <Tracked
+        name="screen"
+        clock={clock}
+        className="absolute inset-0 bg-background"
+        style={{ '--cover-tint': onScreen.tint }}
+      >
+        <CoverGlow tint={onScreen.tint} />
+        <div className="absolute inset-x-[6cqw] top-[55cqw] flex flex-col items-center gap-[4cqw]">
+          <Tracked name="screenHeading" clock={clock}>
+            <RecordHeading
+              artist={onScreen.record.artist}
+              title={onScreen.record.title}
+              catalogue={onScreen.catalogue}
+            />
+          </Tracked>
+          <Tracked name="screenDiscs" clock={clock}>
+            <DiscRow
+              releaseId={onScreen.pressing.id}
+              formats={onScreen.pressing.formats}
+              picture={null}
+            />
+          </Tracked>
+        </div>
+      </Tracked>
+      <Tracked
+        name="flyer"
+        clock={clock}
+        className="hero-film-sleeve absolute top-[5cqw] left-[27cqw] size-[46cqw]"
+      >
+        <HouseSleeve
+          artist={onScreen.record.artist}
+          title={onScreen.record.title}
+          className="size-full rounded-(--radius)"
+        />
+      </Tracked>
     </div>
   )
 }

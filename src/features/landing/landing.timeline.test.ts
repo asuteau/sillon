@@ -1,106 +1,222 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  HERO_SLOTS,
   HERO_STILL,
+  HERO_TRACKS,
+  heroCast,
+  LOOP_ENTRY_MS,
+  LOOP_MS,
+  OPENING_MS,
+  frameAt,
+  heroClockAt,
   heroSceneAt,
-  isCoverLoaded,
+  keyframesOf,
   msUntilNextCue,
+  poseTransform,
 } from './landing.timeline'
+import type { Frame, HeroTrackName } from './landing.timeline'
 
-const beatAt = (ms: number) => heroSceneAt(ms).beat
+const names = Object.keys(HERO_TRACKS.opening) as HeroTrackName[]
+// What shows at a moment, whichever frame it comes from
+const shown = ({ opacity, pose, draw }: Frame) => ({ opacity, pose, draw })
+const opening = (name: HeroTrackName, ms: number) =>
+  shown(frameAt(HERO_TRACKS.opening[name], ms))
+const loop = (name: HeroTrackName, ms: number) =>
+  shown(frameAt(HERO_TRACKS.loop[name], ms))
 
-// First moment each beat shows, scanning in 10ms steps from `from`
-const beatStarts = (from: number, to: number) => {
-  const starts: [string, number][] = []
-  for (let ms = from; ms < to; ms += 10) {
-    const beat = beatAt(ms)
-    if (starts.at(-1)?.[0] !== beat) starts.push([beat, ms])
-  }
-  return starts
-}
+// Inside the camera's world: hidden whenever the world is
+const inWorld = (name: HeroTrackName) => /^(slide|sleeve|disc)/.test(name)
+const inScreen = (name: HeroTrackName) => name.startsWith('screen')
 
 describe('heroSceneAt', () => {
-  it('plays four beats of about 2s, 3s, 4s and 3s', () => {
-    expect(beatStarts(0, 12_000)).toEqual([
-      ['intro', 0],
-      ['collection', 2000],
-      ['scan', 5000],
-      ['detail', 9000],
-    ])
+  it('plays the opening once, then the loop', () => {
+    expect(heroSceneAt(0)).toEqual({ part: 'opening', pass: 0, screen: 1 })
+    expect(heroSceneAt(6599).part).toBe('opening')
+    expect(heroSceneAt(6600).part).toBe('loop')
+    expect(heroSceneAt(60_000).part).toBe('loop')
   })
 
-  it('draws the groove first, then shows the wordmark', () => {
-    expect(heroSceneAt(0)).toEqual({ beat: 'intro', wordmark: false })
-    expect(heroSceneAt(1500)).toEqual({ beat: 'intro', wordmark: true })
+  it('advances the strip by one record each pass', () => {
+    // The loop joins on the strip, 1.8s in; a pass is 7.6s
+    expect(heroSceneAt(6600).pass).toBe(0)
+    expect(heroSceneAt(6600 + 5799).pass).toBe(0)
+    expect(heroSceneAt(6600 + 5800).pass).toBe(1)
+    expect(heroSceneAt(6600 + 5800 + 7600).pass).toBe(2)
   })
 
-  it('loops from the collection, never replaying the intro', () => {
-    expect(beatStarts(12_000, 32_000)).toEqual([
-      ['collection', 12_000],
-      ['scan', 15_000],
-      ['detail', 19_000],
-      ['collection', 22_000],
-      ['scan', 25_000],
-      ['detail', 29_000],
-    ])
-    expect(heroSceneAt(12_000)).toEqual(heroSceneAt(2000))
+  it('opens the Record screen on the record that came in, then keeps it into the next pass', () => {
+    // Pass 0 brings record 1 in; the screen still shows it as pass 1 starts
+    expect(heroSceneAt(6600).screen).toBe(1)
+    expect(heroSceneAt(6600 + 5800).screen).toBe(1)
+    // Once hidden, it changes to the next record to come in
+    expect(heroSceneAt(6600 + 5800 + 1700).screen).toBe(2)
   })
+})
 
-  it('fills the grid from empty to every cover', () => {
-    expect(heroSceneAt(2000)).toEqual({ beat: 'collection', loaded: 0 })
-    expect(heroSceneAt(4900)).toEqual({ beat: 'collection', loaded: 9 })
-  })
-
-  it('scans, matches, adds, then asks about the fulfilled want', () => {
-    const steps: string[] = []
-    for (let ms = 5000; ms < 9000; ms += 10) {
-      const scene = heroSceneAt(ms)
-      if (scene.beat === 'scan' && steps.at(-1) !== scene.step)
-        steps.push(scene.step)
-    }
-    expect(steps).toEqual(['aim', 'match', 'added', 'fulfilled'])
-  })
-
-  it('opens the detail after showing the grid', () => {
-    expect(heroSceneAt(9000)).toEqual({ beat: 'detail', open: false })
-    expect(heroSceneAt(11_900)).toEqual({ beat: 'detail', open: true })
+describe('heroClockAt', () => {
+  it('runs the opening from 0, then the loop from where it joins', () => {
+    expect(heroClockAt(1234)).toEqual({ part: 'opening', ms: 1234 })
+    expect(heroClockAt(6600)).toEqual({ part: 'loop', ms: 1800 })
+    expect(heroClockAt(6600 + 5800)).toEqual({ part: 'loop', ms: 0 })
   })
 })
 
 describe('msUntilNextCue', () => {
   it('waits for the next change of scene', () => {
-    expect(msUntilNextCue(0)).toBeGreaterThan(0)
-    const next = msUntilNextCue(0)
-    expect(heroSceneAt(next)).not.toEqual(heroSceneAt(0))
-    expect(heroSceneAt(next - 1)).toEqual(heroSceneAt(0))
+    for (const elapsed of [0, 7000, 12_000, 13_000, 30_000]) {
+      const next = msUntilNextCue(elapsed)
+      expect(next).toBeGreaterThan(0)
+      expect(heroSceneAt(elapsed + next)).not.toEqual(heroSceneAt(elapsed))
+      expect(heroSceneAt(elapsed + next - 1)).toEqual(heroSceneAt(elapsed))
+    }
   })
 
-  it('wraps from the last cue to the start of the loop', () => {
-    expect(msUntilNextCue(11_900)).toBe(100)
-    expect(msUntilNextCue(21_900)).toBe(100)
-  })
-
-  it('never returns zero on a cue', () => {
-    for (let ms = 0; ms < 22_000; ms += 10)
+  it('never returns zero', () => {
+    for (let ms = 0; ms < 40_000; ms += 10)
       expect(msUntilNextCue(ms)).toBeGreaterThan(0)
   })
 })
 
-describe('isCoverLoaded', () => {
-  it('loads the covers out of grid order, like real images', () => {
-    const order = Array.from({ length: 9 }, (_, loaded) =>
-      Array.from({ length: 9 }, (_, cell) => cell).find(
-        (cell) =>
-          isCoverLoaded(cell, loaded + 1) && !isCoverLoaded(cell, loaded),
-      ),
-    )
-    expect(new Set(order).size).toBe(9)
-    expect(order).not.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8])
+describe('HERO_STILL', () => {
+  it('is the Sleeve pull pose, before the camera pulls back', () => {
+    expect(HERO_STILL).toEqual({ part: 'opening', ms: 5000 })
   })
 })
 
-describe('HERO_STILL', () => {
-  it('is the full collection grid', () => {
-    expect(HERO_STILL).toEqual({ beat: 'collection', loaded: 9 })
+describe('HERO_TRACKS', () => {
+  it('animates the same elements in both parts', () => {
+    expect(Object.keys(HERO_TRACKS.loop).sort()).toEqual([...names].sort())
+  })
+
+  it('ends the opening exactly where the loop joins', () => {
+    for (const name of names)
+      expect([name, loop(name, LOOP_ENTRY_MS)]).toEqual([
+        name,
+        opening(name, OPENING_MS),
+      ])
+  })
+
+  it('wraps the loop seamlessly, or out of sight', () => {
+    const isHidden = (name: HeroTrackName, ms: number) =>
+      loop(name, ms).opacity === 0 ||
+      (inWorld(name) && loop('world', ms).opacity === 0) ||
+      (inScreen(name) && loop('screen', ms).opacity === 0)
+
+    for (const name of names) {
+      const jumps =
+        JSON.stringify(loop(name, LOOP_MS)) !== JSON.stringify(loop(name, 0))
+      if (jumps)
+        expect([name, isHidden(name, LOOP_MS) && isHidden(name, 0)]).toEqual([
+          name,
+          true,
+        ])
+    }
+  })
+
+  it('changes the Record screen and flying Cover only while both are hidden', () => {
+    expect(loop('screen', 1700).opacity).toBe(0)
+    expect(loop('flyer', 1700).opacity).toBe(0)
+  })
+
+  it('holds the Sleeve pull pose in the still: sleeve and disc apart, nothing else', () => {
+    const { ms } = HERO_STILL
+    expect(opening('sleeve:0', ms)).toMatchObject({
+      opacity: 1,
+      pose: { x: -10 },
+    })
+    expect(opening('disc:0', ms)).toMatchObject({ opacity: 1, pose: { x: 10 } })
+    for (const name of [
+      'groove',
+      'wordmark',
+      'slide:1',
+      'caption:0',
+      'pick',
+    ] as const)
+      expect(opening(name, ms).opacity).toBe(0)
+  })
+
+  it('draws the groove before the wordmark shows', () => {
+    expect(opening('grooveDraw', 1350).draw).toBe(1)
+    expect(opening('wordmark', 1350).opacity).toBeLessThan(1)
+    expect(opening('wordmark', 1450).opacity).toBe(1)
+  })
+
+  it('lands the flying Cover on the centred sleeve in the strip', () => {
+    // Strip: sleeve 50cqw pulled 10cqw left, world scaled .58 and raised
+    // 8cqw; the Cover is 46cqw, centred 28cqw down
+    expect(loop('flyer', 1600)).toMatchObject({
+      opacity: 1,
+      pose: { x: -5.8, y: 20, s: 0.63 },
+    })
+  })
+})
+
+describe('keyframesOf', () => {
+  const frame = (at: number, over: Partial<Frame> = {}): Frame => ({
+    at,
+    opacity: 1,
+    pose: { x: 0, y: 0, s: 1, r: 0, ry: 0 },
+    draw: 1,
+    ...over,
+  })
+
+  it('spreads the frames over the part, easing each step', () => {
+    const keyframes = keyframesOf(
+      [frame(0, { opacity: 0, ease: 'fade' }), frame(500), frame(1000)],
+      1000,
+    )
+    expect(keyframes.map((k) => [k.offset, k.opacity, k.easing])).toEqual([
+      [0, 0, 'cubic-bezier(0.2, 0, 0, 1)'],
+      [0.5, 1, 'linear'],
+      [1, 1, 'linear'],
+    ])
+  })
+
+  it('animates only what changes', () => {
+    const [still] = keyframesOf([frame(0, { opacity: 0 }), frame(10)], 10)
+    expect(still).not.toHaveProperty('transform')
+    expect(still).not.toHaveProperty('strokeDashoffset')
+  })
+
+  it('holds the first and last frames to the part edges', () => {
+    const keyframes = keyframesOf(
+      [frame(200, { opacity: 0 }), frame(400)],
+      1000,
+    )
+    expect(keyframes.map((k) => [k.offset, k.opacity])).toEqual([
+      [0, 0],
+      [0.2, 0],
+      [0.4, 1],
+      [1, 1],
+    ])
+  })
+})
+
+describe('heroCast', () => {
+  it('rotates four records across passes', () => {
+    expect([0, 1, 2, 3, 4].map((pass) => heroCast(pass, 0))).toEqual([
+      0, 1, 2, 3, 0,
+    ])
+  })
+
+  it('lines the strip up in order, wrapping round', () => {
+    expect(HERO_SLOTS.map((slot) => heroCast(0, slot))).toEqual([
+      2, 3, 0, 1, 2, 3,
+    ])
+  })
+
+  it('centres the record that came in, as the Record screen showed it', () => {
+    const { pass, screen } = heroSceneAt(6600 + 5800 + 100)
+    expect(heroCast(pass, 0)).toBe(heroCast(pass - 1, 1))
+    expect(heroCast(screen, 0)).toBe(heroCast(pass, 0))
+  })
+})
+
+describe('poseTransform', () => {
+  it('moves in container units, turns and scales', () => {
+    expect(poseTransform({ x: -10, y: 2, s: 0.82, r: -8, ry: 55 })).toBe(
+      'perspective(1000px) translate(-10cqw, 2cqw) rotateY(55deg) rotate(-8deg) scale(0.82)',
+    )
   })
 })
