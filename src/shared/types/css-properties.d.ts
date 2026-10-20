@@ -8,5 +8,7 @@ declare module 'react' {
     '--disc-surface'?: string
     // A Sleeve pull slide's distance to the centre (0 centred, 1 a slide away)
     '--pull-distance'?: number
+    // How much of the landing hero's groove is still to draw (1 none drawn)
+    '--groove-undrawn'?: number
   }
 }

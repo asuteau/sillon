@@ -99,13 +99,10 @@ export const LANDING_RECORDS = [
 ] as const satisfies readonly LandingRecord[]
 
 // House sleeves are black, white and grey, so they give no tint in the app.
-// The hero's detail beat shows the tint a coloured Cover would give: a warm
-// amber, within the same lightness and chroma limits.
-export const HERO_DETAIL_TINT = formatOklch({
-  l: TINT_LIGHTNESS,
-  c: TINT_MAX_CHROMA,
-  h: 62,
-})
+// The hero shows the tint a coloured Cover would give, at a hue, within the
+// same lightness and chroma limits.
+export const heroTint = (hue: number): string =>
+  formatOklch({ l: TINT_LIGHTNESS, c: TINT_MAX_CHROMA, h: hue })
 
 // Picks records by position so each still stays stable and varied
 export const landingRecords = (...indexes: number[]): LandingRecord[] =>
@@ -254,7 +251,54 @@ export const LANDING_PRESSINGS: readonly LandingPressing[] = [
       },
     ],
   },
+  {
+    id: 104_106,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '2',
+        descriptions: ['LP', 'Album'],
+        text: 'Disc 1: Seafoam, Disc 2: Oxblood',
+      },
+    ],
+  },
+  {
+    id: 104_107,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '1',
+        descriptions: ['LP', 'Album'],
+        text: 'Coke Bottle Clear',
+      },
+    ],
+  },
+  {
+    id: 104_108,
+    formats: [{ name: 'Vinyl', qty: '1', descriptions: ['7"', 'Single'] }],
+  },
+  {
+    id: 104_109,
+    formats: [
+      {
+        name: 'Vinyl',
+        qty: '1',
+        descriptions: ['LP', 'Album'],
+        text: 'Bone Marbled',
+      },
+    ],
+  },
 ]
 
 export const landingPressing = (index: number): LandingPressing =>
   LANDING_PRESSINGS[index % LANDING_PRESSINGS.length]
+
+// The hero film's cast, taking turns at the strip's centre, by LANDING_RECORDS
+// index: each in a different Vinyl colour, the second with two discs. The
+// hue is the tint its Cover would give (House sleeves give none)
+export const HERO_CAST = [
+  { index: 2, tintHue: 62 },
+  { index: 5, tintHue: 190 },
+  { index: 4, tintHue: 30 },
+  { index: 6, tintHue: 150 },
+] as const
