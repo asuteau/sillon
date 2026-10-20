@@ -106,6 +106,7 @@ describe('LandingPage', () => {
     renderLanding()
     expect(sectionHeadings()).toEqual([
       'Your collection, in HD.',
+      'Your collection, in numbers.',
       'Your wantlist, fulfilled.',
       'Scan the sleeve.',
       'Nothing to spin?',
@@ -136,7 +137,7 @@ describe('LandingPage', () => {
   it('keeps the stills out of the tab order', () => {
     const { container } = renderLanding()
     const stills = container.querySelectorAll('[data-slot="landing-still"]')
-    expect(stills).toHaveLength(4)
+    expect(stills).toHaveLength(5)
     for (const still of [
       ...stills,
       container.querySelector('[data-slot="hero-animation"]'),

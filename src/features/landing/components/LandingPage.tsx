@@ -1,5 +1,6 @@
 import { CollectionStill } from './CollectionStill'
 import { LinerNotes } from './LinerNotes'
+import { PortraitStill } from './PortraitStill'
 import { FeatureSection } from './FeatureSection'
 import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
@@ -23,9 +24,28 @@ export const LandingPage = () => (
         record. Sort by date added, artist, title or year.
       </p>
       <p>
+        Pull a record from its sleeve and the disc comes out in its own vinyl
+        colour, read from Discogs: seafoam, oxblood, clear with a splatter.
+      </p>
+      <p>
         No cover anywhere? The record gets a house sleeve, set in type with its
         artist and title.
       </p>
+    </FeatureSection>
+
+    <FeatureSection
+      id="portrait"
+      label="Portrait"
+      title="Your collection, in numbers."
+      still={<PortraitStill />}
+      flip
+    >
+      <p>
+        Portrait reads every record you own: what the collection is worth on
+        Discogs, the artists you keep coming back to, the decades your pressings
+        come from.
+      </p>
+      <p>The leader of each chart is set in copper.</p>
     </FeatureSection>
 
     <FeatureSection
@@ -33,7 +53,6 @@ export const LandingPage = () => (
       label="Wantlist"
       title="Your wantlist, fulfilled."
       still={<WantlistStill />}
-      flip
     >
       <p>
         Your wantlist sits next to your collection. Add the exact release you
@@ -48,6 +67,7 @@ export const LandingPage = () => (
       label="Barcode scanning"
       title="Scan the sleeve."
       still={<ScanStill />}
+      flip
     >
       <p>
         In the shop, point your phone at the barcode on the back. Sillon finds
@@ -65,7 +85,6 @@ export const LandingPage = () => (
       label="Random pick"
       title="Nothing to spin?"
       still={<RandomPickStill />}
-      flip
     >
       <p>
         Random pick draws one record from your whole collection. Not the mood?

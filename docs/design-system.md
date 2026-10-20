@@ -58,7 +58,7 @@ Records are the colour. A fixed accent would fight every cover on screen, and a 
 - Colour on record screens comes from the current Cover (`--cover-tint`).
 - **Copper lacquer** is the one brand material, from the copper master a record is pressed from.
 - It's used only on brand moments, never for hover, selection, focus, links or any general interactive state.
-- It has two renderings of the same three stops: **sweep** for marks (icon, favicon, launch screen, the groove mark in lacquer tone — the landing's closing mark above "Bring your crates." — House sleeve shapes) and **satin** for buttons. A mark too thin to carry the gradient (a Portrait Leader's bar or column) is **solid** stop 2, `--lacquer-2`: a sweep on a 3px bar just reads as an uneven colour, and stop 1 all but vanishes on light grounds.
+- It has two renderings of the same three stops: **sweep** for marks (icon, favicon, launch screen, the groove mark in lacquer tone — the landing hero film's groove and the closing mark above "Bring your crates." — House sleeve shapes) and **satin** for buttons. A mark too thin to carry the gradient (a Portrait Leader's bar or column) is **solid** stop 2, `--lacquer-2`: a sweep on a 3px bar just reads as an uneven colour, and stop 1 all but vanishes on light grounds.
 - **No text on the sweep.** Text on lacquer always goes on a satin button.
 
 How copper was chosen, in order (specimens in `docs/brand/specimens/`, open in a browser):
@@ -131,26 +131,49 @@ shadcn derives every radius from one `--radius`, which can't express "square sur
 
 ## 5. Motion
 
-Fast and quiet: fades by default, three signatures, nothing else.
+Fast and quiet: fades by default, three signatures, nothing else. The landing hero film strings the three together, with two easings of its own (below).
 
-| Motion                      | Duration                                         | Easing                                                 |
-| --------------------------- | ------------------------------------------------ | ------------------------------------------------------ |
-| Default (state, enter/exit) | 160ms opacity fade                               | `--ease-fade` = `cubic-bezier(.2,0,0,1)` (`ease-fade`) |
-| Cover → detail              | 320ms open, 280ms close                          | `--ease-platter` = `cubic-bezier(.65,0,.15,1)`         |
-| Groove loader               | ~800ms draw-in, short hold, loops (1100ms cycle) | platter                                                |
-| Groove draw-in (landing)    | ~800ms draw-in, once                             | platter                                                |
-| Groove draw-in (Portrait)   | ~800ms draw-in, once, on reveal                  | platter                                                |
-| Sleeve pull                 | scroll-driven; timed moves 320ms                 | platter                                                |
+| Motion                      | Duration                                         | Easing                                                            |
+| --------------------------- | ------------------------------------------------ | ----------------------------------------------------------------- |
+| Default (state, enter/exit) | 160ms opacity fade                               | `--ease-fade` = `cubic-bezier(.2,0,0,1)` (`ease-fade`)            |
+| Cover → detail              | 320ms open, 280ms close                          | `--ease-platter` = `cubic-bezier(.65,0,.15,1)`                    |
+| Groove loader               | ~800ms draw-in, short hold, loops (1100ms cycle) | platter                                                           |
+| Groove draw-in (landing)    | ~800ms draw-in, once, closing mark               | platter                                                           |
+| Groove draw-in (Portrait)   | ~800ms draw-in, once, on reveal                  | platter                                                           |
+| Sleeve pull                 | scroll-driven; timed moves 320ms                 | platter                                                           |
+| Hero film, Pull (landing)   | 6.6s opening, once; then a 7.6s loop per record  | platter, fade; its own: out `(.16,1,.3,1)`, in-out `(.45,0,.1,1)` |
 
-**Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero uses `growCover` for the same move inside one page.
+**Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero film plays the same move as one of its own tracks (see Hero film).
 
 **Signature 2 — groove loader** (`GrooveLoader`, `.groove-loader`). The spiral draws in from the outer edge like a needle, via `stroke-dashoffset` on a `pathLength="1"` path. Only on real waits — cold start (`AppShellPending`), long fetches — never as an added delay.
 
-The same draw-in plays **once** on the landing (`.groove-draw-in`): in the hero's intro (text colour), and on the closing mark above "Bring your crates." (96px, lacquer tone). The closing mark stays undrawn (`.groove-undrawn`) until its section scrolls into view, then draws in and stops observing; it never replays during the page view.
+The same draw-in plays **once** on the landing: in the hero film's opening (lacquer tone, drawn by the film, see Hero film), and on the closing mark above "Bring your crates." (`.groove-draw-in`, 96px, lacquer tone). The closing mark stays undrawn (`.groove-undrawn`) until its section scrolls into view, then draws in and stops observing; it never replays during the page view.
 
 The Portrait's ranking bars are the same draw-in, straightened: once, on reveal, from the start of the line (`.portrait-bar`), as their section fades in (`.portrait-reveal`). The time charts' columns (Pressing decade, Additions by year) draw up from the baseline the same way (`.portrait-column`). Every Portrait bar and column is neutral but the Leaders' (see §3): copper, nothing else changes — no larger type, which made the leading row a separate block. Entries tied for the most all lead; when every entry ties, none does.
 
 **Signature 3 — Sleeve pull** (`SleevePull`, `.sleeve-pull-*`, `src/features/collection/sleeve-pull.ts`). Recent additions on Home: a strip of sleeves, 320px on desktop (edges faded with a mask), ≈60vw on a phone, capped at 28svh (never under 160px) below 640px wide, so short phones keep the Random pick prompt above the fold. The centred sleeve and its disc part around a shared centre — sleeve −20%, disc +20% of the sleeve width — so the pair stays centred; neighbours scale to 0.82 and dim. Scroll-driven, not timed: every frame, each slide's distance to the centre (`--pull-distance`, from the native scroll position) drives the pull, scale, dimming and the disc's turn, and native `scroll-snap` gives the momentum and settling. Timed moves (arrows, ←/→, a tapped neighbour, removal) glide over 320ms platter. Touch, trackpad, keys and the arrow buttons beside the caption (≥640px) move it; no mouse drag. Tapping the centred record opens its record screen with Signature 1: the disc tucks back during the flight and slides out again once the Cover has landed on close. Removing the centred record slides the next older one into the centre (the previous one if it was the last). The strip opens with the centred disc already out; it never plays an entrance. Until a slide's Cover is ready its disc stays the skeleton's flat disc, and the vinyl fades in with the Cover (300ms), so the vinyl never shows beside an empty sleeve. While Recent additions loads, the strip's own geometry stands in (`SleevePullSkeleton`): flat `--muted` sleeves, no shadow, no pulse, the centred one with a flat disc pulled out, a step off `--muted` (6% `--foreground`, no grooves or sheen; none under reduced motion, as the strip), with the caption's, attribution's and Random pick prompt's space held so nothing moves when the strip fades in over it in the same pose.
+
+**Hero film — Pull** (`HeroAnimation`, `.hero-film-*`, `src/features/landing/landing.timeline.ts`). The landing hero: the groove becomes a disc, the disc pulls out of its House sleeve (Signature 3), the strip advances, and each Cover grows into its Record screen (Signature 1). Made-up records and House sleeves only, each disc in its Vinyl colour (`discSurface()`), each Record screen with its Disc count (`DiscRow`).
+
+| Beat                 | Opening, once (ms) | Move                                                                                                     | Easing  |
+| -------------------- | ------------------ | -------------------------------------------------------------------------------------------------------- | ------- |
+| Groove draws in      | 250–1350           | Lacquer groove, turning from −40° as it settles                                                          | platter |
+| Wordmark             | 850–1450           | Rises in under the groove                                                                                | out     |
+| Groove → disc        | 1700–2500          | Groove and wordmark fade out; the disc fades in where the groove was                                     | out     |
+| Sleeve slides in     | 2900–3900          | From off left, turned (rotateY 55°, −8°)                                                                 | out     |
+| Disc tucks in        | 3200–3900          | Into the sleeve                                                                                          | in-out  |
+| Pull                 | 4200–5000          | Sleeve −20%, disc +20% of the sleeve: the Sleeve pull's pose                                             | platter |
+| Camera pulls back    | 5100–6400          | To the strip (scale 0.58); neighbours come in from beyond, together (5300–6300), at 0.82 and 0.5 opacity | platter |
+| Caption, Random pick | 6000–6500          | Rise in (`SleevePullCaption`, the lacquer "Pick for me" button)                                          | out     |
+
+Then the loop, one pass per record, four records taking turns (`HERO_CAST_SIZE`). It starts with the Record screen open; the opening joins it at 1800ms, on the strip. Loop beats (ms into the pass): the Cover shrinks back onto its sleeve as the screen fades to the strip (1000–1600, platter); the centred disc tucks back in (2000–2900) as the strip advances one slide (2300–3300, platter); the next disc pulls out (2700–3900) and its caption rises; the strip fades and the Cover grows from its sleeve into the Record screen's Cover (4500–5350, platter); the heading rises (5100–5700), then the disc row (5550–6150); hold to 7600. The records turn over while the Record screen hides the strip, so no swap is ever seen.
+
+- Played with the Web Animations API: one animation per tracked element (`data-track`), transform and opacity only, plus the groove's `stroke-dashoffset`. Positions in `cqw` of the 4:5 stage, so the film scales with its column; the stage's layout (slide, groove, Record screen Cover) is set once in TS and handed to the CSS as `--hero-*` properties on the stage. React re-renders only at cues (opening → loop, a new pass), never per frame.
+- Easings: platter and fade are `--ease-platter` and `--ease-fade`, copied into `landing.timeline.ts` since Web Animations can't read `var()` (a test keeps them equal to `src/styles.css`). The film adds two of its own, nowhere else in the app: out `(.16,1,.3,1)` for things settling in (wordmark, sleeve, disc, neighbours, caption) and in-out `(.45,0,.1,1)` for a disc tucking in.
+- A disc out of its sleeve turns slowly (one turn per 1.9s, linear).
+- Pauses off-screen and in a hidden tab, and resumes where it stopped.
+- Frameless: no card or border; the strip's edges fade into the page (mask, 12%), and the Record screen's glow fades out before the stage's edges, with no tinted top edge.
+- Reduced motion: one still, `HERO_STILL` (the opening's last frame, where the loop joins): the full Sleeve pull pose — the strip, the centred House sleeve with its disc pulled out in its Vinyl colour, the neighbours scaled down and dimmed, the caption and the Random pick button — no turn.
 
 Home is laid out on the Sleeve pull's centre axis (`text-center` on Home's `Page`): the page title, the caption, the Discogs attribution and the Random pick prompt (`RandomPickPrompt`: question, subline, any error, button stacked, frameless — no card chrome) are all centred, at every width, including the loading and empty states. Home only; every other page title stays left-aligned.
 
@@ -180,7 +203,7 @@ The disc's colour (`discSurface()`, `src/features/collection/disc-surface.utils.
 Rules:
 
 - No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
-- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero shows a still frame, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in. The Sleeve pull keeps the disc in its sleeve and never shows it; neighbours still scale and dim (they follow the finger), removal cross-fades and the arrows jump.
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero film shows one still (the Sleeve pull pose, disc pulled out), the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in. Home's Sleeve pull keeps the disc in its sleeve and never shows it; neighbours still scale and dim (they follow the finger), removal cross-fades and the arrows jump. The landing's Sleeve pull poses (the hero's still, the Collection still) are stills, not motion: their disc stays pulled out.
 
 ---
 

@@ -2,7 +2,7 @@ import { RecordHeading } from '#/shared/components/RecordHeading'
 import { HouseSleeve } from '#/shared/components/HouseSleeve'
 import { FulfilledWantPromptView } from '#/features/wantlist/components/FulfilledWantPrompt'
 
-import { catalogueLines, landingRecords } from '../landing.content'
+import { catalogueLines, landingRecords } from '../content/landing.content'
 import { LandingStill } from './LandingStill'
 
 const [RECORD] = landingRecords(5)

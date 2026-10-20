@@ -3,7 +3,7 @@ import { HouseSleeve } from '#/shared/components/HouseSleeve'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { Button } from '#/shared/components/ui/button'
 
-import { catalogueLines, landingRecords } from '../landing.content'
+import { catalogueLines, landingRecords } from '../content/landing.content'
 import { LandingStill } from './LandingStill'
 
 const [RECORD] = landingRecords(1)
@@ -19,10 +19,7 @@ export const RandomPickStill = () => (
     <RecordHeading
       artist={RECORD.artist}
       title={RECORD.title}
-      catalogue={[
-        `${RECORD.year} · ${RECORD.added}`,
-        ...catalogueLines(RECORD).slice(1),
-      ]}
+      catalogue={catalogueLines(RECORD, { withAdded: true })}
     />
     <Button variant="lacquer">
       <RandomPickIcon />

@@ -2,11 +2,23 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { HERO_STILL } from '../landing.timeline'
 import { useHeroPlayback } from './use-hero-playback'
 
 let reducedMotion = false
 let intersect: (isIntersecting: boolean) => void = () => {}
+
+interface FakeAnimation {
+  target: Element
+  currentTime: number
+  playState: 'running' | 'paused' | 'idle'
+  options: KeyframeAnimationOptions
+}
+
+// jsdom has no Web Animations: record what the film asks for
+let animations: FakeAnimation[] = []
+const live = () => animations.filter((a) => a.playState !== 'idle')
+const worldAnimation = () =>
+  live().find((a) => (a.target as HTMLElement).dataset.track === 'world')
 
 const setHidden = (hidden: boolean) => {
   Object.defineProperty(document, 'visibilityState', {
@@ -23,10 +35,16 @@ const advance = (ms: number) =>
     vi.advanceTimersByTime(ms)
   })
 
+const stage = () => {
+  const node = document.createElement('div')
+  node.innerHTML = '<div data-track="world"></div><div data-track="pick"></div>'
+  return node
+}
+
 const renderPlayback = () => {
   const hook = renderHook(() => useHeroPlayback())
   act(() => {
-    hook.result.current.stageRef(document.createElement('div'))
+    hook.result.current.stageRef(stage())
   })
   return hook
 }
@@ -34,6 +52,7 @@ const renderPlayback = () => {
 beforeEach(() => {
   vi.useFakeTimers()
   reducedMotion = false
+  animations = []
   vi.stubGlobal('matchMedia', (query: string) => ({
     matches: query.includes('reduce') && reducedMotion,
     addEventListener: () => {},
@@ -55,35 +74,73 @@ beforeEach(() => {
       disconnect() {}
     },
   )
+  Element.prototype.animate = function (
+    this: Element,
+    _keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
+    options?: number | KeyframeAnimationOptions,
+  ) {
+    const animation: FakeAnimation = {
+      target: this,
+      currentTime: 0,
+      playState: 'running',
+      options: typeof options === 'object' ? options : {},
+    }
+    animations.push(animation)
+    return Object.assign(animation, {
+      play: () => (animation.playState = 'running'),
+      pause: () => (animation.playState = 'paused'),
+      cancel: () => (animation.playState = 'idle'),
+    }) as unknown as Animation
+  }
   setHidden(false)
 })
 
 afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
+  // @ts-expect-error jsdom has none of its own
+  delete Element.prototype.animate
 })
 
 describe('useHeroPlayback', () => {
-  it('opens on the groove and plays through the beats', () => {
+  it('plays the opening once, then loops pass after pass', () => {
     const { result } = renderPlayback()
-    expect(result.current.scene).toEqual({ beat: 'intro', wordmark: false })
+    expect(result.current.scene).toEqual({
+      part: 'opening',
+      pass: 0,
+      screen: 1,
+    })
     expect(result.current.isPlaying).toBe(true)
-    advance(2000)
-    expect(result.current.scene.beat).toBe('collection')
-    advance(3000)
-    expect(result.current.scene.beat).toBe('scan')
+    advance(6600)
+    expect(result.current.scene.part).toBe('loop')
+    advance(5800)
+    expect(result.current.scene.pass).toBe(1)
   })
 
-  it('pauses while the tab is hidden', () => {
+  it('runs each element on its track, the loop repeating', () => {
+    renderPlayback()
+    expect(worldAnimation()?.playState).toBe('running')
+    expect(worldAnimation()?.options.iterations).toBe(1)
+    advance(6600)
+    expect(worldAnimation()?.options.iterations).toBe(Infinity)
+    // Joins the loop on the strip
+    expect(worldAnimation()?.currentTime).toBe(1800)
+  })
+
+  it('pauses while the tab is hidden, and resumes where it left off', () => {
     const { result } = renderPlayback()
     advance(1000)
     setHidden(true)
     expect(result.current.isPlaying).toBe(false)
+    expect(worldAnimation()?.playState).toBe('paused')
+    expect(worldAnimation()?.currentTime).toBe(1000)
     advance(10_000)
-    expect(result.current.scene.beat).toBe('intro')
+    expect(result.current.scene.part).toBe('opening')
     setHidden(false)
-    advance(1000)
-    expect(result.current.scene.beat).toBe('collection')
+    expect(worldAnimation()?.playState).toBe('running')
+    expect(worldAnimation()?.currentTime).toBe(1000)
+    advance(5600)
+    expect(result.current.scene.part).toBe('loop')
   })
 
   it('pauses while off-screen', () => {
@@ -91,19 +148,21 @@ describe('useHeroPlayback', () => {
     advance(1000)
     intersect(false)
     expect(result.current.isPlaying).toBe(false)
+    expect(worldAnimation()?.playState).toBe('paused')
     advance(10_000)
-    expect(result.current.scene.beat).toBe('intro')
+    expect(result.current.scene.part).toBe('opening')
     intersect(true)
-    advance(1000)
-    expect(result.current.scene.beat).toBe('collection')
+    advance(5600)
+    expect(result.current.scene.part).toBe('loop')
   })
 
-  it('shows a single still frame with reduced motion', () => {
+  it('holds one still frame, nothing moving, with reduced motion', () => {
     reducedMotion = true
     const { result } = renderPlayback()
-    expect(result.current.scene).toEqual(HERO_STILL)
     expect(result.current.isPlaying).toBe(false)
+    expect(result.current.clock).toEqual({ part: 'opening', ms: 6600 })
     advance(20_000)
-    expect(result.current.scene).toEqual(HERO_STILL)
+    expect(result.current.scene.part).toBe('opening')
+    expect(live()).toHaveLength(0)
   })
 })
