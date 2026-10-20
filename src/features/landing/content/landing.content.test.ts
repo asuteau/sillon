@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { vinylColours } from '#/features/collection/vinyl-colour.utils'
 
 import { HERO_CAST, LANDING_RECORDS, landingPressing } from './landing.content'
-import { HERO_CAST_SIZE } from './landing.timeline'
+import { HERO_CAST_SIZE } from '../landing.timeline'
 
 const coloursOf = (index: number) =>
   vinylColours(landingPressing(index).formats).map(

@@ -1,13 +1,17 @@
-import { SleevePullCaption } from '#/features/collection/components/SleevePull'
-import { discSurface } from '#/features/collection/disc-surface.utils'
-import { slidePosition } from '#/features/collection/sleeve-pull.utils'
-import { vinylColour } from '#/features/collection/vinyl-colour.utils'
+import {
+  SleevePullBody,
+  SleevePullCaption,
+} from '#/features/collection/components/SleevePull'
 import { Disc } from '#/shared/components/brand/Disc'
 import { HouseSleeve } from '#/shared/components/HouseSleeve'
 import { Button } from '#/shared/components/ui/button'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 
-import { landingPressing, landingRecords } from '../landing.content'
+import {
+  landingPressing,
+  landingRecords,
+  pressingSurface,
+} from '../content/landing.content'
 import { LandingStill } from './LandingStill'
 
 // Recent additions as the strip shows them: five records, the second centred
@@ -18,9 +22,7 @@ const RECORDS = landingRecords(0, 1, 2, 3, 4)
 const SLOTS = [CENTRED - 1, CENTRED, CENTRED + 1]
 
 const centred = RECORDS[CENTRED]
-const pressing = landingPressing(CENTRED)
-// Its Vinyl colour, read from its Discogs formats as the app reads it
-const surface = discSurface(vinylColour(pressing.formats), pressing.id)
+const surface = pressingSurface(landingPressing(CENTRED))
 
 // The Sleeve pull, held in its settled pose: the centred sleeve and its disc
 // parted, the neighbours scaled down and dimmed (design system §5)
@@ -36,22 +38,24 @@ export const CollectionStill = () => (
             className="sleeve-pull-slide"
             style={{ '--pull-distance': isCentred ? 0 : 1 }}
           >
-            <span className="sleeve-pull-body">
-              {/* Neighbours' discs stay tucked, out of sight */}
-              {isCentred && (
-                <Disc
-                  surface={surface.background}
-                  seeThrough={surface.seeThrough}
-                />
-              )}
-              <span className="sleeve-pull-sleeve">
+            <SleevePullBody
+              // Neighbours' discs stay tucked, out of sight
+              disc={
+                isCentred && (
+                  <Disc
+                    surface={surface.background}
+                    seeThrough={surface.seeThrough}
+                  />
+                )
+              }
+              sleeve={
                 <HouseSleeve
                   artist={record.artist}
                   title={record.title}
                   className="size-full overflow-hidden rounded-(--radius)"
                 />
-              </span>
-            </span>
+              }
+            />
           </span>
         )
       })}
@@ -69,7 +73,9 @@ export const CollectionStill = () => (
       <SleevePullCaption
         artist={centred.artist}
         title={centred.title}
-        catalogue={`${slidePosition(CENTRED, COUNT)} · Added ${centred.added}`}
+        index={CENTRED}
+        count={COUNT}
+        added={centred.added}
       />
       <Button
         variant="outline"

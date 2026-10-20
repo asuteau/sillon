@@ -16,8 +16,8 @@ Your Discogs collection, cover first: a personal app for picking what to play.
 - **Record screen** — one screen for every record, opened from Home, Random pick, Collection, Wantlist, Search or a Stack
 - **Portrait** — your Collection as a whole: Top artists, Top styles, Pressing decade, Additions by year
 - **Random pick** — one record from the whole Collection
-- **Search** — artists, Discographies, Masters and Releases
-- **Scan a Stack** — scan barcodes one after another, choose the pressing when a barcode matches several, add them all in one tap; a WebAssembly reader where the browser has no native one
+- **Search** — artists, Discographies, Masters and Releases; scan a barcode to find a Release
+- **Scan a Stack** — scan barcodes one after another, choose the Release for each **Unresolved** one (a barcode that matches several), add them all in one tap; a WebAssembly reader where the browser has no native one
 - **Wantlist** — with a Fulfilled want prompt when a new record was on it
 - **Marketplace** — Listing count, Lowest price and Suggested prices for a Release
 - **Covers** — HD Covers from Deezer; a House sleeve when a record has none

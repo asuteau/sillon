@@ -106,20 +106,3 @@ export const flyCover = ({ row, sheet, direction }: FlyCoverInput) => {
   }
   flight.finished.then(land, land)
 }
-
-// The same growth within one page, with no copy: `to` (the detail cover)
-// starts laid over `from` (the grid cover) and grows into place. The caller
-// handles reduced motion.
-export const growCover = (from: Element, to: HTMLElement): Animation => {
-  to.style.transformOrigin = '0 0'
-  const atFrom = {
-    transform: flipTransform(
-      from.getBoundingClientRect(),
-      to.getBoundingClientRect(),
-    ),
-  }
-  return to.animate([atFrom, { transform: 'none' }], {
-    duration: COVER_OPEN_MS,
-    easing: PLATTER_EASING,
-  })
-}

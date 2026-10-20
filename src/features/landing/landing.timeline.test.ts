@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -79,8 +81,8 @@ describe('msUntilNextCue', () => {
 })
 
 describe('HERO_STILL', () => {
-  it('is the Sleeve pull pose, before the camera pulls back', () => {
-    expect(HERO_STILL).toEqual({ part: 'opening', ms: 5000 })
+  it("is the opening's last frame, where the loop joins on the strip", () => {
+    expect(HERO_STILL).toEqual({ part: 'opening', ms: OPENING_MS })
   })
 })
 
@@ -119,21 +121,33 @@ describe('HERO_TRACKS', () => {
     expect(loop('flyer', 1700).opacity).toBe(0)
   })
 
-  it('holds the Sleeve pull pose in the still: sleeve and disc apart, nothing else', () => {
+  it('holds the full Sleeve pull pose in the still: the strip, disc out, neighbours dimmed, caption', () => {
     const { ms } = HERO_STILL
+    expect(opening('world', ms)).toMatchObject({
+      opacity: 1,
+      pose: { y: -8, s: 0.58 },
+    })
     expect(opening('sleeve:0', ms)).toMatchObject({
       opacity: 1,
       pose: { x: -10 },
     })
     expect(opening('disc:0', ms)).toMatchObject({ opacity: 1, pose: { x: 10 } })
-    for (const name of [
-      'groove',
-      'wordmark',
-      'slide:1',
-      'caption:0',
-      'pick',
-    ] as const)
+    for (const slot of [-2, -1, 1, 2, 3] as const)
+      expect(opening(`slide:${slot}`, ms)).toMatchObject({
+        opacity: 0.5,
+        pose: { x: slot * 58, s: 0.82 },
+      })
+    expect(opening('caption:0', ms).opacity).toBe(1)
+    expect(opening('pick', ms).opacity).toBe(1)
+    for (const name of ['groove', 'wordmark', 'screen', 'flyer'] as const)
       expect(opening(name, ms).opacity).toBe(0)
+  })
+
+  it('brings the neighbours in together, not staggered', () => {
+    const starts = HERO_SLOTS.filter((slot) => slot !== 0).map(
+      (slot) => HERO_TRACKS.opening[`slide:${slot}`][1].at,
+    )
+    expect(new Set(starts).size).toBe(1)
   })
 
   it('draws the groove before the wordmark shows', () => {
@@ -177,6 +191,22 @@ describe('keyframesOf', () => {
     const [still] = keyframesOf([frame(0, { opacity: 0 }), frame(10)], 10)
     expect(still).not.toHaveProperty('transform')
     expect(still).not.toHaveProperty('strokeDashoffset')
+  })
+
+  it('eases with the design tokens, as src/styles.css defines them', () => {
+    const css = readFileSync(
+      new URL('../../styles.css', import.meta.url),
+      'utf8',
+    )
+    const token = (name: string) =>
+      css
+        .match(new RegExp(`--ease-${name}:\\s*([^;]+);`))?.[1]
+        .replace(/,\s*/g, ', ')
+    const easing = (ease: Frame['ease']) =>
+      keyframesOf([frame(0, { opacity: 0, ease }), frame(1)], 1)[0].easing
+
+    expect(easing('platter')).toBe(token('platter'))
+    expect(easing('fade')).toBe(token('fade'))
   })
 
   it('holds the first and last frames to the part edges', () => {

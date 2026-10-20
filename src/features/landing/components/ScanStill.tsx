@@ -9,7 +9,7 @@ import {
   RecordList,
 } from '#/shared/components/RecordList'
 
-import { LANDING_STACK } from '../landing-stack.content'
+import { LANDING_STACK } from '../content/landing-stack.content'
 import { LandingStill } from './LandingStill'
 import { ScanViewfinder } from './ScanViewfinder'
 

@@ -74,30 +74,53 @@ const Slide = ({ record, slideRef, isCentred, onSelect }: SlideProps) => {
         )
       }
     >
-      <span className="sleeve-pull-body">
-        <Disc
-          surface={surface.background}
-          seeThrough={surface.seeThrough}
-          picture={
-            surface.picture && <CoverArt {...coverArt} className="size-full" />
-          }
-        />
-        <span data-slot="sleeve" className="sleeve-pull-sleeve">
+      <SleevePullBody
+        disc={
+          <Disc
+            surface={surface.background}
+            seeThrough={surface.seeThrough}
+            picture={
+              surface.picture && (
+                <CoverArt {...coverArt} className="size-full" />
+              )
+            }
+          />
+        }
+        sleeve={
           <CoverArt
             {...coverArt}
             className="size-full overflow-hidden rounded-(--radius)"
           />
-        </span>
-      </span>
+        }
+      />
     </button>
   )
 }
 
+interface SleevePullBodyProps {
+  disc?: React.ReactNode
+  sleeve: React.ReactNode
+}
+
+// A slide's disc behind its sleeve, parted by the slide's --pull-distance.
+// Pure, for the landing too
+export const SleevePullBody = ({ disc, sleeve }: SleevePullBodyProps) => (
+  <span className="sleeve-pull-body">
+    {disc}
+    <span data-slot="sleeve" className="sleeve-pull-sleeve">
+      {sleeve}
+    </span>
+  </span>
+)
+
 interface SleevePullCaptionProps {
   artist: string
   title: string
-  // "02 / 10 · Added 3 Sep 2026"
-  catalogue: string
+  // The record's place in the strip, from 0
+  index: number
+  count: number
+  // The date added, formatted: "3 Sep 2026"
+  added: string
   className?: string
 }
 
@@ -105,7 +128,9 @@ interface SleevePullCaptionProps {
 export const SleevePullCaption = ({
   artist,
   title,
-  catalogue,
+  index,
+  count,
+  added,
   className,
 }: SleevePullCaptionProps) => (
   <div
@@ -121,7 +146,7 @@ export const SleevePullCaption = ({
       {title}
     </span>
     <span className="type-catalogue text-[11px] text-muted-foreground">
-      {catalogue}
+      {`${slidePosition(index, count)} · Added ${added}`}
     </span>
   </div>
 )
@@ -140,7 +165,9 @@ const Caption = ({ record, index, count }: CaptionProps) => {
     <SleevePullCaption
       artist={formatArtists(info.artists)}
       title={info.title}
-      catalogue={`${slidePosition(index, count)} · Added ${formatDateAdded(record.date_added)}`}
+      index={index}
+      count={count}
+      added={formatDateAdded(record.date_added)}
       className="animate-in duration-160 ease-fade fade-in-0"
     />
   )

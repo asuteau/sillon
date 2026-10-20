@@ -442,10 +442,38 @@
 }
 
 /* The landing hero film, Pull (HeroAnimation): placed in cqw of its 4:5
-   stage, moved by Web Animations (transform and opacity). The strip's edges
-   fade into the page; the camera scales about the centred slide */
+   stage by the --hero-* properties the stage sets (HERO_STAGE_VARS), moved
+   by Web Animations (transform and opacity). The strip's edges fade into the
+   page; the camera scales about the centred slide */
+.hero-film-slide,
+.hero-film-mark,
+.hero-film-flyer {
+  position: absolute;
+  left: calc(50cqw - var(--hero-box) / 2);
+  top: calc(var(--hero-box-y) - var(--hero-box) / 2);
+  width: var(--hero-box);
+  height: var(--hero-box);
+}
+
+.hero-film-slide {
+  --hero-box: var(--hero-sleeve);
+  --hero-box-y: var(--hero-slide-y);
+}
+
+/* The groove, where the disc it becomes sits */
+.hero-film-mark {
+  --hero-box: var(--hero-groove);
+  --hero-box-y: var(--hero-slide-y);
+}
+
+/* The flying Cover, at the Record screen's Cover */
+.hero-film-flyer {
+  --hero-box: var(--hero-cover);
+  --hero-box-y: var(--hero-cover-y);
+}
+
 .hero-film-world {
-  transform-origin: 50cqw 56cqw;
+  transform-origin: 50cqw var(--hero-slide-y);
   mask-image: linear-gradient(
     90deg,
     transparent,
@@ -461,7 +489,6 @@
 }
 
 .hero-film-sleeve {
-  border-radius: var(--radius);
   box-shadow: 0 10px 30px var(--pull-shadow);
   backface-visibility: hidden;
 }
