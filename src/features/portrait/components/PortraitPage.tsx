@@ -10,6 +10,7 @@ import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 import { useCollectionScan } from '../hooks/use-collection-scan'
 import type { CollectionScan } from '../hooks/use-collection-scan'
 import { formatEstimatedValue, formatRecords } from '../portrait.utils'
+import { PortraitFigures } from './PortraitFigures'
 import { RankedList } from './RankedList'
 import { TimeChart } from './TimeChart'
 
@@ -83,16 +84,11 @@ export const PortraitPageView = ({
   return (
     <>
       <PortraitTitle />
-      <section aria-label="Your Collection">
-        <dl className="m-0 grid grid-cols-2 divide-x divide-border rounded-(--radius) border border-border bg-card py-4">
-          <Figure
-            label="Estimated value"
-            value={estimatedValue}
-            hint={valueRange}
-          />
-          <Figure label="Records" value={recordCount} />
-        </dl>
-      </section>
+      <PortraitFigures
+        recordCount={recordCount}
+        estimatedValue={estimatedValue}
+        valueRange={valueRange}
+      />
       <ScanFigures scan={scan} onRetry={onRetryScan} />
       {/* One attribution for the whole Portrait */}
       <DiscogsAttribution href={discogsCollectionUrl(username)} />
@@ -103,33 +99,6 @@ export const PortraitPageView = ({
 
 const PortraitTitle = () => (
   <h1 className="type-display mb-6 text-4xl text-foreground">Portrait</h1>
-)
-
-interface FigureProps {
-  label: string
-  value: string | undefined
-  hint?: string
-}
-
-const Figure = ({ label, value, hint }: FigureProps) => (
-  <div className="flex flex-col items-center gap-1 px-2 text-center">
-    <dt className="type-caps text-[11px] text-muted-foreground">{label}</dt>
-    <dd className="m-0 flex flex-col items-center gap-0.5">
-      {value === undefined ? (
-        <span className="h-7 w-16 rounded-(--radius) bg-muted" />
-      ) : (
-        // Counts are catalogue data; set large here as the headline
-        <span className="type-catalogue text-2xl leading-7 font-medium text-foreground">
-          {value}
-        </span>
-      )}
-      {hint && (
-        <span className="type-catalogue text-[10px] text-muted-foreground">
-          {hint}
-        </span>
-      )}
-    </dd>
-  </div>
 )
 
 const formatProgress = ({ read, total }: { read: number; total?: number }) =>

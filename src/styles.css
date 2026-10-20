@@ -524,6 +524,12 @@
   }
 }
 
+/* Landing stills are static: the Portrait still shows its charts drawn */
+[data-slot='landing-still']
+  :is(.portrait-reveal, .portrait-bar, .portrait-column) {
+  animation: none;
+}
+
 /* The disc (Disc), a brand object: vinyl in its Vinyl colour (--disc-surface,
    static gradients from discSurface; black by default), grooves, a sheen, the
    label in the Cover tint (inherited --cover-tint, grey until known and for

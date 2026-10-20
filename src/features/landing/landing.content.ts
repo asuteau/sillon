@@ -172,3 +172,26 @@ export const LINER_NOTES_STACK = [
     href: 'https://developers.deezer.com',
   },
 ] as const
+
+// The Portrait still's figures, for the made-up collection above: one
+// Leader among the Top artists and among the Pressing decades
+export const LANDING_PORTRAIT = {
+  currency: 'EUR',
+  estimatedValue: { minimum: 1380, median: 2140, maximum: 3050 },
+  topArtists: [
+    { name: 'Marisol Okafor', copies: 9 },
+    { name: 'The Lanterne Quartet', copies: 7 },
+    { name: 'Juno Varga', copies: 6 },
+    { name: 'Oskar Hale Trio', copies: 4 },
+    { name: 'Palais Ensemble', copies: 3 },
+  ],
+  pressingDecades: [
+    { decade: 1960, copies: 31 },
+    { decade: 1970, copies: 46 },
+    { decade: 1980, copies: 22 },
+    { decade: 1990, copies: 9 },
+    { decade: 2000, copies: 5 },
+    { decade: 2010, copies: 18 },
+    { decade: 2020, copies: 12 },
+  ],
+} as const
