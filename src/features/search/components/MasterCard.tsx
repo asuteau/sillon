@@ -15,10 +15,16 @@ const BADGE_CLASSES =
 
 interface MasterCardProps {
   master: Master
+  /** The Discography's artist: no artist line, and the Cover's last-resort credit */
+  discographyArtist?: string
   onClick: () => void
 }
 
-export const MasterCard = ({ master, onClick }: MasterCardProps) => {
+export const MasterCard = ({
+  master,
+  discographyArtist,
+  onClick,
+}: MasterCardProps) => {
   const hasBadges = master.inCollection || master.inWantlist
 
   return (
@@ -28,14 +34,19 @@ export const MasterCard = ({ master, onClick }: MasterCardProps) => {
         media={
           <CoverArt
             coverKey={masterCoverKey(master.id)}
-            artist={master.artist}
-            credits={master.credits}
+            artist={discographyArtist ?? master.artist}
+            // The searched artist's own name last, should the record print another
+            credits={
+              discographyArtist
+                ? [...master.credits, discographyArtist]
+                : master.credits
+            }
             title={master.title}
             styles={[]}
             className={RECORD_ROW_MEDIA_CLASSES}
           />
         }
-        artist={master.artist}
+        artist={discographyArtist ? undefined : master.artist}
         title={master.title}
         badges={
           hasBadges && (

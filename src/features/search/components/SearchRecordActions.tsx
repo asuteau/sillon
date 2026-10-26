@@ -11,7 +11,7 @@ import {
 } from '#/features/wantlist/wantlist.mutations'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { ReleaseListButtons } from '#/shared/components/ReleaseListButtons'
-import { versionsQueryOptions } from '../search.queries'
+import { syncMasterUserData, versionsQueryOptions } from '../search.queries'
 import type { VersionsPage } from '../search.schema'
 
 interface SearchRecordActionsProps {
@@ -58,6 +58,7 @@ export function SearchRecordActions({
         }
       },
     )
+    syncMasterUserData(queryClient, masterId, field)
   }
 
   const handleCollectionToggle = async () => {

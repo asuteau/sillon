@@ -15,7 +15,7 @@ import {
   useRemoveFromWantlist,
 } from '#/features/wantlist/wantlist.mutations'
 import { FulfilledWantPrompt } from '#/features/wantlist/components/FulfilledWantPrompt'
-import { versionsQueryOptions } from '../search.queries'
+import { syncMasterUserData, versionsQueryOptions } from '../search.queries'
 import type { MasterVersion } from '../search.model'
 import type { VersionsPage } from '../search.schema'
 
@@ -57,6 +57,7 @@ export function VersionRow({ version, masterId }: VersionRowProps) {
         }
       },
     )
+    syncMasterUserData(queryClient, masterId, field)
   }
 
   const handleCollectionToggle = async () => {
