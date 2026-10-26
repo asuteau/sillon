@@ -44,6 +44,14 @@ _Avoid_: Version, pressing, edition
 The Release Discogs designates as the canonical one for a Master. It decides what kind of record the Master is (compilation, live…); other Releases only fill in a missing album tag.
 _Avoid_: Primary release, original pressing
 
+**Owned Master**:
+A Master with at least one of its Releases in the Collection, whichever pressing. Shown wherever Masters are listed (search results, Discography), so the user sees at a glance which albums they already have. Unlike a Fulfilled want, any Release counts.
+_Avoid_: Owned album, in collection
+
+**Wanted Master**:
+A Master with at least one of its Releases on the Wantlist, whichever pressing.
+_Avoid_: Wanted album, on wantlist
+
 **Discography**:
 The Masters an artist is credited on as main artist, newest first, including splits and collaborations whatever the credit order. Credit is decided by who the artist is, not by name: homonyms and other artists whose name contains this one ("Schöner Sterben Mit Heroin & Korn") are excluded. Excludes guest appearances, remixes and production credits. Best-effort for very prolific artists: it may be truncated.
 _Avoid_: Releases, albums list

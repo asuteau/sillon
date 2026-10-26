@@ -10,7 +10,13 @@ import {
   searchArtists,
   searchMasters,
 } from './search.api'
-import type { DiscographyArtist, DiscographyFormat } from './search.schema'
+import type {
+  ArtistMasters,
+  DiscographyArtist,
+  DiscographyFormat,
+  MasterResult,
+  SearchPage,
+} from './search.schema'
 import { toSearchRecord } from './search.model'
 import { prepareRecordCover } from '#/features/collection/collection.queries'
 
@@ -83,3 +89,44 @@ export const artistDetailQueryOptions = (artistId: string) =>
     queryFn: () => getArtistDetail({ data: { artistId } }),
     staleTime: 30 * 60 * 1000,
   })
+
+type MasterResults = { results: MasterResult[] }
+
+// After a Release of this Master is added or removed, its Owned/Wanted Master
+// badge follows what the loaded versions say, without refetching any search
+export const syncMasterUserData = (
+  queryClient: QueryClient,
+  masterId: string,
+  field: 'in_collection' | 'in_wantlist',
+) => {
+  const versions = queryClient.getQueryData(
+    versionsQueryOptions(masterId).queryKey,
+  )
+  if (!versions) return
+  const value = versions.versions.some((v) => v.stats.user[field] > 0)
+
+  const patch = <T extends MasterResults>(old: T | undefined): T | undefined =>
+    old && {
+      ...old,
+      results: old.results.map((r) =>
+        String(r.id) === masterId
+          ? {
+              ...r,
+              user_data: {
+                in_collection: r.user_data?.in_collection ?? false,
+                in_wantlist: r.user_data?.in_wantlist ?? false,
+                [field]: value,
+              },
+            }
+          : r,
+      ),
+    }
+  queryClient.setQueriesData<SearchPage>(
+    { queryKey: ['search', 'masters'] },
+    patch,
+  )
+  queryClient.setQueriesData<ArtistMasters>(
+    { queryKey: ['search', 'artistMasters'] },
+    patch,
+  )
+}

@@ -15,7 +15,6 @@ import { SearchRecordScreen } from '#/features/search/components/SearchRecordScr
 import { useDebounce } from '#/shared/hooks/use-debounce'
 
 import { ArtistCard } from '#/features/search/components/ArtistCard'
-import { DiscographyCard } from '#/features/search/components/DiscographyCard'
 import { MasterCard } from '#/features/search/components/MasterCard'
 import { VersionRow } from '#/features/search/components/VersionRow'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
@@ -24,10 +23,9 @@ import {
   discogsMasterUrl,
   discogsSearchUrl,
 } from '#/shared/utils/discogs-urls'
-import type { ArtistDiscographyItem } from '#/features/search/search.model'
+import type { Master } from '#/features/search/search.model'
 import {
   toArtist,
-  toArtistDiscographyItem,
   toMaster,
   toMasterVersion,
 } from '#/features/search/search.model'
@@ -320,7 +318,7 @@ const CLASSIFIED_FILTERS = {
   {
     label: string
     format: DiscographyFormat
-    matches: (item: ArtistDiscographyItem) => boolean
+    matches: (item: Master) => boolean
   }
 >
 
@@ -375,13 +373,13 @@ function DiscographyList({
   const classifiedItems = useMemo(() => {
     const keep = (data: ArtistMasters | undefined, key: ClassifiedFilter) =>
       (data?.results ?? [])
-        .map(toArtistDiscographyItem)
+        .map(toMaster)
         .filter(CLASSIFIED_FILTERS[key].matches)
     return {
       albums: keep(albumsQuery.data, 'albums'),
       eps: keep(epsQuery.data, 'eps'),
       compilations: keep(compilationsQuery.data, 'compilations'),
-    } satisfies Record<ClassifiedFilter, ArtistDiscographyItem[]>
+    } satisfies Record<ClassifiedFilter, Master[]>
   }, [albumsQuery.data, epsQuery.data, compilationsQuery.data])
 
   // Artists without studio albums (singles-only DJs…) fall back to the first non-empty filter
@@ -398,7 +396,7 @@ function DiscographyList({
     ),
   )
   const allItems = useMemo(
-    () => (allQuery.data?.results ?? []).map(toArtistDiscographyItem),
+    () => (allQuery.data?.results ?? []).map(toMaster),
     [allQuery.data],
   )
 
@@ -447,10 +445,10 @@ function DiscographyList({
       ) : (
         <RecordList>
           {items.map((item) => (
-            <DiscographyCard
+            <MasterCard
               key={item.id}
-              item={item}
-              artistName={artistName}
+              master={item}
+              discographyArtist={artistName}
               onClick={() => onMasterClick(item.id)}
             />
           ))}

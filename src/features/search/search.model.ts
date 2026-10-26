@@ -79,15 +79,6 @@ export type Artist = {
   styles: string[]
 }
 
-export type ArtistDiscographyItem = {
-  id: number
-  title: string
-  /** Every artist credited, Lead credit first, to look the Cover up by */
-  credits: string[]
-  year: number | null
-  formats: string[]
-}
-
 export function toArtist(raw: ArtistResult): Artist {
   return {
     id: raw.id,
@@ -95,19 +86,6 @@ export function toArtist(raw: ArtistResult): Artist {
     picture: raw.thumb,
     genres: raw.genres ?? [],
     styles: raw.styles ?? [],
-  }
-}
-
-export function toArtistDiscographyItem(
-  raw: MasterResult,
-): ArtistDiscographyItem {
-  const dashIdx = raw.title.indexOf(' - ')
-  return {
-    id: raw.id,
-    title: dashIdx >= 0 ? raw.title.slice(dashIdx + 3) : raw.title,
-    credits: dashIdx >= 0 ? creditNames(raw.title.slice(0, dashIdx)) : [],
-    year: raw.year ? parseInt(raw.year, 10) || null : null,
-    formats: raw.format ?? [],
   }
 }
 
