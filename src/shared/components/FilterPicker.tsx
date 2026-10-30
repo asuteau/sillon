@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { ReadingState } from '#/shared/components/ReadingState'
 import { Button } from '#/shared/components/ui/button'
 import { Chip } from '#/shared/components/ui/chip'
+import { cn } from '#/shared/utils/cn'
 import {
   Drawer,
   DrawerContent,
@@ -221,9 +222,18 @@ const FacetSection = <TValue extends string | number>({
               key={value}
               active={value === active}
               onClick={() => onPick(value)}
+              // The value in full ink, its count muted beside it
+              className={cn('gap-1.5', value !== active && 'text-foreground')}
             >
               {label}
-              <span className="type-catalogue text-xs opacity-70">{count}</span>
+              <span
+                className={cn(
+                  'type-catalogue text-xs',
+                  value === active ? 'opacity-70' : 'text-muted-foreground',
+                )}
+              >
+                {count}
+              </span>
             </Chip>
           ))}
         </div>
