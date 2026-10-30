@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { PortraitPageView } from './PortraitPage'
 
@@ -22,6 +22,18 @@ vi.mock('@tanstack/react-router', () => ({
     </a>
   ),
 }))
+
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 const READ: CollectionScan = {
   status: 'read',
@@ -105,13 +117,18 @@ describe('PortraitPageView', () => {
           status: 'reading',
           read: 1200,
           total: 4000,
+          requestsLeft: 28,
           isComplete: false,
           hasGap: false,
         }}
       />,
     )
 
-    expect(screen.getByText('Reading 1,200 / 4,000 records')).toBeTruthy()
+    expect(
+      screen.getByRole('progressbar', { name: 'Reading your collection' }),
+    ).toBeTruthy()
+    expect(screen.getByText('1,200 of 4,000')).toBeTruthy()
+    expect(screen.getByText('about 42 s left')).toBeTruthy()
     expect(screen.queryByText('Top artists')).toBeNull()
     expect(screen.queryByText('Top styles')).toBeNull()
     expect(screen.queryByText('Nirvana')).toBeNull()
@@ -129,6 +146,7 @@ describe('PortraitPageView', () => {
           status: 'failed',
           read: 100,
           total: 4000,
+          requestsLeft: 39,
           isComplete: false,
           hasGap: false,
         }}

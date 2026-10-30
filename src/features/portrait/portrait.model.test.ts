@@ -5,9 +5,7 @@ import type { CollectionRelease } from '#/features/collection/collection.schema'
 
 import {
   additionsByYear,
-  nextReadDelay,
   pressingDecades,
-  SCAN_PACE_MS,
   scanProgress,
   topArtists,
   topStyles,
@@ -212,6 +210,7 @@ describe('scanProgress', () => {
     expect(scanProgress(undefined)).toEqual({
       read: 0,
       total: undefined,
+      requestsLeft: undefined,
       isComplete: false,
       hasGap: false,
     })
@@ -223,6 +222,7 @@ describe('scanProgress', () => {
     expect(scanProgress(data)).toEqual({
       read: 100,
       total: 250,
+      requestsLeft: 2,
       isComplete: false,
       hasGap: false,
     })
@@ -237,6 +237,7 @@ describe('scanProgress', () => {
     expect(scanProgress(data)).toEqual({
       read: 150,
       total: 150,
+      requestsLeft: 0,
       isComplete: true,
       hasGap: false,
     })
@@ -268,19 +269,10 @@ describe('scanProgress', () => {
     expect(scanProgress(data)).toEqual({
       read: 149,
       total: 150,
+      requestsLeft: 0,
       isComplete: false,
       hasGap: true,
     })
-  })
-})
-
-describe('nextReadDelay', () => {
-  it('waits out the pace after the last Discogs fetch', () => {
-    expect(nextReadDelay(10_000, 10_500)).toBe(SCAN_PACE_MS - 500)
-  })
-
-  it('reads at once when the last page is older than the pace', () => {
-    expect(nextReadDelay(0, 60_000)).toBe(0)
   })
 })
 

@@ -3,10 +3,10 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { newestFirstQueryOptions } from '#/features/collection/collection.queries'
 import type { CollectionPages } from '#/features/collection/collection.queries'
+import { nextReadDelay } from '#/shared/utils/paced-read'
 
 import {
   additionsByYear,
-  nextReadDelay,
   pressingDecades,
   scanProgress,
   topArtists,

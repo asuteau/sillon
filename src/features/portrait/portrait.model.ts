@@ -109,19 +109,12 @@ export const additionsByYear = (releases: CollectionRelease[]): YearCount[] => {
   return fillSteps(counts, 1).map(({ key, copies }) => ({ year: key, copies }))
 }
 
-// One page per 1.5s: at most 40 of Discogs' 60 requests a minute, leaving
-// headroom for the rest of the app
-export const SCAN_PACE_MS = 1500
-
-// Paced from the last page's Discogs fetch, so pages already in the cache
-// (loaded by the Collection page, restored from the device) cost no wait
-export const nextReadDelay = (lastFetchedAt: number, now: number) =>
-  Math.max(0, lastFetchedAt + SCAN_PACE_MS - now)
-
 export type ScanProgress = {
   read: number
   /** Record count, unknown before the first page */
   total: number | undefined
+  /** Discogs pages still to ask for, unknown before the first page */
+  requestsLeft: number | undefined
   /** Every Copy read: only then do scan-based figures show */
   isComplete: boolean
   /** Every page read, yet Copies missing: a removal shifted Discogs' pages
@@ -134,7 +127,13 @@ export const scanProgress = (
 ): ScanProgress => {
   const last = data?.pages.at(-1)
   if (!data || !last)
-    return { read: 0, total: undefined, isComplete: false, hasGap: false }
+    return {
+      read: 0,
+      total: undefined,
+      requestsLeft: undefined,
+      isComplete: false,
+      hasGap: false,
+    }
   const total = last.pagination.items
   const read = Math.min(
     uniqueCopies(data.pages.flatMap((page) => page.releases)).length,
@@ -144,6 +143,7 @@ export const scanProgress = (
   return {
     read,
     total,
+    requestsLeft: Math.max(0, last.pagination.pages - last.pagination.page),
     isComplete: isLastPage && read === total,
     hasGap: isLastPage && read < total,
   }

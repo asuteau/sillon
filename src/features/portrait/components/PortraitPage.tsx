@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router'
 import { collectionValueQueryOptions } from '#/features/collection/collection.queries'
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
+import { ReadingState } from '#/shared/components/ReadingState'
 import { Button, buttonVariants } from '#/shared/components/ui/button'
 import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
 
@@ -11,6 +12,7 @@ import { useCollectionScan } from '../hooks/use-collection-scan'
 import type { CollectionScan } from '../hooks/use-collection-scan'
 import { formatEstimatedValue, formatRecords } from '../portrait.utils'
 import { PortraitFigures } from './PortraitFigures'
+import { PortraitHeldSections } from './PortraitHeldSections'
 import { RankedList } from './RankedList'
 import { TimeChart } from './TimeChart'
 
@@ -101,27 +103,27 @@ const PortraitTitle = () => (
   <h1 className="type-display mb-6 text-4xl text-foreground">Portrait</h1>
 )
 
-const formatProgress = ({ read, total }: { read: number; total?: number }) =>
-  total === undefined
-    ? 'Reading records…'
-    : `Reading ${read.toLocaleString()} / ${formatRecords(total)}`
-
 interface ScanFiguresProps {
   scan: CollectionScan
   onRetry: () => void
 }
 
-// Figures that need every Copy read: a progress line until all are, then
-// every section at once, never partial
+// Figures that need every Copy read: the reading state over the sections'
+// held shapes until all are, then every section at once, never partial
 const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
   if (scan.status === 'reading') {
     return (
-      <p
-        role="status"
-        className="type-catalogue mt-10 text-sm text-muted-foreground"
-      >
-        {formatProgress(scan)}
-      </p>
+      <PortraitHeldSections
+        readout={
+          <ReadingState
+            list="collection"
+            size="small"
+            read={scan.read}
+            total={scan.total}
+            requestsLeft={scan.requestsLeft}
+          />
+        }
+      />
     )
   }
 
