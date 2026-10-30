@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
 import { Chip, ChipRow } from '#/shared/components/ui/chip'
+import { cn } from '#/shared/utils/cn'
 import { SORT_KEYS } from '#/shared/utils/list-sort'
 import type { ListSort, SortKey } from '#/shared/utils/list-sort'
 
@@ -16,13 +17,23 @@ interface SortChipsProps {
   value: ListSort
   onSelect: (key: SortKey) => void
   isPending?: boolean
+  className?: string
 }
 
-export const SortChips = ({ value, onSelect, isPending }: SortChipsProps) => {
+export const SortChips = ({
+  value,
+  onSelect,
+  isPending,
+  className,
+}: SortChipsProps) => {
   const OrderIcon = value.order === 'asc' ? ArrowUp : ArrowDown
 
   return (
-    <ChipRow role="group" aria-label="Sort by" className="mb-6">
+    <ChipRow
+      role="group"
+      aria-label="Sort by"
+      className={cn('mb-6', className)}
+    >
       {SORT_KEYS.map((key) => {
         const isActive = value.sort === key
         return (

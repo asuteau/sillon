@@ -13,7 +13,8 @@ export interface FilterableRecord {
   basic_information: {
     year: number
     styles: string[]
-    artists: { id: number; name: string }[]
+    // anv: the Name variation credited on this record, if any
+    artists: { id: number; name: string; anv?: string }[]
   }
 }
 

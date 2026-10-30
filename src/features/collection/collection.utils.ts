@@ -56,6 +56,4 @@ export function formatAmount(
   }).format(amount)
 }
 
-// A Record count, e.g. "1 record", "2,140 records"
-export const formatRecords = (count: number) =>
-  `${count.toLocaleString()} ${count === 1 ? 'record' : 'records'}`
+export { formatRecords } from '#/shared/utils/format-records'

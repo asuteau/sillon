@@ -5,6 +5,7 @@ import {
 } from '#/features/collection/collection.queries'
 import { formatListMeta } from '#/features/collection/collection.utils'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
+import { CollectionFilterPicker } from '#/features/collection/components/CollectionFilterPicker'
 import { FilteredCollection } from '#/features/collection/components/FilteredCollection'
 import { RecordList } from '#/shared/components/RecordList'
 import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
@@ -19,7 +20,7 @@ import {
   pickFilters,
   withoutFilter,
 } from '#/shared/utils/list-filter'
-import type { FilterKind } from '#/shared/utils/list-filter'
+import type { FilterKind, ListFilters } from '#/shared/utils/list-filter'
 import {
   listSortSchema,
   nextListSort,
@@ -81,6 +82,9 @@ function Collection() {
   }
   const handleRemoveFilter = (kind: FilterKind) =>
     void navigate({ search: (prev) => withoutFilter(prev, kind) })
+  // A pick from the picker: every kind, the unset ones undefined
+  const handleFiltersChange = (next: ListFilters) =>
+    void navigate({ search: (prev) => ({ ...prev, ...next }) })
   const handleClearFilters = () =>
     void navigate({ search: (prev) => toListSortSearch(resolveListSort(prev)) })
 
@@ -93,11 +97,23 @@ function Collection() {
         <h1 className="type-display text-4xl text-foreground">Collection</h1>
         {hasRecords && <RandomPickButton />}
       </header>
-      <SortChips
-        value={listSort}
-        onSelect={handleSortSelect}
-        isPending={isSortPending}
-      />
+      <div className="mb-6 flex items-center gap-2">
+        {hasRecords && (
+          <>
+            <CollectionFilterPicker
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+            <span aria-hidden className="h-5 w-px shrink-0 bg-border" />
+          </>
+        )}
+        <SortChips
+          value={listSort}
+          onSelect={handleSortSelect}
+          isPending={isSortPending}
+          className="mb-0 min-w-0 flex-1"
+        />
+      </div>
     </>
   )
 
