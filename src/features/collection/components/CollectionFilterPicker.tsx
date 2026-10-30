@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { FilterChip, FilterPicker } from '#/shared/components/FilterPicker'
-import type { FilterPickerRead } from '#/shared/components/FilterPicker'
 import type { ListFilters } from '#/shared/utils/list-filter'
 
 import { useFullCollectionRead } from '../hooks/use-full-collection-read'
@@ -19,11 +18,6 @@ export const CollectionFilterPicker = ({
 }: CollectionFilterPickerProps) => {
   const [open, setOpen] = useState(false)
   const { read, retry } = useFullCollectionRead(open)
-  const pickerRead = useMemo(
-    (): FilterPickerRead =>
-      read.status === 'read' ? { status: 'read', records: read.copies } : read,
-    [read],
-  )
 
   return (
     <>
@@ -32,7 +26,7 @@ export const CollectionFilterPicker = ({
         list="collection"
         open={open}
         onOpenChange={setOpen}
-        read={pickerRead}
+        read={read}
         filters={filters}
         onFiltersChange={onFiltersChange}
         onRetry={retry}

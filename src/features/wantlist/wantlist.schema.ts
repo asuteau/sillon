@@ -13,7 +13,12 @@ export const WantlistItemSchema = z.object({
     title: z.string(),
     year: z.number(),
     artists: z.array(
-      z.object({ name: z.string(), anv: z.string().optional() }),
+      // id tells artists apart: homonyms differ, Name variations share it
+      z.object({
+        id: z.number(),
+        name: z.string(),
+        anv: z.string().optional(),
+      }),
     ),
     cover_image: z.string(),
     thumb: z.string(),

@@ -1,4 +1,7 @@
-import type { CollectionPages } from './collection.queries'
+import { uniqueRecords } from '#/shared/utils/full-read'
+import type { ListReader } from '#/shared/utils/full-read'
+
+import type { CollectionListPage } from './collection.queries'
 import type { CollectionRelease, CollectionValue } from './collection.schema'
 import { parseAmount } from './collection.utils'
 
@@ -40,46 +43,14 @@ export function toEstimatedValue(value: CollectionValue): EstimatedValue {
 }
 
 // A Copy read twice (pages shifting under a read) still counts once
-export const uniqueCopies = (releases: CollectionRelease[]) => [
-  ...new Map(releases.map((r) => [r.instance_id, r])).values(),
-]
+export const uniqueCopies = (releases: CollectionRelease[]) =>
+  uniqueRecords(releases, (release) => release.instance_id)
 
-export type ReadProgress = {
-  read: number
-  /** Record count, unknown before the first page */
-  total: number | undefined
-  /** Discogs pages still to ask for, unknown before the first page */
-  requestsLeft: number | undefined
-  /** Every Copy read: only then do figures and filters show */
-  isComplete: boolean
-  /** Every page read, yet Copies missing: a removal shifted Discogs' pages
-   *  under the scan, or restored pages predate a change made elsewhere */
-  hasGap: boolean
-}
-
-export const readProgress = (
-  data: Pick<CollectionPages, 'pages'> | undefined,
-): ReadProgress => {
-  const last = data?.pages.at(-1)
-  if (!data || !last)
-    return {
-      read: 0,
-      total: undefined,
-      requestsLeft: undefined,
-      isComplete: false,
-      hasGap: false,
-    }
-  const total = last.pagination.items
-  const read = Math.min(
-    uniqueCopies(data.pages.flatMap((page) => page.releases)).length,
-    total,
-  )
-  const isLastPage = last.pagination.page >= last.pagination.pages
-  return {
-    read,
-    total,
-    requestsLeft: Math.max(0, last.pagination.pages - last.pagination.page),
-    isComplete: isLastPage && read === total,
-    hasGap: isLastPage && read < total,
-  }
+// Copies tell apart by instance: one release can be owned twice
+export const collectionReader: ListReader<
+  CollectionListPage,
+  CollectionRelease
+> = {
+  recordsOf: (page) => page.releases,
+  keyOf: (release) => release.instance_id,
 }

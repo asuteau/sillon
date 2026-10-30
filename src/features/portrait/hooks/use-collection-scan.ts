@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { ReadProgress } from '#/features/collection/collection.model'
+import type { ReadProgress } from '#/shared/utils/full-read'
 import { useFullCollectionRead } from '#/features/collection/hooks/use-full-collection-read'
 
 import {
@@ -38,10 +38,10 @@ export const useCollectionScan = (
     if (read.status !== 'read') return read
     return {
       status: 'read',
-      topArtists: topArtists(read.copies),
-      topStyles: topStyles(read.copies),
-      pressingDecades: pressingDecades(read.copies),
-      additionsByYear: additionsByYear(read.copies),
+      topArtists: topArtists(read.records),
+      topStyles: topStyles(read.records),
+      pressingDecades: pressingDecades(read.records),
+      additionsByYear: additionsByYear(read.records),
     }
   }, [read])
 

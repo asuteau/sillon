@@ -12,16 +12,23 @@ export const wantlistListQueryKey = ['wantlist', 'list'] as const
 // Discogs' largest page: fewest requests to read the whole Wantlist
 const WANTLIST_PER_PAGE = 100
 
+/** A page stamped with when it was asked of Discogs, to pace a full read */
+export type WantlistListPage = WantlistPage & { fetchedAt: number }
+
+// In memory only: ADR 0004 persists the Collection alone
 export const wantlistQueryOptions = (listSort: ListSort) =>
   infiniteQueryOptions({
     queryKey: [
       ...wantlistListQueryKey,
       { perPage: WANTLIST_PER_PAGE, ...listSort },
     ],
-    queryFn: ({ pageParam }) =>
-      getWantlist({
+    queryFn: async ({ pageParam }): Promise<WantlistListPage> => {
+      const fetchedAt = Date.now()
+      const page = await getWantlist({
         data: { perPage: WANTLIST_PER_PAGE, page: pageParam, ...listSort },
-      }),
+      })
+      return { ...page, fetchedAt }
+    },
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.pages
@@ -29,16 +36,25 @@ export const wantlistQueryOptions = (listSort: ListSort) =>
         : undefined,
     staleTime: 10 * 60 * 1000,
     refetchOnMount: false,
+    // A refetch re-reads every loaded page back to back, unpaced: a fully
+    // read Wantlist would spend most of Discogs' minute on one tab focus
+    refetchOnWindowFocus: false,
   })
 
-type WantlistPages = InfiniteData<WantlistPage, number>
+type WantlistPages = InfiniteData<WantlistListPage, number>
 
-const newestFirstQueryKey = wantlistQueryOptions({
+// The default list, and the one the full read for Filters goes through
+export const newestFirstWantlistQueryOptions = wantlistQueryOptions({
   sort: 'added',
   order: 'desc',
-}).queryKey
+})
 
-const adjustItems = (page: WantlistPage, delta: 1 | -1): WantlistPage => ({
+const newestFirstQueryKey = newestFirstWantlistQueryOptions.queryKey
+
+const adjustItems = (
+  page: WantlistListPage,
+  delta: 1 | -1,
+): WantlistListPage => ({
   ...page,
   pagination: {
     ...page.pagination,
