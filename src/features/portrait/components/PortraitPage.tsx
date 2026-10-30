@@ -150,18 +150,8 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
           entries={scan.topArtists.map((artist) => ({
             key: artist.id,
             count: artist.copies,
-            label: (
-              <Link
-                to="/search"
-                search={{
-                  artistId: String(artist.id),
-                  artistName: artist.name,
-                }}
-                className="text-foreground no-underline hover:underline"
-              >
-                {artist.name}
-              </Link>
-            ),
+            label: artist.name,
+            filter: { artist: artist.id },
           }))}
         />
       )}
@@ -172,6 +162,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
             key: style.name,
             count: style.copies,
             label: style.name,
+            filter: { style: style.name },
           }))}
         />
       )}
@@ -183,6 +174,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
             key: decade,
             label: `${decade}s`,
             count: copies,
+            filter: { decade },
           }))}
           note={
             scan.pressingDecades.noYear > 0 &&
@@ -197,6 +189,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
             key: year,
             label: String(year),
             count: copies,
+            filter: { added: year },
           }))}
         />
       )}
