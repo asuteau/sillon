@@ -49,8 +49,9 @@ interface FilterPickerProps extends FilterPickerBodyProps {
   onOpenChange: (open: boolean) => void
 }
 
-// Hundreds of artists: the first few, the rest on demand or by search
-const ARTIST_PREVIEW = 12
+// Every kind shows its first few values, the rest on demand (or, for
+// artists, by search)
+const FACET_PREVIEW = 5
 
 // The Filter chip, next to the sort: opens the picker straight away, even
 // before the list is read
@@ -161,18 +162,21 @@ export const FilterPickerBody = ({
       />
       <FacetSection
         title="Style"
+        noun="styles"
         values={facets.style}
         active={filters.style}
         onPick={pick('style')}
       />
       <FacetSection
         title="Pressing decade"
+        noun="decades"
         values={facets.decade}
         active={filters.decade}
         onPick={pick('decade')}
       />
       <FacetSection
         title="Added"
+        noun="years"
         values={facets.added}
         active={filters.added}
         onPick={pick('added')}
@@ -186,10 +190,12 @@ interface FacetSectionProps<TValue> {
   values: FacetValue<TValue>[]
   active: TValue | undefined
   onPick: (value: TValue) => void
+  /** Plural, for "All 40 styles" */
+  noun: string
+  /** Shows every value, e.g. while searching artists */
+  uncapped?: boolean
   /** Above the values, e.g. the artist search */
   lead?: ReactNode
-  /** Below the values, e.g. "All 340 artists" */
-  trail?: ReactNode
   empty?: string
 }
 
@@ -198,11 +204,21 @@ const FacetSection = <TValue extends string | number>({
   values,
   active,
   onPick,
+  noun,
+  uncapped = false,
   lead,
-  trail,
   empty,
 }: FacetSectionProps<TValue>) => {
   const headingId = useId()
+  const [showsAll, setShowsAll] = useState(false)
+  const isCapped = !showsAll && !uncapped && values.length > FACET_PREVIEW
+  // The active value stays in view, wherever it ranks
+  const shown = isCapped
+    ? values.filter(
+        (facet, index) => index < FACET_PREVIEW || facet.value === active,
+      )
+    : values
+
   return (
     <section
       role="group"
@@ -217,7 +233,7 @@ const FacetSection = <TValue extends string | number>({
         <p className="text-sm text-muted-foreground">{empty}</p>
       ) : (
         <div className="flex flex-wrap gap-2">
-          {values.map(({ value, label, count }) => (
+          {shown.map(({ value, label, count }) => (
             <Chip
               key={value}
               active={value === active}
@@ -238,7 +254,16 @@ const FacetSection = <TValue extends string | number>({
           ))}
         </div>
       )}
-      {trail}
+      {isCapped && (
+        <Button
+          variant="link"
+          size="sm"
+          className="self-start px-0"
+          onClick={() => setShowsAll(true)}
+        >
+          All {values.length} {noun}
+        </Button>
+      )}
     </section>
   )
 }
@@ -251,22 +276,15 @@ interface ArtistSectionProps {
 
 const ArtistSection = ({ values, active, onPick }: ArtistSectionProps) => {
   const [query, setQuery] = useState('')
-  const [showsAll, setShowsAll] = useState(false)
-  const matches = searchArtists(values, query)
-  const isCapped = !showsAll && !query.trim() && matches.length > ARTIST_PREVIEW
-  // The active artist stays in view, wherever it ranks
-  const shown = isCapped
-    ? matches.filter(
-        (artist, index) => index < ARTIST_PREVIEW || artist.value === active,
-      )
-    : matches
 
   return (
     <FacetSection
       title="Artist"
-      values={shown}
+      noun="artists"
+      values={searchArtists(values, query)}
       active={active}
       onPick={onPick}
+      uncapped={query.trim() !== ''}
       empty="No artist matches"
       lead={
         <Input
@@ -276,18 +294,6 @@ const ArtistSection = ({ values, active, onPick }: ArtistSectionProps) => {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
-      }
-      trail={
-        isCapped && (
-          <Button
-            variant="link"
-            size="sm"
-            className="self-start px-0"
-            onClick={() => setShowsAll(true)}
-          >
-            All {values.length} artists
-          </Button>
-        )
       }
     />
   )

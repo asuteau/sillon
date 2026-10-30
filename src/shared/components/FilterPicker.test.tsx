@@ -190,8 +190,44 @@ describe('FilterPickerBody', () => {
       />,
     )
 
-    expect(values('Artist')).toHaveLength(12)
+    expect(values('Artist')).toHaveLength(5)
     fireEvent.click(screen.getByRole('button', { name: 'All 32 artists' }))
     expect(values('Artist')).toHaveLength(32)
+  })
+
+  it('shows the first values of every kind, then all on demand', () => {
+    const many = Array.from({ length: 6 }, (_, i) =>
+      record({ styles: [`Style ${i}`] }),
+    )
+    render(
+      <FilterPickerBody
+        {...BODY}
+        read={{ status: 'read', records: [...RECORDS, ...many] }}
+      />,
+    )
+
+    expect(values('Style')).toHaveLength(5)
+    fireEvent.click(screen.getByRole('button', { name: 'All 8 styles' }))
+    expect(values('Style')).toHaveLength(8)
+    expect(
+      within(section('Pressing decade')).queryByRole('button', {
+        name: /^All /,
+      }),
+    ).toBeNull()
+  })
+
+  it('keeps the active value in view beyond the first ones', () => {
+    const many = Array.from({ length: 6 }, (_, i) =>
+      record({ styles: [`Style ${i}`] }),
+    )
+    render(
+      <FilterPickerBody
+        {...BODY}
+        read={{ status: 'read', records: [...RECORDS, ...many] }}
+        filters={{ style: 'Style 5' }}
+      />,
+    )
+
+    expect(values('Style')).toContain('Style 51')
   })
 })
