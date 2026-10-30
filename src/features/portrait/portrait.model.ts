@@ -1,19 +1,16 @@
-import type { CollectionPages } from '#/features/collection/collection.queries'
+import { uniqueCopies } from '#/features/collection/collection.model'
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import { stripDisambiguator } from '#/shared/utils/artist-name'
+import {
+  addedYear,
+  creditedArtists,
+  pressingDecade,
+} from '#/shared/utils/list-filter'
 
 const TOP_COUNT = 10
 
-// Discogs' "Various" credit on compilations: not an artist
-const VARIOUS_ARTIST_ID = 194
-
 export type TopArtist = { id: number; name: string; copies: number }
 export type TopStyle = { name: string; copies: number }
-
-// A Copy read twice (pages shifting under a scan) still counts once
-const uniqueCopies = (releases: CollectionRelease[]) => [
-  ...new Map(releases.map((r) => [r.instance_id, r])).values(),
-]
 
 const byCopiesThenName = <T extends { name: string; copies: number }>(
   a: T,
@@ -25,11 +22,8 @@ const byCopiesThenName = <T extends { name: string; copies: number }>(
 export const topArtists = (releases: CollectionRelease[]): TopArtist[] => {
   const counts = new Map<number, TopArtist>()
   for (const release of uniqueCopies(releases)) {
-    const artists = new Map(
-      release.basic_information.artists.map((a) => [a.id, a]),
-    )
-    for (const [id, artist] of artists) {
-      if (id === VARIOUS_ARTIST_ID) continue
+    for (const artist of creditedArtists(release.basic_information.artists)) {
+      const { id } = artist
       const entry = counts.get(id) ?? {
         id,
         name: stripDisambiguator(artist.name),
@@ -88,9 +82,9 @@ export const pressingDecades = (
   const counts = new Map<number, number>()
   let noYear = 0
   for (const release of uniqueCopies(releases)) {
-    const { year } = release.basic_information
-    if (year > 0) increment(counts, Math.floor(year / 10) * 10)
-    else noYear++
+    const decade = pressingDecade(release.basic_information.year)
+    if (decade === undefined) noYear++
+    else increment(counts, decade)
   }
   return {
     decades: fillSteps(counts, 10).map(({ key, copies }) => ({
@@ -105,46 +99,6 @@ export const pressingDecades = (
 export const additionsByYear = (releases: CollectionRelease[]): YearCount[] => {
   const counts = new Map<number, number>()
   for (const release of uniqueCopies(releases))
-    increment(counts, Number(release.date_added.slice(0, 4)))
+    increment(counts, addedYear(release.date_added))
   return fillSteps(counts, 1).map(({ key, copies }) => ({ year: key, copies }))
-}
-
-export type ScanProgress = {
-  read: number
-  /** Record count, unknown before the first page */
-  total: number | undefined
-  /** Discogs pages still to ask for, unknown before the first page */
-  requestsLeft: number | undefined
-  /** Every Copy read: only then do scan-based figures show */
-  isComplete: boolean
-  /** Every page read, yet Copies missing: a removal shifted Discogs' pages
-   *  under the scan, or restored pages predate a change made elsewhere */
-  hasGap: boolean
-}
-
-export const scanProgress = (
-  data: Pick<CollectionPages, 'pages'> | undefined,
-): ScanProgress => {
-  const last = data?.pages.at(-1)
-  if (!data || !last)
-    return {
-      read: 0,
-      total: undefined,
-      requestsLeft: undefined,
-      isComplete: false,
-      hasGap: false,
-    }
-  const total = last.pagination.items
-  const read = Math.min(
-    uniqueCopies(data.pages.flatMap((page) => page.releases)).length,
-    total,
-  )
-  const isLastPage = last.pagination.page >= last.pagination.pages
-  return {
-    read,
-    total,
-    requestsLeft: Math.max(0, last.pagination.pages - last.pagination.page),
-    isComplete: isLastPage && read === total,
-    hasGap: isLastPage && read < total,
-  }
 }

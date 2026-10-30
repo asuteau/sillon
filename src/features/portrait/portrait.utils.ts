@@ -14,9 +14,6 @@ export const formatEstimatedValue = (
   }
 }
 
-export const formatRecords = (count: number) =>
-  `${count.toLocaleString()} ${count === 1 ? 'record' : 'records'}`
-
 // The count a Leader holds: the most, unless every entry ties (then none)
 export const leaderCount = (counts: number[]): number | null => {
   const top = Math.max(...counts)

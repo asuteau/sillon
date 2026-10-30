@@ -3,7 +3,9 @@ import type { ReactNode } from 'react'
 
 import { cn } from '#/shared/utils/cn'
 
-import { formatRecords, leaderCount } from '../portrait.utils'
+import { formatRecords } from '#/features/collection/collection.utils'
+
+import { leaderCount } from '../portrait.utils'
 
 export interface TimeEntry {
   key: number

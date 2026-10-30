@@ -1,4 +1,6 @@
 import { stripDisambiguator } from '#/shared/utils/artist-name'
+import { formatYear } from '#/shared/utils/list-sort'
+import type { SortKey } from '#/shared/utils/list-sort'
 
 export function formatDateAdded(dateAdded: string): string {
   return new Date(dateAdded).toLocaleDateString('en-GB', {
@@ -7,6 +9,15 @@ export function formatDateAdded(dateAdded: string): string {
     year: 'numeric',
   })
 }
+
+// A row's catalogue line: the year when sorted by year, else the date added
+export const formatListMeta = (
+  release: { date_added: string; basic_information: { year: number } },
+  sort: SortKey,
+): string =>
+  sort === 'year'
+    ? formatYear(release.basic_information.year)
+    : formatDateAdded(release.date_added)
 
 export function formatArtists(artists: { name: string }[]): string {
   return artists.map((a) => stripDisambiguator(a.name)).join(', ')
@@ -44,3 +55,7 @@ export function formatAmount(
     maximumFractionDigits: Math.abs(amount) < 1000 ? 0 : 1,
   }).format(amount)
 }
+
+// A Record count, e.g. "1 record", "2,140 records"
+export const formatRecords = (count: number) =>
+  `${count.toLocaleString()} ${count === 1 ? 'record' : 'records'}`

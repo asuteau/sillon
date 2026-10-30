@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  formatEstimatedValue,
-  formatRecords,
-  leaderCount,
-} from './portrait.utils'
+import { formatEstimatedValue, leaderCount } from './portrait.utils'
 
 const VALUE = { minimum: 9100, median: 18400, maximum: 31250 }
 
@@ -18,14 +14,6 @@ describe('formatEstimatedValue', () => {
 
   it('is null without an estimate', () => {
     expect(formatEstimatedValue(null, 'EUR', 'en-GB')).toBeNull()
-  })
-})
-
-describe('formatRecords', () => {
-  it('says record for one, records otherwise', () => {
-    expect(formatRecords(1)).toBe('1 record')
-    expect(formatRecords(0)).toBe('0 records')
-    expect(formatRecords(2140)).toBe(`${(2140).toLocaleString()} records`)
   })
 })
 
