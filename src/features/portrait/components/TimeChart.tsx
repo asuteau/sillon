@@ -1,9 +1,10 @@
+import { Link } from '@tanstack/react-router'
 import { useId } from 'react'
 import type { ReactNode } from 'react'
 
-import { cn } from '#/shared/utils/cn'
-
 import { formatRecords } from '#/features/collection/collection.utils'
+import { cn } from '#/shared/utils/cn'
+import type { ListFilters } from '#/shared/utils/list-filter'
 
 import { leaderCount } from '../portrait.utils'
 
@@ -12,6 +13,8 @@ export interface TimeEntry {
   /** The decade or year, as read aloud and on the axis */
   label: string
   count: number
+  /** The Collection filter the column opens; none for a still chart */
+  filter?: ListFilters
 }
 
 interface TimeChartProps {
@@ -30,6 +33,8 @@ const MAX_TICKS = 6
 // Hand-built vertical bars on a hairline baseline; an empty step stays as an
 // empty bar. Leaders get a copper column and a full-strength count. Read as a
 // list of values; the bars draw up on reveal (fade under reduced motion).
+// A column with Copies opens the Collection filtered by it; an empty one has
+// nothing to open.
 export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
   const titleId = useId()
   const top = Math.max(1, ...entries.map((entry) => entry.count))
@@ -54,50 +59,26 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
           className="m-0 flex list-none gap-1 p-0 sm:gap-2"
         >
           {entries.map((entry, index) => {
-            const isLeader = entry.count === leader
+            const column: TimeColumnProps = {
+              entry,
+              isLeader: entry.count === leader,
+              showsCount: !isCrowded || entry.count === top,
+              height: entry.count / top,
+              tick: hasTick(index) ? entry.label : '',
+            }
             return (
               <li key={entry.key} className="flex min-w-0 flex-1 flex-col">
-                <span className="sr-only">{`${entry.label}: ${formatRecords(entry.count)}`}</span>
-                <div
-                  aria-hidden
-                  className="flex h-32 flex-col items-center justify-end gap-1 border-b border-border"
-                >
-                  {(!isCrowded || entry.count === top) && (
-                    <span
-                      className={cn(
-                        'type-catalogue text-[10px] leading-3',
-                        isLeader ? 'text-foreground' : 'text-muted-foreground',
-                      )}
-                    >
-                      {entry.count.toLocaleString()}
-                    </span>
-                  )}
-                  <span
-                    className={cn(
-                      'portrait-column block w-full max-w-8',
-                      isLeader
-                        ? 'bg-(--lacquer-2)'
-                        : entry.count > 0
-                          ? 'bg-foreground/80'
-                          : // An empty bar: a stub on the baseline, not a gap
-                            'bg-muted-foreground/40',
-                    )}
-                    // Room left above the tallest bar for its count
-                    style={{
-                      height:
-                        entry.count > 0
-                          ? `calc((100% - 1rem) * ${entry.count / top})`
-                          : '2px',
-                    }}
-                  />
-                </div>
-                <span
-                  aria-hidden
-                  // Centred even when wider than its column
-                  className="type-catalogue mt-1.5 flex h-3 justify-center text-[10px] leading-3 whitespace-nowrap text-muted-foreground"
-                >
-                  {hasTick(index) ? entry.label : ''}
-                </span>
+                {entry.filter && entry.count > 0 ? (
+                  <Link
+                    to="/collection"
+                    search={entry.filter}
+                    className="flex flex-1 flex-col text-inherit no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+                  >
+                    <TimeColumn {...column} />
+                  </Link>
+                ) : (
+                  <TimeColumn {...column} />
+                )}
               </li>
             )
           })}
@@ -111,3 +92,62 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
     </section>
   )
 }
+
+interface TimeColumnProps {
+  entry: TimeEntry
+  isLeader: boolean
+  showsCount: boolean
+  /** Share of the tallest column */
+  height: number
+  /** The axis label, empty between ticks */
+  tick: string
+}
+
+const TimeColumn = ({
+  entry,
+  isLeader,
+  showsCount,
+  height,
+  tick,
+}: TimeColumnProps) => (
+  <>
+    <span className="sr-only">{`${entry.label}, ${formatRecords(entry.count)}`}</span>
+    <div
+      aria-hidden
+      className="flex h-32 flex-col items-center justify-end gap-1 border-b border-border"
+    >
+      {showsCount && (
+        <span
+          className={cn(
+            'type-catalogue text-[10px] leading-3',
+            isLeader ? 'text-foreground' : 'text-muted-foreground',
+          )}
+        >
+          {entry.count.toLocaleString()}
+        </span>
+      )}
+      <span
+        className={cn(
+          'portrait-column block w-full max-w-8',
+          isLeader
+            ? 'bg-(--lacquer-2)'
+            : entry.count > 0
+              ? 'bg-foreground/80'
+              : // An empty bar: a stub on the baseline, not a gap
+                'bg-muted-foreground/40',
+        )}
+        // Room left above the tallest bar for its count
+        style={{
+          height: entry.count > 0 ? `calc((100% - 1rem) * ${height})` : '2px',
+        }}
+      />
+    </div>
+    <span
+      aria-hidden
+      // Centred even when wider than its column
+      className="type-catalogue mt-1.5 flex h-3 justify-center text-[10px] leading-3 whitespace-nowrap text-muted-foreground"
+    >
+      {tick}
+    </span>
+  </>
+)
