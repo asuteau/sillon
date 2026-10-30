@@ -4,7 +4,11 @@ import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import type { ListSort } from '#/shared/utils/list-sort'
 
 import { getWantlist } from './wantlist.api'
-import type { WantlistItem, WantlistPage } from './wantlist.schema'
+import { readProgress } from '#/shared/utils/full-read'
+
+import { wantlistReader } from './wantlist.model'
+import type { WantlistListPage } from './wantlist.model'
+import type { WantlistItem } from './wantlist.schema'
 
 // Prefix shared by every sorted list, used for invalidation
 export const wantlistListQueryKey = ['wantlist', 'list'] as const
@@ -12,16 +16,20 @@ export const wantlistListQueryKey = ['wantlist', 'list'] as const
 // Discogs' largest page: fewest requests to read the whole Wantlist
 const WANTLIST_PER_PAGE = 100
 
+// In memory only: ADR 0004 persists the Collection alone
 export const wantlistQueryOptions = (listSort: ListSort) =>
   infiniteQueryOptions({
     queryKey: [
       ...wantlistListQueryKey,
       { perPage: WANTLIST_PER_PAGE, ...listSort },
     ],
-    queryFn: ({ pageParam }) =>
-      getWantlist({
+    queryFn: async ({ pageParam }): Promise<WantlistListPage> => {
+      const fetchedAt = Date.now()
+      const page = await getWantlist({
         data: { perPage: WANTLIST_PER_PAGE, page: pageParam, ...listSort },
-      }),
+      })
+      return { ...page, fetchedAt }
+    },
     initialPageParam: 1,
     getNextPageParam: (last) =>
       last.pagination.page < last.pagination.pages
@@ -29,16 +37,40 @@ export const wantlistQueryOptions = (listSort: ListSort) =>
         : undefined,
     staleTime: 10 * 60 * 1000,
     refetchOnMount: false,
+    // A refetch re-reads every loaded page back to back, unpaced: a fully
+    // read Wantlist would spend most of Discogs' minute on one tab focus
+    refetchOnWindowFocus: false,
   })
 
-type WantlistPages = InfiniteData<WantlistPage, number>
+type WantlistPages = InfiniteData<WantlistListPage, number>
 
-const newestFirstQueryKey = wantlistQueryOptions({
+// The default list, and the one the full read for Filters goes through
+export const newestFirstWantlistQueryOptions = wantlistQueryOptions({
   sort: 'added',
   order: 'desc',
-}).queryKey
+})
 
-const adjustItems = (page: WantlistPage, delta: 1 | -1): WantlistPage => ({
+const newestFirstQueryKey = newestFirstWantlistQueryOptions.queryKey
+
+// The full read of the Wantlist, newest first, in memory only: ADR 0004
+// persists the Collection alone, and only Filters need every record
+export const wantlistSource = {
+  list: 'wantlist' as const,
+  options: newestFirstWantlistQueryOptions,
+  reader: wantlistReader,
+}
+
+/** Every record of the Wantlist read: the list sorts it on the device */
+export const isWantlistRead = (queryClient: QueryClient): boolean =>
+  readProgress(
+    queryClient.getQueryData<WantlistPages>(newestFirstQueryKey)?.pages,
+    wantlistReader,
+  ).isComplete
+
+const adjustItems = (
+  page: WantlistListPage,
+  delta: 1 | -1,
+): WantlistListPage => ({
   ...page,
   pagination: {
     ...page.pagination,

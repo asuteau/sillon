@@ -1,18 +1,10 @@
 import { stripDisambiguator } from '#/shared/utils/artist-name'
 
-export function formatDateAdded(dateAdded: string): string {
-  return new Date(dateAdded).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
 export function formatArtists(artists: { name: string }[]): string {
   return artists.map((a) => stripDisambiguator(a.name)).join(', ')
 }
 
-// The first credited artist, for House sleeves
+// The Lead credit's name, for House sleeves
 export function leadArtist(artists: { name: string }[]): string {
   return stripDisambiguator(artists[0]?.name ?? '')
 }

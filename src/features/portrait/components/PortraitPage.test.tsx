@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { PortraitPageView } from './PortraitPage'
 
@@ -12,16 +12,42 @@ vi.mock('@tanstack/react-router', () => ({
     to,
     search,
     children,
+    'aria-label': ariaLabel,
   }: {
+    'aria-label'?: string
     to: string
-    search?: Record<string, string>
+    search?: Record<string, string | number>
     children: ReactNode
   }) => (
-    <a href={search ? `${to}?${new URLSearchParams(search)}` : to}>
+    <a
+      href={
+        search
+          ? `${to}?${new URLSearchParams(
+              Object.entries(search).map(([key, value]) => [
+                key,
+                String(value),
+              ]),
+            )}`
+          : to
+      }
+      aria-label={ariaLabel}
+    >
       {children}
     </a>
   ),
 }))
+
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 const READ: CollectionScan = {
   status: 'read',
@@ -105,13 +131,16 @@ describe('PortraitPageView', () => {
           status: 'reading',
           read: 1200,
           total: 4000,
-          isComplete: false,
-          hasGap: false,
+          requestsLeft: 28,
         }}
       />,
     )
 
-    expect(screen.getByText('Reading 1,200 / 4,000 records')).toBeTruthy()
+    expect(
+      screen.getByRole('progressbar', { name: 'Reading your collection' }),
+    ).toBeTruthy()
+    expect(screen.getByText('1,200 of 4,000')).toBeTruthy()
+    expect(screen.getByText('about 42 s left')).toBeTruthy()
     expect(screen.queryByText('Top artists')).toBeNull()
     expect(screen.queryByText('Top styles')).toBeNull()
     expect(screen.queryByText('Nirvana')).toBeNull()
@@ -129,8 +158,7 @@ describe('PortraitPageView', () => {
           status: 'failed',
           read: 100,
           total: 4000,
-          isComplete: false,
-          hasGap: false,
+          requestsLeft: 39,
         }}
         onRetryScan={onRetryScan}
       />,
@@ -141,22 +169,31 @@ describe('PortraitPageView', () => {
     expect(screen.queryByText('Top artists')).toBeNull()
   })
 
-  it('ranks top artists, each linking to their Discography', () => {
+  it('ranks top artists, each opening the Collection filtered by them', () => {
     render(<PortraitPageView {...FIGURES} isEmpty={false} />)
 
-    const link = screen.getByRole('link', { name: /Nirvana/ })
-    expect(link.getAttribute('href')).toBe(
-      '/search?artistId=125246&artistName=Nirvana',
-    )
-    expect(screen.getByText('12')).toBeTruthy()
+    const link = screen.getByRole('link', { name: 'Nirvana, 12 records' })
+    expect(link.getAttribute('href')).toBe('/collection?artist=125246')
+    expect(screen.queryByRole('link', { name: /Discography/ })).toBeNull()
+    expect(
+      screen.getAllByRole('link').map((each) => each.getAttribute('href')),
+    ).not.toContainEqual(expect.stringContaining('/search?'))
   })
 
-  it('ranks top styles', () => {
+  it('ranks top styles, each opening the Collection filtered by it', () => {
     render(<PortraitPageView {...FIGURES} isEmpty={false} />)
 
     expect(screen.getByText('Top styles')).toBeTruthy()
-    expect(screen.getByText('Grunge')).toBeTruthy()
-    expect(screen.getByText('14')).toBeTruthy()
+    expect(
+      screen
+        .getByRole('link', { name: 'Grunge, 14 records' })
+        .getAttribute('href'),
+    ).toBe('/collection?style=Grunge')
+    expect(
+      screen
+        .getByRole('link', { name: 'Nu Metal, 3 records' })
+        .getAttribute('href'),
+    ).toBe('/collection?style=Nu+Metal')
   })
 
   it('hides a section with nothing to say', () => {
@@ -179,11 +216,28 @@ describe('PortraitPageView', () => {
       screen.getByRole('list', { name: 'Pressing decade' }),
     ).getAllByRole('listitem')
     expect(items.map((item) => item.textContent)).toEqual([
-      expect.stringContaining('1990s: 9 records'),
-      expect.stringContaining('2000s: 0 records'),
-      expect.stringContaining('2010s: 5 records'),
+      expect.stringContaining('1990s, 9 records'),
+      expect.stringContaining('2000s, 0 records'),
+      expect.stringContaining('2010s, 5 records'),
     ])
     expect(screen.getByText('42 records with no year')).toBeTruthy()
+  })
+
+  it('opens the Collection filtered by a Pressing decade, not an empty one', () => {
+    render(<PortraitPageView {...FIGURES} isEmpty={false} />)
+
+    const list = screen.getByRole('list', { name: 'Pressing decade' })
+    expect(
+      within(list)
+        .getByRole('link', { name: '1990s, 9 records' })
+        .getAttribute('href'),
+    ).toBe('/collection?decade=1990')
+    expect(
+      within(list)
+        .getByRole('link', { name: '2010s, 5 records' })
+        .getAttribute('href'),
+    ).toBe('/collection?decade=2010')
+    expect(within(list).queryByRole('link', { name: /2000s/ })).toBeNull()
   })
 
   it('hides the no-year note when every Copy has a year', () => {
@@ -222,9 +276,21 @@ describe('PortraitPageView', () => {
       screen.getByRole('list', { name: 'Additions by year' }),
     ).getAllByRole('listitem')
     expect(items.map((item) => item.textContent)).toEqual([
-      expect.stringContaining('2024: 7 records'),
-      expect.stringContaining('2025: 0 records'),
-      expect.stringContaining('2026: 4 records'),
+      expect.stringContaining('2024, 7 records'),
+      expect.stringContaining('2025, 0 records'),
+      expect.stringContaining('2026, 4 records'),
     ])
+  })
+
+  it('opens the Collection filtered by an added year, not an empty one', () => {
+    render(<PortraitPageView {...FIGURES} isEmpty={false} />)
+
+    const list = screen.getByRole('list', { name: 'Additions by year' })
+    expect(
+      within(list)
+        .getByRole('link', { name: '2024, 7 records' })
+        .getAttribute('href'),
+    ).toBe('/collection?added=2024')
+    expect(within(list).queryByRole('link', { name: /2025/ })).toBeNull()
   })
 })

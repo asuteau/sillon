@@ -6,7 +6,7 @@ import { DISCOGS_MAX_AGE_MS } from '#/shared/utils/discogs-freshness'
 import type { KeyValueStore } from '#/shared/utils/idb-store'
 
 import { createCollectionPersistence } from './collection.persist'
-import type { CollectionListPage } from './collection.queries'
+import type { CollectionListPage } from './collection.model'
 
 vi.mock('#/services/session', () => ({}))
 

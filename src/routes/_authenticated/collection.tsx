@@ -1,152 +1,37 @@
-import { useRemoveFromCollection } from '#/features/collection/collection.mutations'
+import { createFileRoute } from '@tanstack/react-router'
+
 import {
   collectionQueryOptions,
   isPersistedListSort,
 } from '#/features/collection/collection.queries'
-import { formatDateAdded } from '#/features/collection/collection.utils'
-import type { CollectionRelease } from '#/features/collection/collection.schema'
-import { RecordList } from '#/shared/components/RecordList'
-import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
-import { Button } from '#/shared/components/ui/button'
-import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { RecordScreen, RemoveAction } from '#/shared/components/RecordScreen'
-import { RandomPickButton } from '#/features/collection/components/RandomPickButton'
-import { SortChips } from '#/shared/components/SortChips'
-import {
-  formatYear,
-  listSortSchema,
-  nextListSort,
-  resolveListSort,
-  toListSortSearch,
-} from '#/shared/utils/list-sort'
-import type { SortKey } from '#/shared/utils/list-sort'
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
-import { useState, useTransition } from 'react'
-import { Page } from '#/shared/components/Page'
-import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
-import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
+import { CollectionPage } from '#/features/collection/components/CollectionPage'
+import { hasFilters, listFilterSchema } from '#/shared/utils/list-filter'
+import { listSortSchema, resolveListSort } from '#/shared/utils/list-sort'
 
 export const Route = createFileRoute('/_authenticated/collection')({
-  validateSearch: listSortSchema,
-  // The newest-first list loads on the client, which may restore it from the
-  // device instead of asking Discogs
+  // Filters sit next to the sort, e.g. ?style=Shoegaze&decade=1990&sort=year
+  validateSearch: listSortSchema.extend(listFilterSchema.shape),
+  // The newest-first list, and the full read filters run over, load on the
+  // client, which may restore them from the device instead of asking Discogs
   ssr: ({ search }) =>
     search.status !== 'success' ||
-    !isPersistedListSort(resolveListSort(search.value)),
-  loaderDeps: ({ search }) => resolveListSort(search),
+    (!hasFilters(search.value) &&
+      !isPersistedListSort(resolveListSort(search.value))),
+  loaderDeps: ({ search }) => ({
+    listSort: resolveListSort(search),
+    isFiltered: hasFilters(search),
+  }),
   loader: ({ context: { queryClient }, deps }) =>
-    queryClient.prefetchInfiniteQuery(collectionQueryOptions(deps)),
-  component: Collection,
+    deps.isFiltered
+      ? undefined
+      : queryClient.prefetchInfiniteQuery(
+          collectionQueryOptions(deps.listSort),
+        ),
+  component: () => <Collection />,
 })
 
-function Collection() {
+const Collection = () => {
   const { user } = Route.useRouteContext()
-  const listSort = resolveListSort(Route.useSearch())
-  const navigate = Route.useNavigate()
-  const [isSortPending, startSortTransition] = useTransition()
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useSuspenseInfiniteQuery(collectionQueryOptions(listSort))
-  const [selected, setSelected] = useState<CollectionRelease | null>(null)
-
-  const handleSortSelect = (key: SortKey) => {
-    startSortTransition(async () => {
-      await navigate({ search: toListSortSearch(nextListSort(listSort, key)) })
-    })
-  }
-
-  const removeFromCollection = useRemoveFromCollection()
-  const isEmpty = data.pages[0]?.releases.length === 0
-
-  return (
-    <Page>
-      <header className="mb-6 flex items-end justify-between gap-4">
-        <h1 className="type-display text-4xl text-foreground">Collection</h1>
-        {!isEmpty && <RandomPickButton />}
-      </header>
-
-      <SortChips
-        value={listSort}
-        onSelect={handleSortSelect}
-        isPending={isSortPending}
-      />
-
-      {isEmpty ? (
-        <p className="text-muted-foreground">
-          No records in your collection yet.
-        </p>
-      ) : (
-        <>
-          <RecordList aria-busy={isSortPending}>
-            {data.pages.map((page) =>
-              page.releases.map((release) => (
-                <li key={release.instance_id}>
-                  <ReleaseRow
-                    release={release}
-                    meta={
-                      listSort.sort === 'year'
-                        ? formatYear(release.basic_information.year)
-                        : formatDateAdded(release.date_added)
-                    }
-                    onClick={() => setSelected(release)}
-                  />
-                </li>
-              )),
-            )}
-          </RecordList>
-
-          {user && (
-            <DiscogsAttribution href={discogsCollectionUrl(user.username)} />
-          )}
-
-          {hasNextPage && (
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-              >
-                {isFetchingNextPage ? (
-                  <>
-                    Loading…
-                    <GrooveLoader size={14} />
-                  </>
-                ) : (
-                  'Load more'
-                )}
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-
-      {selected && (
-        <RecordScreen
-          record={selected}
-          onClose={() => setSelected(null)}
-          actions={
-            <RemoveAction
-              label="Remove from collection"
-              icon={<CollectionIcon className="size-4" />}
-              isRemoving={removeFromCollection.isPending}
-              onRemove={() =>
-                removeFromCollection.mutate(
-                  {
-                    releaseId: selected.id,
-                    copy: {
-                      instanceId: selected.instance_id,
-                      folderId: selected.folder_id,
-                    },
-                  },
-                  { onSuccess: () => setSelected(null) },
-                )
-              }
-            />
-          }
-        />
-      )}
-    </Page>
-  )
+  const search = Route.useSearch()
+  return <CollectionPage search={search} username={user?.username} />
 }

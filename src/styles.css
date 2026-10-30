@@ -414,6 +414,17 @@
   }
 }
 
+/* Reading state (ReadingState): the groove fills to the share of records read,
+   gliding to each new share. Fades in only on real waits (the router's
+   default pendingMs), so a list read in one request never flashes it. */
+.reading-state {
+  animation: groove-fade 160ms var(--ease-fade) 1000ms both;
+}
+
+.reading-groove {
+  transition: stroke-dashoffset 600ms var(--ease-platter);
+}
+
 /* Landing: the groove draws in once, from the outer edge. `.groove-undrawn`
    hides it until the closing section scrolls into view (hidden, not a zero
    dash: a round cap would leave a dot). */
@@ -922,6 +933,11 @@
   .groove-draw-in path {
     stroke-dasharray: none;
     animation: none;
+  }
+
+  /* Same drawing, in steps */
+  .reading-groove {
+    transition: none;
   }
 
   /* The section's fade carries the reveal */

@@ -1,5 +1,15 @@
-import type { CollectionRelease, CollectionValue } from './collection.schema'
+import { uniqueRecords } from '#/shared/utils/full-read'
+import type { ListReader } from '#/shared/utils/full-read'
+
+import type {
+  CollectionPage,
+  CollectionRelease,
+  CollectionValue,
+} from './collection.schema'
 import { parseAmount } from './collection.utils'
+
+/** A page stamped with when it was asked of Discogs, to tell its age */
+export type CollectionListPage = CollectionPage & { fetchedAt: number }
 
 export type CollectionRecord = {
   id: number
@@ -36,4 +46,17 @@ export function toEstimatedValue(value: CollectionValue): EstimatedValue {
     median,
     maximum: parseAmount(value.maximum) ?? median,
   }
+}
+
+// A Copy read twice (pages shifting under a read) still counts once
+export const uniqueCopies = (releases: CollectionRelease[]) =>
+  uniqueRecords(releases, (release) => release.instance_id)
+
+// Copies tell apart by instance: one release can be owned twice
+export const collectionReader: ListReader<
+  CollectionListPage,
+  CollectionRelease
+> = {
+  recordsOf: (page) => page.releases,
+  keyOf: (release) => release.instance_id,
 }

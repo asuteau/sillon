@@ -133,6 +133,10 @@ _Avoid_: Direction
 **Default order**:
 The sort order a sort key starts with when chosen: descending for `added` and `year` (most recent first), ascending for `artist` and `title` (A→Z).
 
+**Filter**:
+A narrowing of the Collection or the Wantlist to the records matching an artist, a style, a Pressing decade or the year they were added to that list. One value per kind; filters of different kinds combine (Shoegaze pressed in the 1990s). Artists are matched the way Top artists counts them, so a filter from a Portrait entry always shows exactly the number of records that entry showed. A filtered list appears whole or not at all, never growing as records are read.
+_Avoid_: Facet, refine, query, search (search finds records outside the user's lists)
+
 ### Metrics
 
 **Portrait**:

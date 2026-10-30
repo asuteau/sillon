@@ -39,13 +39,13 @@ describe('PortraitStill', () => {
     expect(
       columns.map((column) => column.querySelector('.sr-only')?.textContent),
     ).toEqual([
-      '1960s: 31 records',
-      '1970s: 46 records',
-      '1980s: 22 records',
-      '1990s: 9 records',
-      '2000s: 5 records',
-      '2010s: 18 records',
-      '2020s: 12 records',
+      '1960s, 31 records',
+      '1970s, 46 records',
+      '1980s, 22 records',
+      '1990s, 9 records',
+      '2000s, 5 records',
+      '2010s, 18 records',
+      '2020s, 12 records',
     ])
   })
 })

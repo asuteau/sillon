@@ -22,6 +22,8 @@ import { sampleCoverTint } from '#/shared/utils/cover-tint'
 import type { ListSort } from '#/shared/utils/list-sort'
 
 import { collectionPersistence } from './collection.persist'
+import { collectionReader } from './collection.model'
+import type { CollectionListPage } from './collection.model'
 import type { CollectionPage, CollectionRelease } from './collection.schema'
 
 // Only changes with the Collection itself — mutations invalidate it
@@ -37,9 +39,6 @@ export const collectionListQueryKey = ['collection', 'list'] as const
 
 // Discogs' largest page: fewest requests to read the whole Collection
 const COLLECTION_PER_PAGE = 100
-
-/** A page stamped with when it was asked of Discogs, to tell its age */
-export type CollectionListPage = CollectionPage & { fetchedAt: number }
 
 // The newest-first list is the one Collection cache, persisted on device
 export const isPersistedListSort = ({ sort, order }: ListSort) =>
@@ -80,6 +79,13 @@ export const newestFirstQueryOptions = collectionQueryOptions({
   sort: 'added',
   order: 'desc',
 })
+
+// The full read of the Collection, through its one cache
+export const collectionSource = {
+  list: 'collection' as const,
+  options: newestFirstQueryOptions,
+  reader: collectionReader,
+}
 
 const RECENT_ADDITIONS_COUNT = 10
 

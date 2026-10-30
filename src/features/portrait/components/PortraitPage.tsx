@@ -2,15 +2,20 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
 import { collectionValueQueryOptions } from '#/features/collection/collection.queries'
+import { formatRecords } from '#/shared/utils/format-records'
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
-import { Button, buttonVariants } from '#/shared/components/ui/button'
+import { ReadingState } from '#/shared/components/ReadingState'
+import { ReadFailed } from '#/shared/components/ReadFailed'
+import { buttonVariants } from '#/shared/components/ui/button'
 import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
+import { formatPressingDecade } from '#/shared/utils/list-filter'
 
 import { useCollectionScan } from '../hooks/use-collection-scan'
 import type { CollectionScan } from '../hooks/use-collection-scan'
-import { formatEstimatedValue, formatRecords } from '../portrait.utils'
+import { formatEstimatedValue } from '../portrait.utils'
 import { PortraitFigures } from './PortraitFigures'
+import { PortraitHeldSections } from './PortraitHeldSections'
 import { RankedList } from './RankedList'
 import { TimeChart } from './TimeChart'
 
@@ -101,42 +106,32 @@ const PortraitTitle = () => (
   <h1 className="type-display mb-6 text-4xl text-foreground">Portrait</h1>
 )
 
-const formatProgress = ({ read, total }: { read: number; total?: number }) =>
-  total === undefined
-    ? 'Reading records…'
-    : `Reading ${read.toLocaleString()} / ${formatRecords(total)}`
-
 interface ScanFiguresProps {
   scan: CollectionScan
   onRetry: () => void
 }
 
-// Figures that need every Copy read: a progress line until all are, then
-// every section at once, never partial
+// Figures that need every Copy read: the reading state over the sections'
+// held shapes until all are, then every section at once, never partial
 const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
   if (scan.status === 'reading') {
     return (
-      <p
-        role="status"
-        className="type-catalogue mt-10 text-sm text-muted-foreground"
-      >
-        {formatProgress(scan)}
-      </p>
+      <PortraitHeldSections
+        readout={
+          <ReadingState
+            list="collection"
+            size="small"
+            read={scan.read}
+            total={scan.total}
+            requestsLeft={scan.requestsLeft}
+          />
+        }
+      />
     )
   }
 
   if (scan.status === 'failed') {
-    return (
-      <p
-        role="alert"
-        className="type-catalogue mt-10 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
-      >
-        Couldn't reach Discogs.
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          Try again
-        </Button>
-      </p>
-    )
+    return <ReadFailed onRetry={onRetry} className="mt-10" />
   }
 
   return (
@@ -147,18 +142,8 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
           entries={scan.topArtists.map((artist) => ({
             key: artist.id,
             count: artist.copies,
-            label: (
-              <Link
-                to="/search"
-                search={{
-                  artistId: String(artist.id),
-                  artistName: artist.name,
-                }}
-                className="text-foreground no-underline hover:underline"
-              >
-                {artist.name}
-              </Link>
-            ),
+            label: artist.name,
+            filter: { artist: artist.id },
           }))}
         />
       )}
@@ -169,6 +154,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
             key: style.name,
             count: style.copies,
             label: style.name,
+            filter: { style: style.name },
           }))}
         />
       )}
@@ -178,8 +164,9 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
           title="Pressing decade"
           entries={scan.pressingDecades.decades.map(({ decade, copies }) => ({
             key: decade,
-            label: `${decade}s`,
+            label: formatPressingDecade(decade),
             count: copies,
+            filter: { decade },
           }))}
           note={
             scan.pressingDecades.noYear > 0 &&
@@ -194,6 +181,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
             key: year,
             label: String(year),
             count: copies,
+            filter: { added: year },
           }))}
         />
       )}

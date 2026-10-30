@@ -3,7 +3,7 @@ import type { InfiniteData } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { CollectionRelease } from './collection.schema'
-import type { CollectionListPage } from './collection.queries'
+import type { CollectionListPage } from './collection.model'
 import {
   addCopyToLists,
   collectionQueryOptions,

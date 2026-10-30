@@ -1,130 +1,37 @@
-import { useRemoveFromWantlist } from '#/features/wantlist/wantlist.mutations'
-import { wantlistQueryOptions } from '#/features/wantlist/wantlist.queries'
-import type { WantlistItem } from '#/features/wantlist/wantlist.schema'
-import { formatDateAdded } from '#/features/collection/collection.utils'
-import { RecordList } from '#/shared/components/RecordList'
-import { ReleaseRow } from '#/features/collection/components/ReleaseRow'
-import { Button } from '#/shared/components/ui/button'
-import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'
-import { RecordScreen, RemoveAction } from '#/shared/components/RecordScreen'
-import { SortChips } from '#/shared/components/SortChips'
-import {
-  formatYear,
-  listSortSchema,
-  nextListSort,
-  resolveListSort,
-  toListSortSearch,
-} from '#/shared/utils/list-sort'
-import type { SortKey } from '#/shared/utils/list-sort'
-import { useSuspenseInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { WantlistIcon } from '#/shared/components/icons/WantlistIcon'
-import { useState, useTransition } from 'react'
-import { Page } from '#/shared/components/Page'
-import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
-import { discogsWantlistUrl } from '#/shared/utils/discogs-urls'
+
+import { WantlistPage } from '#/features/wantlist/components/WantlistPage'
+import {
+  isWantlistRead,
+  newestFirstWantlistQueryOptions,
+  wantlistQueryOptions,
+} from '#/features/wantlist/wantlist.queries'
+import { hasFilters, listFilterSchema } from '#/shared/utils/list-filter'
+import { listSortSchema, resolveListSort } from '#/shared/utils/list-sort'
 
 export const Route = createFileRoute('/_authenticated/wantlist')({
-  validateSearch: listSortSchema,
-  loaderDeps: ({ search }) => resolveListSort(search),
-  loader: ({ context: { queryClient }, deps }) =>
-    queryClient.prefetchInfiniteQuery(wantlistQueryOptions(deps)),
-  component: Wantlist,
+  // Filters sit next to the sort, apart from the Collection's own
+  validateSearch: listSortSchema.extend(listFilterSchema.shape),
+  loaderDeps: ({ search }) => ({
+    listSort: resolveListSort(search),
+    isFiltered: hasFilters(search),
+  }),
+  // Filtered: the first page of the full read, newest first, which a short
+  // Wantlist already holds whole. Unfiltered: the sorted list, unless the
+  // full read is whole and sorts on the device.
+  loader: ({ context: { queryClient }, deps }) => {
+    if (deps.isFiltered)
+      return queryClient.prefetchInfiniteQuery(newestFirstWantlistQueryOptions)
+    if (isWantlistRead(queryClient)) return
+    return queryClient.prefetchInfiniteQuery(
+      wantlistQueryOptions(deps.listSort),
+    )
+  },
+  component: () => <Wantlist />,
 })
 
-function Wantlist() {
+const Wantlist = () => {
   const { user } = Route.useRouteContext()
-  const listSort = resolveListSort(Route.useSearch())
-  const navigate = Route.useNavigate()
-  const [isSortPending, startSortTransition] = useTransition()
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useSuspenseInfiniteQuery(wantlistQueryOptions(listSort))
-  const [selected, setSelected] = useState<WantlistItem | null>(null)
-
-  const handleSortSelect = (key: SortKey) => {
-    startSortTransition(async () => {
-      await navigate({ search: toListSortSearch(nextListSort(listSort, key)) })
-    })
-  }
-
-  const removeFromWantlist = useRemoveFromWantlist()
-
-  return (
-    <Page>
-      <h1 className="type-display mb-6 text-4xl text-foreground">Wantlist</h1>
-
-      <SortChips
-        value={listSort}
-        onSelect={handleSortSelect}
-        isPending={isSortPending}
-      />
-
-      {data.pages[0]?.wants.length === 0 ? (
-        <p className="text-muted-foreground">Your wantlist is empty.</p>
-      ) : (
-        <>
-          <RecordList aria-busy={isSortPending}>
-            {data.pages.map((page) =>
-              page.wants.map((want) => (
-                <li key={want.id}>
-                  <ReleaseRow
-                    release={want}
-                    meta={
-                      listSort.sort === 'year'
-                        ? formatYear(want.basic_information.year)
-                        : formatDateAdded(want.date_added)
-                    }
-                    onClick={() => setSelected(want)}
-                  />
-                </li>
-              )),
-            )}
-          </RecordList>
-
-          {user && (
-            <DiscogsAttribution href={discogsWantlistUrl(user.username)} />
-          )}
-
-          {hasNextPage && (
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-              >
-                {isFetchingNextPage ? (
-                  <>
-                    Loading…
-                    <GrooveLoader size={14} />
-                  </>
-                ) : (
-                  'Load more'
-                )}
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-
-      {selected && (
-        <RecordScreen
-          record={selected}
-          onClose={() => setSelected(null)}
-          actions={
-            <RemoveAction
-              label="Remove from wantlist"
-              icon={<WantlistIcon className="size-4" />}
-              isRemoving={removeFromWantlist.isPending}
-              onRemove={() =>
-                removeFromWantlist.mutate(selected.id, {
-                  onSuccess: () => setSelected(null),
-                })
-              }
-            />
-          }
-        />
-      )}
-    </Page>
-  )
+  const search = Route.useSearch()
+  return <WantlistPage search={search} username={user?.username} />
 }
