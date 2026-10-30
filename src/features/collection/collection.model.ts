@@ -1,9 +1,15 @@
 import { uniqueRecords } from '#/shared/utils/full-read'
 import type { ListReader } from '#/shared/utils/full-read'
 
-import type { CollectionListPage } from './collection.queries'
-import type { CollectionRelease, CollectionValue } from './collection.schema'
+import type {
+  CollectionPage,
+  CollectionRelease,
+  CollectionValue,
+} from './collection.schema'
 import { parseAmount } from './collection.utils'
+
+/** A page stamped with when it was asked of Discogs, to tell its age */
+export type CollectionListPage = CollectionPage & { fetchedAt: number }
 
 export type CollectionRecord = {
   id: number

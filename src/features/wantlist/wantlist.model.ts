@@ -1,7 +1,9 @@
 import type { ListReader } from '#/shared/utils/full-read'
 
-import type { WantlistListPage } from './wantlist.queries'
-import type { WantlistItem } from './wantlist.schema'
+import type { WantlistItem, WantlistPage } from './wantlist.schema'
+
+/** A page stamped with when it was asked of Discogs, to pace a full read */
+export type WantlistListPage = WantlistPage & { fetchedAt: number }
 
 export type WantRecord = {
   id: number
@@ -21,7 +23,7 @@ export function toWantRecord(item: WantlistItem): WantRecord {
   }
 }
 
-// A release is wanted once: its ID tells Wants apart
+// A Release is on the Wantlist once: its ID tells entries apart
 export const wantlistReader: ListReader<WantlistListPage, WantlistItem> = {
   recordsOf: (page) => page.wants,
   keyOf: (want) => want.id,

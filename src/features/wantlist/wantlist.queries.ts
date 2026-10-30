@@ -4,16 +4,17 @@ import type { InfiniteData, QueryClient } from '@tanstack/react-query'
 import type { ListSort } from '#/shared/utils/list-sort'
 
 import { getWantlist } from './wantlist.api'
-import type { WantlistItem, WantlistPage } from './wantlist.schema'
+import { readProgress } from '#/shared/utils/full-read'
+
+import { wantlistReader } from './wantlist.model'
+import type { WantlistListPage } from './wantlist.model'
+import type { WantlistItem } from './wantlist.schema'
 
 // Prefix shared by every sorted list, used for invalidation
 export const wantlistListQueryKey = ['wantlist', 'list'] as const
 
 // Discogs' largest page: fewest requests to read the whole Wantlist
 const WANTLIST_PER_PAGE = 100
-
-/** A page stamped with when it was asked of Discogs, to pace a full read */
-export type WantlistListPage = WantlistPage & { fetchedAt: number }
 
 // In memory only: ADR 0004 persists the Collection alone
 export const wantlistQueryOptions = (listSort: ListSort) =>
@@ -50,6 +51,21 @@ export const newestFirstWantlistQueryOptions = wantlistQueryOptions({
 })
 
 const newestFirstQueryKey = newestFirstWantlistQueryOptions.queryKey
+
+// The full read of the Wantlist, newest first, in memory only: ADR 0004
+// persists the Collection alone, and only Filters need every record
+export const wantlistSource = {
+  list: 'wantlist' as const,
+  options: newestFirstWantlistQueryOptions,
+  reader: wantlistReader,
+}
+
+/** Every record of the Wantlist read: the list sorts it on the device */
+export const isWantlistRead = (queryClient: QueryClient): boolean =>
+  readProgress(
+    queryClient.getQueryData<WantlistPages>(newestFirstQueryKey)?.pages,
+    wantlistReader,
+  ).isComplete
 
 const adjustItems = (
   page: WantlistListPage,

@@ -8,17 +8,21 @@ export interface ListReader<TPage, TRecord> {
   keyOf: (record: TRecord) => number
 }
 
-export type ReadProgress = {
-  read: number
-  /** Record count, unknown before the first page */
-  total: number | undefined
-  /** Discogs pages still to ask for, unknown before the first page */
-  requestsLeft: number | undefined
+export type ReadProgress = ReadStanding & {
   /** Every record read: only then do figures and filters show */
   isComplete: boolean
   /** Every page read, yet records missing: a removal shifted Discogs' pages
    *  under the read, or restored pages predate a change made elsewhere */
   hasGap: boolean
+}
+
+/** How far a read stands, as the reading state shows it */
+export type ReadStanding = {
+  read: number
+  /** Record count, unknown before the first page */
+  total: number | undefined
+  /** Discogs pages still to ask for, unknown before the first page */
+  requestsLeft: number | undefined
 }
 
 // A record read twice (pages shifting under a read) still counts once

@@ -1,29 +1,10 @@
 import { stripDisambiguator } from '#/shared/utils/artist-name'
-import { formatYear } from '#/shared/utils/list-sort'
-import type { SortKey } from '#/shared/utils/list-sort'
-
-export function formatDateAdded(dateAdded: string): string {
-  return new Date(dateAdded).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-// A row's catalogue line: the year when sorted by year, else the date added
-export const formatListMeta = (
-  release: { date_added: string; basic_information: { year: number } },
-  sort: SortKey,
-): string =>
-  sort === 'year'
-    ? formatYear(release.basic_information.year)
-    : formatDateAdded(release.date_added)
 
 export function formatArtists(artists: { name: string }[]): string {
   return artists.map((a) => stripDisambiguator(a.name)).join(', ')
 }
 
-// The first credited artist, for House sleeves
+// The Lead credit's name, for House sleeves
 export function leadArtist(artists: { name: string }[]): string {
   return stripDisambiguator(artists[0]?.name ?? '')
 }
@@ -55,5 +36,3 @@ export function formatAmount(
     maximumFractionDigits: Math.abs(amount) < 1000 ? 0 : 1,
   }).format(amount)
 }
-
-export { formatRecords } from '#/shared/utils/format-records'

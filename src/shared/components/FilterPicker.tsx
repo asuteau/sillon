@@ -1,7 +1,9 @@
+import type { QueryKey } from '@tanstack/react-query'
 import { SlidersHorizontal } from 'lucide-react'
 import { useId, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
+import { ReadFailed } from '#/shared/components/ReadFailed'
 import { ReadingState } from '#/shared/components/ReadingState'
 import { Button } from '#/shared/components/ui/button'
 import { Chip } from '#/shared/components/ui/chip'
@@ -15,29 +17,27 @@ import {
   DrawerTitle,
 } from '#/shared/components/ui/drawer'
 import { Input } from '#/shared/components/ui/input'
+import { useFullListRead } from '#/shared/hooks/use-full-list-read'
+import type {
+  FullListRead,
+  FullListSource,
+  ReadablePage,
+} from '#/shared/hooks/use-full-list-read'
 import { formatRecords } from '#/shared/utils/format-records'
-import { listFacets, searchArtists } from '#/shared/utils/list-facets'
-import type { FacetValue } from '#/shared/utils/list-facets'
+import { listFilterOptions, searchArtists } from '#/shared/utils/filter-options'
+import type { FilterOption } from '#/shared/utils/filter-options'
 import { filterRecords, pickFilters } from '#/shared/utils/list-filter'
+import type { ListName } from '#/shared/utils/list-name'
 import type {
   FilterableRecord,
   FilterKind,
   ListFilters,
 } from '#/shared/utils/list-filter'
 
-// The read the picker counts over: the whole list, or how far it stands
-export type FilterPickerRead =
-  | {
-      status: 'reading' | 'failed'
-      read: number
-      total: number | undefined
-      requestsLeft: number | undefined
-    }
-  | { status: 'read'; records: FilterableRecord[] }
-
 interface FilterPickerBodyProps {
-  list: 'collection' | 'wantlist'
-  read: FilterPickerRead
+  list: ListName
+  /** The read the picker counts over: the whole list, or how far it stands */
+  read: FullListRead<FilterableRecord>
   filters: ListFilters
   /** Every kind, the unset ones undefined, to merge into the URL search */
   onFiltersChange: (filters: ListFilters) => void
@@ -51,7 +51,7 @@ interface FilterPickerProps extends FilterPickerBodyProps {
 
 // Every kind shows its first few values, the rest on demand (or, for
 // artists, by search)
-const FACET_PREVIEW = 5
+const PREVIEW_COUNT = 5
 
 // The Filter chip, next to the sort: opens the picker straight away, even
 // before the list is read
@@ -62,7 +62,47 @@ export const FilterChip = ({ onClick }: { onClick: () => void }) => (
   </Chip>
 )
 
-// A sheet of four faceted sections over a whole list. Picking applies at
+interface ListFilterPickerProps<
+  TPage extends ReadablePage,
+  TRecord extends FilterableRecord,
+  TQueryKey extends QueryKey,
+> {
+  source: FullListSource<TPage, TRecord, TQueryKey>
+  filters: ListFilters
+  onFiltersChange: (filters: ListFilters) => void
+}
+
+// The Filter chip and its sheet. Opening it starts the full read of the list
+// the Filter options count over; the filtered list then reuses it.
+export const ListFilterPicker = <
+  TPage extends ReadablePage,
+  TRecord extends FilterableRecord,
+  TQueryKey extends QueryKey,
+>({
+  source,
+  filters,
+  onFiltersChange,
+}: ListFilterPickerProps<TPage, TRecord, TQueryKey>) => {
+  const [open, setOpen] = useState(false)
+  const { read, retry } = useFullListRead(source, open)
+
+  return (
+    <>
+      <FilterChip onClick={() => setOpen(true)} />
+      <FilterPicker
+        list={source.list}
+        open={open}
+        onOpenChange={setOpen}
+        read={read}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        onRetry={retry}
+      />
+    </>
+  )
+}
+
+// A sheet of four sections of Filter options over a whole list. Picking applies at
 // once (the list behind updates, the counts narrow); the sheet stays open to
 // combine kinds.
 export const FilterPicker = ({
@@ -112,8 +152,8 @@ export const FilterPickerBody = ({
   onRetry,
 }: FilterPickerBodyProps) => {
   const records = read.status === 'read' ? read.records : undefined
-  const facets = useMemo(
-    () => records && listFacets(records, filters),
+  const options = useMemo(
+    () => records && listFilterOptions(records, filters),
     [records, filters],
   )
 
@@ -130,18 +170,8 @@ export const FilterPickerBody = ({
     )
   }
 
-  if (read.status === 'failed' || !facets) {
-    return (
-      <p
-        role="alert"
-        className="type-catalogue flex flex-wrap items-center gap-3 py-6 text-sm text-muted-foreground"
-      >
-        Couldn't reach Discogs.
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          Try again
-        </Button>
-      </p>
-    )
+  if (read.status === 'failed' || !options) {
+    return <ReadFailed onRetry={onRetry} className="py-6" />
   }
 
   // One value per kind: a pick replaces the kind's value, the active one clears
@@ -156,28 +186,28 @@ export const FilterPickerBody = ({
   return (
     <div className="flex flex-col gap-8 py-2">
       <ArtistSection
-        values={facets.artist}
+        values={options.artist}
         active={filters.artist}
         onPick={pick('artist')}
       />
-      <FacetSection
+      <FilterSection
         title="Style"
         noun="styles"
-        values={facets.style}
+        values={options.style}
         active={filters.style}
         onPick={pick('style')}
       />
-      <FacetSection
+      <FilterSection
         title="Pressing decade"
-        noun="decades"
-        values={facets.decade}
+        noun="pressing decades"
+        values={options.decade}
         active={filters.decade}
         onPick={pick('decade')}
       />
-      <FacetSection
-        title="Added"
+      <FilterSection
+        title="Added year"
         noun="years"
-        values={facets.added}
+        values={options.added}
         active={filters.added}
         onPick={pick('added')}
       />
@@ -185,9 +215,9 @@ export const FilterPickerBody = ({
   )
 }
 
-interface FacetSectionProps<TValue> {
+interface FilterSectionProps<TValue> {
   title: string
-  values: FacetValue<TValue>[]
+  values: FilterOption<TValue>[]
   active: TValue | undefined
   onPick: (value: TValue) => void
   /** Plural, for "All 40 styles" */
@@ -199,7 +229,7 @@ interface FacetSectionProps<TValue> {
   empty?: string
 }
 
-const FacetSection = <TValue extends string | number>({
+const FilterSection = <TValue extends string | number>({
   title,
   values,
   active,
@@ -208,14 +238,14 @@ const FacetSection = <TValue extends string | number>({
   uncapped = false,
   lead,
   empty,
-}: FacetSectionProps<TValue>) => {
+}: FilterSectionProps<TValue>) => {
   const headingId = useId()
   const [showsAll, setShowsAll] = useState(false)
-  const isCapped = !showsAll && !uncapped && values.length > FACET_PREVIEW
+  const isCapped = !showsAll && !uncapped && values.length > PREVIEW_COUNT
   // The active value stays in view, wherever it ranks
   const shown = isCapped
     ? values.filter(
-        (facet, index) => index < FACET_PREVIEW || facet.value === active,
+        (option, index) => index < PREVIEW_COUNT || option.value === active,
       )
     : values
 
@@ -269,7 +299,7 @@ const FacetSection = <TValue extends string | number>({
 }
 
 interface ArtistSectionProps {
-  values: ReturnType<typeof listFacets>['artist']
+  values: ReturnType<typeof listFilterOptions>['artist']
   active: number | undefined
   onPick: (value: number) => void
 }
@@ -278,7 +308,7 @@ const ArtistSection = ({ values, active, onPick }: ArtistSectionProps) => {
   const [query, setQuery] = useState('')
 
   return (
-    <FacetSection
+    <FilterSection
       title="Artist"
       noun="artists"
       values={searchArtists(values, query)}

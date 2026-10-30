@@ -192,8 +192,6 @@ describe('FilteredListView', () => {
           read: 0,
           total: undefined,
           requestsLeft: undefined,
-          isComplete: false,
-          hasGap: false,
         }}
         onRetry={onRetry}
       />,

@@ -1,9 +1,9 @@
 import type { CollectionRelease } from '#/features/collection/collection.schema'
 import {
   formatArtists,
-  formatDateAdded,
   leadArtist,
 } from '#/features/collection/collection.utils'
+import { formatDateAdded } from '#/shared/utils/list-meta'
 import { discSurface } from '#/features/collection/disc-surface.utils'
 import { useSleevePull } from '#/features/collection/hooks/use-sleeve-pull'
 import { slidePosition } from '#/features/collection/sleeve-pull.utils'

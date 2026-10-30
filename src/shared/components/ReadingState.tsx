@@ -1,5 +1,7 @@
 import { useRollingCount } from '#/shared/hooks/use-rolling-count'
 import { cn } from '#/shared/utils/cn'
+import type { ReadStanding } from '#/shared/utils/full-read'
+import type { ListName } from '#/shared/utils/list-name'
 import {
   GROOVE_INNER_RADIUS,
   GROOVE_OUTER_RADIUS,
@@ -11,13 +13,8 @@ import { formatTimeLeft, readingDashoffset } from '#/shared/utils/reading-state'
 
 const SIZES = { large: 168, small: 30 } as const
 
-interface ReadingStateProps {
-  list: 'collection' | 'wantlist'
-  read: number
-  /** Record count, unknown before the first page */
-  total: number | undefined
-  /** Discogs pages still to ask for, unknown before the first page */
-  requestsLeft: number | undefined
+interface ReadingStateProps extends ReadStanding {
+  list: ListName
   /** Large centred in a page; small beside its readout (picker sheet, Portrait) */
   size?: keyof typeof SIZES
   className?: string

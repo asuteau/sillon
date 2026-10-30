@@ -10,20 +10,39 @@ import { readProgress, readRecords } from '#/shared/utils/full-read'
 import type {
   ListPagination,
   ListReader,
-  ReadProgress,
+  ReadStanding,
 } from '#/shared/utils/full-read'
+import type { ListName } from '#/shared/utils/list-name'
 import { nextReadDelay } from '#/shared/utils/paced-read'
 
 export type FullListRead<TRecord> =
-  | ({ status: 'reading' } & ReadProgress)
-  | ({ status: 'failed' } & ReadProgress)
+  | ({ status: 'reading' } & ReadStanding)
+  | ({ status: 'failed' } & ReadStanding)
   /** Every record, once each, in the list's order */
   | { status: 'read'; records: TRecord[] }
 
 /** A list page stamped with when it was asked of Discogs, to pace the next */
-type ReadablePage = { pagination: ListPagination; fetchedAt: number }
+export type ReadablePage = { pagination: ListPagination; fetchedAt: number }
 
 type ListPages<TPage> = InfiniteData<TPage>
+
+/** A list a full read goes through: its one newest-first cache, and how its
+ *  pages hold its records */
+export interface FullListSource<
+  TPage extends ReadablePage,
+  TRecord,
+  TQueryKey extends QueryKey = QueryKey,
+> {
+  list: ListName
+  options: UseInfiniteQueryOptions<
+    TPage,
+    Error,
+    ListPages<TPage>,
+    TQueryKey,
+    number
+  >
+  reader: ListReader<TPage, TRecord>
+}
 
 // Reads a whole Discogs list through its one cache (persisted or not is the
 // query's own business), one paced page at a time, from wherever it stands.
@@ -33,14 +52,8 @@ export const useFullListRead = <
   TRecord,
   TQueryKey extends QueryKey,
 >(
-  options: UseInfiniteQueryOptions<
-    TPage,
-    Error,
-    ListPages<TPage>,
-    TQueryKey,
-    number
-  >,
-  reader: ListReader<TPage, TRecord>,
+  { options, reader }: FullListSource<TPage, TRecord, TQueryKey>,
+  /** Off: no request, only what the cache already holds */
   enabled: boolean,
 ): { read: FullListRead<TRecord>; retry: () => void } => {
   const queryClient = useQueryClient()
@@ -82,7 +95,7 @@ export const useFullListRead = <
   const { hasGap } = progress
   const { queryKey } = options
   useEffect(() => {
-    if (!hasGap || hasReread || isFetching) return
+    if (!enabled || !hasGap || hasReread || isFetching) return
     setHasReread(true)
     queryClient.setQueryData<ListPages<TPage>>(
       queryKey,
@@ -93,7 +106,7 @@ export const useFullListRead = <
         },
     )
     void refetch()
-  }, [hasGap, hasReread, isFetching, queryClient, queryKey, refetch])
+  }, [enabled, hasGap, hasReread, isFetching, queryClient, queryKey, refetch])
 
   const isRead = progress.isComplete || (hasGap && hasReread)
   const read = useMemo((): FullListRead<TRecord> => {

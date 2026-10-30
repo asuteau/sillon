@@ -3,9 +3,9 @@ import { useState } from 'react'
 import type { ReleaseFormat } from '#/features/collection/collection.schema'
 import {
   formatArtists,
-  formatDateAdded,
   leadArtist,
 } from '#/features/collection/collection.utils'
+import { formatDateAdded } from '#/shared/utils/list-meta'
 import { DiscRow } from '#/features/collection/components/DiscRow'
 import { MarketplaceSection } from '#/features/marketplace/components/MarketplaceSection'
 import { GrooveLoader } from '#/shared/components/brand/GrooveLoader'

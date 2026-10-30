@@ -2,12 +2,14 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 
 import { collectionValueQueryOptions } from '#/features/collection/collection.queries'
-import { formatRecords } from '#/features/collection/collection.utils'
+import { formatRecords } from '#/shared/utils/format-records'
 import { profileQueryOptions } from '#/features/profile/profile.queries'
 import { DiscogsAttribution } from '#/shared/components/DiscogsAttribution'
 import { ReadingState } from '#/shared/components/ReadingState'
-import { Button, buttonVariants } from '#/shared/components/ui/button'
+import { ReadFailed } from '#/shared/components/ReadFailed'
+import { buttonVariants } from '#/shared/components/ui/button'
 import { discogsCollectionUrl } from '#/shared/utils/discogs-urls'
+import { formatPressingDecade } from '#/shared/utils/list-filter'
 
 import { useCollectionScan } from '../hooks/use-collection-scan'
 import type { CollectionScan } from '../hooks/use-collection-scan'
@@ -129,17 +131,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
   }
 
   if (scan.status === 'failed') {
-    return (
-      <p
-        role="alert"
-        className="type-catalogue mt-10 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
-      >
-        Couldn't reach Discogs.
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          Try again
-        </Button>
-      </p>
-    )
+    return <ReadFailed onRetry={onRetry} className="mt-10" />
   }
 
   return (
@@ -172,7 +164,7 @@ const ScanFigures = ({ scan, onRetry }: ScanFiguresProps) => {
           title="Pressing decade"
           entries={scan.pressingDecades.decades.map(({ decade, copies }) => ({
             key: decade,
-            label: `${decade}s`,
+            label: formatPressingDecade(decade),
             count: copies,
             filter: { decade },
           }))}

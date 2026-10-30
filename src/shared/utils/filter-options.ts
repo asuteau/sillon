@@ -3,32 +3,33 @@ import {
   addedYear,
   creditedArtists,
   filterRecords,
+  formatPressingDecade,
   pressingDecade,
   withoutFilter,
 } from './list-filter'
 import type { FilterableRecord, ListFilters } from './list-filter'
 
-// Facets: the values a Filter picker offers, each with its record count. A
+// Filter options: the values a Filter picker offers, each with its record count. A
 // kind's values are counted over the list narrowed by the other kinds' active
 // filters, never its own, so any value picked gives a non-empty list and can
 // replace the active one.
 
-export type FacetValue<TValue> = {
+export type FilterOption<TValue> = {
   value: TValue
   label: string
   count: number
 }
 
-export type ArtistFacetValue = FacetValue<number> & {
+export type ArtistFilterOption = FilterOption<number> & {
   /** Every name the artist is credited under on the list, for search */
   names: string[]
 }
 
-export type ListFacets = {
-  artist: ArtistFacetValue[]
-  style: FacetValue<string>[]
-  decade: FacetValue<number>[]
-  added: FacetValue<number>[]
+export type ListFilterOptions = {
+  artist: ArtistFilterOption[]
+  style: FilterOption<string>[]
+  decade: FilterOption<number>[]
+  added: FilterOption<number>[]
 }
 
 const tally = <TValue>(
@@ -53,17 +54,17 @@ const withActive = <TValue>(
 }
 
 const byCountThenLabel = <TValue>(
-  a: FacetValue<TValue>,
-  b: FacetValue<TValue>,
+  a: FilterOption<TValue>,
+  b: FilterOption<TValue>,
 ) => b.count - a.count || a.label.localeCompare(b.label)
 
-const newestFirst = (a: FacetValue<number>, b: FacetValue<number>) =>
+const newestFirst = (a: FilterOption<number>, b: FilterOption<number>) =>
   b.value - a.value
 
-const artistFacet = (
+const artistOptions = (
   records: FilterableRecord[],
   active: number | undefined,
-): ArtistFacetValue[] => {
+): ArtistFilterOption[] => {
   const names = new Map<number, Set<string>>()
   for (const record of records)
     for (const artist of record.basic_information.artists) {
@@ -88,19 +89,19 @@ const artistFacet = (
     .sort((a, b) => byCountThenLabel(a, b) || a.value - b.value)
 }
 
-const yearFacet = (
+const yearOptions = (
   counts: Map<number, number>,
   active: number | undefined,
   label: (value: number) => string,
-): FacetValue<number>[] =>
+): FilterOption<number>[] =>
   withActive(counts, active)
     .map(([value, count]) => ({ value, label: label(value), count }))
     .sort(newestFirst)
 
-export const listFacets = (
+export const listFilterOptions = (
   records: FilterableRecord[],
   filters: ListFilters,
-): ListFacets => {
+): ListFilterOptions => {
   const narrowed = (kind: keyof ListFilters) =>
     filterRecords(records, withoutFilter(filters, kind))
 
@@ -117,12 +118,12 @@ export const listFacets = (
   ])
 
   return {
-    artist: artistFacet(narrowed('artist'), filters.artist),
+    artist: artistOptions(narrowed('artist'), filters.artist),
     style: withActive(styles, filters.style)
       .map(([value, count]) => ({ value, label: value, count }))
       .sort(byCountThenLabel),
-    decade: yearFacet(decades, filters.decade, (decade) => `${decade}s`),
-    added: yearFacet(added, filters.added, String),
+    decade: yearOptions(decades, filters.decade, formatPressingDecade),
+    added: yearOptions(added, filters.added, String),
   }
 }
 
@@ -134,9 +135,9 @@ const fold = (text: string) =>
 
 // An artist matches by any name it is credited under on the list
 export const searchArtists = (
-  artists: ArtistFacetValue[],
+  artists: ArtistFilterOption[],
   query: string,
-): ArtistFacetValue[] => {
+): ArtistFilterOption[] => {
   const needle = fold(query.trim())
   if (!needle) return artists
   return artists.filter((artist) =>

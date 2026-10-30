@@ -132,8 +132,6 @@ describe('PortraitPageView', () => {
           read: 1200,
           total: 4000,
           requestsLeft: 28,
-          isComplete: false,
-          hasGap: false,
         }}
       />,
     )
@@ -161,8 +159,6 @@ describe('PortraitPageView', () => {
           read: 100,
           total: 4000,
           requestsLeft: 39,
-          isComplete: false,
-          hasGap: false,
         }}
         onRetryScan={onRetryScan}
       />,

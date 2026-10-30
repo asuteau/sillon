@@ -34,13 +34,14 @@ export const useRollingCount = (value: number): number => {
     const from = shownRef.current
     if (from === value) return
     const start = performance.now()
-    let frame = requestAnimationFrame(function step(now) {
+    const step = (now: number) => {
       const t = Math.min((now - start) / ROLL_MS, 1)
       const next = Math.round(from + (value - from) * easePlatter(t))
       shownRef.current = next
       setShown(next)
       if (t < 1) frame = requestAnimationFrame(step)
-    })
+    }
+    let frame = requestAnimationFrame(step)
     return () => cancelAnimationFrame(frame)
   }, [value, isReducedMotion])
 

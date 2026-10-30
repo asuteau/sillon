@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { ReadProgress } from '#/shared/utils/full-read'
+import type { ReadStanding } from '#/shared/utils/full-read'
 import { useFullCollectionRead } from '#/features/collection/hooks/use-full-collection-read'
 
 import {
@@ -17,8 +17,8 @@ import type {
 } from '../portrait.model'
 
 export type CollectionScan =
-  | ({ status: 'reading' } & ReadProgress)
-  | ({ status: 'failed' } & ReadProgress)
+  | ({ status: 'reading' } & ReadStanding)
+  | ({ status: 'failed' } & ReadStanding)
   | {
       status: 'read'
       topArtists: TopArtist[]

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { readProgress } from './full-read'
 
-// A list record keyed by its own ID, as a Want is; Copies key by instance
+// A list record keyed by its own ID, as a Wantlist entry is; Copies key by instance
 type Item = { key: number }
 
 let nextKey = 1

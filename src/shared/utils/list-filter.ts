@@ -69,7 +69,10 @@ export const activeFilters = (
   const labels: Record<FilterKind, string | undefined> = {
     artist: filters.artist === undefined ? undefined : (artistName ?? 'Artist'),
     style: filters.style,
-    decade: filters.decade === undefined ? undefined : `${filters.decade}s`,
+    decade:
+      filters.decade === undefined
+        ? undefined
+        : formatPressingDecade(filters.decade),
     added:
       filters.added === undefined ? undefined : `Added in ${filters.added}`,
   }
@@ -82,7 +85,7 @@ export const activeFilters = (
 // Discogs' "Various" credit on compilations: not an artist
 const VARIOUS_ARTIST_ID = 194
 
-// Every main artist credited, once each, told apart by Discogs ID: Name
+// Every artist credited on the record, once each, told apart by Discogs ID: Name
 // variations share their artist's ID, homonyms differ. Top artists counts by
 // it, so a filtered count equals the Portrait figure.
 export const creditedArtists = <TArtist extends { id: number }>(
@@ -99,6 +102,9 @@ export const creditedArtists = <TArtist extends { id: number }>(
 // No year (Discogs' 0) has no decade.
 export const pressingDecade = (year: number): number | undefined =>
   year > 0 ? Math.floor(year / 10) * 10 : undefined
+
+/** A Pressing decade as shown, e.g. "1990s" */
+export const formatPressingDecade = (decade: number): string => `${decade}s`
 
 // As Discogs dates it, in its own time zone
 export const addedYear = (dateAdded: string): number =>

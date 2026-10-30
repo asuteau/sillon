@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { useId } from 'react'
 import type { ReactNode } from 'react'
 
-import { formatRecords } from '#/features/collection/collection.utils'
+import { formatRecords } from '#/shared/utils/format-records'
 import { cn } from '#/shared/utils/cn'
 import type { ListFilters } from '#/shared/utils/list-filter'
 
@@ -40,6 +40,9 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
   const top = Math.max(1, ...entries.map((entry) => entry.count))
   const leader = leaderCount(entries.map((entry) => entry.count))
   const isCrowded = entries.length > MAX_LABELLED
+  // Tappable columns keep a 44px hit area: crowded past the width, the chart
+  // scrolls sideways rather than shrink them
+  const isTappable = entries.some((entry) => entry.filter)
   // Anchored on the newest step, so the current year always carries a label
   const tickStep = Math.ceil(entries.length / MAX_TICKS)
   const hasTick = (index: number) =>
@@ -56,7 +59,13 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
       {entries.length > 0 && (
         <ol
           aria-labelledby={titleId}
-          className="m-0 flex list-none gap-1 p-0 sm:gap-2"
+          className={cn(
+            'flex list-none gap-1 sm:gap-2',
+            isTappable
+              ? // Room inside the scroller for the focus outline
+                '-m-1 overflow-x-auto p-1'
+              : 'm-0 p-0',
+          )}
         >
           {entries.map((entry, index) => {
             const column: TimeColumnProps = {
@@ -67,7 +76,13 @@ export const TimeChart = ({ title, entries, note }: TimeChartProps) => {
               tick: hasTick(index) ? entry.label : '',
             }
             return (
-              <li key={entry.key} className="flex min-w-0 flex-1 flex-col">
+              <li
+                key={entry.key}
+                className={cn(
+                  'flex flex-1 flex-col',
+                  isTappable ? 'min-w-11' : 'min-w-0',
+                )}
+              >
                 {entry.filter && entry.count > 0 ? (
                   <Link
                     to="/collection"

@@ -1,13 +1,20 @@
+import type { QueryKey } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { X } from 'lucide-react'
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
+import { ReadFailed } from '#/shared/components/ReadFailed'
 import { ReadingState } from '#/shared/components/ReadingState'
 import { RecordList } from '#/shared/components/RecordList'
 import { Button } from '#/shared/components/ui/button'
 import { Chip, ChipRow } from '#/shared/components/ui/chip'
-import type { FullListRead } from '#/shared/hooks/use-full-list-read'
+import { useFullListRead } from '#/shared/hooks/use-full-list-read'
+import type {
+  FullListRead,
+  FullListSource,
+  ReadablePage,
+} from '#/shared/hooks/use-full-list-read'
 import { formatRecords } from '#/shared/utils/format-records'
 import {
   activeFilters,
@@ -19,33 +26,63 @@ import type {
   FilterKind,
   ListFilters,
 } from '#/shared/utils/list-filter'
+import type { ListName } from '#/shared/utils/list-name'
 import { sortRecords } from '#/shared/utils/list-sort'
 import type { ListSort, SortableRecord } from '#/shared/utils/list-sort'
 
-export interface FilteredListProps {
+/** A record a list can be filtered and sorted by */
+export type ListRecord = FilterableRecord & SortableRecord
+
+interface FilteredListBaseProps<TRecord extends ListRecord> {
   filters: ListFilters
   listSort: ListSort
   onRemoveFilter: (kind: FilterKind) => void
   onClearFilters: () => void
-}
-
-interface FilteredListViewProps<
-  TRecord extends FilterableRecord & SortableRecord,
-> extends FilteredListProps {
-  list: 'collection' | 'wantlist'
-  read: FullListRead<TRecord>
-  onRetry: () => void
   recordKey: (record: TRecord) => number
   /** A row, inside its list item */
   renderRecord: (record: TRecord) => ReactNode
 }
 
+interface FilteredListProps<
+  TPage extends ReadablePage,
+  TRecord extends ListRecord,
+  TQueryKey extends QueryKey,
+> extends FilteredListBaseProps<TRecord> {
+  source: FullListSource<TPage, TRecord, TQueryKey>
+}
+
+interface FilteredListViewProps<
+  TRecord extends ListRecord,
+> extends FilteredListBaseProps<TRecord> {
+  list: ListName
+  read: FullListRead<TRecord>
+  onRetry: () => void
+}
+
+// Discogs can't filter a list: filters run over the full read of it
+export const FilteredList = <
+  TPage extends ReadablePage,
+  TRecord extends ListRecord,
+  TQueryKey extends QueryKey,
+>({
+  source,
+  ...props
+}: FilteredListProps<TPage, TRecord, TQueryKey>) => {
+  const { read, retry } = useFullListRead(source, true)
+  return (
+    <FilteredListView
+      {...props}
+      list={source.list}
+      read={read}
+      onRetry={retry}
+    />
+  )
+}
+
 // A Collection or Wantlist filtered over its full read (Discogs can't filter
 // either): the reading state until every record is read, then the result
 // whole. Never partial, never growing.
-export const FilteredListView = <
-  TRecord extends FilterableRecord & SortableRecord,
->({
+export const FilteredListView = <TRecord extends ListRecord>({
   list,
   filters,
   listSort,
@@ -80,17 +117,7 @@ export const FilteredListView = <
   }
 
   if (read.status === 'failed' || !matches) {
-    return (
-      <p
-        role="alert"
-        className="type-catalogue flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
-      >
-        Couldn't reach Discogs.
-        <Button variant="outline" size="sm" onClick={onRetry}>
-          Try again
-        </Button>
-      </p>
-    )
+    return <ReadFailed onRetry={onRetry} />
   }
 
   return (

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { WantlistItemSchema } from './wantlist.schema'
 
-// A Want as Discogs returns it, trimmed to the fields Sillon reads
+// A Wantlist entry as Discogs returns it, trimmed to the fields Sillon reads
 const WANT = {
   id: 2242413,
   date_added: '2021-03-14T09:21:07-07:00',

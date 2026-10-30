@@ -2,6 +2,7 @@ import { PortraitFigures } from '#/features/portrait/components/PortraitFigures'
 import { RankedList } from '#/features/portrait/components/RankedList'
 import { TimeChart } from '#/features/portrait/components/TimeChart'
 import { formatEstimatedValue } from '#/features/portrait/portrait.utils'
+import { formatPressingDecade } from '#/shared/utils/list-filter'
 
 import { LANDING_PORTRAIT } from '../content/landing.content'
 import { LandingStill } from './LandingStill'
@@ -36,7 +37,7 @@ export const PortraitStill = () => (
       title="Pressing decade"
       entries={pressingDecades.map(({ decade, copies }) => ({
         key: decade,
-        label: `${decade}s`,
+        label: formatPressingDecade(decade),
         count: copies,
       }))}
     />

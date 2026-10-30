@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { listFacets, searchArtists } from './list-facets'
+import { listFilterOptions, searchArtists } from './filter-options'
 
 const NIRVANA = { id: 125246, name: 'Nirvana' }
 const KORN = { id: 33285, name: 'Korn' }
@@ -23,9 +23,9 @@ const record = ({
   basic_information: { year, styles, artists },
 })
 
-describe('listFacets', () => {
+describe('listFilterOptions', () => {
   it('counts each value of each kind present in the list', () => {
-    const facets = listFacets(
+    const options = listFilterOptions(
       [
         record(),
         record({ year: 1989, added: 2022 }),
@@ -34,26 +34,26 @@ describe('listFacets', () => {
       {},
     )
 
-    expect(facets.artist).toEqual([
+    expect(options.artist).toEqual([
       { value: NIRVANA.id, label: 'Nirvana', count: 2, names: ['Nirvana'] },
       { value: KORN.id, label: 'Korn', count: 1, names: ['Korn'] },
     ])
-    expect(facets.style).toEqual([
+    expect(options.style).toEqual([
       { value: 'Grunge', label: 'Grunge', count: 2 },
       { value: 'Nu Metal', label: 'Nu Metal', count: 1 },
     ])
-    expect(facets.decade).toEqual([
+    expect(options.decade).toEqual([
       { value: 1990, label: '1990s', count: 2 },
       { value: 1980, label: '1980s', count: 1 },
     ])
-    expect(facets.added).toEqual([
+    expect(options.added).toEqual([
       { value: 2022, label: '2022', count: 1 },
       { value: 2021, label: '2021', count: 2 },
     ])
   })
 
   it('narrows each kind by the other active filters, not its own', () => {
-    const facets = listFacets(
+    const options = listFilterOptions(
       [
         record({ styles: ['Grunge'] }),
         record({ styles: ['Grunge', 'Noise'], year: 1989 }),
@@ -63,13 +63,13 @@ describe('listFacets', () => {
     )
 
     // Korn has no Grunge record: picking it could only give an empty list
-    expect(facets.artist.map((v) => v.label)).toEqual(['Nirvana'])
-    expect(facets.decade).toEqual([
+    expect(options.artist.map((v) => v.label)).toEqual(['Nirvana'])
+    expect(options.decade).toEqual([
       { value: 1990, label: '1990s', count: 1 },
       { value: 1980, label: '1980s', count: 1 },
     ])
     // Its own kind ignores the style picked, so another can replace it
-    expect(facets.style).toEqual([
+    expect(options.style).toEqual([
       { value: 'Grunge', label: 'Grunge', count: 2 },
       { value: 'Noise', label: 'Noise', count: 1 },
       { value: 'Nu Metal', label: 'Nu Metal', count: 1 },
@@ -77,7 +77,7 @@ describe('listFacets', () => {
   })
 
   it('orders by count, ties A→Z; decades and years newest first', () => {
-    const facets = listFacets(
+    const options = listFilterOptions(
       [
         record({ styles: ['Shoegaze'], year: 1971, added: 2019 }),
         record({ styles: ['Dream Pop'], year: 2016, added: 2024 }),
@@ -87,13 +87,13 @@ describe('listFacets', () => {
       {},
     )
 
-    expect(facets.style.map((v) => v.label)).toEqual([
+    expect(options.style.map((v) => v.label)).toEqual([
       'Shoegaze',
       'Ambient',
       'Dream Pop',
     ])
-    expect(facets.decade.map((v) => v.value)).toEqual([2010, 1990, 1970])
-    expect(facets.added.map((v) => v.value)).toEqual([2024, 2020, 2019])
+    expect(options.decade.map((v) => v.value)).toEqual([2010, 1990, 1970])
+    expect(options.added.map((v) => v.value)).toEqual([2024, 2020, 2019])
   })
 
   it('matches artists as Top artists: by ID, Name variations, splits', () => {
@@ -101,7 +101,7 @@ describe('listFacets', () => {
       { id: 1, name: 'Mogwai' },
       { id: 2, name: 'Bardo Pond' },
     ]
-    const facets = listFacets(
+    const options = listFilterOptions(
       [
         record({ artists: [{ id: 3, name: 'Nirvana (2)' }] }),
         record({ artists: [NIRVANA] }),
@@ -112,7 +112,7 @@ describe('listFacets', () => {
       {},
     )
 
-    expect(facets.artist).toEqual([
+    expect(options.artist).toEqual([
       {
         value: NIRVANA.id,
         label: 'Nirvana',
@@ -126,19 +126,19 @@ describe('listFacets', () => {
   })
 
   it('leaves the no-year bucket out of decades', () => {
-    const facets = listFacets([record({ year: 0 }), record()], {})
+    const options = listFilterOptions([record({ year: 0 }), record()], {})
 
-    expect(facets.decade).toEqual([{ value: 1990, label: '1990s', count: 1 }])
+    expect(options.decade).toEqual([{ value: 1990, label: '1990s', count: 1 }])
   })
 
   it('keeps an active value listed even when nothing matches it any more', () => {
     const records = [record({ styles: ['Grunge'] })]
 
-    expect(listFacets(records, { style: 'Shoegaze' }).style).toEqual([
+    expect(listFilterOptions(records, { style: 'Shoegaze' }).style).toEqual([
       { value: 'Grunge', label: 'Grunge', count: 1 },
       { value: 'Shoegaze', label: 'Shoegaze', count: 0 },
     ])
-    expect(listFacets(records, { artist: 999 }).artist).toEqual([
+    expect(listFilterOptions(records, { artist: 999 }).artist).toEqual([
       { value: NIRVANA.id, label: 'Nirvana', count: 1, names: ['Nirvana'] },
       { value: 999, label: 'Artist', count: 0, names: [] },
     ])

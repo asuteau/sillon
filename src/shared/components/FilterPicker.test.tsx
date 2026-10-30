@@ -92,7 +92,7 @@ describe('FilterPickerBody', () => {
     expect(values('Artist')).toEqual(['Nirvana2', 'Korn1'])
     expect(values('Style')).toEqual(['Grunge2', 'Nu Metal1'])
     expect(values('Pressing decade')).toEqual(['1990s2', '1980s1'])
-    expect(values('Added')).toEqual(['20213'])
+    expect(values('Added year')).toEqual(['20213'])
   })
 
   it('narrows counts by the other active filters', () => {

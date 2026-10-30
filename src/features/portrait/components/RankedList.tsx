@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { useId } from 'react'
 
-import { formatRecords } from '#/features/collection/collection.utils'
+import { formatRecords } from '#/shared/utils/format-records'
 import { cn } from '#/shared/utils/cn'
 import type { ListFilters } from '#/shared/utils/list-filter'
 
@@ -29,7 +29,8 @@ const ROW = 'grid grid-cols-[2rem_1fr] items-baseline'
 // Leaders get a copper bar and a full-strength count, same size as the rest.
 // The bars draw in on reveal (fade under reduced motion). A row with a filter
 // opens the Collection filtered by it; its padding is cancelled by negative
-// margin, so the tap target reaches 44px without moving a pixel.
+// margin, so the tap target reaches 44px (a 35px row plus 16px) without
+// moving a pixel, and meets the next row's in the gap between them.
 export const RankedList = ({ title, entries }: RankedListProps) => {
   const titleId = useId()
   const top = entries[0]?.count ?? 1

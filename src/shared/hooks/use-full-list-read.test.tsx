@@ -17,7 +17,7 @@ type WantsPage = {
   fetchedAt: number
 }
 
-// 5 wants, 2 a page; fetched long ago, so the pace never waits
+// 5 Wantlist entries, 2 a page; fetched long ago, so the pace never waits
 const WANTS = [1, 2, 3, 4, 5].map((id) => ({ id }))
 const PER_PAGE = 2
 const PAGES = Math.ceil(WANTS.length / PER_PAGE)
@@ -44,6 +44,12 @@ const reader = {
   keyOf: (want: Want) => want.id,
 }
 
+const source = (fetchPage: (page: number) => Promise<WantsPage>) => ({
+  list: 'wantlist' as const,
+  options: wantsOptions(fetchPage),
+  reader,
+})
+
 // A fresh cache per test, kept across the test's renders
 let queryClient: QueryClient
 beforeEach(() => {
@@ -62,7 +68,7 @@ describe('useFullListRead', () => {
     const seen: string[] = []
     const { result } = renderHook(
       () => {
-        const value = useFullListRead(wantsOptions(fetchPage), reader, true)
+        const value = useFullListRead(source(fetchPage), true)
         seen.push(value.read.status)
         return value
       },
@@ -81,7 +87,7 @@ describe('useFullListRead', () => {
 
   it('asks nothing until enabled', async () => {
     const fetchPage = vi.fn(pageOf)
-    renderHook(() => useFullListRead(wantsOptions(fetchPage), reader, false), {
+    renderHook(() => useFullListRead(source(fetchPage), false), {
       wrapper,
     })
 
@@ -96,7 +102,7 @@ describe('useFullListRead', () => {
       return pageOf(page)
     })
     const { result } = renderHook(
-      () => useFullListRead(wantsOptions(fetchPage), reader, true),
+      () => useFullListRead(source(fetchPage), true),
       { wrapper },
     )
 
