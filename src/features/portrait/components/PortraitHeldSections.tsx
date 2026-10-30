@@ -15,12 +15,10 @@ interface PortraitHeldSectionsProps {
 export const PortraitHeldSections = ({
   readout,
 }: PortraitHeldSectionsProps) => (
-  <div className="relative">
-    {/* In the first section's top margin, so nothing moves on reveal */}
-    <div className="absolute inset-x-0 top-2">{readout}</div>
+  <div>
+    <HeldRanking readout={readout} />
     {/* Fades in with the readout, after the same delay */}
     <div aria-hidden className="reading-state">
-      <HeldRanking />
       <HeldRanking />
       <HeldTimeChart />
       <HeldTimeChart />
@@ -33,29 +31,40 @@ const HeldTitle = () => (
   <span className="type-caps invisible mb-5 block text-[11px]">&nbsp;</span>
 )
 
-// RankedList's rows: rank, name, bar
-const HeldRanking = () => (
+interface HeldRankingProps {
+  readout?: ReactNode
+}
+
+// RankedList's rows: rank, name, bar. The readout sits on the title's
+// baseline and grows up into the section's top margin, so it never reaches
+// the rows and nothing moves on reveal
+const HeldRanking = ({ readout }: HeldRankingProps) => (
   <div className="mt-14">
-    <HeldTitle />
-    <div className="flex flex-col gap-4">
-      {HELD_ROWS.map((width) => (
-        <div key={width} className="grid grid-cols-[2rem_1fr] items-baseline">
-          <span className="type-catalogue invisible text-[11px]">00</span>
-          <div className="flex flex-col gap-2">
-            <span className="relative">
-              &nbsp;
+    <div className="relative">
+      <HeldTitle />
+      {readout && <div className="absolute inset-x-0 bottom-5">{readout}</div>}
+    </div>
+    <div aria-hidden className={readout ? 'reading-state' : undefined}>
+      <div className="flex flex-col gap-4">
+        {HELD_ROWS.map((width) => (
+          <div key={width} className="grid grid-cols-[2rem_1fr] items-baseline">
+            <span className="type-catalogue invisible text-[11px]">00</span>
+            <div className="flex flex-col gap-2">
+              <span className="relative">
+                &nbsp;
+                <span
+                  className="absolute inset-y-1.5 left-0 bg-muted"
+                  style={{ width: `${width * 0.4}%` }}
+                />
+              </span>
               <span
-                className="absolute inset-y-1.5 left-0 bg-muted"
-                style={{ width: `${width * 0.4}%` }}
+                className="block h-0.75 bg-muted"
+                style={{ width: `${width}%` }}
               />
-            </span>
-            <span
-              className="block h-0.75 bg-muted"
-              style={{ width: `${width}%` }}
-            />
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   </div>
 )
