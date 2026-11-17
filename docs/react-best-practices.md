@@ -1,7 +1,16 @@
 # Sillon — React Best Practices
 
-Guidelines applied consistently across the codebase.
-Claude Code should follow these rules in every component it generates.
+Judgement rules for React code. Reviewers apply every one; see `CODING_STANDARDS.md`.
+
+ESLint enforces the mechanical rules (`eslint.config.js`), so they live there, not here:
+
+- Named exports only: `import/no-default-export`
+- Arrow functions only: `func-style`, `prefer-arrow-callback`
+- No `as` casts (`as const` allowed): `@typescript-eslint/consistent-type-assertions`
+- Components never touch `localStorage`: a `*.store.ts` or `shared/utils` module owns storage
+- Hooks: `react-hooks/*`, including `exhaustive-deps`
+
+Pre-existing violations are frozen in `eslint-suppressions.json`. It only shrinks: fix a frozen violation when you touch its file, then run `npx eslint . --prune-suppressions`.
 
 ---
 
@@ -89,23 +98,6 @@ function CollectionGridView({ records }: { records: Record[] }) {
 
 ---
 
-## 3. Named exports only
-
-No default exports on components. Named exports are easier to refactor,
-grep, and import consistently.
-
-```tsx
-// ✅
-export function RecordCard({ record }: { record: Record }) { ... }
-
-// ❌
-export default function RecordCard({ record }: { record: Record }) { ... }
-```
-
-Exception: route components declared inline in `.routes.tsx` files.
-
----
-
 ## 4. Props interfaces — explicit and co-located
 
 Define the props interface directly above the component. No inline types in the
@@ -128,41 +120,6 @@ export function RecordCard({ record, onPress, variant = 'grid' }: {
   variant?: 'grid' | 'list' | 'bin'
 }) { ... }
 ```
-
----
-
-## 5. No raw localStorage access
-
-Always use `useLocalStorage` from `shared/hooks/`. Raw `localStorage` calls are
-SSR-unsafe (TanStack Start runs on the server where `window` is undefined) and
-bypass type safety.
-
-```tsx
-// ✅
-const [theme, setTheme] = useLocalStorage<Theme>('sillon-theme', 'system')
-
-// ❌
-const [theme, setTheme] = useState<Theme>(
-  (localStorage.getItem('sillon-theme') as Theme) ?? 'system',
-)
-```
-
----
-
-## 6. No unsafe type casts
-
-Avoid `as` casts. Use Zod schemas at API boundaries to get properly typed data,
-and `satisfies` or proper inference everywhere else.
-
-```tsx
-// ✅ — type comes from Zod inference, no cast needed
-const record = RecordSchema.parse(raw) // type: Record
-
-// ❌
-const record = raw as Record
-```
-
-Exception: `as const` for literal type narrowing is acceptable.
 
 ---
 
@@ -205,47 +162,6 @@ const handlePick = async () => {
   const { data } = await refetch()
   if (data) setPicked(data)
 }
-```
-
----
-
-## 9. Suffix rule for feature files
-
-One file per responsibility → use dot suffix.
-Multiple files for one responsibility → promote to subfolder.
-
-```
-// ✅ Single file per role
-features/collection/
-  collection.schema.ts
-  collection.model.ts
-  collection.queries.ts
-  collection.utils.ts
-
-// ✅ Promoted to subfolder when needed
-features/collection/
-  queries/
-    collection.queries.ts
-    cover.queries.ts
-```
-
----
-
-## 10. Arrow functions only
-
-Always use arrow functions — for components, utilities, handlers, and helpers.
-Never use the `function` keyword.
-
-```ts
-// ✅
-export const formatDateAdded = (date: string): string => ...
-
-export const CoverArt = ({ title }: CoverArtProps) => { ... }
-
-// ❌
-export function formatDateAdded(date: string): string { ... }
-
-function CoverArt({ title }: CoverArtProps) { ... }
 ```
 
 ---
@@ -497,7 +413,7 @@ const isOnline = useSyncExternalStore(
 ## 15. Effect dependencies — follow the linter, always
 
 The `react-hooks/exhaustive-deps` rule catches stale-closure bugs before they
-reach production. **Never suppress it.**
+reach production. When it fires, fix the code:
 
 ```tsx
 // ❌ Hidden stale-closure bug

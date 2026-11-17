@@ -1,5 +1,7 @@
 # Sillon — Development Roadmap
 
+The original phased build plan, kept as history. Most of it has shipped and some plans changed: the code and GitHub issues are the current source of truth. For conventions, read `docs/conventions.md`; for decisions, `docs/adr/`.
+
 ## Overview
 
 ```
@@ -368,27 +370,7 @@ Same as Collection but different data source. Share components.
 
 ### 3.7 File & folder conventions
 
-| What                        | Where                         | Example                    |
-| --------------------------- | ----------------------------- | -------------------------- |
-| Route files                 | `routes/`                     | `collection.$id.tsx`       |
-| Auth guard                  | `routes/_authenticated.tsx`   | layout route, no UI        |
-| Protected routes            | `routes/_authenticated/`      | auto-protected by guard    |
-| Raw API schema              | `features/{name}/`            | `collection.schema.ts`     |
-| Applicative model + mapping | `features/{name}/`            | `collection.model.ts`      |
-| Query options               | `features/{name}/`            | `collection.queries.ts`    |
-| Pure utils                  | `features/{name}/`            | `collection.utils.ts`      |
-| Feature components          | `features/{name}/components/` | `CollectionGrid.tsx`       |
-| External services           | `services/`                   | `discogs.server.ts`        |
-| Shared components           | `shared/components/`          | shadcn + custom primitives |
-| Shared hooks                | `shared/hooks/`               | `useLocalStorage.ts`       |
-| Shared utils                | `shared/utils/`               | generic pure functions     |
-
-**Routing**: file-based routing kept as recommended by TanStack — full type-safety
-on `Link`, `navigate`, and params via code-gen. Route files contain only routing
-concerns (loader, search params, component import). All logic lives in `features/`.
-
-**Suffix rule**: one file per responsibility → use suffix (e.g. `collection.model.ts`).
-If a responsibility grows beyond one file → promote to a subfolder (e.g. `queries/`).
+Moved to `docs/conventions.md`.
 
 ### 3.8 Testing setup — Vitest
 
