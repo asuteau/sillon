@@ -1,0 +1,254 @@
+{
+  "src/features/auth/auth.api.ts": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/features/collection/collection.api.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    },
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/features/collection/collection.model.ts": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/features/collection/collection.mutations.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    },
+    "func-style": {
+      "count": 4
+    }
+  },
+  "src/features/collection/collection.persist.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 3
+    }
+  },
+  "src/features/collection/collection.persist.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 4
+    }
+  },
+  "src/features/collection/collection.queries.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    }
+  },
+  "src/features/collection/collection.queries.ts": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/features/collection/collection.utils.ts": {
+    "func-style": {
+      "count": 4
+    }
+  },
+  "src/features/collection/hooks/use-random-pick.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    }
+  },
+  "src/features/collection/vinyl-colour.utils.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "src/features/landing/components/CollectionStill.test.tsx": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "src/features/landing/components/LandingPage.test.tsx": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 3
+    }
+  },
+  "src/features/landing/hooks/use-hero-playback.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 6
+    }
+  },
+  "src/features/landing/landing.timeline.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "src/features/portrait/portrait.model.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    }
+  },
+  "src/features/profile/profile.model.ts": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/features/profile/profile.queries.ts": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/features/scan/hooks/use-stack-scanner.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/features/search/components/SearchRecordActions.tsx": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/features/search/components/SearchRecordScreen.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/features/search/components/VersionRow.tsx": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/features/search/search.api.ts": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/features/search/search.model.ts": {
+    "func-style": {
+      "count": 4
+    }
+  },
+  "src/features/wantlist/wantlist.api.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "src/features/wantlist/wantlist.model.ts": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/features/wantlist/wantlist.mutations.ts": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/features/wantlist/wantlist.queries.ts": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/router.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/routes/__root.tsx": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/routes/_authenticated/search.tsx": {
+    "func-style": {
+      "count": 6
+    }
+  },
+  "src/routes/index.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/routes/offline.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/services/deezer.server.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "src/services/discogs.server.ts": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/shared/components/DefaultCatchBoundary.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/shared/components/DiscogsRateLimitDevTools.tsx": {
+    "func-style": {
+      "count": 2
+    }
+  },
+  "src/shared/components/HouseSleeve.test.tsx": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 1
+    }
+  },
+  "src/shared/components/NotFound.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/shared/components/SheetCover.test.tsx": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 3
+    }
+  },
+  "src/shared/components/SheetCover.tsx": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/shared/components/ThemeToggle.tsx": {
+    "func-style": {
+      "count": 3
+    },
+    "no-restricted-properties": {
+      "count": 2
+    },
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/hooks/use-full-list-read.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/hooks/use-hd-cover.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/hooks/use-is-mobile.ts": {
+    "react-hooks/set-state-in-effect": {
+      "count": 1
+    }
+  },
+  "src/shared/utils/cn.ts": {
+    "func-style": {
+      "count": 1
+    }
+  },
+  "src/shared/utils/discogs-freshness.test.ts": {
+    "@typescript-eslint/consistent-type-assertions": {
+      "count": 2
+    }
+  },
+  "src/shared/utils/discogs-oauth.ts": {
+    "func-style": {
+      "count": 3
+    }
+  }
+}

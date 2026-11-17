@@ -1,7 +1,6 @@
 # Sillon
 
 Personal vinyl record collection app connected to Discogs.
-Built with TanStack Start — migrated from Remix.
 
 ## Commands
 
@@ -16,7 +15,6 @@ pnpm check && npx tsc --noEmit    # Run after every code change (prettier + esli
 
 - TanStack Start + TanStack Router (file-based) + TanStack Query
 - Tailwind CSS v4 + shadcn/ui (style `base-nova`, Base UI + vaul)
-- Familjen Grotesk + Martian Mono, self-hosted in `public/fonts/`
 - Motion: CSS + Web Animations API (no animation library)
 - Discogs OAuth 1.0a — auth & collection data
 - Deezer API — HD cover art
@@ -27,24 +25,21 @@ pnpm check && npx tsc --noEmit    # Run after every code change (prettier + esli
 ```
 src/
   routes/      ← file-based routing only, no logic
-  features/    ← domain logic by feature (schema, model, queries, utils, components)
-  services/    ← external connections (discogs.server.ts, deezer.server.ts, session.server.ts)
+  features/    ← domain logic by feature
+  services/    ← external connections (Discogs, Deezer, session)
   shared/      ← cross-feature components, hooks, utils
   styles.css   ← design tokens, type roles, motion
 ```
 
-## Current phase
-
-Phase 3 — Core features (collection, search, wantlist).
-Auth (Phase 2) is complete.
+Imports use `#/` for `src/`.
 
 ## Docs
 
-**IMPORTANT:** Before starting any task, identify which docs below are relevant and read them first. Do not start writing code before loading the right context.
-
-- `docs/roadmap.md` — full phased plan, file conventions (section 3.7), architecture decisions
-- `docs/react-best-practices.md` — apply every rule to every component generated
-- `docs/design-system.md` — brand identity: tokens, type, shapes, motion, icons, House sleeves, mark, PWA assets, voice
+- `docs/conventions.md` — read before creating a file: folder and suffix for each role
+- `docs/react-best-practices.md` — read before writing a component, hook or Effect
+- `docs/design-system.md` — read before touching UI, motion or user-facing copy
+- `CONTEXT.md` — read when naming a domain concept
+- `docs/adr/` — read before changing dependencies, caching or money-related behaviour
 
 ## Agent skills
 

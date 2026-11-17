@@ -34,7 +34,7 @@ function applyThemeMode(mode: ThemeMode) {
   document.documentElement.style.colorScheme = resolved
 }
 
-export default function ThemeToggle() {
+export const ThemeToggle = () => {
   const [mode, setMode] = useState<ThemeMode>('auto')
 
   useEffect(() => {
