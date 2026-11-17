@@ -15,8 +15,8 @@ describe('PortraitStill', () => {
   it('shows the Estimated value as the app sets it, with its range', () => {
     render(<PortraitStill />)
     const value = screen.getByText('Estimated value').parentElement
-    expect(value?.textContent).toContain('≈ €2.1K')
-    expect(value?.textContent).toContain('€1.4K – €3.1K')
+    expect(value?.textContent).toContain('≈ €2.1k')
+    expect(value?.textContent).toContain('€1.4k – €3.1k')
   })
 
   it('ranks five Top artists, one copper Leader bar, no copper text', () => {

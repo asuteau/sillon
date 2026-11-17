@@ -7,8 +7,8 @@ const VALUE = { minimum: 9100, median: 18400, maximum: 31250 }
 describe('formatEstimatedValue', () => {
   it('heads with the median and gives the range alongside', () => {
     expect(formatEstimatedValue(VALUE, 'EUR', 'en-GB')).toEqual({
-      median: '≈ €18.4K',
-      range: '€9.1K – €31.3K',
+      median: '≈ €18.4k',
+      range: '€9.1k – €31.3k',
     })
   })
 

@@ -22,7 +22,7 @@ export function parseAmount(amount: string): number | null {
   return Number(decimal ? `${integer}.${decimal[1]}` : integer)
 }
 
-// Compact, e.g. "€850", "€1.2K", "€3.4M". One decimal only from 1K up.
+// Compact, e.g. "€850", "€1.2k", "€3.4M" (en-GB on Node 24 ICU). One decimal only from 1k up.
 export function formatAmount(
   amount: number,
   currency: string,
