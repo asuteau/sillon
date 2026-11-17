@@ -6,14 +6,14 @@ import { GrooveMark } from './brand/GrooveMark'
 import { PortraitIcon } from './icons/PortraitIcon'
 import { Wordmark } from './brand/Wordmark'
 import { ScanButton } from './ScanButton'
-import ThemeToggle from './ThemeToggle'
+import { ThemeToggle } from './ThemeToggle'
 import { buttonVariants } from './ui/button'
 
 // Active state from the router's data-status; underline fades in
 const NAV_LINK_CLASSES =
   'relative inline-flex items-center gap-1.5 rounded-(--radius) text-muted-foreground no-underline transition-colors duration-160 ease-fade after:absolute after:inset-x-0 after:-bottom-1.5 after:h-px after:bg-current after:opacity-0 after:transition-opacity after:duration-160 after:ease-fade hover:text-foreground hover:after:opacity-100 data-[status=active]:text-foreground data-[status=active]:after:opacity-100'
 
-export default function Header() {
+export const Header = () => {
   const user = useMatch({
     from: '__root__',
     select: (match) => match.context.user,

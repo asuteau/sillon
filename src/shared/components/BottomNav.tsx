@@ -14,7 +14,7 @@ const TAB_CLASSES =
   'group/tab flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-muted-foreground no-underline transition-colors duration-160 ease-fade hover:text-foreground data-[status=active]:bg-muted data-[status=active]:font-semibold data-[status=active]:text-foreground'
 const TAB_LABEL_CLASSES = 'hidden group-data-[status=active]/tab:inline'
 
-export default function BottomNav() {
+export const BottomNav = () => {
   const user = useMatch({
     from: '__root__',
     select: (match) => match.context.user,

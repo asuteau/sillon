@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ScanIcon } from '#/shared/components/icons/ScanIcon'
 import { SearchIcon } from '#/shared/components/icons/SearchIcon'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import { z } from 'zod'
 
 import { StackScanner } from '#/features/scan/components/StackScanner'
@@ -68,17 +68,23 @@ function Search() {
   const inputRef = useRef<HTMLInputElement>(null)
   const debouncedValue = useDebounce(inputValue)
 
-  useEffect(() => {
-    if (debouncedValue === q) return
+  // Reads the latest q without re-syncing on it: a back navigation that
+  // changes q must not be undone by the debounced input
+  const syncQuery = useEffectEvent((value: string) => {
+    if (value === q) return
     navigate({
       search: (s) => ({
         ...s,
-        q: debouncedValue,
+        q: value,
         artistId: undefined,
         masterId: undefined,
         releaseId: undefined,
       }),
     }).catch(() => {})
+  })
+
+  useEffect(() => {
+    syncQuery(debouncedValue)
   }, [debouncedValue])
 
   const handleModeChange = (newMode: 'artist' | 'title') => {
