@@ -17,6 +17,8 @@ export const CURVES = {
   // The films' own, no token: a soft landing, and a disc tucking in
   out: [0.16, 1, 0.3, 1],
   inOut: [0.45, 0, 0.1, 1],
+  // A camera with weight: slow off the mark, a long settle
+  dolly: [0.55, 0, 0.12, 1],
   linear: [0, 0, 1, 1],
 } as const satisfies Record<string, Curve>
 
@@ -55,6 +57,10 @@ export const bezier = ([x1, y1, x2, y2]: Curve) => {
 }
 
 export const mix = (a: number, b: number, t: number) => a + (b - a) * t
+
+// To a thousandth: what a look keeps of a number, so a sample reads the same
+// every time and a keyframe stays short
+export const round3 = (n: number) => Math.round(n * 1000) / 1000
 
 // A key: at `at` ms the value is `value`; `ease` curves the step to the next
 // key (linear when left out), as a CSS keyframe's easing does

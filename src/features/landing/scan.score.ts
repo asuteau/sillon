@@ -10,14 +10,11 @@
 // leaves, the line the app says once it's added rises, and the camera eases
 // back to the crate, now one sleeve lighter at the front. The sleeve put
 // back fades in behind while the camera's focus is on the panel.
-import { CURVES, track } from './film/film.model'
+import { CURVES, round3, track } from './film/film.model'
 import type { Curve, Key, Look, Move, Score, Shot } from './film/film.model'
 
 // One pass: one sleeve scanned and sent
 export const SCAN_PASS_MS = 6400
-
-// The film's own: a camera with weight, slow off the mark, a long settle
-const DOLLY: Curve = [0.55, 0, 0.12, 1]
 
 // Lens distance for the sleeves (CSS px), each about its own centre: the
 // sleeves share one box, so they share one vanishing point
@@ -205,7 +202,7 @@ const BAR_RESET = B + SEND + 302
 const CUES: Record<CuedTrack, readonly Cue[]> = {
   set: bothPasses([
     [0, {}],
-    [LIFT, {}, DOLLY],
+    [LIFT, {}, CURVES.dolly],
     [HELD_AT + 100, { s: 1.16 }, CURVES.out],
     [HELD_AT + 700, { s: 1.13 }],
     [MATCH, { s: 1.13 }, CURVES.platter],
@@ -285,8 +282,7 @@ const compile = (cues: readonly Cue[]) => {
   })
   return (ms: number): Pose => {
     const pose = { ...REST }
-    for (const [field, value] of fields)
-      pose[field] = Math.round(value(ms) * 1000) / 1000
+    for (const [field, value] of fields) pose[field] = round3(value(ms))
     return pose
   }
 }

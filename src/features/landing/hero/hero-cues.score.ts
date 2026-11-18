@@ -14,8 +14,6 @@ export type HeroFraming = 'wide' | 'tall'
 
 export const EASE = {
   ...CURVES,
-  // A camera with weight: slow off the mark, long settle
-  dolly: [0.55, 0, 0.12, 1],
   // A move that leaves fast and lands softly, for things thrown
   toss: [0.3, 0.1, 0.1, 1],
 } as const satisfies Record<string, Curve>

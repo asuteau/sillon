@@ -3,6 +3,7 @@
 // In sleeve units (1 = a 12" sleeve's width), y up, the front facing +z.
 // Pure: the DOM lays the faces out in CSS 3D and shades them from here.
 import { dot, lightDirection, normalise } from './camera.utils'
+import { round3 } from './film.model'
 import type { KeyLight, Vec3 } from './camera.utils'
 
 export interface JacketSize {
@@ -43,8 +44,7 @@ export interface JacketFace {
   transform: (unit: number) => string
 }
 
-const r3 = (n: number) => Math.round(n * 1000) / 1000
-const cqw = (n: number) => `${Object.is(r3(n), -0) ? 0 : r3(n)}cqw`
+const cqw = (n: number) => `${Object.is(round3(n), -0) ? 0 : round3(n)}cqw`
 
 // A bevel's rounding starts 30° off the front: nearer it, the front's own
 // sheen already reads, and the rim would glint every time the front does
@@ -212,7 +212,7 @@ export const faceLight = (
   const [a, b = a] = normals
   const mid = normalise({ x: a.x + b.x, y: a.y + b.y, z: a.z + b.z })
   const lambert = Math.max(0, dot(mid, lightDirection(key)))
-  const shade = r3(0.34 * (1 - lambert * key.strength) ** 1.6)
+  const shade = round3(0.34 * (1 - lambert * key.strength) ** 1.6)
   // Turned from the camera: no reflection to see
   if (Math.max(dot(a, view), dot(b, view)) <= 0) return { shade, glint: 0 }
   let best = 0
@@ -225,5 +225,5 @@ export const faceLight = (
     })
     best = Math.max(best, bestOnArc(a, b, half))
   }
-  return { shade, glint: r3(key.strength * best ** SHININESS) }
+  return { shade, glint: round3(key.strength * best ** SHININESS) }
 }

@@ -7,8 +7,8 @@
 import { leaderCount } from '#/features/portrait/portrait.utils'
 
 import { LANDING_PORTRAIT } from './content/landing.content'
-import { CURVES, track } from './film/film.model'
-import type { Curve, Key, Look, Score, Shot } from './film/film.model'
+import { CURVES, round3, track } from './film/film.model'
+import type { Key, Look, Score, Shot } from './film/film.model'
 
 export const PORTRAIT_LOOP_MS = 9600
 
@@ -37,9 +37,6 @@ export const PORTRAIT_TRACK_NAMES = [
 
 export type PortraitTrack = (typeof PORTRAIT_TRACK_NAMES)[number]
 
-// A camera with weight: slow off the mark, long settle (the engine spike's)
-const DOLLY: Curve = [0.55, 0, 0.12, 1]
-
 // Beats, ms into the loop
 const DRAW_MS = 800
 const ARTISTS_FROM = 700
@@ -58,35 +55,35 @@ const UNDRAW_MS = 8800
 // as the focus moves down it; then back
 const CAMERA: Record<'rx' | 'ry' | 'y' | 's', readonly Key[]> = {
   rx: [
-    [0, 24, DOLLY],
-    [2600, 12, DOLLY],
-    [4800, 6, DOLLY],
+    [0, 24, CURVES.dolly],
+    [2600, 12, CURVES.dolly],
+    [4800, 6, CURVES.dolly],
     [6400, 3],
-    [8000, 3, DOLLY],
+    [8000, 3, CURVES.dolly],
     [PORTRAIT_LOOP_MS, 24],
   ],
   ry: [
-    [0, -18, DOLLY],
-    [2600, -8, DOLLY],
-    [4800, 5, DOLLY],
+    [0, -18, CURVES.dolly],
+    [2600, -8, CURVES.dolly],
+    [4800, 5, CURVES.dolly],
     [6400, 2],
-    [8000, 0, DOLLY],
+    [8000, 0, CURVES.dolly],
     [PORTRAIT_LOOP_MS, -18],
   ],
   y: [
-    [0, 3, DOLLY],
-    [2600, 2, DOLLY],
-    [4800, -1, DOLLY],
+    [0, 3, CURVES.dolly],
+    [2600, 2, CURVES.dolly],
+    [4800, -1, CURVES.dolly],
     [6400, 0],
-    [8000, 0, DOLLY],
+    [8000, 0, CURVES.dolly],
     [PORTRAIT_LOOP_MS, 3],
   ],
   s: [
-    [0, 0.86, DOLLY],
-    [2600, 0.91, DOLLY],
-    [4800, 0.94, DOLLY],
+    [0, 0.86, CURVES.dolly],
+    [2600, 0.91, CURVES.dolly],
+    [4800, 0.94, CURVES.dolly],
     [6400, 0.95],
-    [8000, 0.95, DOLLY],
+    [8000, 0.95, CURVES.dolly],
     [PORTRAIT_LOOP_MS, 0.86],
   ],
 }
@@ -95,8 +92,6 @@ const rx = track(CAMERA.rx)
 const ry = track(CAMERA.ry)
 const camY = track(CAMERA.y)
 const camS = track(CAMERA.s)
-
-const round3 = (n: number) => Math.round(n * 1000) / 1000
 
 // Out of focus: how soft a part is over time (0 sharp, 1 softest), as lens
 // blur (stage units) and a dimming. A blur repaints whatever moves inside

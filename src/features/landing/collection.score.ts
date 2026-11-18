@@ -9,7 +9,7 @@
 // next record behind the screen; the Cover shrinks back onto the centred
 // sleeve, its disc slides out again, and the camera swings back to where the
 // pass began.
-import { CURVES, mix, track } from './film/film.model'
+import { CURVES, mix, round3, track } from './film/film.model'
 import type { Beats, Key, Look, Score, Shot } from './film/film.model'
 
 export const COLLECTION_LOOP_MS = 10_000
@@ -81,9 +81,7 @@ export const COLLECTION_STAGE_VARS = {
 // ---------------------------------------------------------------------------
 // Keys. Two keys a millisecond apart are a cut, always out of sight
 
-const { platter, fade, out, inOut } = CURVES
-// A camera with weight: slow off the mark, long settle (the spike's dolly)
-const dolly = [0.55, 0, 0.12, 1] as const
+const { platter, fade, out, inOut, dolly } = CURVES
 
 const KEYS = {
   // The camera's swing about the centred slide, and its tilt
@@ -215,8 +213,6 @@ const KEYS = {
 const TRACKS = new Map(
   Object.entries(KEYS).map(([name, keys]) => [name, track(keys)]),
 )
-
-const round3 = (n: number) => Math.round(n * 1000) / 1000
 
 // ---------------------------------------------------------------------------
 // Looks

@@ -8,8 +8,8 @@
 // camera pushes back in, through the screen, to the Wantlist, where the want
 // folds away and the count drops. The set fades to the page ground and the
 // loop comes round in the dark, the want back in its place.
-import { CURVES, track } from './film/film.model'
-import type { Curve, Look, Score, Shot } from './film/film.model'
+import { CURVES, round3, track } from './film/film.model'
+import type { Look, Score, Shot } from './film/film.model'
 
 export const WANTLIST_LOOP_MS = 10_000
 
@@ -68,9 +68,7 @@ export type WantlistTrack = (typeof WANTLIST_TRACKS)[number]
 // camera dollies this far in to frame it
 export const WANTLIST_DEPTH = 36
 
-// A camera with weight: slow off the mark, a long settle. The film's own
-const DOLLY: Curve = [0.55, 0, 0.12, 1]
-const { platter, fade, out, inOut } = CURVES
+const { platter, fade, out, inOut, dolly } = CURVES
 
 const L = WANTLIST_LOOP_MS
 // Camera pulls back to the Record screen, then pushes in to the Wantlist
@@ -88,10 +86,10 @@ const curves = {
   // Dolly: in on the Wantlist, back past the screen a touch, settle, in again
   camZ: track([
     [0, WANTLIST_DEPTH],
-    [PULL[0], WANTLIST_DEPTH - 1.5, DOLLY],
+    [PULL[0], WANTLIST_DEPTH - 1.5, dolly],
     [PULL[1], -2.5, out],
     [PULL[1] + 900, 0],
-    [PUSH[0], 0.6, DOLLY],
+    [PUSH[0], 0.6, dolly],
     [PUSH[1], WANTLIST_DEPTH + 1, out],
     [PUSH[1] + 900, WANTLIST_DEPTH],
     [L, WANTLIST_DEPTH],
@@ -220,15 +218,15 @@ const curves = {
   ]),
 }
 
-const r3 = (n: number) => Math.round(n * 1000) / 1000
-
 // A rise: up from 2 units below as it shows
 const rise = (shown: number): Look => ({
-  opacity: r3(shown),
-  transform: [{ translate: [0, r3((1 - shown) * 2.5)] }],
+  opacity: round3(shown),
+  transform: [{ translate: [0, round3((1 - shown) * 2.5)] }],
 })
 
-const press = (scale: number): Look => ({ transform: [{ scale: r3(scale) }] })
+const press = (scale: number): Look => ({
+  transform: [{ scale: round3(scale) }],
+})
 
 export const WANTLIST_SCORE: Score<WantlistTrack> = {
   tracks: WANTLIST_TRACKS,
@@ -238,7 +236,7 @@ export const WANTLIST_SCORE: Score<WantlistTrack> = {
   still: 5400,
   cuts: [],
   sample: (ms) => {
-    const at = (name: keyof typeof curves) => r3(curves[name](ms))
+    const at = (name: keyof typeof curves) => round3(curves[name](ms))
     const owned = at('owned')
     const count = at('count')
     const shot: Shot<WantlistTrack> = {
@@ -260,12 +258,12 @@ export const WANTLIST_SCORE: Score<WantlistTrack> = {
         ],
       },
       others: { opacity: at('othersDim') },
-      'count:3': { opacity: r3(1 - count) },
+      'count:3': { opacity: round3(1 - count) },
       'count:2': { opacity: count },
       screen: { opacity: at('screenFade'), blur: at('screenBlur') },
       sheen: { transform: [{ translate: [at('sheen'), 0] }, { rotateZ: 20 }] },
       heading: rise(at('heading')),
-      unowned: { opacity: r3(1 - owned) },
+      unowned: { opacity: round3(1 - owned) },
       owned: { opacity: owned },
       press: press(at('press')),
       prompt: rise(at('prompt')),

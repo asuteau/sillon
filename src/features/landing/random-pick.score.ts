@@ -6,7 +6,7 @@
 // into the haze; its disc slides out, turning, its heading rises. "Pick
 // again": the record drops back, the dig goes deeper, the next one rises.
 // Then the pick closes, everything settles back and the loop starts over.
-import { CURVES, mix, track } from './film/film.model'
+import { CURVES, mix, round3, track } from './film/film.model'
 import type { Key, Look, Move, Score, Shot } from './film/film.model'
 
 export const RANDOM_PICK_MS = 11_200
@@ -357,8 +357,6 @@ const BUTTONS = {
 // Discs turn at about 33⅓ rpm, a whole number of turns a loop
 const TURNS = 6
 
-const rounded = (n: number) => Math.round(n * 1000) / 1000
-
 export const RANDOM_PICK_SCORE: Score<RandomPickTrack> = {
   tracks: RANDOM_PICK_TRACKS,
   length: RANDOM_PICK_MS,
@@ -371,7 +369,7 @@ export const RANDOM_PICK_SCORE: Score<RandomPickTrack> = {
     const shot: Shot<RandomPickTrack> = {
       world: { transform: worldMoves(t) },
       spin: {
-        transform: [{ rotateZ: rounded((t / RANDOM_PICK_MS) * TURNS * 360) }],
+        transform: [{ rotateZ: round3((t / RANDOM_PICK_MS) * TURNS * 360) }],
       },
     }
     for (const slot of SLOTS) shot[`sleeve:${slot}`] = sleeveLook(slot, t)
