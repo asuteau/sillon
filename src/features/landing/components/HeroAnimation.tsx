@@ -11,7 +11,7 @@ import { RecordHeading } from '#/shared/components/RecordHeading'
 import { Button } from '#/shared/components/ui/button'
 
 import { GeneratedCover } from './GeneratedCover'
-import { useHeroPlayback } from '../hooks/use-hero-playback'
+import { useFilmPlayer } from '../hooks/use-film-player'
 import {
   HERO_CAST,
   LANDING_RECORDS,
@@ -20,16 +20,17 @@ import {
   landingPressing,
   pressingSurface,
 } from '../content/landing.content'
+import { lookStyle } from '../film/film-css.utils'
+import type { Shot } from '../film/film.model'
 import {
+  HERO_BEATS,
   HERO_CAST_SIZE,
+  HERO_SCORE,
   HERO_SLOTS,
   HERO_STAGE_VARS,
-  HERO_TRACKS,
-  frameAt,
   heroCast,
-  poseTransform,
-} from '../landing.timeline'
-import type { HeroClock, HeroSlot, HeroTrackName } from '../landing.timeline'
+} from '../hero.score'
+import type { HeroFilmTrack, HeroSlot, HeroTrackName } from '../hero.score'
 
 // The cast as the app would read it: Vinyl colour from the Discogs formats,
 // the Cover tint, the Record screen's catalogue lines
@@ -47,35 +48,24 @@ const CAST = HERO_CAST.map(({ index, tintHue }) => {
 
 type CastMember = (typeof CAST)[number]
 
-// An element's look before its Web Animation takes over, or for good as the
-// reduced-motion still
-const restingStyle = (
-  clock: HeroClock,
-  name: HeroTrackName,
-): React.CSSProperties => {
-  const { opacity, pose, draw } = frameAt(
-    HERO_TRACKS[clock.part][name],
-    clock.ms,
-  )
-  return name === 'grooveDraw'
-    ? { '--groove-undrawn': 1 - draw }
-    : { opacity, transform: poseTransform(pose) }
-}
+// Every tracked element's look while it rests: before Motion takes over, or
+// for good as the reduced-motion still
+type Looks = Shot<HeroFilmTrack>
 
 interface TrackedProps {
   name: HeroTrackName
-  clock: HeroClock
+  looks: Looks
   className?: string
   style?: React.CSSProperties
   children?: React.ReactNode
 }
 
-// One element the film moves (`data-track`, see useHeroPlayback)
-const Tracked = ({ name, clock, className, style, children }: TrackedProps) => (
+// One element the film moves (`data-track`, see useFilmPlayer)
+const Tracked = ({ name, looks, className, style, children }: TrackedProps) => (
   <div
     data-track={name}
     className={className}
-    style={{ ...style, ...restingStyle(clock, name) }}
+    style={{ ...style, ...lookStyle(looks[name] ?? {}) }}
   >
     {children}
   </div>
@@ -84,12 +74,12 @@ const Tracked = ({ name, clock, className, style, children }: TrackedProps) => (
 interface SlideProps {
   slot: HeroSlot
   member: CastMember
-  clock: HeroClock
+  looks: Looks
 }
 
 // One slide of the strip: a generated Cover, and for the centred and next
 // slides, the disc that pulls out of it in its Vinyl colour
-const Slide = ({ slot, member, clock }: SlideProps) => {
+const Slide = ({ slot, member, looks }: SlideProps) => {
   const { record, pressing, surface, tint } = member
   const sleeve = (
     <GeneratedCover
@@ -103,7 +93,7 @@ const Slide = ({ slot, member, clock }: SlideProps) => {
   return (
     <Tracked
       name={`slide:${slot}`}
-      clock={clock}
+      looks={looks}
       className="hero-film-slide"
       style={{ '--cover-tint': tint }}
     >
@@ -111,10 +101,15 @@ const Slide = ({ slot, member, clock }: SlideProps) => {
         <>
           <Tracked
             name={`disc:${slot}`}
-            clock={clock}
+            looks={looks}
             className="hero-film-disc absolute inset-[3%]"
           >
-            <span data-spin className="absolute inset-0">
+            {/* The grooves turn (`spin`); the sheen stays with the light */}
+            <span
+              data-track="spin"
+              data-track-target=".disc-grooves"
+              className="absolute inset-0"
+            >
               <Disc
                 surface={surface.background}
                 seeThrough={surface.seeThrough}
@@ -123,7 +118,7 @@ const Slide = ({ slot, member, clock }: SlideProps) => {
           </Tracked>
           <Tracked
             name={`sleeve:${slot}`}
-            clock={clock}
+            looks={looks}
             className="hero-film-sleeve absolute inset-0"
           >
             {sleeve}
@@ -139,16 +134,16 @@ const Slide = ({ slot, member, clock }: SlideProps) => {
 interface CaptionProps {
   slot: 0 | 1
   pass: number
-  clock: HeroClock
+  looks: Looks
 }
 
-const Caption = ({ slot, pass, clock }: CaptionProps) => {
+const Caption = ({ slot, pass, looks }: CaptionProps) => {
   const cast = heroCast(pass, slot)
   const { record } = CAST[cast]
   return (
     <Tracked
       name={`caption:${slot}`}
-      clock={clock}
+      looks={looks}
       className="absolute inset-x-[6cqw] top-[66cqw] flex"
     >
       <SleevePullCaption
@@ -168,7 +163,11 @@ const Caption = ({ slot, pass, clock }: CaptionProps) => {
 // Built from the app's own pieces; decorative and inert; pauses off-screen or
 // in a hidden tab, and holds one still frame with reduced motion.
 export const HeroAnimation = () => {
-  const { stageRef, scene, clock, isPlaying } = useHeroPlayback()
+  const { stageRef, scene, at, isPlaying } = useFilmPlayer(
+    HERO_SCORE,
+    HERO_BEATS,
+  )
+  const looks = HERO_SCORE.sample(at)
   const onScreen = CAST[heroCast(scene.screen, 0)]
 
   return (
@@ -181,10 +180,10 @@ export const HeroAnimation = () => {
       className="hero-film @container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
       style={HERO_STAGE_VARS}
     >
-      <Tracked name="groove" clock={clock} className="hero-film-mark">
+      <Tracked name="groove" looks={looks} className="hero-film-mark">
         <Tracked
           name="grooveDraw"
-          clock={clock}
+          looks={looks}
           className="hero-film-groove size-full"
         >
           <GrooveMark size={160} tone="lacquer" className="size-full" />
@@ -192,7 +191,7 @@ export const HeroAnimation = () => {
       </Tracked>
       <Tracked
         name="wordmark"
-        clock={clock}
+        looks={looks}
         className="absolute inset-x-0 top-[84cqw] text-center text-foreground"
       >
         <Wordmark className="text-[11cqw]" />
@@ -200,7 +199,7 @@ export const HeroAnimation = () => {
 
       <Tracked
         name="world"
-        clock={clock}
+        looks={looks}
         className="hero-film-world absolute inset-0"
       >
         {HERO_SLOTS.map((slot) => (
@@ -208,16 +207,16 @@ export const HeroAnimation = () => {
             key={slot}
             slot={slot}
             member={CAST[heroCast(scene.pass, slot)]}
-            clock={clock}
+            looks={looks}
           />
         ))}
       </Tracked>
 
-      <Caption slot={0} pass={scene.pass} clock={clock} />
-      <Caption slot={1} pass={scene.pass} clock={clock} />
+      <Caption slot={0} pass={scene.pass} looks={looks} />
+      <Caption slot={1} pass={scene.pass} looks={looks} />
       <Tracked
         name="pick"
-        clock={clock}
+        looks={looks}
         className="absolute inset-x-0 top-[92cqw] flex justify-center"
       >
         <Button variant="lacquer" size="lg">
@@ -229,20 +228,20 @@ export const HeroAnimation = () => {
       {/* The Record screen; its Cover is the flying one, above */}
       <Tracked
         name="screen"
-        clock={clock}
+        looks={looks}
         className="absolute inset-0 bg-background"
         style={{ '--cover-tint': onScreen.tint }}
       >
         <CoverGlow tint={onScreen.tint} />
         <div className="absolute inset-x-[6cqw] top-[55cqw] flex flex-col items-center gap-[4cqw]">
-          <Tracked name="screenHeading" clock={clock}>
+          <Tracked name="screenHeading" looks={looks}>
             <RecordHeading
               artist={onScreen.record.artist}
               title={onScreen.record.title}
               catalogue={onScreen.catalogue}
             />
           </Tracked>
-          <Tracked name="screenDiscs" clock={clock}>
+          <Tracked name="screenDiscs" looks={looks}>
             <DiscRow
               releaseId={onScreen.pressing.id}
               formats={onScreen.pressing.formats}
@@ -253,7 +252,7 @@ export const HeroAnimation = () => {
       </Tracked>
       <Tracked
         name="flyer"
-        clock={clock}
+        looks={looks}
         className="hero-film-flyer hero-film-sleeve"
       >
         <GeneratedCover

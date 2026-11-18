@@ -454,8 +454,9 @@
 
 /* The landing hero film, Pull (HeroAnimation): placed in cqw of its 4:5
    stage by the --hero-* properties the stage sets (HERO_STAGE_VARS), moved
-   by Web Animations (transform and opacity). The strip's edges fade into the
-   page; the camera scales about the centred slide */
+   by its score (transform and opacity; the groove's draw by --film-undrawn).
+   The strip's edges fade into the page; the camera scales about the centred
+   slide */
 .hero-film-slide,
 .hero-film-mark,
 .hero-film-flyer {
@@ -496,7 +497,7 @@
 
 .hero-film-groove path {
   stroke-dasharray: 1;
-  stroke-dashoffset: var(--groove-undrawn, 0);
+  stroke-dashoffset: var(--film-undrawn, 0);
 }
 
 .hero-film-sleeve {
@@ -525,6 +526,90 @@
 
 /* No sheet behind the hero's Record screen: the hole shows the page */
 .hero-film .disc-row .disc-hole {
+  background: var(--background);
+}
+
+/* The landing's Collection loop (CollectionLoop): placed in cqw of its 4:5
+   stage by the --loop-* properties the stage sets (COLLECTION_STAGE_VARS),
+   moved by its score. The camera is a CSS 3D set: the strip turns under one
+   lens about the centred slide; neighbours sit back, out of focus */
+[data-slot='collection-film'][data-paused] * {
+  animation-play-state: paused;
+}
+
+.collection-loop-slide,
+.collection-loop-flyer {
+  position: absolute;
+  left: calc(50cqw - var(--loop-box) / 2);
+  top: calc(var(--loop-box-y) - var(--loop-box) / 2);
+  width: var(--loop-box);
+  height: var(--loop-box);
+}
+
+.collection-loop-slide {
+  --loop-box: var(--loop-sleeve);
+  --loop-box-y: var(--loop-slide-y);
+}
+
+.collection-loop-flyer {
+  --loop-box: var(--loop-cover);
+  --loop-box-y: var(--loop-cover-y);
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.collection-loop-strip {
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+}
+
+.collection-loop-camera {
+  transform-origin: 50cqw var(--loop-slide-y);
+  transform-style: preserve-3d;
+}
+
+.collection-loop-sleeve {
+  box-shadow: 0 10px 30px var(--pull-shadow);
+  border-radius: var(--radius);
+  backface-visibility: hidden;
+}
+
+.collection-loop-disc .disc {
+  inset: 0;
+}
+
+/* A soft band of light, brighter on dark Covers than it could be on light */
+.collection-loop-glint {
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    oklch(1 0 0 / 0.28) 50%,
+    transparent 80%
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Frameless: the Record screen's glow fades out before the
+   stage's edges, with no tinted top edge */
+.collection-loop .cover-glow {
+  background: radial-gradient(
+    closest-side at 50% 30%,
+    oklch(
+        from var(--cover-tint) var(--cover-glow-lightness) c h /
+          var(--cover-glow-alpha)
+      )
+      40%,
+    transparent
+  );
+  box-shadow: none;
+}
+
+.collection-loop .disc-row .disc-hole {
   background: var(--background);
 }
 

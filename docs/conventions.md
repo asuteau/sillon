@@ -34,6 +34,7 @@ One file per responsibility, named `{domain}.{role}.ts`. When a role outgrows on
 | `.store.ts`     | Client state with `useSyncExternalStore`, persisted to `localStorage`  |
 | `.persist.ts`   | Query cache persistence                                                |
 | `.content.ts`   | Static copy and made-up records for marketing pages                    |
+| `.score.ts`     | A landing film's score: pure looks over time (ADR 0005)                |
 | `.test.ts(x)`   | Vitest, next to the file it tests                                      |
 
 Components are `PascalCase.tsx`; hooks are `use-kebab-case.ts`.
