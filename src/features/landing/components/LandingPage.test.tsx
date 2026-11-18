@@ -200,10 +200,10 @@ describe('LandingPage', () => {
     ).toBeGreaterThanOrEqual(8)
   })
 
-  it('keeps the stills out of the tab order', () => {
+  it('keeps the stills and feature films out of the tab order', () => {
     const { container } = renderLanding()
     const stills = container.querySelectorAll(
-      '[data-slot="landing-still"], [data-slot="landing-loop"]',
+      '[data-slot="landing-still"], [data-slot$="-film"]',
     )
     expect(stills).toHaveLength(5)
     for (const still of [

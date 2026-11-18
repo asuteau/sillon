@@ -27,7 +27,7 @@ afterEach(() => {
 })
 
 const stage = (container: HTMLElement) =>
-  container.querySelector<HTMLElement>('[data-slot="landing-loop"]')
+  container.querySelector<HTMLElement>('[data-slot="scan-film"]')
 const track = (container: HTMLElement, name: string) =>
   container.querySelector<HTMLElement>(`[data-track="${name}"]`)
 

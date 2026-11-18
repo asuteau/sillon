@@ -270,7 +270,7 @@ export const ScanLoop = () => {
   return (
     <div
       ref={stageRef}
-      data-slot="landing-loop"
+      data-slot="scan-film"
       inert
       aria-hidden
       className="@container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
