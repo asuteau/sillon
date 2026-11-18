@@ -145,6 +145,7 @@ Fast and quiet: fades by default, three signatures, nothing else. The landing he
 | Hero film, Pull (landing)   | 6.6s opening, once; then a 7.6s loop per record  | platter, fade; its own: out `(.16,1,.3,1)`, in-out `(.45,0,.1,1)` |
 | Collection loop (landing)   | 10s pass, looped; plays only on screen           | platter, fade, out, in-out; dolly `(.55,0,.12,1)`                 |
 | Wantlist loop (landing)     | 10s loop, in view only                           | platter, fade, out, in-out; its own: dolly `(.55,0,.12,1)`        |
+| Random pick loop (landing)  | 11.2s loop, in view only                         | platter, fade, out, in-out                                        |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero film plays the same move as one of its own tracks (see Hero film).
 
@@ -190,6 +191,8 @@ Then the loop, one pass per record, four records taking turns (`HERO_CAST_SIZE`)
 - Frameless: the stage's edges fade (mask, 7%); the Record screen stands on the page ground lit by its Cover tint, fading out before the Wantlist behind.
 - Reduced motion: one still, `WANTLIST_SCORE.still` (5400ms): the Record screen sharp, Owned, the prompt up, the Wantlist soft behind.
 
+**Random pick loop** (`RandomPickFilm`, `src/features/landing/random-pick.score.ts`). The Random pick section's loop, 11.2s, seamless (its last frame is its first). A crate of seven records (generated Covers) under a crane camera, CSS 3D under one perspective. "Pick for me" dips (500ms); the sleeves in front flick forward one after the other (700ms on, 120ms apart, out); the drawn record rises out of the crate with weight, a touch past and settling (1100–2700ms, platter then in-out), turning to face the camera as the camera cranes down and dollies in, while the crate falls back into the page's haze (95% `--background`) and a light crosses its Cover; its disc slides out in its Vinyl colour to the Sleeve pull's pose (2600–3400ms, platter), turning; its heading (`RecordHeading`) and "Pick again" rise in (out). "Pick again" (4500ms): the disc tucks in, the record drops home, the dig goes two sleeves deeper and the next record is drawn the same way (5950–8550ms). Then the pick closes: the record drops home, the sleeves settle back, back to front (10150ms on, 90ms apart, in-out), "Pick for me" returns and the camera cranes back up to where it started. Discs turn 6 times a loop (~33⅓ rpm). Frameless, on the page ground. Plays only on screen; reduced motion: one still, `RANDOM_PICK_SCORE.still` (the first record drawn, its disc out, heading and "Pick again" shown). Landing only: the app's own Random pick stays a plain fade.
+
 Home is laid out on the Sleeve pull's centre axis (`text-center` on Home's `Page`): the page title, the caption, the Discogs attribution and the Random pick prompt (`RandomPickPrompt`: question, subline, any error, button stacked, frameless — no card chrome) are all centred, at every width, including the loading and empty states. Home only; every other page title stays left-aligned.
 
 **The disc** (`Disc`, `.disc-*`) is a brand object, like the mark: vinyl in the Release's Vinyl colour with fine grooves and a sheen, a label in the Cover tint (§3; grey for House sleeves, cross-fading from grey as the tint arrives), a printed line on the label so the turn shows, and a centre hole in `--background`. Square sleeve, round record (§4).
@@ -217,7 +220,7 @@ The disc's colour (`discSurface()`, `src/features/collection/disc-surface.utils.
 
 Rules:
 
-- No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade).
+- No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade; the landing's Random pick loop is a film, not the app).
 - `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero film shows one still (the Sleeve pull pose, disc pulled out), the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in. The reading state draws the same share in steps, without the glide, and its count jumps. Home's Sleeve pull keeps the disc in its sleeve and never shows it; neighbours still scale and dim (they follow the finger), removal cross-fades and the arrows jump. The landing's Sleeve pull poses (the hero's still, the Collection loop's still) are stills, not motion: their disc stays pulled out.
 
 ---
