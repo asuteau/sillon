@@ -62,7 +62,7 @@ describe('HeroAnimation', () => {
     expect(screen?.querySelectorAll('.disc-row-slot')).toHaveLength(2)
   })
 
-  it('opens on a disc in its Vinyl colour, from a House sleeve', () => {
+  it('opens on a disc in its Vinyl colour, from a generated Cover', () => {
     const { container } = render(<HeroAnimation />)
     const disc = track(container, 'disc:0')?.querySelector<HTMLElement>('.disc')
     expect(disc?.style.getPropertyValue('--disc-surface')).not.toBe('')

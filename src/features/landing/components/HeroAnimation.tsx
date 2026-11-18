@@ -6,11 +6,11 @@ import { Disc } from '#/shared/components/brand/Disc'
 import { GrooveMark } from '#/shared/components/brand/GrooveMark'
 import { Wordmark } from '#/shared/components/brand/Wordmark'
 import { CoverGlow } from '#/shared/components/CoverGlow'
-import { HouseSleeve } from '#/shared/components/HouseSleeve'
 import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { Button } from '#/shared/components/ui/button'
 
+import { GeneratedCover } from './GeneratedCover'
 import { useHeroPlayback } from '../hooks/use-hero-playback'
 import {
   HERO_CAST,
@@ -87,14 +87,15 @@ interface SlideProps {
   clock: HeroClock
 }
 
-// One slide of the strip: a House sleeve, and for the centred and next
+// One slide of the strip: a generated Cover, and for the centred and next
 // slides, the disc that pulls out of it in its Vinyl colour
 const Slide = ({ slot, member, clock }: SlideProps) => {
-  const { record, surface, tint } = member
+  const { record, pressing, surface, tint } = member
   const sleeve = (
-    <HouseSleeve
+    <GeneratedCover
       artist={record.artist}
       title={record.title}
+      seed={pressing.id}
       className="size-full rounded-(--radius)"
     />
   )
@@ -255,9 +256,10 @@ export const HeroAnimation = () => {
         clock={clock}
         className="hero-film-flyer hero-film-sleeve"
       >
-        <HouseSleeve
+        <GeneratedCover
           artist={onScreen.record.artist}
           title={onScreen.record.title}
+          seed={onScreen.pressing.id}
           className="size-full rounded-(--radius)"
         />
       </Tracked>
