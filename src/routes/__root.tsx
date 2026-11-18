@@ -11,6 +11,8 @@ import {
   Outlet,
   Scripts,
   createRootRouteWithContext,
+  useLocation,
+  useMatch,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
@@ -103,6 +105,17 @@ function RootComponent() {
   )
 }
 
+// The signed-out landing carries its own header
+const AppHeader = () => {
+  const hasLandingHeader = useMatch({
+    from: '__root__',
+    select: (match) => !match.context.user,
+  })
+  const isHome = useLocation({ select: (l) => l.pathname === '/' })
+  if (hasLandingHeader && isHome) return null
+  return <Header />
+}
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -113,7 +126,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="font-sans antialiased wrap-anywhere selection:bg-foreground/15">
         <div vaul-drawer-wrapper="" className="min-h-svh bg-background">
           <PwaUpdateBanner />
-          <Header />
+          <AppHeader />
           {children}
           <Footer />
           <BottomNav />
