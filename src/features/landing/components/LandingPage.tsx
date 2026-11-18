@@ -18,11 +18,14 @@ import { WantlistFilm } from './WantlistFilm'
 export const LandingPage = () => (
   <div className="@container overflow-x-clip">
     <LandingHeader />
-    <main id="top" className="mx-auto w-full max-w-270 scroll-mt-20 px-4 pb-8">
+    <main
+      id="top"
+      className="mx-auto w-full max-w-270 scroll-mt-24 sm:scroll-mt-20 px-4 pb-8"
+    >
       <LandingHero />
       <LandingKeyFacts />
       <LandingChallenge />
-      <div id="features" className="scroll-mt-20" />
+      <div id="features" className="scroll-mt-24 sm:scroll-mt-20" />
 
       <FeatureSection
         id="collection"

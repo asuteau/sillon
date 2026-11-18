@@ -195,6 +195,8 @@ describe('LandingPage', () => {
     for (const a of anchors) {
       const id = a.getAttribute('href')?.slice(1) ?? ''
       expect(container.querySelector(`#${id}`)).not.toBeNull()
+      // On a phone too, never hidden below a breakpoint
+      expect(a.className).not.toMatch(/(^|\s)hidden(\s|$)/)
     }
     expect(
       within(header)

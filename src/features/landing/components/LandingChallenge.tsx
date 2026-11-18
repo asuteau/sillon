@@ -2,7 +2,7 @@
 export const LandingChallenge = () => (
   <section
     aria-labelledby="challenge-title"
-    className="scroll-mt-20 border-t border-border py-14 sm:py-20"
+    className="scroll-mt-24 sm:scroll-mt-20 border-t border-border py-14 sm:py-20"
   >
     <div className="flex max-w-2xl flex-col gap-4">
       <p className="type-caps text-[11px] text-muted-foreground">The problem</p>

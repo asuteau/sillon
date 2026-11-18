@@ -24,7 +24,7 @@ export const FeatureSection = ({
   <section
     id={id}
     aria-labelledby={`${id}-title`}
-    className="scroll-mt-20 border-t border-border py-14 sm:py-20"
+    className="scroll-mt-24 sm:scroll-mt-20 border-t border-border py-14 sm:py-20"
   >
     <div className="grid items-center gap-8 md:grid-cols-2 md:gap-14">
       <div className={cn('flex flex-col gap-4', flip && 'md:order-2')}>
