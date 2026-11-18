@@ -12,6 +12,8 @@ const EngineSpike = import.meta.env.DEV
   : () => null
 
 export const Route = createFileRoute('/spike/engine')({
+  // Client only: the shots measure the page and read the URL and theme
+  ssr: false,
   beforeLoad: () => {
     if (!import.meta.env.DEV) throw notFound()
   },
