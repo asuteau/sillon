@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { HERO_CAST, LANDING_RECORDS } from './content/landing.content'
+import { STACK_CAST, WALL_CAST } from './content/hero.content'
+import { LANDING_RECORDS } from './content/landing.content'
 import { coverArt } from './cover-art.utils'
 
 const THEMES = ['light', 'dark'] as const
@@ -16,10 +17,10 @@ describe('coverArt', () => {
 
   it('draws different art for each member of the cast', () => {
     for (const theme of THEMES) {
-      const arts = HERO_CAST.map(({ index }) =>
-        JSON.stringify(coverArt(104_101 + index, theme)),
-      )
-      expect(new Set(arts).size).toBe(HERO_CAST.length)
+      // The hero film's wall and Stack: every record its own Cover
+      const cast = [...WALL_CAST, ...STACK_CAST]
+      const arts = cast.map(({ seed }) => JSON.stringify(coverArt(seed, theme)))
+      expect(new Set(arts).size).toBe(cast.length)
     }
     const all = LANDING_RECORDS.map((_, i) =>
       JSON.stringify(coverArt(104_101 + i, 'light')),
