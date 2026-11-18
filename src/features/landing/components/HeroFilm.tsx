@@ -192,6 +192,7 @@ export const HeroFilm = () => {
       {framing === null ? (
         <div
           data-slot="hero-film"
+          inert
           aria-hidden
           className="absolute inset-0 bg-background"
         />
