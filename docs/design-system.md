@@ -143,6 +143,7 @@ Fast and quiet: fades by default, three signatures, nothing else. The landing he
 | Reading state, groove fill  | 600ms glide per request; count rolls ~300ms      | platter                                                           |
 | Sleeve pull                 | scroll-driven; timed moves 320ms                 | platter                                                           |
 | Hero film, Pull (landing)   | 6.6s opening, once; then a 7.6s loop per record  | platter, fade; its own: out `(.16,1,.3,1)`, in-out `(.45,0,.1,1)` |
+| Wantlist loop (landing)     | 10s loop, in view only                           | platter, fade, out, in-out; its own: dolly `(.55,0,.12,1)`        |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero film plays the same move as one of its own tracks (see Hero film).
 
@@ -179,6 +180,12 @@ Then the loop, one pass per record, four records taking turns (`HERO_CAST_SIZE`)
 - Pauses off-screen and in a hidden tab, and resumes where it stopped.
 - Frameless: no card or border; the strip's edges fade into the page (mask, 12%), and the Record screen's glow fades out before the stage's edges, with no tinted top edge.
 - Reduced motion: one still, `HERO_SCORE.still` (the opening's last frame, where the loop joins): the full Sleeve pull pose — the strip, the centred House sleeve with its disc pulled out in its Vinyl colour, the neighbours scaled down and dimmed, the caption and the Random pick button — no turn.
+
+**Wantlist loop** (`WantlistFilm`, `src/features/landing/wantlist.score.ts`). The Wantlist section's film: a want becomes a Fulfilled want. A CSS 3D set under one lens (`perspective: 120cqw`), the Wantlist 36 units behind the Record screen, the camera the world's inverse. Built from the app's own pieces: `RecordRow`s on a `RecordList`, `RecordHeading`, `ReleaseListButtons`, `FulfilledWantPromptView`, with a generated Cover. Beats (ms into the 10s loop): pushed in on the Wantlist, the want lifts toward the lens and the others dim (500–1300, out); the camera dollies back through the Record screen, which comes out of its blur as it passes (1500–3300, dolly, a touch past then settling), while the Wantlist racks out of focus behind (blur, 0.3 opacity); the Collection toggle is pressed and turns Owned (4100, fade), the key's sheen crossing the Cover (3800–5600); the prompt rises (4600–5200); Remove is pressed (6000); the camera pushes back through the screen to the Wantlist (6300–7900), where the want folds away (8400–9100, platter) and the count drops to 2. The set fades to the page ground (9350–10000) and the loop comes round in the dark, the want back in its place: the camera comes round exactly; the rest jumps only unseen.
+
+- Plays only in view (and the tab visible); a score on the film engine with no beats, so React never re-renders while it plays.
+- Frameless: the stage's edges fade (mask, 7%); the Record screen stands on the page ground lit by its Cover tint, fading out before the Wantlist behind.
+- Reduced motion: one still, `WANTLIST_SCORE.still` (5400ms): the Record screen sharp, Owned, the prompt up, the Wantlist soft behind.
 
 Home is laid out on the Sleeve pull's centre axis (`text-center` on Home's `Page`): the page title, the caption, the Discogs attribution and the Random pick prompt (`RandomPickPrompt`: question, subline, any error, button stacked, frameless — no card chrome) are all centred, at every width, including the loading and empty states. Home only; every other page title stays left-aligned.
 
