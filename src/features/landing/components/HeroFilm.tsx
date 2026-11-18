@@ -1,7 +1,9 @@
+import { RotateCcw } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { LIST_NAMES, plural } from '#/features/scan/components/StackBar'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
+import { Button } from '#/shared/components/ui/button'
 import { usePrefersReducedMotion } from '#/shared/hooks/use-prefers-reduced-motion'
 
 import { HeroSet, Tracked } from './HeroSet'
@@ -89,10 +91,10 @@ interface HeroStageProps {
   framing: HeroFraming
 }
 
-// The film on its stage
+// The film on its stage, and Replay once it has ended
 const HeroStage = ({ framing }: HeroStageProps) => {
   const score = HERO_SCORES[framing]
-  const { stageRef, at } = useFilmPlayer(score, NO_BEATS)
+  const { stageRef, at, hasEnded, replay } = useFilmPlayer(score, NO_BEATS)
   // Sampled once per rest pose: the set (hundreds of elements) re-renders
   // only when it moves to a new one
   const looks = useMemo(() => score.sample(at), [score, at])
@@ -143,6 +145,17 @@ const HeroStage = ({ framing }: HeroStageProps) => {
         </div>
         <StackHud looks={looks} centre={centre} />
       </div>
+      {hasEnded && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={replay}
+          className="absolute right-4 bottom-3 animate-in bg-background/70 fade-in sm:right-6 sm:bottom-5"
+        >
+          <RotateCcw />
+          Replay
+        </Button>
+      )}
     </>
   )
 }
@@ -151,8 +164,8 @@ const HeroStage = ({ framing }: HeroStageProps) => {
 // Stack of three sleeves is scanned and added in one go, the newest record
 // comes out of the wall and its disc slides out in its Vinyl colour; then
 // the camera pulls back and holds. Full width, 16:9 or about 4:5 for the
-// screen; decorative and inert; pauses off-screen and in a hidden tab; one
-// still with reduced motion.
+// screen; decorative and inert but for Replay; pauses off-screen and in a
+// hidden tab; one still with reduced motion.
 export const HeroFilm = () => {
   const framing = useHeroFraming()
   const reducedMotion = usePrefersReducedMotion()

@@ -226,6 +226,12 @@ describe('LandingPage', () => {
     expect(film.contains(connect)).toBe(false)
   })
 
+  it('offers no Replay with reduced motion: nothing plays', () => {
+    reducedMotion = true
+    renderLanding()
+    expect(screen.queryByRole('button', { name: 'Replay' })).toBeNull()
+  })
+
   it('follows the voice rules and the glossary', () => {
     const { container } = renderLanding()
     const text = container.textContent
