@@ -9,7 +9,7 @@ import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
 import { RandomPickStill } from './RandomPickStill'
 import { ScanStill } from './ScanStill'
-import { WantlistStill } from './WantlistStill'
+import { WantlistFilm } from './WantlistFilm'
 
 // The signed-out `/`: show the product, then "Connect with Discogs"
 export const LandingPage = () => (
@@ -45,7 +45,7 @@ export const LandingPage = () => (
         id="wantlist"
         label="Wantlist"
         title="Your wantlist, fulfilled."
-        still={<WantlistStill />}
+        still={<WantlistFilm />}
       >
         <p>
           Your wantlist sits next to your collection. Add the exact release you

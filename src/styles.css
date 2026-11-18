@@ -533,7 +533,7 @@
    stage by the --loop-* properties the stage sets (COLLECTION_STAGE_VARS),
    moved by its score. The camera is a CSS 3D set: the strip turns under one
    lens about the centred slide; neighbours sit back, out of focus */
-[data-slot='collection-loop'][data-paused] * {
+[data-slot='collection-film'][data-paused] * {
   animation-play-state: paused;
 }
 
@@ -594,7 +594,7 @@
   mix-blend-mode: soft-light;
 }
 
-/* Frameless inside its card: the Record screen's glow fades out before the
+/* Frameless: the Record screen's glow fades out before the
    stage's edges, with no tinted top edge */
 .collection-loop .cover-glow {
   background: radial-gradient(

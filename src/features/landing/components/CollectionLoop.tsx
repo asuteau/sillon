@@ -24,7 +24,6 @@ import { lookStyle } from '../film/film-css.utils'
 import type { Shot } from '../film/film.model'
 import { useFilmPlayer } from '../hooks/use-film-player'
 import { GeneratedCover } from './GeneratedCover'
-import { LandingStill } from './LandingStill'
 
 // The records taking turns at the strip's centre, by LANDING_RECORDS index,
 // each in a different Vinyl colour; the second, first on the Record screen,
@@ -170,7 +169,7 @@ const Caption = ({ slot, turn, looks }: CaptionProps) => {
 // The Collection section's loop: Recent additions as the Sleeve pull, seen
 // through a camera that swings with the strip; the next record pulls out and
 // its Cover grows into its Record screen, then lands back on its sleeve.
-// Built from the app's own pieces; decorative and inert; plays only on
+// Built from the app's own pieces; frameless, decorative and inert; plays only on
 // screen, and holds the Sleeve pull still with reduced motion.
 export const CollectionLoop = () => {
   const { stageRef, scene, at, isPlaying } = useFilmPlayer(
@@ -181,75 +180,74 @@ export const CollectionLoop = () => {
   const onScreen = castAt(scene.screen)
 
   return (
-    <LandingStill className="p-0 sm:p-0">
-      <div
-        ref={stageRef}
-        data-slot="collection-loop"
-        data-paused={isPlaying ? undefined : ''}
-        aria-hidden
-        className="collection-loop @container relative aspect-4/5 w-full overflow-hidden"
-        style={COLLECTION_STAGE_VARS}
-      >
-        {/* The strip's edges fade into the page; the camera moves inside */}
-        <div className="collection-loop-strip absolute inset-0">
-          <Tracked
-            name="camera"
-            looks={looks}
-            className="collection-loop-camera absolute inset-0"
-          >
-            {COLLECTION_SLOTS.map((slot) => (
-              <Slide
-                key={slot}
-                slot={slot}
-                member={castAt(scene.pass + slot)}
-                looks={looks}
-              />
-            ))}
-          </Tracked>
-        </div>
-
-        <Caption slot={0} turn={scene.pass} looks={looks} />
-        <Caption slot={1} turn={scene.pass + 1} looks={looks} />
-
-        {/* The Record screen; its Cover is the flying one, above */}
+    <div
+      ref={stageRef}
+      data-slot="collection-film"
+      data-paused={isPlaying ? undefined : ''}
+      inert
+      aria-hidden
+      className="collection-loop @container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
+      style={COLLECTION_STAGE_VARS}
+    >
+      {/* The strip's edges fade into the page; the camera moves inside */}
+      <div className="collection-loop-strip absolute inset-0">
         <Tracked
-          name="screen"
+          name="camera"
           looks={looks}
-          className="absolute inset-0 bg-background"
-          style={{ '--cover-tint': onScreen.tint }}
+          className="collection-loop-camera absolute inset-0"
         >
-          <CoverGlow tint={onScreen.tint} />
-          <div className="absolute inset-x-[6cqw] top-[64cqw] flex flex-col items-center gap-[4cqw]">
-            <Tracked name="screenHeading" looks={looks}>
-              <RecordHeading
-                artist={onScreen.record.artist}
-                title={onScreen.record.title}
-                catalogue={onScreen.catalogue}
-              />
-            </Tracked>
-            <Tracked name="screenDiscs" looks={looks}>
-              <DiscRow
-                releaseId={onScreen.pressing.id}
-                formats={onScreen.pressing.formats}
-                picture={null}
-              />
-            </Tracked>
-          </div>
-        </Tracked>
-        <Tracked
-          name="flyer"
-          looks={looks}
-          className="collection-loop-flyer collection-loop-sleeve"
-        >
-          <Cover member={onScreen} />
-          {/* Light crossing the Cover as it lands */}
-          <Tracked
-            name="glint"
-            looks={looks}
-            className="collection-loop-glint absolute inset-y-0 left-[20%] w-[60%]"
-          />
+          {COLLECTION_SLOTS.map((slot) => (
+            <Slide
+              key={slot}
+              slot={slot}
+              member={castAt(scene.pass + slot)}
+              looks={looks}
+            />
+          ))}
         </Tracked>
       </div>
-    </LandingStill>
+
+      <Caption slot={0} turn={scene.pass} looks={looks} />
+      <Caption slot={1} turn={scene.pass + 1} looks={looks} />
+
+      {/* The Record screen; its Cover is the flying one, above */}
+      <Tracked
+        name="screen"
+        looks={looks}
+        className="absolute inset-0 bg-background"
+        style={{ '--cover-tint': onScreen.tint }}
+      >
+        <CoverGlow tint={onScreen.tint} />
+        <div className="absolute inset-x-[6cqw] top-[64cqw] flex flex-col items-center gap-[4cqw]">
+          <Tracked name="screenHeading" looks={looks}>
+            <RecordHeading
+              artist={onScreen.record.artist}
+              title={onScreen.record.title}
+              catalogue={onScreen.catalogue}
+            />
+          </Tracked>
+          <Tracked name="screenDiscs" looks={looks}>
+            <DiscRow
+              releaseId={onScreen.pressing.id}
+              formats={onScreen.pressing.formats}
+              picture={null}
+            />
+          </Tracked>
+        </div>
+      </Tracked>
+      <Tracked
+        name="flyer"
+        looks={looks}
+        className="collection-loop-flyer collection-loop-sleeve"
+      >
+        <Cover member={onScreen} />
+        {/* Light crossing the Cover as it lands */}
+        <Tracked
+          name="glint"
+          looks={looks}
+          className="collection-loop-glint absolute inset-y-0 left-[20%] w-[60%]"
+        />
+      </Tracked>
+    </div>
   )
 }

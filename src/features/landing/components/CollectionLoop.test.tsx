@@ -36,7 +36,7 @@ const renderLoop = () => {
 describe('CollectionLoop', () => {
   it('is decorative: hidden from assistive tech, inert, nothing to focus', () => {
     const { container } = renderLoop()
-    const stage = container.querySelector('[data-slot="collection-loop"]')
+    const stage = container.querySelector('[data-slot="collection-film"]')
     expect(stage?.getAttribute('aria-hidden')).toBe('true')
     expect(stage?.closest('[inert]')).not.toBeNull()
     expect(
