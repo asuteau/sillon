@@ -1,4 +1,4 @@
-import { CollectionStill } from './CollectionStill'
+import { CollectionLoop } from './CollectionLoop'
 import { LandingChallenge } from './LandingChallenge'
 import { LandingHeader } from './LandingHeader'
 import { LandingKeyFacts } from './LandingKeyFacts'
@@ -25,7 +25,7 @@ export const LandingPage = () => (
         id="collection"
         label="Collection"
         title="Your collection, in HD."
-        still={<CollectionStill />}
+        still={<CollectionLoop />}
       >
         <p>
           Sillon reads your Discogs collection and finds an HD cover for every

@@ -195,7 +195,8 @@ describe('LandingPage', () => {
     const { container } = renderLanding()
     expect(container.querySelectorAll('img')).toHaveLength(0)
     expect(
-      container.querySelectorAll('[data-layout]').length,
+      container.querySelectorAll('[data-layout], [data-theme-art="light"]')
+        .length,
     ).toBeGreaterThanOrEqual(8)
   })
 

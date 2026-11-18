@@ -19,5 +19,10 @@ declare module 'react' {
     '--hero-groove'?: string
     '--hero-cover'?: string
     '--hero-cover-y'?: string
+    // The landing Collection loop's layout, in cqw (COLLECTION_STAGE_VARS)
+    '--loop-sleeve'?: string
+    '--loop-slide-y'?: string
+    '--loop-cover'?: string
+    '--loop-cover-y'?: string
   }
 }
