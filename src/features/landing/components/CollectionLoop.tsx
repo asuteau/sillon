@@ -1,5 +1,3 @@
-import type * as React from 'react'
-
 import { DiscRow } from '#/features/collection/components/DiscRow'
 import { SleevePullCaption } from '#/features/collection/components/SleevePull'
 import { Disc } from '#/shared/components/brand/Disc'
@@ -12,7 +10,7 @@ import {
   COLLECTION_SLOTS,
   COLLECTION_STAGE_VARS,
 } from '../collection.score'
-import type { CollectionTrack } from '../collection.score'
+import type { CollectionScene, CollectionTrack } from '../collection.score'
 import {
   LANDING_RECORDS,
   catalogueLines,
@@ -20,9 +18,9 @@ import {
   landingPressing,
   pressingSurface,
 } from '../content/landing.content'
-import { lookStyle } from '../film/film-css.utils'
+import { FilmStage } from '../film/FilmStage'
 import type { Shot } from '../film/film.model'
-import { useFilmPlayer } from '../hooks/use-film-player'
+import { Tracked } from '../film/Tracked'
 import { GeneratedCover } from './GeneratedCover'
 
 // The records taking turns at the strip's centre, by LANDING_RECORDS index,
@@ -50,28 +48,6 @@ type CastMember = (typeof CAST)[number]
 const castAt = (turn: number): CastMember =>
   CAST[((turn % CAST.length) + CAST.length) % CAST.length]
 
-type Looks = Shot<CollectionTrack>
-
-interface TrackedProps {
-  name: CollectionTrack
-  looks: Looks
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
-}
-
-// One element the film moves (`data-track`, see useFilmPlayer), resting at
-// its look until the browser takes over
-const Tracked = ({ name, looks, className, style, children }: TrackedProps) => (
-  <div
-    data-track={name}
-    className={className}
-    style={{ ...style, ...lookStyle(looks[name] ?? {}) }}
-  >
-    {children}
-  </div>
-)
-
 interface CoverProps {
   member: CastMember
 }
@@ -88,7 +64,7 @@ const Cover = ({ member: { record, pressing } }: CoverProps) => (
 interface SlideProps {
   slot: (typeof COLLECTION_SLOTS)[number]
   member: CastMember
-  looks: Looks
+  looks: Shot<CollectionTrack>
 }
 
 // One slide of the strip: a generated Cover and, for the two slides that
@@ -144,7 +120,7 @@ const Slide = ({ slot, member, looks }: SlideProps) => {
 interface CaptionProps {
   slot: 0 | 1
   turn: number
-  looks: Looks
+  looks: Shot<CollectionTrack>
 }
 
 const Caption = ({ slot, turn, looks }: CaptionProps) => {
@@ -171,24 +147,28 @@ const Caption = ({ slot, turn, looks }: CaptionProps) => {
 // its Cover grows into its Record screen, then lands back on its sleeve.
 // Built from the app's own pieces; frameless, decorative and inert; plays only on
 // screen, and holds the Sleeve pull still with reduced motion.
-export const CollectionLoop = () => {
-  const { stageRef, scene, at, isPlaying } = useFilmPlayer(
-    COLLECTION_SCORE,
-    COLLECTION_BEATS,
-  )
-  const looks = COLLECTION_SCORE.sample(at)
+export const CollectionLoop = () => (
+  <FilmStage
+    score={COLLECTION_SCORE}
+    beats={COLLECTION_BEATS}
+    slot="collection-film"
+    className="collection-loop aspect-4/5 w-full min-w-0 overflow-hidden"
+    style={COLLECTION_STAGE_VARS}
+  >
+    {({ looks, scene }) => <CollectionSet looks={looks} scene={scene} />}
+  </FilmStage>
+)
+
+interface CollectionSetProps {
+  looks: Shot<CollectionTrack>
+  scene: CollectionScene
+}
+
+const CollectionSet = ({ looks, scene }: CollectionSetProps) => {
   const onScreen = castAt(scene.screen)
 
   return (
-    <div
-      ref={stageRef}
-      data-slot="collection-film"
-      data-paused={isPlaying ? undefined : ''}
-      inert
-      aria-hidden
-      className="collection-loop @container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
-      style={COLLECTION_STAGE_VARS}
-    >
+    <>
       {/* The strip's edges fade into the page; the camera moves inside */}
       <div className="collection-loop-strip absolute inset-0">
         <Tracked
@@ -248,6 +228,6 @@ export const CollectionLoop = () => {
           className="collection-loop-glint absolute inset-y-0 left-[20%] w-[60%]"
         />
       </Tracked>
-    </div>
+    </>
   )
 }

@@ -63,6 +63,7 @@ const current = () => {
 }
 
 let reducedMotion = false
+let onMotionChange: Array<() => void> = []
 let intersect: (isIntersecting: boolean) => void = () => {}
 
 const setHidden = (hidden: boolean) => {
@@ -72,6 +73,15 @@ const setHidden = (hidden: boolean) => {
   })
   act(() => {
     document.dispatchEvent(new Event('visibilitychange'))
+  })
+}
+
+// The visitor turns reduced motion on (or the client learns it, after
+// hydrating as if motion were fine)
+const reduceMotion = () => {
+  reducedMotion = true
+  act(() => {
+    for (const listener of onMotionChange) listener()
   })
 }
 
@@ -130,10 +140,13 @@ beforeEach(() => {
   played = []
   samples = 0
   samplesAtFirstPlay = null
+  onMotionChange = []
   vi.stubGlobal('matchMedia', (query: string) => ({
     matches: query.includes('reduce') && reducedMotion,
-    addEventListener: () => {},
-    removeEventListener: () => {},
+    addEventListener: (_: string, listener: () => void) =>
+      onMotionChange.push(listener),
+    removeEventListener: (_: string, listener: () => void) =>
+      (onMotionChange = onMotionChange.filter((l) => l !== listener)),
   }))
   vi.stubGlobal(
     'IntersectionObserver',
@@ -276,5 +289,29 @@ describe('useFilmPlayer', () => {
     expect(live()).toHaveLength(0)
     // Nothing plays, so nothing ends
     expect(result.current.hasEnded).toBe(false)
+  })
+
+  it('is paused while nobody can see it, never as a still', () => {
+    const { result } = renderPlayer()
+    expect(result.current.isPaused).toBe(false)
+    intersect(false)
+    expect(result.current.isPaused).toBe(true)
+    reduceMotion()
+    expect(result.current.isPaused).toBe(false)
+  })
+
+  it('stops for the still when reduced motion turns on, leaving nothing behind', () => {
+    const { result } = renderPlayer()
+    advance(1000)
+    expect(live().length).toBeGreaterThan(0)
+    reduceMotion()
+    expect(result.current.at).toBe(9000)
+    // Every animation it played is cancelled, on the tracked elements and
+    // the parts they name: the browser drops a cancelled animation's look,
+    // so each rests as React (or the CSS) sets it
+    expect(live()).toHaveLength(0)
+    expect(played.map((a) => a.target.tagName)).toContain('I')
+    advance(20_000)
+    expect(live()).toHaveLength(0)
   })
 })

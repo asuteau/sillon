@@ -1,12 +1,9 @@
-import type * as React from 'react'
-
 import { Disc } from '#/shared/components/brand/Disc'
 import { RandomPickIcon } from '#/shared/components/icons/RandomPickIcon'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { Button } from '#/shared/components/ui/button'
 
 import { GeneratedCover } from './GeneratedCover'
-import { useFilmPlayer } from '../hooks/use-film-player'
 import {
   LANDING_RECORDS,
   catalogueLines,
@@ -14,9 +11,10 @@ import {
   landingPressing,
   pressingSurface,
 } from '../content/landing.content'
-import { lookStyle } from '../film/film-css.utils'
+import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
 import type { Shot } from '../film/film.model'
+import { Tracked } from '../film/Tracked'
 import {
   CRATE,
   PICKS,
@@ -43,33 +41,16 @@ const crateRecord = (slot: number) => {
   }
 }
 
-type Looks = Shot<RandomPickTrack>
-
 const cqw = (n: number) => `${n}cqw`
 
-interface TrackedProps {
+interface HazeProps {
   name: RandomPickTrack
-  looks: Looks
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
+  looks: Shot<RandomPickTrack>
 }
-
-// One element the film moves (`data-track`, see useFilmPlayer), resting at
-// its look until the browser takes over
-const Tracked = ({ name, looks, className, style, children }: TrackedProps) => (
-  <div
-    data-track={name}
-    className={className}
-    style={{ ...style, ...lookStyle(looks[name] ?? {}) }}
-  >
-    {children}
-  </div>
-)
 
 // The page's ground over the crate while a record is out: it falls back
 // into the haze
-const Haze = ({ name, looks }: { name: RandomPickTrack; looks: Looks }) => (
+const Haze = ({ name, looks }: HazeProps) => (
   <Tracked
     name={name}
     looks={looks}
@@ -89,7 +70,7 @@ interface PanelProps {
   height: number
   transform: string
   className: string
-  looks: Looks
+  looks: Shot<RandomPickTrack>
 }
 
 // A flat panel of the crate, centred on the world's origin then placed
@@ -108,9 +89,13 @@ const Panel = ({ width, height, transform, className, looks }: PanelProps) => (
   </div>
 )
 
+interface CrateProps {
+  looks: Shot<RandomPickTrack>
+}
+
 // The crate's floor and walls, round the records; the front wall is low so
 // the Covers show over it
-const Crate = ({ looks }: { looks: Looks }) => (
+const Crate = ({ looks }: CrateProps) => (
   <>
     {/* Its contact shadow, on the floor it stands on */}
     <div
@@ -161,7 +146,7 @@ const Crate = ({ looks }: { looks: Looks }) => (
 
 interface SleeveProps {
   slot: number
-  looks: Looks
+  looks: Shot<RandomPickTrack>
 }
 
 // A record standing in the crate, hinged at its foot; a pick carries its
@@ -227,7 +212,7 @@ const Sleeve = ({ slot, looks }: SleeveProps) => {
 
 interface CaptionProps {
   pick: PickName
-  looks: Looks
+  looks: Shot<RandomPickTrack>
 }
 
 // The drawn record's heading, as on its Record screen
@@ -258,47 +243,45 @@ const PICK_BUTTONS = [
 // Vinyl colour; "Pick again" draws the next. Landing only: the app's own
 // Random pick stays a plain fade. Built from the app's own pieces;
 // decorative and inert; plays only on screen, a still with reduced motion.
-export const RandomPickFilm = () => {
-  const { stageRef, at } = useFilmPlayer(RANDOM_PICK_SCORE, NO_BEATS)
-  const looks = RANDOM_PICK_SCORE.sample(at)
+export const RandomPickFilm = () => (
+  <FilmStage
+    score={RANDOM_PICK_SCORE}
+    beats={NO_BEATS}
+    slot="random-pick-film"
+    className="aspect-4/5 w-full min-w-0 overflow-hidden"
+  >
+    {({ looks }) => (
+      <>
+        <div className="absolute inset-0 perspective-[160cqw] perspective-origin-[50%_45%]">
+          <Tracked
+            name="world"
+            looks={looks}
+            className="absolute top-[78cqw] left-1/2 size-0 transform-3d"
+          >
+            <Crate looks={looks} />
+            {/* Back to front, so each Cover shows over the one behind */}
+            {[...SLOTS].reverse().map((slot) => (
+              <Sleeve key={slot} slot={slot} looks={looks} />
+            ))}
+          </Tracked>
+        </div>
 
-  return (
-    <div
-      ref={stageRef}
-      data-slot="random-pick-film"
-      inert
-      aria-hidden
-      className="@container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
-    >
-      <div className="absolute inset-0 perspective-[160cqw] perspective-origin-[50%_45%]">
-        <Tracked
-          name="world"
-          looks={looks}
-          className="absolute top-[78cqw] left-1/2 size-0 transform-3d"
-        >
-          <Crate looks={looks} />
-          {/* Back to front, so each Cover shows over the one behind */}
-          {[...SLOTS].reverse().map((slot) => (
-            <Sleeve key={slot} slot={slot} looks={looks} />
-          ))}
-        </Tracked>
-      </div>
-
-      <Caption pick="a" looks={looks} />
-      <Caption pick="b" looks={looks} />
-      {PICK_BUTTONS.map(([name, label]) => (
-        <Tracked
-          key={name}
-          name={name}
-          looks={looks}
-          className="absolute inset-x-0 bottom-[7cqw] flex justify-center"
-        >
-          <Button variant="lacquer" size="lg">
-            <RandomPickIcon />
-            {label}
-          </Button>
-        </Tracked>
-      ))}
-    </div>
-  )
-}
+        <Caption pick="a" looks={looks} />
+        <Caption pick="b" looks={looks} />
+        {PICK_BUTTONS.map(([name, label]) => (
+          <Tracked
+            key={name}
+            name={name}
+            looks={looks}
+            className="absolute inset-x-0 bottom-[7cqw] flex justify-center"
+          >
+            <Button variant="lacquer" size="lg">
+              <RandomPickIcon />
+              {label}
+            </Button>
+          </Tracked>
+        ))}
+      </>
+    )}
+  </FilmStage>
+)

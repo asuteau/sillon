@@ -1,12 +1,9 @@
-import type * as React from 'react'
-
 import { FulfilledWantPromptView } from '#/features/wantlist/components/FulfilledWantPrompt'
 import { RecordHeading } from '#/shared/components/RecordHeading'
 import { RecordList, RecordRow } from '#/shared/components/RecordList'
 import { ReleaseListButtons } from '#/shared/components/ReleaseListButtons'
 
 import { GeneratedCover } from './GeneratedCover'
-import { useFilmPlayer } from '../hooks/use-film-player'
 import {
   LANDING_RECORDS,
   catalogueLines,
@@ -14,10 +11,10 @@ import {
   landingPressing,
 } from '../content/landing.content'
 import { lookStyle } from '../film/film-css.utils'
+import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
-import type { Shot } from '../film/film.model'
+import { Tracked } from '../film/Tracked'
 import { WANTLIST_DEPTH, WANTLIST_SCORE } from '../wantlist.score'
-import type { WantlistTrack } from '../wantlist.score'
 
 // The want, and the two wants above it on the list, by LANDING_RECORDS index
 const WANT = 4
@@ -29,38 +26,10 @@ const castOf = (index: number) => ({
   seed: landingPressing(index).id,
 })
 
+// The want's record and its Cover's seed
+const WANTED = castOf(WANT)
+
 const NOOP = () => {}
-
-type Looks = Shot<WantlistTrack>
-
-interface TrackedProps {
-  name: WantlistTrack
-  looks: Looks
-  // A track moving descendants of a shared component (see useFilmPlayer)
-  target?: string
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
-}
-
-// One element the film moves, resting at its look until the browser takes over
-const Tracked = ({
-  name,
-  looks,
-  target,
-  className,
-  style,
-  children,
-}: TrackedProps) => (
-  <div
-    data-track={name}
-    data-track-target={target}
-    className={className}
-    style={target ? style : { ...style, ...lookStyle(looks[name] ?? {}) }}
-  >
-    {children}
-  </div>
-)
 
 interface WantRowProps {
   index: number
@@ -91,19 +60,14 @@ const WantRow = ({ index }: WantRowProps) => {
 // Wantlist, Remove, and the want folding away. A CSS 3D set under one lens,
 // built from the app's own pieces; decorative and inert; plays only in
 // view, and holds the offer as a still with reduced motion.
-export const WantlistFilm = () => {
-  const { stageRef, at } = useFilmPlayer(WANTLIST_SCORE, NO_BEATS)
-  const looks = WANTLIST_SCORE.sample(at)
-  const want = castOf(WANT)
-
-  return (
-    <div
-      ref={stageRef}
-      data-slot="wantlist-film"
-      inert
-      aria-hidden
-      className="@container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none mask-[linear-gradient(transparent,#000_7%,#000_93%,transparent),linear-gradient(90deg,transparent,#000_7%,#000_93%,transparent)] mask-intersect"
-    >
+export const WantlistFilm = () => (
+  <FilmStage
+    score={WANTLIST_SCORE}
+    beats={NO_BEATS}
+    slot="wantlist-film"
+    className="aspect-4/5 w-full min-w-0 overflow-hidden mask-[linear-gradient(transparent,#000_7%,#000_93%,transparent),linear-gradient(90deg,transparent,#000_7%,#000_93%,transparent)] mask-intersect"
+  >
+    {({ looks }) => (
       <Tracked
         name="exposure"
         looks={looks}
@@ -128,7 +92,7 @@ export const WantlistFilm = () => {
                 <p className="type-display text-[8cqw] text-foreground">
                   Wantlist
                 </p>
-                <p className="relative type-catalogue text-[11px] text-muted-foreground">
+                <div className="relative type-catalogue text-[11px] text-muted-foreground">
                   <Tracked name="count:3" looks={looks}>
                     3 records
                   </Tracked>
@@ -139,7 +103,7 @@ export const WantlistFilm = () => {
                   >
                     2 records
                   </Tracked>
-                </p>
+                </div>
               </div>
               <RecordList className="bg-background">
                 {OTHERS.map((index) => (
@@ -174,9 +138,9 @@ export const WantlistFilm = () => {
             <div className="absolute inset-x-[-5cqw] top-[-6cqw] bottom-[-4cqw] bg-[radial-gradient(closest-side_at_50%_40%,oklch(from_var(--cover-tint)_var(--cover-glow-lightness)_c_h/var(--cover-glow-alpha)),color-mix(in_oklab,var(--background)_70%,transparent)_45%,transparent_80%)]" />
             <div className="relative w-[36cqw] overflow-hidden rounded-(--radius) shadow-[0_10px_30px_var(--pull-shadow)]">
               <GeneratedCover
-                artist={want.record.artist}
-                title={want.record.title}
-                seed={want.seed}
+                artist={WANTED.record.artist}
+                title={WANTED.record.title}
+                seed={WANTED.seed}
                 className="w-full"
               />
               <Tracked
@@ -189,9 +153,9 @@ export const WantlistFilm = () => {
                 year left out, so the screen fits a phone's column) */}
             <Tracked name="heading" looks={looks}>
               <RecordHeading
-                artist={want.record.artist}
-                title={want.record.title}
-                catalogue={catalogueLines(want.record).slice(1)}
+                artist={WANTED.record.artist}
+                title={WANTED.record.title}
+                catalogue={catalogueLines(WANTED.record).slice(1)}
               />
             </Tracked>
             <div className="relative">
@@ -216,6 +180,6 @@ export const WantlistFilm = () => {
           </Tracked>
         </Tracked>
       </Tracked>
-    </div>
-  )
-}
+    )}
+  </FilmStage>
+)

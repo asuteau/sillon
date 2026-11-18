@@ -168,7 +168,10 @@ const playInSteps = function* (
 // resumes where it stopped. Tracked elements carry `data-track`; React rests
 // them at `at` (render `score.sample(at)`) until the browser takes over, and
 // re-renders only on the beats (NO_BEATS for none). With reduced motion,
-// the still, for good. `replay` plays it again from 0.
+// the still, for good: if it turns on mid-film, every animation is
+// cancelled, and a cancelled Web Animation leaves no style behind, so each
+// element (and the parts a track names) rests as React and the CSS set it.
+// `replay` plays it again from 0.
 export const useFilmPlayer = <TName extends string, TScene>(
   score: Score<TName>,
   beats: Beats<TScene>,
@@ -266,6 +269,7 @@ export const useFilmPlayer = <TName extends string, TScene>(
     scene: reducedMotion ? beats.at(score.still) : scene,
     at: reducedMotion ? score.still : partSpan(score, part)[0],
     isPlaying,
+    isPaused: !reducedMotion && !isPlaying,
   }
 }
 
@@ -276,6 +280,9 @@ export interface FilmPlayer<TScene> {
   // The film's time React rests the tracked elements at
   at: number
   isPlaying: boolean
+  // It would play, but nobody can see it (off-screen, a hidden tab). Never
+  // the still: that isn't waiting for anything
+  isPaused: boolean
   // Past the intro: in its loop or held on its end
   hasEnded: boolean
   // Plays it again from 0

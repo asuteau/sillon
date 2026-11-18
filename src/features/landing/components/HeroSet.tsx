@@ -9,17 +9,16 @@ import { GeneratedCover } from './GeneratedCover'
 import { HERO_RECORD, STACK_CAST, WALL_CAST } from '../content/hero.content'
 import type { CastRecord } from '../content/hero.content'
 import { coverArt } from '../cover-art.utils'
-import { lookStyle } from '../film/film-css.utils'
+import { round3 } from '../film/film.model'
 import type { Shot } from '../film/film.model'
 import { JACKET } from '../film/jacket.utils'
 import type { JacketFaceKey } from '../film/jacket.utils'
+import { Tracked } from '../film/Tracked'
 import type { Layout } from '../hero/hero-cues.score'
 import { BARCODE, HERO_FACES } from '../hero/hero.score'
 import type { HeroTrack } from '../hero/hero.score'
 
-export type HeroLooks = Shot<HeroTrack>
-
-const cqw = (n: number) => `${Math.round(n * 1000) / 1000}cqw`
+const cqw = (n: number) => `${round3(n)}cqw`
 
 // Centred on its parent's origin, w × h stage units
 const box = (w: number, h: number): React.CSSProperties => ({
@@ -29,32 +28,6 @@ const box = (w: number, h: number): React.CSSProperties => ({
   width: cqw(w),
   height: cqw(h),
 })
-
-interface TrackedProps {
-  name: HeroTrack
-  looks: HeroLooks
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
-}
-
-// One element the film moves (`data-track`, see useFilmPlayer), resting at
-// its look until the browser takes over
-export const Tracked = ({
-  name,
-  looks,
-  className,
-  style,
-  children,
-}: TrackedProps) => (
-  <div
-    data-track={name}
-    className={className}
-    style={{ ...style, ...lookStyle(looks[name] ?? {}) }}
-  >
-    {children}
-  </div>
-)
 
 // The Cover's print wraps round the edges; the bevels show the board
 const paintOf = (seed: number) => {
@@ -72,8 +45,12 @@ const EDGE = 'bg-(--edge-light) dark:bg-(--edge-dark)'
 const P3D = 'absolute transform-3d'
 const HIDDEN = 'backface-hidden'
 
+interface ThumbProps {
+  seed: number
+}
+
 // A Discogs thumbnail: the art, small and without its type
-const Thumb = ({ seed }: { seed: number }) => (
+const Thumb = ({ seed }: ThumbProps) => (
   <span className="relative block aspect-square h-full shrink-0 overflow-hidden">
     {(['light', 'dark'] as const).map((theme) => {
       const { ground, shapes } = coverArt(seed, theme)
@@ -132,7 +109,7 @@ const Row = ({ record, unit, layout }: RowProps) => {
 
 interface GlossProps {
   name: HeroTrack
-  looks: HeroLooks
+  looks: Shot<HeroTrack>
   unit: number
   sweep?: boolean
 }
@@ -173,7 +150,7 @@ interface WallItemProps {
   unit: number
   soft: number
   layout: Layout
-  looks: HeroLooks
+  looks: Shot<HeroTrack>
 }
 
 // A face's soft twin: the same print under a static blur, faded in by the
@@ -291,7 +268,7 @@ interface SleeveBackProps {
   k: number
   unit: number
   // Without them, the back alone: the soft twin, nothing scanning on it
-  looks?: HeroLooks
+  looks?: Shot<HeroTrack>
 }
 
 // The sleeve's back, the side a scan reads: credits, the running order as
@@ -417,7 +394,7 @@ interface StackSleeveProps {
   k: number
   unit: number
   soft: number
-  looks: HeroLooks
+  looks: Shot<HeroTrack>
 }
 
 // A Stack sleeve as a solid: the printed front, the back with its barcode,
@@ -548,10 +525,15 @@ const StackSleeve = ({ k, unit, soft, looks }: StackSleeveProps) => {
 
 const DISC_DIAMETER = 0.94
 
+interface DiscBodyProps {
+  unit: number
+  looks: Shot<HeroTrack>
+}
+
 // The hero's disc with thickness: two plain layers under the grooved face.
 // The sheen is the light's, not the record's: it sits outside the turn.
 // Only the face blurs
-const DiscBody = ({ unit, looks }: { unit: number; looks: HeroLooks }) => {
+const DiscBody = ({ unit, looks }: DiscBodyProps) => {
   const size = DISC_DIAMETER * unit
   const depth = 0.008 * unit
   const { surface, tint } = HERO_RECORD
@@ -634,7 +616,7 @@ interface HeroSetProps {
   // The soft twins' blur
   soft: number
   layout: Layout
-  looks: HeroLooks
+  looks: Shot<HeroTrack>
 }
 
 // The world: the wall (rows, then Covers) with its shadows, the floor with

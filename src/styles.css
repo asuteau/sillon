@@ -447,13 +447,16 @@
   }
 }
 
+/* A landing film waiting off-screen or in a hidden tab (FilmStage): the
+   app's own CSS animations inside it wait too */
+[data-slot$='-film'][data-paused] * {
+  animation-play-state: paused;
+}
+
 /* The landing's Collection loop (CollectionLoop): placed in cqw of its 4:5
    stage by the --loop-* properties the stage sets (COLLECTION_STAGE_VARS),
    moved by its score. The camera is a CSS 3D set: the strip turns under one
    lens about the centred slide; neighbours sit back, out of focus */
-[data-slot='collection-film'][data-paused] * {
-  animation-play-state: paused;
-}
 
 .collection-loop-slide,
 .collection-loop-flyer {

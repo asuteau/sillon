@@ -4,14 +4,12 @@ import { PortraitFigures } from '#/features/portrait/components/PortraitFigures'
 import { RankedList } from '#/features/portrait/components/RankedList'
 import { TimeChart } from '#/features/portrait/components/TimeChart'
 import { formatEstimatedValue } from '#/features/portrait/portrait.utils'
-import { usePrefersReducedMotion } from '#/shared/hooks/use-prefers-reduced-motion'
 import { formatPressingDecade } from '#/shared/utils/list-filter'
 
 import { LANDING_PORTRAIT } from '../content/landing.content'
-import { lookStyle } from '../film/film-css.utils'
+import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
-import type { Shot } from '../film/film.model'
-import { useFilmPlayer } from '../hooks/use-film-player'
+import { Tracked } from '../film/Tracked'
 import { PORTRAIT_SCORE } from '../portrait.score'
 import type { PortraitTrack } from '../portrait.score'
 
@@ -22,26 +20,6 @@ const ESTIMATE = formatEstimatedValue(estimatedValue, currency, 'en-GB')
 const RECORD_COUNT = pressingDecades.reduce(
   (sum, { copies }) => sum + copies,
   0,
-)
-
-type Looks = Shot<PortraitTrack>
-
-interface TrackedProps {
-  name: PortraitTrack
-  looks: Looks
-  className?: string
-  children?: React.ReactNode
-}
-
-// One element the film moves (`data-track`, see useFilmPlayer)
-const Tracked = ({ name, looks, className, children }: TrackedProps) => (
-  <div
-    data-track={name}
-    className={className}
-    style={lookStyle(looks[name] ?? {})}
-  >
-    {children}
-  </div>
 )
 
 interface BarTracksProps {
@@ -77,29 +55,15 @@ const DECADE_COUNTS = pressingDecades.map((_, i) => `decadeCount:${i}` as const)
 // artists to Pressing decade. Built from the Portrait's own figures and
 // charts; decorative and inert; plays only on screen, and holds one still
 // frame with reduced motion.
-export const PortraitFilm = () => {
-  const { stageRef, at, isPlaying } = useFilmPlayer(PORTRAIT_SCORE, NO_BEATS)
-  const looks = PORTRAIT_SCORE.sample(at)
-  // Hydrated as if motion were fine, the film may start before reduced
-  // motion is known. A fresh sheet for the still drops anything the film
-  // left on the bars.
-  const reducedMotion = usePrefersReducedMotion()
-
-  return (
-    <div
-      ref={stageRef}
-      data-slot="portrait-film"
-      data-paused={isPlaying ? undefined : ''}
-      inert
-      aria-hidden
-      className="portrait-film @container relative w-full min-w-0 overflow-clip py-[3cqw] select-none"
-    >
-      <Tracked
-        key={reducedMotion ? 'still' : 'film'}
-        name="page"
-        looks={looks}
-        className="portrait-film-page"
-      >
+export const PortraitFilm = () => (
+  <FilmStage
+    score={PORTRAIT_SCORE}
+    beats={NO_BEATS}
+    slot="portrait-film"
+    className="portrait-film w-full min-w-0 overflow-clip py-[3cqw]"
+  >
+    {({ looks }) => (
+      <Tracked name="page" looks={looks} className="portrait-film-page">
         <div className="portrait-film-sheet relative flex min-w-0 flex-col gap-8 overflow-hidden rounded-(--radius) border border-border bg-background p-4 select-none sm:p-6 [&_section]:mt-0">
           <Tracked name="figures" looks={looks}>
             <PortraitFigures
@@ -152,6 +116,6 @@ export const PortraitFilm = () => {
           />
         </div>
       </Tracked>
-    </div>
-  )
-}
+    )}
+  </FilmStage>
+)
