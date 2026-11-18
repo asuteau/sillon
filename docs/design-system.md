@@ -131,7 +131,14 @@ shadcn derives every radius from one `--radius`, which can't express "square sur
 
 ## 5. Motion
 
-Fast and quiet: fades by default, three signatures, nothing else. The landing's films (the hero and the feature loops) are exempt: longer holds, a camera, staggered reveals, easings of their own (below). The app keeps the rules.
+Fast and quiet: fades by default, three signatures, nothing else.
+
+**The landing exemption.** The signed-out landing's films, the hero and its five feature loops (Collection, Wantlist, Scan, Random pick, Portrait), are motion design, not UI, and are exempt from "fast and quiet": longer holds, a camera with weight, staggered reveals, easings of their own (`out` `(.16,1,.3,1)`, `in-out`, a dolly and a toss, below). The exemption stops at the films' edges:
+
+- Only inside a film's stage. The landing's headline, header, sections and closing groove follow the app's rules; the headline gets no entrance.
+- Never in the app. Nothing a signed-in screen shows borrows from the films: Random pick is still a plain fade, no stagger, no camera.
+- Still no springs (ADR 0005): a camera's weight is written as score keys, so every curve can be sampled, tested and held as a still.
+- Each film is a pure score (`.score.ts`) played with the Web Animations API, transform and opacity only, no animation library. It plays only on screen and in a visible tab, and under reduced motion shows its own still.
 
 | Motion                      | Duration                                         | Easing                                                          |
 | --------------------------- | ------------------------------------------------ | --------------------------------------------------------------- |
@@ -146,6 +153,7 @@ Fast and quiet: fades by default, three signatures, nothing else. The landing's 
 | Collection loop (landing)   | 10s pass, looped; plays only on screen           | platter, fade, out, in-out; dolly `(.55,0,.12,1)`               |
 | Wantlist loop (landing)     | 10s loop, in view only                           | platter, fade, out, in-out; its own: dolly `(.55,0,.12,1)`      |
 | Random pick loop (landing)  | 11.2s loop, in view only                         | platter, fade, out, in-out                                      |
+| Scan loop (landing)         | 12.8s loop (two 6.4s passes), in view only       | platter, fade, out, in-out; its own: dolly `(.55,0,.12,1)`      |
 | Portrait loop (landing)     | 9.6s loop, in view only                          | platter, fade, in-out; its own: dolly `(.55,0,.12,1)`           |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing's Collection loop plays the same move as one of its own tracks.
@@ -231,8 +239,9 @@ The disc's colour (`discSurface()`, `src/features/collection/disc-surface.utils.
 
 Rules:
 
-- No springs, no staggered list entrances, no crate-dig animation (Random pick is a plain fade; the landing's Random pick loop is a film, not the app).
-- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing hero film shows one still (the hero record, its disc out), the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in. The reading state draws the same share in steps, without the glide, and its count jumps. Home's Sleeve pull keeps the disc in its sleeve and never shows it; neighbours still scale and dim (they follow the finger), removal cross-fades and the arrows jump. The landing's stills (the hero's, the Collection loop's) are stills, not motion: their disc stays pulled out.
+- No springs, anywhere, the landing's films included.
+- In the app: no staggered list entrances, no camera, no crate-dig animation (Random pick is a plain fade; the landing's Random pick loop is a film, not the app).
+- `prefers-reduced-motion`: every animation becomes a fade. Sheets fade instead of sliding, the loader shows the full groove and fades, the cover flight is skipped, the landing's films each show one still and play nothing (the hero: the hero record, its disc out; each loop: its own `still`, above), with no Replay, the landing's closing groove fades in whole (`.groove-fade-in`), Portrait bars and columns show whole as their section fades in. The reading state draws the same share in steps, without the glide, and its count jumps. Home's Sleeve pull keeps the disc in its sleeve and never shows it; neighbours still scale and dim (they follow the finger), removal cross-fades and the arrows jump. The landing's stills are stills, not motion: a disc pulled out in one stays out.
 
 ---
 

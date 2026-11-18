@@ -1,5 +1,7 @@
 # Landing engine spike: Motion vs Remotion (#110)
 
+> The spike pages (`/spike/engine`, `/spike/storyboard`) and `motion` were removed in #122. To run them, check out a commit before it, e.g. `41d4665`.
+
 One ~10s shot built twice: camera push into a Cover while the disc slides out in its Vinyl colour, a light band sweeping the Cover. Same set (`ShotStage`: `GeneratedCover` + `Disc`/`discSurface`), same numbers and curves (`shot.timeline.ts`), two drivers.
 
 ## Run it
