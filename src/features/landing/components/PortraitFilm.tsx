@@ -14,7 +14,6 @@ import type { Shot } from '../film/film.model'
 import { useFilmPlayer } from '../hooks/use-film-player'
 import { PORTRAIT_SCORE } from '../portrait.score'
 import type { PortraitTrack } from '../portrait.score'
-import { LandingStill } from './LandingStill'
 
 const { currency, estimatedValue, topArtists, pressingDecades } =
   LANDING_PORTRAIT
@@ -101,7 +100,7 @@ export const PortraitFilm = () => {
         looks={looks}
         className="portrait-film-page"
       >
-        <LandingStill className="relative flex flex-col gap-8 [&_section]:mt-0">
+        <div className="portrait-film-sheet relative flex min-w-0 flex-col gap-8 overflow-hidden rounded-(--radius) border border-border bg-background p-4 select-none sm:p-6 [&_section]:mt-0">
           <Tracked name="figures" looks={looks}>
             <PortraitFigures
               recordCount={RECORD_COUNT.toLocaleString('en-GB')}
@@ -151,7 +150,7 @@ export const PortraitFilm = () => {
             looks={looks}
             className="portrait-film-shade pointer-events-none absolute inset-0"
           />
-        </LandingStill>
+        </div>
       </Tracked>
     </div>
   )
