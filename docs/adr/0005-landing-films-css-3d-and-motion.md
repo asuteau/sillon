@@ -44,3 +44,13 @@ So:
 - Films animate transform and opacity only. A blur is static, or it's a soft twin.
 
 The hero's numbers after the change (390×844, DPR 2, steady state while the film plays): 4× CPU, ≈61 frames presented a second, main thread ≈80 ms busy a second; 6× CPU, ≈62 frames a second, ≈160 ms. The cost moved to the start: the hero bakes in slices for ~2 s (4×) before it fades up, then one ~0.4 s task creates its animations. The real mid-range phone check and the Safari check this ADR owes are still owed.
+
+## Amendment: the hero starts on its opening
+
+Baking the hero's whole 16.5 s intro before it played (≈0.35 s of script at 1×, seconds at 4×) and creating its ~700 animations in one task kept the stage on the page ground for 2–4 s on a throttled CPU. The scores are pure, but baked ahead of time the hero is ~110 KB gzip of keyframes per framing, too heavy for the landing's bundle. So:
+
+- The player bakes and plays a part in **spans**: an intro's first 2 s, then each span twice as long as the one before (2–6 s, 6–14 s, …), a loop in one. Each span's animations wait their turn (a delay) and hold their end (`fill: forwards`); the next span's, made after them, take over. The film starts as soon as the span under the playhead is in; the rest bakes in slices while it plays, each well before its turn (at 4×, the 2–6 s span is in by ≈1.3 s, the 6–14 s span by ≈4 s).
+- The first slice runs at once, so a part already baked (the loop, a resume) plays without waiting a frame. `useOnScreen` measures the stage as it mounts instead of waiting a frame for the observer's first report.
+- The server and hydration render only the hero's first frame, the page ground (`useHeroFraming` is null until the screen is known): its set is built once, for the screen's framing, instead of rendered for the phone, hydrated, then rebuilt for the screen. The landing's HTML is ~180 KB lighter.
+
+Measured on a production build, Chromium, 1280×800, from navigation to the hero's first moving frame (median of 4, before → after): 1× CPU 1.5 s → 1.1 s on a loaded machine (≈0.83 s → ≈0.36–0.52 s, 0.24 s after first paint, on a quiet one); 4× CPU 3.4 s → 1.8 s. What's left at 4× is hydrating the page and building the set.

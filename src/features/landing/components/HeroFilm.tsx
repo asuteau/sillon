@@ -172,9 +172,19 @@ export const HeroFilm = () => {
 
   return (
     <div className="relative mx-auto aspect-4/5 w-full max-w-360 md:aspect-video">
-      {/* Remounted for a new framing, or when reduced motion is known: the
-          engine's leftovers never mix with the new set */}
-      <HeroStage key={`${framing}-${reducedMotion}`} framing={framing} />
+      {/* Its first frame until the screen is known (the server, hydration):
+          the page ground the film fades up from. Then the set, built once
+          for the screen. Remounted for a new framing, or when reduced
+          motion changes: the engine's leftovers never mix with the new set */}
+      {framing === null ? (
+        <div
+          data-slot="hero-film"
+          aria-hidden
+          className="absolute inset-0 bg-background"
+        />
+      ) : (
+        <HeroStage key={`${framing}-${reducedMotion}`} framing={framing} />
+      )}
     </div>
   )
 }
