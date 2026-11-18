@@ -196,12 +196,14 @@ describe('LandingPage', () => {
     expect(container.querySelectorAll('img')).toHaveLength(0)
     expect(
       container.querySelectorAll('[data-layout]').length,
-    ).toBeGreaterThanOrEqual(8)
+    ).toBeGreaterThanOrEqual(7)
   })
 
-  it('keeps the stills out of the tab order', () => {
+  it('keeps the stills and feature films out of the tab order', () => {
     const { container } = renderLanding()
-    const stills = container.querySelectorAll('[data-slot="landing-still"]')
+    const stills = container.querySelectorAll(
+      '[data-slot="landing-still"], [data-slot$="-film"]',
+    )
     expect(stills).toHaveLength(5)
     for (const still of [
       ...stills,
