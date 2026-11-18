@@ -13,9 +13,10 @@ import { WantlistFilm } from './WantlistFilm'
 
 // The signed-out `/`: show the product, then "Connect with Discogs"
 // The hero film runs to the screen's edges: clipped here, so the page never
-// scrolls sideways
+// scrolls sideways. A container, so the film's edges are the page's
+// (`cqw`), not the viewport's, which counts a desktop scrollbar
 export const LandingPage = () => (
-  <div className="overflow-x-clip">
+  <div className="@container overflow-x-clip">
     <LandingHeader />
     <main id="top" className="mx-auto w-full max-w-270 scroll-mt-20 px-4 pb-8">
       <LandingHero />
