@@ -306,13 +306,3 @@ export const pressingSurface = ({
   formats,
   id,
 }: LandingPressing): DiscSurface => discSurface(vinylColour(formats), id)
-
-// The engine spike's cast (#110), by LANDING_RECORDS index, each in a
-// different Vinyl colour; the hue is the tint its Cover would give (House
-// sleeves give none). Goes with the spike
-export const HERO_CAST = [
-  { index: 2, tintHue: 62 },
-  { index: 5, tintHue: 190 },
-  { index: 4, tintHue: 30 },
-  { index: 6, tintHue: 150 },
-] as const

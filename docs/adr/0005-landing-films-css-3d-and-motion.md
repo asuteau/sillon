@@ -38,7 +38,7 @@ Building the hero film (about 270 tracked elements under one camera) showed two 
 
 So:
 
-- The player (`useFilmPlayer`) plays each part with the Web Animations API, one animation per tracked element, `fill: both`, `iterations: Infinity` for a loop. Motion is no longer used by the landing; `motion` stays a dependency only for the spikes (`src/features/engine-spike`, `src/features/storyboard-spike`) until they are removed, then goes.
+- The player (`useFilmPlayer`) plays each part with the Web Animations API, one animation per tracked element, `fill: both`, `iterations: Infinity` for a loop. Motion is no longer used by the landing. **`motion` was removed** with the spikes (`/spike/engine`, `/spike/storyboard`) in #122; git history keeps them.
 - A part is baked in slices between frames (`bakeInSteps`), and the samples the browser would draw anyway (holds, straight runs within a fiftieth of a unit) are dropped (`withoutHolds`): fewer keyframes start faster. A film is baked and played only when it's on screen and the tab visible.
 - `--film-undrawn` (a stroke's draw) is registered with `@property`, so the Web Animations API interpolates it; it still runs on the main thread, as before.
 - Films animate transform and opacity only. A blur is static, or it's a soft twin.

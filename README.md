@@ -24,6 +24,17 @@ Your Discogs collection, cover first: a personal app for picking what to play.
 - **PWA** — installable, Covers cached, works offline
 - Light and dark, following the system or set by hand
 
+## Landing
+
+The signed-out page shows the product before asking for a sign-in. Its hero
+is a 16-second film, one camera over a 3D set of Sillon's own objects:
+cold Discogs-like rows flip into HD Covers, a Stack of three sleeves is
+scanned and added in one tap, and the newest record's disc slides out in its
+Vinyl colour. Under it: key facts, the problem ("Discogs is a database, not a
+shelf"), then Collection, Wantlist, Scan, Random pick and Portrait, each with
+a short looping film. Made-up records only, with Covers generated in code.
+With reduced motion, every film is a still.
+
 ## Design
 
 _Sillon_ is French for the groove in a record. One spiral line is the mark,
@@ -36,7 +47,7 @@ record. See [`docs/design-system.md`](docs/design-system.md).
 - [TanStack Start](https://tanstack.com/start), [Router](https://tanstack.com/router) and [Query](https://tanstack.com/query)
 - [Tailwind CSS v4](https://tailwindcss.com) + [shadcn/ui](https://ui.shadcn.com)
 - Familjen Grotesk + Martian Mono, self-hosted
-- Motion in CSS and the Web Animations API
+- Motion in CSS and the Web Animations API, no animation library; the landing's films are CSS 3D scores ([ADR 0005](docs/adr/0005-landing-films-css-3d-and-motion.md))
 - Discogs OAuth 1.0a for sign-in and Collection data
 - Deezer API for HD Covers
 

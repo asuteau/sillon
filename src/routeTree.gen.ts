@@ -21,8 +21,6 @@ import { Route as AuthenticatedWantlistRouteImport } from './routes/_authenticat
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
-import { Route as SpikeEngineRouteImport } from './routes/spike.engine'
-import { Route as SpikeStoryboardRouteImport } from './routes/spike.storyboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,16 +81,6 @@ const AuthLogoutRoute = AuthLogoutRouteImport.update({
   path: '/auth/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SpikeEngineRoute = SpikeEngineRouteImport.update({
-  id: '/spike/engine',
-  path: '/spike/engine',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SpikeStoryboardRoute = SpikeStoryboardRouteImport.update({
-  id: '/spike/storyboard',
-  path: '/spike/storyboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -106,8 +94,6 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
-  '/spike/engine': typeof SpikeEngineRoute
-  '/spike/storyboard': typeof SpikeStoryboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -121,8 +107,6 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
-  '/spike/engine': typeof SpikeEngineRoute
-  '/spike/storyboard': typeof SpikeStoryboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,8 +122,6 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
-  '/spike/engine': typeof SpikeEngineRoute
-  '/spike/storyboard': typeof SpikeStoryboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -155,8 +137,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
-    | '/spike/engine'
-    | '/spike/storyboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -170,8 +150,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
-    | '/spike/engine'
-    | '/spike/storyboard'
   id:
     | '__root__'
     | '/'
@@ -186,8 +164,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/auth/login'
     | '/auth/logout'
-    | '/spike/engine'
-    | '/spike/storyboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -199,8 +175,6 @@ export interface RootRouteChildren {
   AuthCallbackRoute: typeof AuthCallbackRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthLogoutRoute: typeof AuthLogoutRoute
-  SpikeEngineRoute: typeof SpikeEngineRoute
-  SpikeStoryboardRoute: typeof SpikeStoryboardRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -289,20 +263,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/spike/engine': {
-      id: '/spike/engine'
-      path: '/spike/engine'
-      fullPath: '/spike/engine'
-      preLoaderRoute: typeof SpikeEngineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/spike/storyboard': {
-      id: '/spike/storyboard'
-      path: '/spike/storyboard'
-      fullPath: '/spike/storyboard'
-      preLoaderRoute: typeof SpikeStoryboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -333,8 +293,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthCallbackRoute: AuthCallbackRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthLogoutRoute: AuthLogoutRoute,
-  SpikeEngineRoute: SpikeEngineRoute,
-  SpikeStoryboardRoute: SpikeStoryboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
