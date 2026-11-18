@@ -4,12 +4,14 @@ import { describe, expect, it } from 'vitest'
 
 import { lookStyle } from '../film/film-css.utils'
 import { playheadAt } from '../film/film.model'
-import type { Look, Shot } from '../film/film.model'
-import { EASE } from './hero-cues.score'
+import type { Look, Move, Shot } from '../film/film.model'
+import { JACKET } from '../film/jacket.utils'
+import { EASE, LAYOUT } from './hero-cues.score'
 import {
   HERO_FILM_MS,
   HERO_HOLD_FROM_MS,
   HERO_SCORES,
+  HERO_STAGES,
   heroBeatAt,
 } from './hero.score'
 import type { HeroTrack } from './hero.score'
@@ -52,6 +54,39 @@ const discOut = (framing: (typeof FRAMINGS)[number], ms: number) => {
   const move = HERO_SCORES[framing].sample(ms).disc?.transform?.at(0)
   return move && 'translate' in move ? move.translate[0] : 0
 }
+
+// CSS's own geometry, independent of the score's: x right, y down, z toward
+// the viewer; a transform list applies its last move first
+type Vec = readonly [number, number, number]
+const rad = (deg: number) => (deg * Math.PI) / 180
+const subV = (a: Vec, b: Vec): Vec => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+const dotV = (a: Vec, b: Vec) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+const norm = (v: Vec): Vec => {
+  const l = Math.hypot(...v)
+  return [v[0] / l, v[1] / l, v[2] / l]
+}
+const applyMove = (move: Move, [x, y, z]: Vec, isPoint: boolean): Vec => {
+  if ('translate' in move) {
+    if (!isPoint) return [x, y, z]
+    const [tx, ty, tz = 0] = move.translate
+    return [x + tx, y + ty, z + tz]
+  }
+  if ('rotateX' in move) {
+    const [c, s] = [Math.cos(rad(move.rotateX)), Math.sin(rad(move.rotateX))]
+    return [x, y * c - z * s, y * s + z * c]
+  }
+  if ('rotateY' in move) {
+    const [c, s] = [Math.cos(rad(move.rotateY)), Math.sin(rad(move.rotateY))]
+    return [x * c + z * s, y, -x * s + z * c]
+  }
+  if ('rotateZ' in move) {
+    const [c, s] = [Math.cos(rad(move.rotateZ)), Math.sin(rad(move.rotateZ))]
+    return [x * c - y * s, x * s + y * c, z]
+  }
+  throw new Error(`Not a rigid move: ${JSON.stringify(move)}`)
+}
+const applyMoves = (moves: readonly Move[], v: Vec, isPoint: boolean) =>
+  moves.reduceRight((acc, move) => applyMove(move, acc, isPoint), v)
 
 describe('the hero film', () => {
   it('tells its story in order: Challenge, Cover first, Stack, Hero record, Pull back', () => {
@@ -186,7 +221,57 @@ describe('the hero film', () => {
       expect(soft(1000)).toBe(0)
       expect(soft(13_000)).toBeGreaterThan(sharp(13_000))
       // The hero record's Cover stays readable as its disc comes out
-      expect(opacity(framing, 's2-soft')(12_900)).toBeLessThan(0.3)
+      expect(opacity(framing, 's2-soft-front')(12_900)).toBeLessThan(0.3)
+    })
+
+    // Firefox ignores `backface-visibility` on a face without a transform
+    // of its own (the rows), and any browser does once an ancestor flattens
+    // the 3D: each face is shown by the score, only while it faces the lens
+    it('shows each flipping face only while it faces the lens', () => {
+      const { perspective, unit } = HERO_STAGES[framing]
+      const d = JACKET.depth * unit
+      const eye: Vec = [0, 0, perspective]
+      // [track, its face, the face's normal and centre in the track's frame]
+      type Face = readonly [HeroTrack, HeroTrack, Vec, Vec]
+      const faces = (n: number): Face[] => [
+        ...Array.from({ length: n }, (_, i): Face[] => [
+          [`w${i}`, `w${i}-row`, [0, 0, 1], [0, 0, 0]],
+          [`w${i}`, `w${i}-face`, [0, 0, -1], [0, 0, -d / 2]],
+          [`w${i}`, `w${i}-soft`, [0, 0, -1], [0, 0, -d / 2]],
+        ]).flat(),
+        ...STACK.flatMap((k): Face[] => [
+          [`s${k}`, `s${k}-front`, [0, 0, 1], [0, 0, d / 2]],
+          [`s${k}`, `s${k}-soft-front`, [0, 0, 1], [0, 0, d / 2]],
+          [`s${k}`, `s${k}-back`, [0, 0, -1], [0, 0, -d / 2]],
+          [`s${k}`, `s${k}-soft-back`, [0, 0, -1], [0, 0, -d / 2]],
+        ]),
+      ]
+      let [checked, hidden] = [0, 0]
+      for (let ms = 0; ms <= score.length; ms += 100) {
+        const shot = shotAt(framing, ms)
+        const world = shot.world?.transform ?? []
+        for (const [parent, face, normal, centre] of faces(
+          LAYOUT[framing].count,
+        )) {
+          const moves = [...world, ...(shot[parent]?.transform ?? [])]
+          const n = norm(applyMoves(moves, normal, false))
+          const p = applyMoves(moves, centre, true)
+          const facing = dotV(n, norm(subV(eye, p)))
+          // Edge on, either is right
+          if (Math.abs(facing) < 0.05) continue
+          checked++
+          const shown = shot[face]?.opacity
+          if (facing < 0) {
+            hidden++
+            expect({ ms, face, shown }).toEqual({ ms, face, shown: 0 })
+          } else if (face.endsWith('-row')) {
+            // The Challenge: a row is there until it turns
+            expect({ ms, face, shown }).toEqual({ ms, face, shown: 1 })
+          }
+        }
+      }
+      // Both sides were seen turned away
+      expect(hidden).toBeGreaterThan(checked / 4)
     })
 
     it('holds the hero record with its disc out as the reduced-motion still', () => {

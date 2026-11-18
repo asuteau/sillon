@@ -15,11 +15,13 @@ import type { Look, Move, Score, Shot } from '../film/film.model'
 import {
   cameraPosition,
   confusion,
+  dot,
   glint,
   lightDirection,
   normalise,
   orient,
   sub,
+  toWorld,
   viewDepth,
 } from '../film/camera.utils'
 import type { Placement, Vec3 } from '../film/camera.utils'
@@ -93,9 +95,9 @@ const SHADED = [...HERO_FACES.map((f) => f.key), 'back'] as const
 const GLINTING = HERO_FACES.map((f) => f.key).filter((k) => k !== 'front')
 
 type WallTrack =
-  `w${number}${'' | '-face' | '-soft' | '-edge' | '-shade' | '-gloss' | '-shadow'}`
+  `w${number}${'' | '-row' | '-face' | '-soft' | '-edge' | '-shade' | '-gloss' | '-shadow'}`
 type StackTrack =
-  | `s${number}${'' | '-soft' | '-edge' | '-dim' | '-gloss' | '-landed' | '-line' | '-scan' | '-hit' | '-shadow' | '-wallshadow'}`
+  | `s${number}${'' | '-front' | '-back' | '-soft-front' | '-soft-back' | '-edge' | '-dim' | '-gloss' | '-landed' | '-line' | '-scan' | '-hit' | '-shadow' | '-wallshadow'}`
   | `s${number}-shade-${JacketFaceKey | 'back'}`
   | `s${number}-glint-${JacketFaceKey}`
 
@@ -119,6 +121,7 @@ export const HERO_TRACKS: readonly HeroTrack[] = [
   'world',
   ...WALL.flatMap((i): WallTrack[] => [
     `w${i}`,
+    `w${i}-row`,
     `w${i}-face`,
     `w${i}-soft`,
     `w${i}-edge`,
@@ -128,7 +131,10 @@ export const HERO_TRACKS: readonly HeroTrack[] = [
   ]),
   ...STACK.flatMap((k): StackTrack[] => [
     `s${k}`,
-    `s${k}-soft`,
+    `s${k}-front`,
+    `s${k}-back`,
+    `s${k}-soft-front`,
+    `s${k}-soft-back`,
     `s${k}-edge`,
     `s${k}-dim`,
     `s${k}-gloss`,
@@ -239,6 +245,17 @@ const shotAt = (
     return { x: x - light.x * k, y: y - light.y * k }
   }
 
+  // 1 while a face (its outward normal and centre in its object's frame)
+  // faces the lens, 0 once turned past a quarter. Faces are shown by the
+  // score, not left to `backface-visibility`: Firefox ignores it on a face
+  // without a transform of its own, and every browser once an ancestor
+  // flattens the 3D (opacity, a filter, overflow)
+  const facing = (at: Placement, normal: Vec3, centre: Vec3) =>
+    dot(orient(normal, at), sub(eye, toWorld(centre, at))) > 0 ? 1 : 0
+  const FRONT = { x: 0, y: 0, z: 1 }
+  const BACK = { x: 0, y: 0, z: -1 }
+  const half = JACKET.depth / 2
+
   const { count } = LAYOUT[framing]
   WALL.forEach((i) => {
     // The 4:5 wall is smaller: the rest stay out of the shot
@@ -247,9 +264,13 @@ const shotAt = (
     // The key falls off the wall once the hero record is out
     const lit = 1 - pose.dim
     const soft = softAt(w)
+    // The row on its front, the Cover on its back: the flip turns one into
+    // the other
+    const cover = facing(w, BACK, { x: 0, y: 0, z: -half })
     set(`w${i}`, { transform: place(w, unit) })
-    set(`w${i}-face`, { opacity: shown * lit * sharpness(soft) })
-    set(`w${i}-soft`, { opacity: shown * lit * soft })
+    set(`w${i}-row`, { opacity: facing(w, FRONT, { x: 0, y: 0, z: 0 }) })
+    set(`w${i}-face`, { opacity: cover * shown * lit * sharpness(soft) })
+    set(`w${i}-soft`, { opacity: cover * shown * lit * soft })
     // Edges have no twin: they fade as their Cover goes soft, so no sharp
     // line shows round it
     set(`w${i}-edge`, {
@@ -280,7 +301,12 @@ const shotAt = (
     const soft = softAt(p)
     // A sleeve is a solid: its faces stay opaque (the disc is inside), the
     // twin comes in over them
-    set(`s${k}-soft`, { opacity: soft })
+    const showsFront = facing(p, FRONT, { x: 0, y: 0, z: half })
+    const showsBack = facing(p, BACK, { x: 0, y: 0, z: -half })
+    set(`s${k}-front`, { opacity: showsFront })
+    set(`s${k}-back`, { opacity: showsBack })
+    set(`s${k}-soft-front`, { opacity: showsFront * soft })
+    set(`s${k}-soft-back`, { opacity: showsBack * soft })
     set(`s${k}-edge`, { opacity: clamp01(1 - soft * 2) })
     const view = normalise(sub(eye, p))
     for (const face of HERO_FACES) {

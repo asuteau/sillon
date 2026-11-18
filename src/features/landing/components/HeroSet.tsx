@@ -196,12 +196,14 @@ const WallItem = ({ i, unit, soft, layout, looks }: WallItemProps) => {
   ] as const
   return (
     <Tracked name={`w${i}`} looks={looks} className={P3D}>
-      <div
+      <Tracked
+        name={`w${i}-row`}
+        looks={looks}
         className={HIDDEN}
         style={box(layout.row.width * unit, layout.row.height * unit)}
       >
         <Row record={record} unit={unit} layout={layout} />
-      </div>
+      </Tracked>
       <div
         className={P3D}
         style={{ ...paintOf(record.seed), transform: 'rotateX(180deg)' }}
@@ -442,7 +444,9 @@ const StackSleeve = ({ k, unit, soft, looks }: StackSleeveProps) => {
   const d = JACKET.depth * unit
   return (
     <>
-      <div
+      <Tracked
+        name={`s${k}-back`}
+        looks={looks}
         className={`overflow-hidden ${HIDDEN}`}
         style={{
           ...box(unit, unit),
@@ -451,9 +455,9 @@ const StackSleeve = ({ k, unit, soft, looks }: StackSleeveProps) => {
       >
         <SleeveBack record={record} k={k} unit={unit} looks={looks} />
         {shade('back')}
-      </div>
+      </Tracked>
       <Tracked
-        name={`s${k}-soft`}
+        name={`s${k}-soft-back`}
         looks={looks}
         className={`overflow-hidden ${HIDDEN}`}
         style={{
@@ -464,7 +468,7 @@ const StackSleeve = ({ k, unit, soft, looks }: StackSleeveProps) => {
         <SleeveBack record={record} k={k} unit={unit} />
       </Tracked>
       <Tracked
-        name={`s${k}-soft`}
+        name={`s${k}-soft-front`}
         looks={looks}
         className={HIDDEN}
         style={{
@@ -486,8 +490,10 @@ const StackSleeve = ({ k, unit, soft, looks }: StackSleeveProps) => {
         }
         if (face.key === 'front') {
           return (
-            <div
+            <Tracked
               key={face.key}
+              name={`s${k}-front`}
+              looks={looks}
               className={`overflow-hidden ${HIDDEN}`}
               style={{ ...placed, borderRadius: cqw(JACKET.bevel * unit) }}
             >
@@ -505,7 +511,7 @@ const StackSleeve = ({ k, unit, soft, looks }: StackSleeveProps) => {
                 looks={looks}
                 className="absolute inset-0 bg-background"
               />
-            </div>
+            </Tracked>
           )
         }
         if (face.key === 'mouth') {
