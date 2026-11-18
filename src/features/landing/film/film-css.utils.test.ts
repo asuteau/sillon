@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 
-import { bakePart, lookStyle, transformCss } from './film-css.utils'
+import {
+  bakeInSteps,
+  bakePart,
+  lookStyle,
+  transformCss,
+  waapiKeyframes,
+  withoutHolds,
+} from './film-css.utils'
 import type { Score } from './film.model'
 
 describe('transformCss', () => {
@@ -77,5 +84,102 @@ describe('bakePart', () => {
     expect(tracks.b).not.toHaveProperty('opacity')
     expect(tracks.b?.transform?.[0]).toBe('translate(4cqw, 0cqw)')
     expect(tracks.b?.transform).toHaveLength(times.length)
+  })
+})
+
+describe('withoutHolds', () => {
+  it('keeps only the keyframes where something changes, and the ends of each hold', () => {
+    const times = [0, 0.25, 0.5, 0.75, 1]
+    expect(
+      withoutHolds(times, {
+        opacity: [0, 0, 0, 0.5, 1],
+        transform: ['a', 'a', 'a', 'a', 'a'],
+      }),
+    ).toEqual({
+      times: [0, 0.5, 1],
+      keyframes: { opacity: [0, 0, 1], transform: ['a', 'a', 'a'] },
+    })
+  })
+
+  it('keeps both ends of a hold between two moves', () => {
+    expect(
+      withoutHolds([0, 0.25, 0.5, 0.75, 1], { opacity: [0, 1, 1, 1, 0] }),
+    ).toEqual({
+      times: [0, 0.25, 0.75, 1],
+      keyframes: { opacity: [0, 1, 1, 0] },
+    })
+  })
+
+  it('keeps only the ends of a straight run: the browser draws the line between', () => {
+    expect(
+      withoutHolds([0, 0.25, 0.5, 0.75, 1], {
+        opacity: [0, 0.25, 0.5, 0.75, 1],
+        transform: [
+          'translate(0cqw, 1cqw)',
+          'translate(1cqw, 1cqw)',
+          'translate(2cqw, 1cqw)',
+          'translate(3cqw, 1cqw)',
+          'translate(4cqw, 1cqw)',
+        ],
+      }),
+    ).toEqual({
+      times: [0, 1],
+      keyframes: {
+        opacity: [0, 1],
+        transform: ['translate(0cqw, 1cqw)', 'translate(4cqw, 1cqw)'],
+      },
+    })
+  })
+
+  it('keeps a bend: where the line from the last kept key would miss', () => {
+    const { times } =
+      withoutHolds([0, 0.25, 0.5, 0.75, 1], {
+        transform: [
+          'rotate(0deg)',
+          'rotate(10deg)',
+          'rotate(20deg)',
+          'rotate(20deg)',
+          'rotate(20deg)',
+        ],
+      }) ?? {}
+    expect(times).toEqual([0, 0.5, 1])
+  })
+
+  it('drops a track that never changes: it rests where React put it', () => {
+    expect(
+      withoutHolds([0, 0.5, 1], {
+        opacity: [1, 1, 1],
+        filter: ['x', 'x', 'x'],
+      }),
+    ).toBeNull()
+  })
+})
+
+describe('waapiKeyframes', () => {
+  it('writes each sample as a Web Animations keyframe at its offset', () => {
+    expect(
+      waapiKeyframes([0, 0.4, 1], {
+        opacity: [0, 1, 1],
+        transform: ['scale(1)', 'scale(2)', 'scale(1)'],
+      }),
+    ).toEqual([
+      { offset: 0, opacity: 0, transform: 'scale(1)' },
+      { offset: 0.4, opacity: 1, transform: 'scale(2)' },
+      { offset: 1, opacity: 1, transform: 'scale(1)' },
+    ])
+  })
+})
+
+describe('bakeInSteps', () => {
+  it('bakes what bakePart bakes, pausing between steps', () => {
+    const steps = bakeInSteps(film, 'loop', 4)
+    let pauses = 0
+    let step = steps.next()
+    while (!step.done) {
+      pauses++
+      step = steps.next()
+    }
+    expect(pauses).toBeGreaterThan(1)
+    expect(step.value).toEqual(bakePart(film, 'loop'))
   })
 })
