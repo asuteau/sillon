@@ -126,7 +126,7 @@ describe('LandingPage', () => {
     expect(linerNotes?.textContent).toContain('Aymeric Suteau')
   })
 
-  it('shows House sleeves only, never third-party cover art', () => {
+  it('shows House sleeves and generated Covers only, never third-party cover art', () => {
     const { container } = renderLanding()
     expect(container.querySelectorAll('img')).toHaveLength(0)
     expect(
