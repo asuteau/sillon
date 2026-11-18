@@ -11,11 +11,11 @@ const subscribe = (onChange: () => void) => {
 }
 
 // The hero film's composition for the screen: 16:9 from tablet widths up,
-// about 4:5 on phones. The server renders the phone's; the film fades up
-// from the page ground, so the switch is never seen
-export const useHeroFraming = (): HeroFraming =>
+// about 4:5 on phones. Null on the server and while hydrating: the screen
+// isn't known yet, so the film's set is built once, for the right one
+export const useHeroFraming = (): HeroFraming | null =>
   useSyncExternalStore(
     subscribe,
     () => (window.matchMedia(WIDE).matches ? 'wide' : 'tall'),
-    () => 'tall',
+    () => null,
   )

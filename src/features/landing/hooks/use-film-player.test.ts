@@ -12,6 +12,11 @@ interface FakeAnimation {
   playState: 'running' | 'paused' | 'idle'
 }
 
+// How many shots the film had sampled when the browser was first asked to
+// play
+let samples = 0
+let samplesAtFirstPlay: number | null = null
+
 // The engine at its boundary: record what the player asks the browser to
 // play (jsdom has no Web Animations)
 let played: FakeAnimation[] = []
@@ -29,6 +34,10 @@ const fakeAnimate = function (
   }
   played.push(animation)
   return Object.assign(animation, {
+    play: () => {
+      samplesAtFirstPlay ??= samples
+      animation.playState = 'running'
+    },
     pause: () => (animation.playState = 'paused'),
     cancel: () => (animation.playState = 'idle'),
   })
@@ -38,6 +47,7 @@ const live = () => played.filter((a) => a.playState !== 'idle')
 const current = () => {
   const animations = live()
   expect(animations.length).toBeGreaterThan(0)
+  samplesAtFirstPlay ??= samples
   const [first] = animations
   for (const a of animations) {
     expect(a.currentTime).toBe(first.currentTime)
@@ -77,10 +87,13 @@ const FILM: Score<'world' | 'pick'> = {
   ending: { kind: 'loop', from: 6000 },
   still: 9000,
   cuts: [],
-  sample: (ms) => ({
-    world: { opacity: ms / 10_000 },
-    pick: { transform: [{ scale: 1 + ms / 10_000 }] },
-  }),
+  sample: (ms) => {
+    samples++
+    return {
+      world: { opacity: ms / 10_000 },
+      pick: { transform: [{ scale: 1 + ms / 10_000 }] },
+    }
+  },
 }
 
 // A new scene every 4s of playing
@@ -96,8 +109,8 @@ const stage = () => {
   return node
 }
 
-const renderPlayer = () => {
-  const hook = renderHook(() => useFilmPlayer(FILM, EVERY_4S))
+const renderPlayer = (score = FILM) => {
+  const hook = renderHook(() => useFilmPlayer(score, EVERY_4S))
   act(() => {
     hook.result.current.stageRef(stage())
   })
@@ -115,6 +128,8 @@ beforeEach(() => {
   })
   reducedMotion = false
   played = []
+  samples = 0
+  samplesAtFirstPlay = null
   vi.stubGlobal('matchMedia', (query: string) => ({
     matches: query.includes('reduce') && reducedMotion,
     addEventListener: () => {},
@@ -171,7 +186,18 @@ describe('useFilmPlayer', () => {
 
   it('moves every tracked element, or the parts it names', () => {
     renderPlayer()
-    expect(current().targets.map((t) => t.tagName)).toEqual(['DIV', 'I', 'I'])
+    const targets = new Set(current().targets)
+    expect([...targets].map((t) => t.tagName)).toEqual(['DIV', 'I', 'I'])
+  })
+
+  it('starts once its opening is baked, and bakes the rest as it plays', () => {
+    // Not baked yet: a film of its own
+    const { result } = renderPlayer({ ...FILM })
+    expect(result.current.isPlaying).toBe(true)
+    // The intro is 6s: 181 shots at 30 a second. It started on its first
+    // 2s, 61 of them
+    expect(samplesAtFirstPlay).toBeLessThanOrEqual(61)
+    expect(samples).toBeGreaterThan(181)
   })
 
   it('changes scene on its beats, counting every loop', () => {

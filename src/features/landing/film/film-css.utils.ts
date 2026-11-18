@@ -180,12 +180,19 @@ export const waapiKeyframes = (
 
 // Bakes a part a few samples at a time: it pauses (yields) between steps,
 // so a long film can be baked across frames without holding the page up
-export const bakeInSteps = function* <TName extends string>(
+export const bakeInSteps = <TName extends string>(
   score: Score<TName>,
   part: Part,
   samplesPerStep = Infinity,
+): Generator<void, Bake<TName>> =>
+  bakeSpanInSteps(score, partSpan(score, part), samplesPerStep)
+
+// The same for any stretch of the film, [start, end] ms
+export const bakeSpanInSteps = function* <TName extends string>(
+  score: Score<TName>,
+  [start, end]: readonly [number, number],
+  samplesPerStep = Infinity,
 ): Generator<void, Bake<TName>> {
-  const [start, end] = partSpan(score, part)
   const duration = end - start
   const at = duration === 0 ? [start] : sampleTimes(start, end, score.cuts)
   const tracks: Partial<Record<TName, Keyframes>> = {}

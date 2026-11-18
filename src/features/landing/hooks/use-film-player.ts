@@ -5,7 +5,7 @@ import { usePageVisible } from '#/shared/hooks/use-page-visible'
 import { usePrefersReducedMotion } from '#/shared/hooks/use-prefers-reduced-motion'
 
 import {
-  bakeInSteps,
+  bakeSpanInSteps,
   waapiKeyframes,
   withoutHolds,
 } from '../film/film-css.utils'
@@ -13,20 +13,55 @@ import type { Bake, Keyframes } from '../film/film-css.utils'
 import { msUntilPartEnds, partSpan, playheadAt } from '../film/film.model'
 import type { Beats, Part, Playhead, Score } from '../film/film.model'
 
-// A part baked for the browser: each track that moves, as Web Animations
-// keyframes, holds left out
-interface PartBake {
+// Ms into a part, [start, end]
+type Span = readonly [number, number]
+
+// The first span of an intro, ms
+const FIRST_SPAN_MS = 2000
+
+// A part is baked and played in spans, so a long intro starts on its
+// opening while the rest bakes as it plays: the first span 2s, each next
+// twice as long as the one before, so it is baked well before its turn. A
+// loop, or a hold, is one span
+export const spansOf = (score: Score<string>, part: Part): Span[] => {
+  const [from, to] = partSpan(score, part)
+  const length = to - from
+  if (part !== 'intro') return [[0, length]]
+  const spans: Span[] = []
+  let [start, size] = [0, FIRST_SPAN_MS]
+  do {
+    const end = Math.min(length, start + size)
+    spans.push([start, end])
+    start = end
+    size *= 2
+  } while (start < length)
+  return spans
+}
+
+// A span baked for the browser: each track that moves in it, as Web
+// Animations keyframes, holds left out
+interface SpanBake {
+  // Ms into the part
+  start: number
   duration: number
   tracks: Map<string, Keyframe[]>
 }
 
-// The bake, then its tracks as keyframes, pausing (yielding) every few
-// samples or tracks
-const bakeForBrowser = function* (
+// Baked once per score and span, as it's first played: never on the server
+const bakes = new WeakMap<Score<string>, Map<string, SpanBake>>()
+
+// The span baked, then its tracks as keyframes, pausing (yielding) every
+// few samples or tracks
+const bakeSpan = function* (
   score: Score<string>,
   part: Part,
-): Generator<void, PartBake> {
-  const steps = bakeInSteps(score, part, 4)
+  span: Span,
+): Generator<void, SpanBake> {
+  const key = `${part}:${span[0]}`
+  const cached = bakes.get(score)?.get(key)
+  if (cached) return cached
+  const [from] = partSpan(score, part)
+  const steps = bakeSpanInSteps(score, [from + span[0], from + span[1]], 4)
   let step = steps.next()
   while (!step.done) {
     yield
@@ -40,36 +75,28 @@ const bakeForBrowser = function* (
     const track = keyframes && withoutHolds(times, keyframes)
     if (track) moving.set(name, waapiKeyframes(track.times, track.keyframes))
   }
-  return { duration, tracks: moving }
+  const bake = { start: span[0], duration, tracks: moving }
+  const spans = bakes.get(score) ?? new Map<string, SpanBake>()
+  spans.set(key, bake)
+  bakes.set(score, spans)
+  return bake
 }
 
-// Baked once per score and part, on first play: never on the server
-const bakes = new WeakMap<Score<string>, Map<Part, PartBake>>()
-const bakedOf = (score: Score<string>, part: Part) =>
-  bakes.get(score)?.get(part)
+// How long a slice of work may hold the main thread, ms
+const SLICE_MS = 8
 
-// How long a slice of baking may hold the main thread, ms
-const BAKE_SLICE_MS = 8
-
-// Bakes a part in slices between frames, so the page never stalls on a
-// long film; `done` once it's ready. Returns a cancel
-const bakeSoon = (score: Score<string>, part: Part, done: () => void) => {
-  const steps = bakeForBrowser(score, part)
+// Runs the steps in slices between frames, the first one now, so the page
+// never stalls on a long film and what's baked already plays at once.
+// Returns a cancel
+const runInSlices = (steps: Generator<void, void>) => {
   let timer: ReturnType<typeof setTimeout> | undefined
   const slice = () => {
-    const until = performance.now() + BAKE_SLICE_MS
+    const until = performance.now() + SLICE_MS
     let step = steps.next()
     while (!step.done && performance.now() < until) step = steps.next()
-    if (!step.done) {
-      timer = setTimeout(slice, 0)
-      return
-    }
-    const parts = bakes.get(score) ?? new Map<Part, PartBake>()
-    parts.set(part, step.value)
-    bakes.set(score, parts)
-    done()
+    if (!step.done) timer = setTimeout(slice, 0)
   }
-  timer = setTimeout(slice, 0)
+  slice()
   return () => clearTimeout(timer)
 }
 
@@ -83,39 +110,58 @@ const targetsOf = (stage: HTMLElement, name: string) =>
     },
   )
 
-// The part's animations, played and paused, set and stopped together
-interface PartControls {
-  pause: () => void
-  cancel: () => void
-}
-
-// The playhead's part as Web Animations, one per tracked element, set to
-// the playhead. The browser plays them: transform and opacity on the
-// compositor, nothing per frame on the main thread (ADR 0005)
-const playPart = (
+// Plays the playhead's part as Web Animations, one per tracked element and
+// span: each span's waits its turn (a delay) and holds its end after it,
+// where the next span, made after it, takes over. They share one clock,
+// the time into the part. Baked a span at a time: the part starts
+// (`onStart`) once the span under the playhead is in, and the rest join as
+// they bake. Then the loop bakes ahead, so the intro's end never waits for
+// it. The browser plays them: transform and opacity on the compositor,
+// nothing per frame on the main thread (ADR 0005)
+const playInSteps = function* (
   stage: HTMLElement,
-  bake: PartBake,
   score: Score<string>,
   { part, ms }: Playhead,
-): PartControls | null => {
-  if (bake.duration === 0) return null
+  animations: Animation[],
+  onStart: () => void,
+): Generator<void, void> {
   const at = ms - partSpan(score, part)[0]
-  const animations = [...bake.tracks].flatMap(([name, keyframes]) =>
-    targetsOf(stage, name).map((target) => {
-      const animation = target.animate(keyframes, {
-        duration: bake.duration,
-        iterations: part === 'loop' ? Infinity : 1,
-        fill: 'both',
-      })
-      animation.currentTime = at
-      return animation
-    }),
-  )
-  if (animations.length === 0) return null
-  return {
-    pause: () => animations.forEach((a) => a.pause()),
-    cancel: () => animations.forEach((a) => a.cancel()),
+  const spans = spansOf(score, part)
+  let startedAt: number | null = null
+  // The part's clock: the browser's, once anything plays
+  const now = () => {
+    const time = animations[0]?.currentTime
+    if (typeof time === 'number') return time
+    return startedAt === null ? at : at + Date.now() - startedAt
   }
+  for (const [s, span] of spans.entries()) {
+    const bake = yield* bakeSpan(score, part, span)
+    if (bake.duration > 0) {
+      for (const [t, [name, keyframes]] of [...bake.tracks].entries()) {
+        if (t > 0 && t % 8 === 0) yield
+        for (const target of targetsOf(stage, name)) {
+          const animation = target.animate(keyframes, {
+            duration: bake.duration,
+            delay: bake.start,
+            iterations: part === 'loop' ? Infinity : 1,
+            fill: bake.start === 0 ? 'both' : 'forwards',
+          })
+          animation.currentTime = now()
+          // Held on the playhead until the part starts
+          if (startedAt === null) animation.pause()
+          animations.push(animation)
+        }
+      }
+    }
+    if (startedAt === null && (span[1] > at || s === spans.length - 1)) {
+      startedAt = Date.now()
+      animations.forEach((a) => a.play())
+      onStart()
+    }
+  }
+  if (part === 'intro' && score.ending.kind === 'loop')
+    for (const span of spansOf(score, 'loop'))
+      yield* bakeSpan(score, 'loop', span)
 }
 
 // Plays a score on the stage while it's on screen and the tab visible, and
@@ -140,8 +186,6 @@ export const useFilmPlayer = <TName extends string, TScene>(
   // Each replay plays from 0 again
   const [run, setRun] = useState(0)
   const replayRef = useRef(false)
-  // Bumped once a part is baked, to play it
-  const [baked, setBaked] = useState(0)
 
   const stageRef = useCallback(
     (node: HTMLElement | null) => {
@@ -155,31 +199,15 @@ export const useFilmPlayer = <TName extends string, TScene>(
     if (reducedMotion) return
     const base = replayRef.current ? 0 : elapsedRef.current
     replayRef.current = false
-    const playhead = playheadAt(score, base)
+    elapsedRef.current = base
     // Nothing is baked or played while nobody can see it (off-screen, a
-    // hidden tab), nor without Web Animations (jsdom). It picks up where it
-    // stopped
-    const canPlay = stage !== null && isPlaying && 'animate' in stage
-    const bake = bakedOf(score, playhead.part)
-    // Baked first, a slice at a time; it rests where it is until then
-    if (canPlay && !bake) {
-      elapsedRef.current = base
-      return bakeSoon(score, playhead.part, () => setBaked((n) => n + 1))
-    }
+    // hidden tab). It picks up where it stopped
+    if (stage === null || !isPlaying) return
 
-    const controls =
-      canPlay && bake ? playPart(stage, bake, score, playhead) : null
-    const startedAt = Date.now()
-    const elapsed = () => (isPlaying ? base + Date.now() - startedAt : base)
-
-    // The loop baked ahead, so the intro's end never waits for it
-    const cancelAhead =
-      canPlay &&
-      playhead.part === 'intro' &&
-      score.ending.kind === 'loop' &&
-      !bakedOf(score, 'loop')
-        ? bakeSoon(score, 'loop', () => {})
-        : undefined
+    // Playing time counts once the part has started
+    let startedAt: number | null = null
+    const elapsed = () =>
+      startedAt === null ? base : base + Date.now() - startedAt
 
     let timer: ReturnType<typeof setTimeout> | undefined
     const scheduleNextBeat = () => {
@@ -194,17 +222,35 @@ export const useFilmPlayer = <TName extends string, TScene>(
         scheduleNextBeat()
       }, wait)
     }
-    if (isPlaying) scheduleNextBeat()
+
+    const start = () => {
+      startedAt = Date.now()
+      scheduleNextBeat()
+    }
+    const animations: Animation[] = []
+    // Without Web Animations (jsdom) only the clock runs
+    const cancelSteps =
+      'animate' in stage
+        ? runInSlices(
+            playInSteps(
+              stage,
+              score,
+              playheadAt(score, base),
+              animations,
+              start,
+            ),
+          )
+        : start()
 
     return () => {
-      cancelAhead?.()
+      cancelSteps?.()
       clearTimeout(timer)
       elapsedRef.current = elapsed()
-      controls?.cancel()
+      animations.forEach((a) => a.cancel())
     }
-    // A new part plays its own bake, a replay from 0, a finished bake its
-    // part; a new scene only re-renders
-  }, [baked, beats, isPlaying, part, reducedMotion, run, score, stage])
+    // A new part plays its own spans, a replay from 0; a new scene only
+    // re-renders
+  }, [beats, isPlaying, part, reducedMotion, run, score, stage])
 
   const replay = useCallback(() => {
     replayRef.current = true

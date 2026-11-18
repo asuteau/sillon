@@ -87,6 +87,13 @@ const StackHud = ({ looks, centre }: StackHudProps) => (
 
 const cqw = (n: number) => `${Math.round(n * 1000) / 1000}cqw`
 
+// The frame the film is composed for, 16:9 or 4:5, as tall as the band and
+// centred in it: on a band wider than 16:9 (a short screen) the camera
+// keeps its framing and more of the set shows either side, never cropped
+// top or bottom. The film's units (`cqw`) are the frame's
+const FRAME =
+  'absolute inset-y-0 left-1/2 aspect-4/5 -translate-x-1/2 md:aspect-video'
+
 interface HeroStageProps {
   framing: HeroFraming
 }
@@ -102,35 +109,43 @@ const HeroStage = ({ framing }: HeroStageProps) => {
 
   return (
     <>
+      {/* The band, the page's width: the frame's composition, and the set
+          on either side of it where the screen is wider */}
       <div
         ref={stageRef}
         data-slot="hero-film"
         inert
         aria-hidden
-        className="@container absolute inset-0 overflow-hidden select-none"
+        className="absolute inset-0 overflow-hidden select-none"
       >
+        {/* The page ground inside the mask: the grade blends over it */}
         <div
           className="absolute inset-0 bg-background"
-          style={{
-            perspective: cqw(perspective),
-            perspectiveOrigin: `${centre * 100}% 50%`,
-            maskImage: STAGE_MASK,
-            maskComposite: 'intersect',
-          }}
+          style={{ maskImage: STAGE_MASK, maskComposite: 'intersect' }}
         >
-          <Tracked
-            name="world"
-            looks={looks}
-            className="absolute top-1/2 size-0 transform-3d"
-            style={{ left: `${centre * 100}%` }}
-          >
-            <HeroSet
-              unit={unit}
-              soft={softBlur(HERO_STAGES[framing])}
-              layout={LAYOUT[framing]}
-              looks={looks}
-            />
-          </Tracked>
+          <div className={`@container ${FRAME}`}>
+            <div
+              className="absolute inset-0"
+              style={{
+                perspective: cqw(perspective),
+                perspectiveOrigin: `${centre * 100}% 50%`,
+              }}
+            >
+              <Tracked
+                name="world"
+                looks={looks}
+                className="absolute top-1/2 size-0 transform-3d"
+                style={{ left: `${centre * 100}%` }}
+              >
+                <HeroSet
+                  unit={unit}
+                  soft={softBlur(HERO_STAGES[framing])}
+                  layout={LAYOUT[framing]}
+                  looks={looks}
+                />
+              </Tracked>
+            </div>
+          </div>
           {/* The Challenge's cold grade: colour drained */}
           <Tracked
             name="grade"
@@ -143,7 +158,9 @@ const HeroStage = ({ framing }: HeroStageProps) => {
             className="pointer-events-none absolute inset-0 bg-background"
           />
         </div>
-        <StackHud looks={looks} centre={centre} />
+        <div className={FRAME}>
+          <StackHud looks={looks} centre={centre} />
+        </div>
       </div>
       {hasEnded && (
         <Button
@@ -164,17 +181,27 @@ const HeroStage = ({ framing }: HeroStageProps) => {
 // Stack of three sleeves is scanned and added in one go, the newest record
 // comes out of the wall and its disc slides out in its Vinyl colour; then
 // the camera pulls back and holds. Full width, 16:9 or about 4:5 for the
-// screen; decorative and inert but for Replay; pauses off-screen and in a
+// screen, or as tall as its row lets it from tablet widths up; decorative and inert but for Replay; pauses off-screen and in a
 // hidden tab; one still with reduced motion.
 export const HeroFilm = () => {
   const framing = useHeroFraming()
   const reducedMotion = usePrefersReducedMotion()
 
   return (
-    <div className="relative mx-auto aspect-4/5 w-full max-w-360 md:aspect-video">
-      {/* Remounted for a new framing, or when reduced motion is known: the
-          engine's leftovers never mix with the new set */}
-      <HeroStage key={`${framing}-${reducedMotion}`} framing={framing} />
+    <div className="relative mx-auto aspect-4/5 w-full max-w-360 md:aspect-auto">
+      {/* Its first frame until the screen is known (the server, hydration):
+          the page ground the film fades up from. Then the set, built once
+          for the screen. Remounted for a new framing, or when reduced
+          motion changes: the engine's leftovers never mix with the new set */}
+      {framing === null ? (
+        <div
+          data-slot="hero-film"
+          aria-hidden
+          className="absolute inset-0 bg-background"
+        />
+      ) : (
+        <HeroStage key={`${framing}-${reducedMotion}`} framing={framing} />
+      )}
     </div>
   )
 }
