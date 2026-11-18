@@ -8,7 +8,7 @@ import { FeatureSection } from './FeatureSection'
 import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
 import { RandomPickStill } from './RandomPickStill'
-import { ScanStill } from './ScanStill'
+import { ScanLoop } from './ScanLoop'
 import { WantlistStill } from './WantlistStill'
 
 // The signed-out `/`: show the product, then "Connect with Discogs"
@@ -59,7 +59,7 @@ export const LandingPage = () => (
         id="scan"
         label="Barcode scanning"
         title="Scan the sleeve."
-        still={<ScanStill />}
+        still={<ScanLoop />}
         flip
       >
         <p>
