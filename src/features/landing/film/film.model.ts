@@ -85,6 +85,9 @@ export type Move =
   // In the stage's plane
   | { rotateZ: number }
   | { scale: number }
+  // Along one axis, about the element's transform-origin (a bar drawing in)
+  | { scaleX: number }
+  | { scaleY: number }
 
 // What one tracked element looks like at a moment; anything left out is
 // untouched by the film

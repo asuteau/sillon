@@ -618,6 +618,65 @@
   animation: none;
 }
 
+/* The landing's Portrait loop (PortraitFilm): the sheet moved by its score.
+   The bars sit inside the charts, so React can't rest them at the loop's
+   first frame: this does, undrawn and not yet copper. With reduced motion
+   they show whole, the leaders copper. */
+@media (prefers-reduced-motion: no-preference) {
+  .portrait-film {
+    --film-undrawn: 1;
+  }
+
+  .portrait-film .portrait-bar {
+    transform: scaleX(0);
+  }
+
+  .portrait-film .portrait-column {
+    transform: scaleY(0);
+  }
+
+  /* A column's count */
+  .portrait-film span:has(+ .portrait-column) {
+    opacity: 0;
+  }
+}
+
+/* A leader turns copper as the lacquer is drawn along its bar, a glint at
+   its front (--film-undrawn): over the leader's copper, the neutral bar
+   (opaque, as foreground/80 shows on the sheet) from the glint on */
+.portrait-film :is(.portrait-bar, .portrait-column) {
+  --copper-to: calc((1 - var(--film-undrawn, 0)) * 115%);
+  --copper-bar: color-mix(in srgb, var(--foreground) 80%, var(--background));
+  --copper-glint: color-mix(in srgb, var(--lacquer-1) 85%, transparent);
+  background-image: linear-gradient(
+    var(--copper-along),
+    transparent calc(var(--copper-to) - 15%),
+    var(--copper-glint) var(--copper-to),
+    var(--copper-bar) var(--copper-to)
+  );
+}
+
+.portrait-film .portrait-bar {
+  --copper-along: 90deg;
+}
+
+.portrait-film .portrait-column {
+  --copper-along: 0deg;
+}
+
+.portrait-film-page > [data-slot='landing-still'] {
+  box-shadow: 0 28px 56px -28px var(--pull-shadow);
+}
+
+/* Light falling off the sheet as it turns away (top left) */
+.portrait-film-shade {
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--pull-shadow) 50%, transparent),
+    transparent 60%
+  );
+}
+
 /* The disc (Disc), a brand object: vinyl in its Vinyl colour (--disc-surface,
    static gradients from discSurface; black by default), grooves, a sheen, the
    label in the Cover tint (inherited --cover-tint, grey until known and for

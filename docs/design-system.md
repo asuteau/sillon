@@ -143,6 +143,7 @@ Fast and quiet: fades by default, three signatures, nothing else. The landing he
 | Reading state, groove fill  | 600ms glide per request; count rolls ~300ms      | platter                                                           |
 | Sleeve pull                 | scroll-driven; timed moves 320ms                 | platter                                                           |
 | Hero film, Pull (landing)   | 6.6s opening, once; then a 7.6s loop per record  | platter, fade; its own: out `(.16,1,.3,1)`, in-out `(.45,0,.1,1)` |
+| Portrait loop (landing)     | 9.6s loop                                        | platter, fade, in-out; its own: dolly `(.55,0,.12,1)`             |
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing hero film plays the same move as one of its own tracks (see Hero film).
 
@@ -179,6 +180,13 @@ Then the loop, one pass per record, four records taking turns (`HERO_CAST_SIZE`)
 - Pauses off-screen and in a hidden tab, and resumes where it stopped.
 - Frameless: no card or border; the strip's edges fade into the page (mask, 12%), and the Record screen's glow fades out before the stage's edges, with no tinted top edge.
 - Reduced motion: one still, `HERO_SCORE.still` (the opening's last frame, where the loop joins): the full Sleeve pull pose — the strip, the centred House sleeve with its disc pulled out in its Vinyl colour, the neighbours scaled down and dimmed, the caption and the Random pick button — no turn.
+
+**Portrait loop** (`PortraitFilm`, `.portrait-film*`, `src/features/landing/portrait.score.ts`). The landing's Portrait section: the Portrait's own figures and charts (`PortraitFigures`, `RankedList`, `TimeChart`) on a sheet, seen at an angle (rotateX 24°, rotateY −18°), the camera easing round to face it. Loop beats (ms): the Top artists bars draw in one after another, top first (700–1940, 800ms each, 110ms apart, platter); the leader's copper is drawn along its bar, a pale lacquer glint at its front (1900–2700, platter); the focus racks down to Pressing decade (2600–3400); its columns draw up (3100–4440, 90ms apart), each count fading in as its column tops out, and the 1970s column's copper is drawn up it (4300–5100); the camera settles almost square (6400) and holds the whole sheet in focus; the bars fade (8000–8500), the camera swings back to its angle (8000–9600, dolly), and the bars are undrawn while hidden, so the wrap is never seen.
+
+- Rack focus: Pressing decade and the figures blur (0.3cqw) and dim while out of focus; Top artists only dims, since its bars move while it's soft and a blur would repaint them every frame.
+- The bars sit inside the charts, so each track names its bar (`data-track-target`); React can't rest them, so `src/styles.css` rests them at the loop's first frame (undrawn, not yet copper) unless motion is reduced. The leaders' copper is the score's `draw` (`--film-undrawn`) read as a gradient over the leader's own copper bar, so a neutral bar until drawn. It runs on the main thread and can lag the bars, so it clears the moment the bars are hidden.
+- Light: a soft shade on the sheet's far corner, as strong as the tilt; a contact shadow under it.
+- Plays only on screen. Reduced motion: one still, `PORTRAIT_SCORE.still` (7000ms, the hold): every bar whole, the leaders copper, the sheet in focus and almost square.
 
 Home is laid out on the Sleeve pull's centre axis (`text-center` on Home's `Page`): the page title, the caption, the Discogs attribution and the Random pick prompt (`RandomPickPrompt`: question, subline, any error, button stacked, frameless — no card chrome) are all centred, at every width, including the loading and empty states. Home only; every other page title stays left-aligned.
 
