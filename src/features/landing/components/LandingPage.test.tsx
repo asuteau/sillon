@@ -200,17 +200,36 @@ describe('LandingPage', () => {
     ).toBeGreaterThanOrEqual(8)
   })
 
-  it('keeps the stills and feature films out of the tab order', () => {
+  it('keeps the hero film, the stills and feature films out of the tab order', () => {
     const { container } = renderLanding()
-    const stills = container.querySelectorAll(
+    const films = container.querySelectorAll(
       '[data-slot="landing-still"], [data-slot$="-film"]',
     )
-    expect(stills).toHaveLength(5)
-    for (const still of [
-      ...stills,
-      container.querySelector('[data-slot="hero-animation"]'),
-    ])
-      expect(still?.hasAttribute('inert')).toBe(true)
+    expect(films).toHaveLength(6)
+    for (const film of films) {
+      expect(film.hasAttribute('inert')).toBe(true)
+      expect(film.getAttribute('aria-hidden')).toBe('true')
+    }
+  })
+
+  it('puts the hero film under the headline and Connect, never over them', () => {
+    renderLanding()
+    const hero = screen.getAllByRole('region')[0]
+    const film = hero.querySelector('[data-slot="hero-film"]')
+    if (!film) throw new Error('No hero film')
+    const connect = within(hero).getByRole('link', {
+      name: 'Connect with Discogs',
+    })
+    expect(
+      connect.compareDocumentPosition(film) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(film.contains(connect)).toBe(false)
+  })
+
+  it('offers no Replay with reduced motion: nothing plays', () => {
+    reducedMotion = true
+    renderLanding()
+    expect(screen.queryByRole('button', { name: 'Replay' })).toBeNull()
   })
 
   it('follows the voice rules and the glossary', () => {

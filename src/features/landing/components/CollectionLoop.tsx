@@ -61,7 +61,7 @@ interface TrackedProps {
 }
 
 // One element the film moves (`data-track`, see useFilmPlayer), resting at
-// its look until Motion takes over
+// its look until the browser takes over
 const Tracked = ({ name, looks, className, style, children }: TrackedProps) => (
   <div
     data-track={name}

@@ -13,12 +13,13 @@ declare module 'react' {
     '--pull-distance'?: number
     // How much of the landing hero's groove is still to draw (1 none drawn)
     '--groove-undrawn'?: number
-    // The landing hero stage's layout, in cqw (HERO_STAGE_VARS)
-    '--hero-sleeve'?: string
-    '--hero-slide-y'?: string
-    '--hero-groove'?: string
-    '--hero-cover'?: string
-    '--hero-cover-y'?: string
+    // A landing hero sleeve's edges and bevels, in light and dark, and the
+    // paper of its back (HeroSet)
+    '--edge-light'?: string
+    '--edge-dark'?: string
+    '--bevel-light'?: string
+    '--bevel-dark'?: string
+    '--paper'?: string
     // The landing Collection loop's layout, in cqw (COLLECTION_STAGE_VARS)
     '--loop-sleeve'?: string
     '--loop-slide-y'?: string

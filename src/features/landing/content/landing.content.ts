@@ -307,9 +307,9 @@ export const pressingSurface = ({
   id,
 }: LandingPressing): DiscSurface => discSurface(vinylColour(formats), id)
 
-// The hero film's cast, taking turns at the strip's centre, by LANDING_RECORDS
-// index: each in a different Vinyl colour, the second with two discs. The
-// hue is the tint its Cover would give (House sleeves give none)
+// The engine spike's cast (#110), by LANDING_RECORDS index, each in a
+// different Vinyl colour; the hue is the tint its Cover would give (House
+// sleeves give none). Goes with the spike
 export const HERO_CAST = [
   { index: 2, tintHue: 62 },
   { index: 5, tintHue: 190 },

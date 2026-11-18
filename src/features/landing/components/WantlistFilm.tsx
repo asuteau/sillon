@@ -43,7 +43,7 @@ interface TrackedProps {
   children?: React.ReactNode
 }
 
-// One element the film moves, resting at its look until Motion takes over
+// One element the film moves, resting at its look until the browser takes over
 const Tracked = ({
   name,
   looks,

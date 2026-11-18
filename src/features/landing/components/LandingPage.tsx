@@ -12,8 +12,10 @@ import { ScanLoop } from './ScanLoop'
 import { WantlistFilm } from './WantlistFilm'
 
 // The signed-out `/`: show the product, then "Connect with Discogs"
+// The hero film runs to the screen's edges: clipped here, so the page never
+// scrolls sideways
 export const LandingPage = () => (
-  <>
+  <div className="overflow-x-clip">
     <LandingHeader />
     <main id="top" className="mx-auto w-full max-w-270 scroll-mt-20 px-4 pb-8">
       <LandingHero />
@@ -103,5 +105,5 @@ export const LandingPage = () => (
       <LandingCta />
       <LinerNotes />
     </main>
-  </>
+  </div>
 )

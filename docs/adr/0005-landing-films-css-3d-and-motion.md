@@ -25,6 +25,22 @@ The first two rows come from the spike's first round, capped at 60 fps; the last
 - The films stay transform, opacity and filter driven (plus `stroke-dashoffset` where the groove draws). No WebGL, no canvas renderer, no per-frame React. A future film needing more goes through a new ADR.
 - Every curve lives in the score as cubic-bezier tracks; the engine only plays what the score sampled. Scores stay pure and tested without a browser, and give each film its reduced-motion still.
 - **No springs.** Motion's springs are not used, in the films or in the app. A spring is physics run outside the score: it can't be sampled into the still, scrubbed or tested like the rest. A camera's weight (slow off the mark, a touch past, settling back) is written as score keys. The app keeps its fixed easings (design system §5).
-- Motion is used only for `animate()` sequences of WAAPI animations. Its React components (`motion.div`, layout animations) are not used.
+- Motion is used only for `animate()` sequences of WAAPI animations. Its React components (`motion.div`, layout animations) are not used. Superseded: the browser plays the films directly (amendment below).
 - The baked keyframes depend on the stage's size, so a film re-bakes on resize (~5 ms).
 - Owed before the hero ships: a real mid-range phone check of the blurred 3D layers (the expensive part), and Safari's sorting and filters inside 3D (only Chrome was tested).
+
+## Amendment: the browser plays the films, not Motion (#115, #116)
+
+Building the hero film (about 270 tracked elements under one camera) showed two costs the spike's single shot hid. Measured on a production build, 390×844 at DPR 2, Chrome, CPU throttled, the film playing:
+
+- **Motion's frame loop.** With every film handed to Motion's `animate()`, its frame loop ran each frame (~5.8 ms of script at 4×) and every frame then recalculated the style of every animated element: the main thread was ~85% busy (≈850 ms per second) and Chrome presented ~46 frames a second. Handing the same keyframes to `Element.animate()` directly left the main thread idle while the film plays (≈80 ms per second at 4×, ≈160 ms at 6×).
+- **Animated blur.** `filter: blur()` moves pixels, so Chrome can't run its animation on the compositor: every film animating a blur had main-thread animation frames. The hero animates no blur: out of focus is a **soft twin** of a face (the same print under a static blur), faded in by opacity.
+
+So:
+
+- The player (`useFilmPlayer`) plays each part with the Web Animations API, one animation per tracked element, `fill: both`, `iterations: Infinity` for a loop. Motion is no longer used by the landing; `motion` stays a dependency only for the spikes (`src/features/engine-spike`, `src/features/storyboard-spike`) until they are removed, then goes.
+- A part is baked in slices between frames (`bakeInSteps`), and the samples the browser would draw anyway (holds, straight runs within a fiftieth of a unit) are dropped (`withoutHolds`): fewer keyframes start faster. A film is baked and played only when it's on screen and the tab visible.
+- `--film-undrawn` (a stroke's draw) is registered with `@property`, so the Web Animations API interpolates it; it still runs on the main thread, as before.
+- Films animate transform and opacity only. A blur is static, or it's a soft twin.
+
+The hero's numbers after the change (390×844, DPR 2, steady state while the film plays): 4× CPU, ≈61 frames presented a second, main thread ≈80 ms busy a second; 6× CPU, ≈62 frames a second, ≈160 ms. The cost moved to the start: the hero bakes in slices for ~2 s (4×) before it fades up, then one ~0.4 s task creates its animations. The real mid-range phone check and the Safari check this ADR owes are still owed.

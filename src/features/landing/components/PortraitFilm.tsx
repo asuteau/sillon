@@ -81,8 +81,8 @@ export const PortraitFilm = () => {
   const { stageRef, at, isPlaying } = useFilmPlayer(PORTRAIT_SCORE, NO_BEATS)
   const looks = PORTRAIT_SCORE.sample(at)
   // Hydrated as if motion were fine, the film may start before reduced
-  // motion is known; Motion leaves its styles on the bars as it stops. A
-  // fresh sheet for the still drops them.
+  // motion is known. A fresh sheet for the still drops anything the film
+  // left on the bars.
   const reducedMotion = usePrefersReducedMotion()
 
   return (

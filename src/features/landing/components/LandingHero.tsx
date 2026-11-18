@@ -1,20 +1,18 @@
 import { ConnectWithDiscogs } from './ConnectWithDiscogs'
-import { HeroAnimation } from './HeroAnimation'
+import { HeroFilm } from './HeroFilm'
 
-// Sized to its content, not the viewport. The Header carries the wordmark.
+// The headline and "Connect with Discogs" first, on the first paint; the
+// film under them, the page's full width. The Header carries the wordmark.
 export const LandingHero = () => (
-  <section
-    aria-labelledby="hero-title"
-    className="grid items-center gap-10 pt-10 pb-14 sm:pt-16 sm:pb-20 md:grid-cols-[1.15fr_1fr] md:gap-14"
-  >
-    <div className="flex flex-col items-start gap-6">
+  <section aria-labelledby="hero-title" className="pt-10 sm:pt-16">
+    <div className="flex flex-col items-start gap-6 pb-6 sm:pb-8">
       <h1
         id="hero-title"
-        className="type-display text-5xl text-balance text-foreground sm:text-7xl"
+        className="max-w-4xl type-display text-5xl text-balance text-foreground sm:text-7xl"
       >
         Your Discogs collection, cover first.
       </h1>
-      <p className="max-w-md text-base text-muted-foreground sm:text-lg">
+      <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
         Sillon keeps your collection and wantlist in step with Discogs, shows
         every record with an HD cover and fits in your pocket.
       </p>
@@ -25,6 +23,9 @@ export const LandingHero = () => (
       <ConnectWithDiscogs />
     </div>
 
-    <HeroAnimation />
+    {/* Out of the page's column, to the screen's edges */}
+    <div className="mx-[calc(50%_-_50vw)] pb-10 sm:pb-14">
+      <HeroFilm />
+    </div>
   </section>
 )

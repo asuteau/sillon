@@ -447,88 +447,6 @@
   }
 }
 
-/* Landing hero: CSS animations hold while it's off-screen or the tab hidden */
-[data-slot='hero-animation'][data-paused] * {
-  animation-play-state: paused;
-}
-
-/* The landing hero film, Pull (HeroAnimation): placed in cqw of its 4:5
-   stage by the --hero-* properties the stage sets (HERO_STAGE_VARS), moved
-   by its score (transform and opacity; the groove's draw by --film-undrawn).
-   The strip's edges fade into the page; the camera scales about the centred
-   slide */
-.hero-film-slide,
-.hero-film-mark,
-.hero-film-flyer {
-  position: absolute;
-  left: calc(50cqw - var(--hero-box) / 2);
-  top: calc(var(--hero-box-y) - var(--hero-box) / 2);
-  width: var(--hero-box);
-  height: var(--hero-box);
-}
-
-.hero-film-slide {
-  --hero-box: var(--hero-sleeve);
-  --hero-box-y: var(--hero-slide-y);
-}
-
-/* The groove, where the disc it becomes sits */
-.hero-film-mark {
-  --hero-box: var(--hero-groove);
-  --hero-box-y: var(--hero-slide-y);
-}
-
-/* The flying Cover, at the Record screen's Cover */
-.hero-film-flyer {
-  --hero-box: var(--hero-cover);
-  --hero-box-y: var(--hero-cover-y);
-}
-
-.hero-film-world {
-  transform-origin: 50cqw var(--hero-slide-y);
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 12%,
-    #000 88%,
-    transparent
-  );
-}
-
-.hero-film-groove path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: var(--film-undrawn, 0);
-}
-
-.hero-film-sleeve {
-  box-shadow: 0 10px 30px var(--pull-shadow);
-  backface-visibility: hidden;
-}
-
-.hero-film-disc .disc {
-  inset: 0;
-}
-
-/* Frameless: the Record screen's glow fades out before the stage's edges,
-   with no tinted top edge */
-.hero-film .cover-glow {
-  background: radial-gradient(
-    closest-side at 50% 34%,
-    oklch(
-        from var(--cover-tint) var(--cover-glow-lightness) c h /
-          var(--cover-glow-alpha)
-      )
-      40%,
-    transparent
-  );
-  box-shadow: none;
-}
-
-/* No sheet behind the hero's Record screen: the hole shows the page */
-.hero-film .disc-row .disc-hole {
-  background: var(--background);
-}
-
 /* The landing's Collection loop (CollectionLoop): placed in cqw of its 4:5
    stage by the --loop-* properties the stage sets (COLLECTION_STAGE_VARS),
    moved by its score. The camera is a CSS 3D set: the strip turns under one
@@ -723,6 +641,15 @@
   .portrait-film span:has(+ .portrait-column) {
     opacity: 0;
   }
+}
+
+/* How much of a stroke a landing film has still to draw (a score's `draw`):
+   registered so the Web Animations API interpolates it rather than
+   flipping it halfway. It still runs on the main thread */
+@property --film-undrawn {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
 }
 
 /* A leader turns copper as the lacquer is drawn along its bar, a glint at
