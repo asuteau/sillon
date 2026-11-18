@@ -200,11 +200,9 @@ describe('LandingPage', () => {
     ).toBeGreaterThanOrEqual(8)
   })
 
-  it('keeps the hero film, the stills and feature films out of the tab order', () => {
+  it('keeps the hero film and the feature films out of the tab order', () => {
     const { container } = renderLanding()
-    const films = container.querySelectorAll(
-      '[data-slot="landing-still"], [data-slot$="-film"]',
-    )
+    const films = container.querySelectorAll('[data-slot$="-film"]')
     expect(films).toHaveLength(6)
     for (const film of films) {
       expect(film.hasAttribute('inert')).toBe(true)
