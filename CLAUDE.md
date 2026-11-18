@@ -15,7 +15,7 @@ pnpm check && npx tsc --noEmit    # Run after every code change (prettier + esli
 
 - TanStack Start + TanStack Router (file-based) + TanStack Query
 - Tailwind CSS v4 + shadcn/ui (style `base-nova`, Base UI + vaul)
-- Motion: CSS + Web Animations API (no animation library)
+- Motion: CSS + Web Animations API, no animation library; landing films are CSS 3D scores played with WAAPI (ADR 0005)
 - Discogs OAuth 1.0a — auth & collection data
 - Deezer API — HD cover art
 - Zod — schema validation at API boundaries

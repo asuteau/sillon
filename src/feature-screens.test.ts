@@ -43,12 +43,15 @@ describe('feature screens', () => {
   })
 })
 
-// #16: the landing hero is sized to its content
+// #16: the landing hero is sized to its content. A cap is not a fill: the
+// hero may be held to the viewport's height (`max-h-`) so it fits above the
+// fold
 describe('landing page', () => {
   it.each(componentFiles('features/landing/components'))(
     '%s never fills the viewport height',
     (file) => {
-      expect(readFileSync(join(SRC, file), 'utf8')).not.toMatch(
+      const source = readFileSync(join(SRC, file), 'utf8')
+      expect(source.replace(/\bmax-h-\[[^\]]*\]/g, '')).not.toMatch(
         /\b(h-screen|min-h-screen|[hy]-(s|d|l)?vh|min-h-(s|d|l)vh)\b|100(s|d|l)?vh/,
       )
     },

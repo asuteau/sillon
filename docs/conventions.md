@@ -22,18 +22,20 @@ Route files hold loader, search params and the component import. Logic lives in 
 
 One file per responsibility, named `{domain}.{role}.ts`. When a role outgrows one file, promote it to a subfolder (`landing/content/`).
 
-| Suffix          | Role                                                                   |
-| --------------- | ---------------------------------------------------------------------- |
-| `.schema.ts`    | Zod schemas for raw API data                                           |
-| `.model.ts`     | Applicative types and mapping from the schema                          |
-| `.queries.ts`   | TanStack Query options                                                 |
-| `.mutations.ts` | Mutation server functions and their `useMutation` hooks                |
-| `.api.ts`       | `createServerFn` wrappers; lazy-import the `.server.ts` they call      |
-| `.server.ts`    | Server-only code (`services/`): never imported by client code directly |
-| `.utils.ts`     | Pure functions                                                         |
-| `.store.ts`     | Client state with `useSyncExternalStore`, persisted to `localStorage`  |
-| `.persist.ts`   | Query cache persistence                                                |
-| `.content.ts`   | Static copy and made-up records for marketing pages                    |
-| `.test.ts(x)`   | Vitest, next to the file it tests                                      |
+| Suffix           | Role                                                                   |
+| ---------------- | ---------------------------------------------------------------------- |
+| `.schema.ts`     | Zod schemas for raw API data                                           |
+| `.model.ts`      | Applicative types and mapping from the schema                          |
+| `.queries.ts`    | TanStack Query options                                                 |
+| `.mutations.ts`  | Mutation server functions and their `useMutation` hooks                |
+| `.api.ts`        | `createServerFn` wrappers; lazy-import the `.server.ts` they call      |
+| `.server.ts`     | Server-only code (`services/`): never imported by client code directly |
+| `.utils.ts`      | Pure functions                                                         |
+| `.store.ts`      | Client state with `useSyncExternalStore`, persisted to `localStorage`  |
+| `.persist.ts`    | Query cache persistence                                                |
+| `.content.ts`    | Static copy and made-up records for marketing pages                    |
+| `.score.ts`      | A landing film's score: pure looks over time (ADR 0005)                |
+| `.test.ts(x)`    | Vitest, next to the file it tests                                      |
+| `.test-utils.ts` | Helpers shared by several tests, never imported by app code            |
 
 Components are `PascalCase.tsx`; hooks are `use-kebab-case.ts`.

@@ -306,13 +306,3 @@ export const pressingSurface = ({
   formats,
   id,
 }: LandingPressing): DiscSurface => discSurface(vinylColour(formats), id)
-
-// The hero film's cast, taking turns at the strip's centre, by LANDING_RECORDS
-// index: each in a different Vinyl colour, the second with two discs. The
-// hue is the tint its Cover would give (House sleeves give none)
-export const HERO_CAST = [
-  { index: 2, tintHue: 62 },
-  { index: 5, tintHue: 190 },
-  { index: 4, tintHue: 30 },
-  { index: 6, tintHue: 150 },
-] as const

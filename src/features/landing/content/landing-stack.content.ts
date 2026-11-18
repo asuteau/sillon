@@ -57,3 +57,32 @@ export const LANDING_STACK: Stack = {
   ],
   notFound: [],
 }
+
+// The Scan loop's sleeves, one per pass: each scanned alone (a Stack of one)
+// and found on Discogs as one release. The first goes to the Collection, the
+// second to the Wantlist. By LANDING_RECORDS index
+export const SCAN_LOOP_SLEEVES = [
+  { index: 0, barcode: '5021732098143', country: 'UK' },
+  { index: 3, barcode: '0731454386722', country: 'US' },
+] as const
+
+// The crate's back sleeves, never lifted
+export const SCAN_LOOP_CRATE = [7, 1] as const
+
+export const scanLoopStack = (pass: 0 | 1): Stack => {
+  const { index, barcode, country } = SCAN_LOOP_SLEEVES[pass]
+  const [record] = landingRecords(index)
+  const id = 10 + pass
+  return {
+    records: [
+      {
+        barcode,
+        status: 'found',
+        matches: [match(id, record, country)],
+        chosenId: id,
+        included: false,
+      },
+    ],
+    notFound: [],
+  }
+}

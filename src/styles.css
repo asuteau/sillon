@@ -447,72 +447,79 @@
   }
 }
 
-/* Landing hero: CSS animations hold while it's off-screen or the tab hidden */
-[data-slot='hero-animation'][data-paused] * {
+/* A landing film waiting off-screen or in a hidden tab (FilmStage): the
+   app's own CSS animations inside it wait too */
+[data-slot$='-film'][data-paused] * {
   animation-play-state: paused;
 }
 
-/* The landing hero film, Pull (HeroAnimation): placed in cqw of its 4:5
-   stage by the --hero-* properties the stage sets (HERO_STAGE_VARS), moved
-   by Web Animations (transform and opacity). The strip's edges fade into the
-   page; the camera scales about the centred slide */
-.hero-film-slide,
-.hero-film-mark,
-.hero-film-flyer {
+/* The landing's Collection loop (CollectionLoop): placed in cqw of its 4:5
+   stage by the --loop-* properties the stage sets (COLLECTION_STAGE_VARS),
+   moved by its score. The camera is a CSS 3D set: the strip turns under one
+   lens about the centred slide; neighbours sit back, out of focus */
+
+.collection-loop-slide,
+.collection-loop-flyer {
   position: absolute;
-  left: calc(50cqw - var(--hero-box) / 2);
-  top: calc(var(--hero-box-y) - var(--hero-box) / 2);
-  width: var(--hero-box);
-  height: var(--hero-box);
+  left: calc(50cqw - var(--loop-box) / 2);
+  top: calc(var(--loop-box-y) - var(--loop-box) / 2);
+  width: var(--loop-box);
+  height: var(--loop-box);
 }
 
-.hero-film-slide {
-  --hero-box: var(--hero-sleeve);
-  --hero-box-y: var(--hero-slide-y);
+.collection-loop-slide {
+  --loop-box: var(--loop-sleeve);
+  --loop-box-y: var(--loop-slide-y);
 }
 
-/* The groove, where the disc it becomes sits */
-.hero-film-mark {
-  --hero-box: var(--hero-groove);
-  --hero-box-y: var(--hero-slide-y);
+.collection-loop-flyer {
+  --loop-box: var(--loop-cover);
+  --loop-box-y: var(--loop-cover-y);
+  overflow: hidden;
+  border-radius: var(--radius);
 }
 
-/* The flying Cover, at the Record screen's Cover */
-.hero-film-flyer {
-  --hero-box: var(--hero-cover);
-  --hero-box-y: var(--hero-cover-y);
-}
-
-.hero-film-world {
-  transform-origin: 50cqw var(--hero-slide-y);
+.collection-loop-strip {
   mask-image: linear-gradient(
     90deg,
     transparent,
-    #000 12%,
-    #000 88%,
+    #000 10%,
+    #000 90%,
     transparent
   );
 }
 
-.hero-film-groove path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: var(--groove-undrawn, 0);
+.collection-loop-camera {
+  transform-origin: 50cqw var(--loop-slide-y);
+  transform-style: preserve-3d;
 }
 
-.hero-film-sleeve {
+.collection-loop-sleeve {
   box-shadow: 0 10px 30px var(--pull-shadow);
+  border-radius: var(--radius);
   backface-visibility: hidden;
 }
 
-.hero-film-disc .disc {
+.collection-loop-disc .disc {
   inset: 0;
 }
 
-/* Frameless: the Record screen's glow fades out before the stage's edges,
-   with no tinted top edge */
-.hero-film .cover-glow {
+/* A soft band of light, brighter on dark Covers than it could be on light */
+.collection-loop-glint {
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    oklch(1 0 0 / 0.28) 50%,
+    transparent 80%
+  );
+  mix-blend-mode: soft-light;
+}
+
+/* Frameless: the Record screen's glow fades out before the
+   stage's edges, with no tinted top edge */
+.collection-loop .cover-glow {
   background: radial-gradient(
-    closest-side at 50% 34%,
+    closest-side at 50% 30%,
     oklch(
         from var(--cover-tint) var(--cover-glow-lightness) c h /
           var(--cover-glow-alpha)
@@ -523,8 +530,7 @@
   box-shadow: none;
 }
 
-/* No sheet behind the hero's Record screen: the hole shows the page */
-.hero-film .disc-row .disc-hole {
+.collection-loop .disc-row .disc-hole {
   background: var(--background);
 }
 
@@ -611,10 +617,77 @@
   }
 }
 
-/* Landing stills are static: the Portrait still shows its charts drawn */
-[data-slot='landing-still']
-  :is(.portrait-reveal, .portrait-bar, .portrait-column) {
+/* The landing's Portrait loop (PortraitFilm): the sheet moved by its score.
+   The bars sit inside the charts, so React can't rest them at the loop's
+   first frame: this does, undrawn and not yet copper. With reduced motion
+   they show whole, the leaders copper. */
+@media (prefers-reduced-motion: no-preference) {
+  .portrait-film {
+    --film-undrawn: 1;
+  }
+
+  .portrait-film .portrait-bar {
+    transform: scaleX(0);
+  }
+
+  .portrait-film .portrait-column {
+    transform: scaleY(0);
+  }
+
+  /* A column's count */
+  .portrait-film span:has(+ .portrait-column) {
+    opacity: 0;
+  }
+}
+
+/* How much of a stroke a landing film has still to draw (a score's `draw`):
+   registered so the Web Animations API interpolates it rather than
+   flipping it halfway. It still runs on the main thread */
+@property --film-undrawn {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+/* A leader turns copper as the lacquer is drawn along its bar, a glint at
+   its front (--film-undrawn): over the leader's copper, the neutral bar
+   (opaque, as foreground/80 shows on the sheet) from the glint on */
+.portrait-film :is(.portrait-bar, .portrait-column) {
+  --copper-to: calc((1 - var(--film-undrawn, 0)) * 115%);
+  --copper-bar: color-mix(in srgb, var(--foreground) 80%, var(--background));
+  --copper-glint: color-mix(in srgb, var(--lacquer-1) 85%, transparent);
+  background-image: linear-gradient(
+    var(--copper-along),
+    transparent calc(var(--copper-to) - 15%),
+    var(--copper-glint) var(--copper-to),
+    var(--copper-bar) var(--copper-to)
+  );
+}
+
+.portrait-film .portrait-bar {
+  --copper-along: 90deg;
+}
+
+.portrait-film .portrait-column {
+  --copper-along: 0deg;
+}
+
+.portrait-film :is(.portrait-reveal, .portrait-bar, .portrait-column) {
   animation: none;
+}
+
+/* The sheet: a landing still's card, its contact shadow under it */
+.portrait-film-sheet {
+  box-shadow: 0 28px 56px -28px var(--pull-shadow);
+}
+
+/* Light falling off the sheet as it turns away (top left) */
+.portrait-film-shade {
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--pull-shadow) 50%, transparent),
+    transparent 60%
+  );
 }
 
 /* The disc (Disc), a brand object: vinyl in its Vinyl colour (--disc-surface,
@@ -882,37 +955,6 @@
 
 .sleeve-pull-body .disc-grooves {
   transform: rotate(calc(var(--pull-out) * 140deg));
-}
-
-/* The landing's Collection still: the Sleeve pull's settled pose, sized to
-   its column (an @container) and centred by layout, never scrolled */
-[data-slot='landing-still'] .sleeve-pull-strip {
-  /* Small enough that a neighbour shows either side */
-  --sleeve: min(36cqw, 200px);
-  justify-content: center;
-  overflow: hidden;
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 10%,
-    #000 90%,
-    transparent
-  );
-}
-
-[data-slot='landing-still'] .sleeve-pull-slide {
-  cursor: default;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* A still, not motion: its disc stays pulled out */
-  [data-slot='landing-still'] .sleeve-pull-body .disc {
-    display: block;
-  }
-
-  [data-slot='landing-still'] .sleeve-pull-sleeve {
-    transform: translateX(calc(var(--pull-out) * var(--sleeve) * -0.2));
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
