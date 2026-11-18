@@ -1,7 +1,6 @@
 // The craft spike's shot (#110) as a pure score: a world in sleeve units
-// (1 = a 12" sleeve's width), a camera rig and the beats over 10s. Both
-// renderers sample it: the DOM bakes it into WAAPI keyframes for CSS 3D, the
-// WebGL scene reads it every frame. Engine-agnostic: no DOM, no three.
+// (1 = a 12" sleeve's width), a camera rig and the beats over 10s. The DOM
+// bakes it into WAAPI keyframes for CSS 3D. Engine-agnostic: no DOM.
 
 type Bezier = readonly [number, number, number, number]
 

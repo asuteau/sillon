@@ -6,9 +6,8 @@ export const LOOP_MS = CRAFT_MS + LOOP_HOLD_MS
 
 type Listener = () => void
 
-// One clock for both renderers, so side by side they play the same frame.
-// WebGL reads it every frame; the DOM's Motion animation follows its
-// play/pause/seek events and otherwise runs on its own (WAAPI).
+// The page's clock: the DOM's Motion animation follows its play/pause/seek
+// events and otherwise runs on its own (WAAPI).
 export const createShotClock = () => {
   let origin = performance.now()
   let pausedAt: number | null = null

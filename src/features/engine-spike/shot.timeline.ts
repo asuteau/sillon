@@ -1,6 +1,5 @@
-// The spike's one shot, as numbers. Both engines read these and each writes
-// its own idiomatic driver: Motion `animate()` sequences, Remotion
-// `interpolate()` per frame. Positions in % of the sleeve, times in ms.
+// The spike's first, flat shot, as numbers, driven by Motion `animate()`
+// sequences ("Prior flat"). Positions in % of the sleeve, times in ms.
 
 type Bezier = readonly [number, number, number, number]
 

@@ -1,11 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { ThemeToggle } from '#/shared/components/ThemeToggle'
 
@@ -15,17 +8,10 @@ import { LOOP_MS, createShotClock } from '../shot-clock'
 import { DomShot } from './DomShot'
 import { MotionShot } from './MotionShot'
 
-// WebGL in its own chunk, so its weight is only paid when it is shown
-const GlShot = lazy(() =>
-  import('./GlShot').then((m) => ({ default: m.GlShot })),
-)
-
-type View = 'dom' | 'webgl' | 'both' | 'flat'
+type View = 'dom' | 'flat'
 
 const VIEWS: Array<{ id: View; label: string }> = [
-  { id: 'both', label: 'A + B' },
   { id: 'dom', label: 'A · DOM' },
-  { id: 'webgl', label: 'B · WebGL' },
   { id: 'flat', label: 'Prior flat' },
 ]
 
@@ -78,13 +64,13 @@ const startClock = () => {
   return clock
 }
 
-// Dev-only page for the landing engine spike (#110). The craft round: the
-// same ~10s shot in the DOM (A: CSS 3D + Motion) and in WebGL (B: three.js),
-// on one clock, in 16:9 or ~4:5, either theme. `?view=` `&framing=` `&t=`
+// Dev-only page for the landing engine spike (#110): the craft shot picked
+// (A: CSS 3D + Motion) beside the prior flat one, in 16:9 or ~4:5, either
+// theme. `?view=` `&framing=` `&t=`
 // (ms, paused) set it from the URL, for screenshots.
 export const EngineSpike = () => {
   const [view, setView] = useState<View>(() =>
-    readParam('view', ['dom', 'webgl', 'both', 'flat'], 'both'),
+    readParam('view', ['dom', 'flat'], 'dom'),
   )
   const [framing, setFraming] = useState<Framing>(() =>
     readParam('framing', ['wide', 'tall'], 'wide'),
@@ -108,22 +94,6 @@ export const EngineSpike = () => {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [clock])
-
-  const shot = (v: 'dom' | 'webgl') =>
-    v === 'dom' ? (
-      <DomShot key={`dom-${framing}`} framing={framing} clock={clock} />
-    ) : (
-      <Suspense
-        fallback={
-          <div
-            className="w-full bg-background"
-            style={{ aspectRatio: framing === 'wide' ? '16 / 9' : '4 / 5' }}
-          />
-        }
-      >
-        <GlShot key={`gl-${framing}`} framing={framing} clock={clock} />
-      </Suspense>
-    )
 
   return (
     <main className="mx-auto flex max-w-7xl flex-col gap-6 p-4 md:p-6">
@@ -176,29 +146,11 @@ export const EngineSpike = () => {
           <MotionShot />
         </section>
       )}
-      {view === 'both' && (
-        <div
-          className={
-            framing === 'wide'
-              ? 'grid gap-6 lg:grid-cols-2'
-              : 'mx-auto grid w-full max-w-4xl gap-6 md:grid-cols-2'
-          }
-        >
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium">A · DOM: CSS 3D + Motion</h2>
-            {shot('dom')}
-          </section>
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium">B · WebGL: three.js / R3F</h2>
-            {shot('webgl')}
-          </section>
-        </div>
-      )}
-      {(view === 'dom' || view === 'webgl') && (
+      {view === 'dom' && (
         <section
           className={framing === 'wide' ? 'w-full' : 'mx-auto w-full max-w-md'}
         >
-          {shot(view)}
+          <DomShot key={framing} framing={framing} clock={clock} />
         </section>
       )}
     </main>
