@@ -1,6 +1,14 @@
 // @vitest-environment jsdom
 import { act, render, screen, within } from '@testing-library/react'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
 import {
   GROOVE_INNER_RADIUS,
@@ -8,6 +16,16 @@ import {
   grooveSpiralPath,
 } from '#/shared/utils/groove-spiral'
 
+import { COLLECTION_SCORE } from '../collection.score'
+import { lookStyle } from '../film/film-css.utils'
+import type { Score } from '../film/film.model'
+import { HERO_SCORES } from '../hero/hero.score'
+import { PORTRAIT_SCORE } from '../portrait.score'
+import { RANDOM_PICK_SCORE } from '../random-pick.score'
+import { SCAN_SCORE } from '../scan.score'
+import { WANTLIST_SCORE } from '../wantlist.score'
+import { LandingCta } from './LandingCta'
+import { LandingKeyFacts } from './LandingKeyFacts'
 import { LandingPage } from './LandingPage'
 
 const renderLanding = () => render(<LandingPage />)
@@ -51,6 +69,28 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals()
 })
+
+// The page's first render in a fresh worker compiles React's and jsdom's
+// paths for its ~2,000 elements (the hero alone ~900, each element a debug
+// stack in React's dev build): about a second alone, several under a full
+// parallel suite. Paid once here, under the hook's own timeout, so no test
+// carries it; the tests then render in a few hundred milliseconds
+beforeAll(() => {
+  vi.stubGlobal('matchMedia', () => ({
+    matches: false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+  vi.stubGlobal(
+    'IntersectionObserver',
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  )
+  render(<LandingPage />).unmount()
+  vi.unstubAllGlobals()
+}, 30_000)
 
 // Headings inside the inert stills are hidden from assistive tech in browsers
 const sectionHeadings = () =>
@@ -164,7 +204,7 @@ describe('LandingPage', () => {
   })
 
   it('credits Discogs and Deezer in the key facts', () => {
-    renderLanding()
+    render(<LandingKeyFacts />)
     const facts = screen.getByRole('region', { name: 'Key facts' })
     expect(facts.querySelectorAll('li').length).toBeGreaterThanOrEqual(3)
     expect(facts.querySelectorAll('li').length).toBeLessThanOrEqual(4)
@@ -224,6 +264,44 @@ describe('LandingPage', () => {
     expect(film.contains(connect)).toBe(false)
   })
 
+  it('holds every film on its still with reduced motion, nothing waiting to play', () => {
+    reducedMotion = true
+    const { container } = renderLanding()
+    // Reduced motion reports every query as matching: the hero is wide
+    const scores: Record<string, Score<string>> = {
+      'hero-film': HERO_SCORES.wide,
+      'collection-film': COLLECTION_SCORE,
+      'wantlist-film': WANTLIST_SCORE,
+      'scan-film': SCAN_SCORE,
+      'random-pick-film': RANDOM_PICK_SCORE,
+      'portrait-film': PORTRAIT_SCORE,
+    }
+    const films = container.querySelectorAll<HTMLElement>(
+      '[data-slot$="-film"]',
+    )
+    expect([...films].map((film) => film.dataset.slot).sort()).toEqual(
+      Object.keys(scores).sort(),
+    )
+    for (const film of films) {
+      const score = scores[film.dataset.slot ?? '']
+      const still = score.sample(score.still)
+      expect(film.hasAttribute('data-paused')).toBe(false)
+      const tracked = film.querySelectorAll<HTMLElement>(
+        '[data-track]:not([data-track-target])',
+      )
+      expect(tracked.length).toBeGreaterThan(0)
+      for (const element of tracked) {
+        const { opacity, transform } = lookStyle(
+          still[element.dataset.track ?? ''] ?? {},
+        )
+        if (opacity !== undefined)
+          expect(element.style.opacity).toBe(String(opacity))
+        if (transform !== undefined)
+          expect(element.style.transform).toBe(transform)
+      }
+    }
+  })
+
   it('offers no Replay with reduced motion: nothing plays', () => {
     reducedMotion = true
     renderLanding()
@@ -242,7 +320,7 @@ describe('LandingPage', () => {
 
   describe('closing groove', () => {
     it('is a 96px groove in lacquer tone', () => {
-      renderLanding()
+      render(<LandingCta />)
       const groove = closingGroove()
       const path = groove.querySelector('path')
       expect(groove.getAttribute('width')).toBe('96')
@@ -257,7 +335,7 @@ describe('LandingPage', () => {
     })
 
     it('stays undrawn until the section scrolls into view', () => {
-      renderLanding()
+      render(<LandingCta />)
       expect(closingGroove().classList).toContain('groove-undrawn')
       reportCta(false)
       expect(closingGroove().classList).toContain('groove-undrawn')
@@ -265,7 +343,7 @@ describe('LandingPage', () => {
     })
 
     it('draws in once on the first intersecting entry, then stops observing', () => {
-      renderLanding()
+      render(<LandingCta />)
       reportCta(true)
       const groove = closingGroove()
       expect(groove.classList).toContain('groove-draw-in')
@@ -280,7 +358,7 @@ describe('LandingPage', () => {
 
     it('fades the full groove in with reduced motion, no draw-in', () => {
       reducedMotion = true
-      renderLanding()
+      render(<LandingCta />)
       reportCta(true)
       expect(closingGroove().classList).toContain('groove-fade-in')
       expect(closingGroove().classList).not.toContain('groove-undrawn')
