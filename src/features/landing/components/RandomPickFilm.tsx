@@ -6,7 +6,6 @@ import { RecordHeading } from '#/shared/components/RecordHeading'
 import { Button } from '#/shared/components/ui/button'
 
 import { GeneratedCover } from './GeneratedCover'
-import { LandingStill } from './LandingStill'
 import { useFilmPlayer } from '../hooks/use-film-player'
 import {
   LANDING_RECORDS,
@@ -264,43 +263,42 @@ export const RandomPickFilm = () => {
   const looks = RANDOM_PICK_SCORE.sample(at)
 
   return (
-    <LandingStill className="p-0 sm:p-0">
-      <div
-        ref={stageRef}
-        data-slot="random-pick-film"
-        aria-hidden
-        className="@container relative aspect-4/5 w-full overflow-hidden"
-      >
-        <div className="absolute inset-0 perspective-[160cqw] perspective-origin-[50%_45%]">
-          <Tracked
-            name="world"
-            looks={looks}
-            className="absolute top-[78cqw] left-1/2 size-0 transform-3d"
-          >
-            <Crate looks={looks} />
-            {/* Back to front, so each Cover shows over the one behind */}
-            {[...SLOTS].reverse().map((slot) => (
-              <Sleeve key={slot} slot={slot} looks={looks} />
-            ))}
-          </Tracked>
-        </div>
-
-        <Caption pick="a" looks={looks} />
-        <Caption pick="b" looks={looks} />
-        {PICK_BUTTONS.map(([name, label]) => (
-          <Tracked
-            key={name}
-            name={name}
-            looks={looks}
-            className="absolute inset-x-0 bottom-[7cqw] flex justify-center"
-          >
-            <Button variant="lacquer" size="lg">
-              <RandomPickIcon />
-              {label}
-            </Button>
-          </Tracked>
-        ))}
+    <div
+      ref={stageRef}
+      data-slot="random-pick-film"
+      inert
+      aria-hidden
+      className="@container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
+    >
+      <div className="absolute inset-0 perspective-[160cqw] perspective-origin-[50%_45%]">
+        <Tracked
+          name="world"
+          looks={looks}
+          className="absolute top-[78cqw] left-1/2 size-0 transform-3d"
+        >
+          <Crate looks={looks} />
+          {/* Back to front, so each Cover shows over the one behind */}
+          {[...SLOTS].reverse().map((slot) => (
+            <Sleeve key={slot} slot={slot} looks={looks} />
+          ))}
+        </Tracked>
       </div>
-    </LandingStill>
+
+      <Caption pick="a" looks={looks} />
+      <Caption pick="b" looks={looks} />
+      {PICK_BUTTONS.map(([name, label]) => (
+        <Tracked
+          key={name}
+          name={name}
+          looks={looks}
+          className="absolute inset-x-0 bottom-[7cqw] flex justify-center"
+        >
+          <Button variant="lacquer" size="lg">
+            <RandomPickIcon />
+            {label}
+          </Button>
+        </Tracked>
+      ))}
+    </div>
   )
 }

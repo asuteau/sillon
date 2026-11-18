@@ -34,7 +34,7 @@ describe('RandomPickFilm', () => {
     const { container } = render(<RandomPickFilm />)
     const film = container.querySelector('[data-slot="random-pick-film"]')
     expect(film?.getAttribute('aria-hidden')).toBe('true')
-    expect(film?.closest('[inert]')).not.toBeNull()
+    expect(film?.hasAttribute('inert')).toBe(true)
   })
 
   it('opens on the crate at rest, "Pick for me" shown', () => {

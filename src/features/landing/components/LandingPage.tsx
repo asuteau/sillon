@@ -1,4 +1,4 @@
-import { CollectionStill } from './CollectionStill'
+import { CollectionLoop } from './CollectionLoop'
 import { LandingChallenge } from './LandingChallenge'
 import { LandingHeader } from './LandingHeader'
 import { LandingKeyFacts } from './LandingKeyFacts'
@@ -9,7 +9,7 @@ import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
 import { RandomPickFilm } from './RandomPickFilm'
 import { ScanStill } from './ScanStill'
-import { WantlistStill } from './WantlistStill'
+import { WantlistFilm } from './WantlistFilm'
 
 // The signed-out `/`: show the product, then "Connect with Discogs"
 export const LandingPage = () => (
@@ -25,7 +25,7 @@ export const LandingPage = () => (
         id="collection"
         label="Collection"
         title="Your collection, in HD."
-        still={<CollectionStill />}
+        still={<CollectionLoop />}
       >
         <p>
           Sillon reads your Discogs collection and finds an HD cover for every
@@ -45,7 +45,7 @@ export const LandingPage = () => (
         id="wantlist"
         label="Wantlist"
         title="Your wantlist, fulfilled."
-        still={<WantlistStill />}
+        still={<WantlistFilm />}
       >
         <p>
           Your wantlist sits next to your collection. Add the exact release you
