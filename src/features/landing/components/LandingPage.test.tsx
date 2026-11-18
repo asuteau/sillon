@@ -102,14 +102,34 @@ describe('LandingPage', () => {
     ).toBe('/auth/login')
   })
 
-  it('shows the features, then a final call to action, then the liner notes', () => {
-    renderLanding()
+  it('runs header, hero, key facts, Challenge, features, call to action, liner notes', () => {
+    const { container } = renderLanding()
+    expect(container.querySelector('header')).not.toBeNull()
     expect(sectionHeadings()).toEqual([
+      'Discogs is a database, not a shelf.',
       'Your collection, in HD.',
-      'Your collection, in numbers.',
       'Your wantlist, fulfilled.',
       'Scan the sleeve.',
       'Nothing to spin?',
+      'Your collection, in numbers.',
+      'Bring your crates.',
+      'Liner notes',
+    ])
+    const sections = [...container.querySelectorAll('main > section')].map(
+      (s) =>
+        s.getAttribute('aria-label') ??
+        document.getElementById(s.getAttribute('aria-labelledby') ?? '')
+          ?.textContent,
+    )
+    expect(sections).toEqual([
+      'Your Discogs collection, cover first.',
+      'Key facts',
+      'Discogs is a database, not a shelf.',
+      'Your collection, in HD.',
+      'Your wantlist, fulfilled.',
+      'Scan the sleeve.',
+      'Nothing to spin?',
+      'Your collection, in numbers.',
       'Bring your crates.',
       'Liner notes',
     ])
@@ -117,6 +137,51 @@ describe('LandingPage', () => {
     expect(links).toHaveLength(2)
     for (const link of links)
       expect(link.getAttribute('href')).toBe('/auth/login')
+  })
+
+  it('has a sticky header whose anchors resolve to sections', () => {
+    const { container } = renderLanding()
+    const header = container.querySelector('header')
+    if (!header) throw new Error('No landing header')
+    const anchors = within(header)
+      .getAllByRole('link')
+      .filter((a) => a.getAttribute('href')?.startsWith('#'))
+    expect(anchors.map((a) => a.textContent)).toEqual([
+      'sillon',
+      'Features',
+      'Portrait',
+      'Liner notes',
+    ])
+    for (const a of anchors) {
+      const id = a.getAttribute('href')?.slice(1) ?? ''
+      expect(container.querySelector(`#${id}`)).not.toBeNull()
+    }
+    expect(
+      within(header)
+        .getByRole('link', { name: 'Connect' })
+        .getAttribute('href'),
+    ).toBe('/auth/login')
+  })
+
+  it('credits Discogs and Deezer in the key facts', () => {
+    renderLanding()
+    const facts = screen.getByRole('region', { name: 'Key facts' })
+    expect(facts.querySelectorAll('li').length).toBeGreaterThanOrEqual(3)
+    expect(facts.querySelectorAll('li').length).toBeLessThanOrEqual(4)
+    expect(facts.textContent).toContain('Discogs')
+    expect(facts.textContent).toContain('Deezer')
+    expect(facts.textContent).not.toMatch(/\d/)
+  })
+
+  it('leads the Scan copy with one sleeve in a shop, the Stack second', () => {
+    renderLanding()
+    const scan = screen.getByRole('region', { name: 'Scan the sleeve.' })
+    const paragraphs = [...scan.querySelectorAll('p')].map((p) => p.textContent)
+    const body = paragraphs.filter((t) => t && t.length > 40)
+    expect(body[0]).toMatch(/shop/)
+    expect(body[0]).toMatch(/Collection/)
+    expect(body[0]).toMatch(/Wantlist/)
+    expect(body[1]).toMatch(/Stack/)
   })
 
   it('anchors the liner notes for /about', () => {
@@ -151,7 +216,7 @@ describe('LandingPage', () => {
     expect(text).not.toContain('!')
     expect(text).not.toMatch(/\boops\b/i)
     expect(text).not.toMatch(
-      /\b(wishlist|library|shelf|shuffle|surprise me|artwork|placeholder|owned want|completed want)\b/i,
+      /\b(wishlist|library|shuffle|surprise me|artwork|placeholder|owned want|completed want)\b/i,
     )
   })
 
