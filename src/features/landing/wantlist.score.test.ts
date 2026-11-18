@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { easeToken, halfway } from './film/ease-tokens.test-utils'
 import { playheadAt } from './film/film.model'
 import { WANTLIST_BEATS, WANTLIST_SCORE } from './wantlist.score'
 import type { WantlistTrack } from './wantlist.score'
@@ -97,6 +98,21 @@ describe('WANTLIST_SCORE', () => {
     expect(opacity('screen:soft', pass)).toBeGreaterThan(0)
     expect(opacity('screen:soft', pass)).toBeLessThan(1)
     expect(opacity('screen:soft', 3500)).toBe(0)
+  })
+
+  it('eases with the design tokens, as src/styles.css defines them', () => {
+    // Owned fades in on fade; the want folds away on platter
+    expect(opacity('owned', beat('added') + 80)).toBeCloseTo(
+      halfway(0, 1, easeToken('fade')),
+      2,
+    )
+    const fold = look('want', beat('offWantlist') + 550).transform?.find(
+      (move) => 'rotateX' in move,
+    )
+    expect(fold && 'rotateX' in fold ? fold.rotateX : NaN).toBeCloseTo(
+      halfway(0, -88, easeToken('platter')),
+      2,
+    )
   })
 
   it('cuts nowhere: every look moves on its curves', () => {

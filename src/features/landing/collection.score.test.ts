@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { easeToken, halfway } from './film/ease-tokens.test-utils'
 import { playheadAt } from './film/film.model'
 import type { Look, Move } from './film/film.model'
 import {
@@ -173,6 +174,18 @@ describe('COLLECTION_SCORE', () => {
     // The sharp face gives way, so no crisp edge shows round a soft one
     expect(opacity('slide:-1:sharp', 0)).toBe(0)
     expect(opacity('slide:0:sharp', 0)).toBe(1)
+  })
+
+  it('eases with the design tokens, as src/styles.css defines them', () => {
+    // The strip advances one slide on platter; the caption fades on fade
+    expect(shiftX('slide:0', 2950)).toBeCloseTo(
+      halfway(0, -64, easeToken('platter')),
+      2,
+    )
+    expect(opacity('caption:0', 1950)).toBeCloseTo(
+      halfway(1, 0, easeToken('fade')),
+      2,
+    )
   })
 
   it('holds the Sleeve pull as its still: disc out, caption shown', () => {

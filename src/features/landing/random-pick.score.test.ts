@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { easeToken, halfway } from './film/ease-tokens.test-utils'
 import { lookStyle } from './film/film-css.utils'
 import { PICKS, RANDOM_PICK_SCORE } from './random-pick.score'
 import type { RandomPickTrack } from './random-pick.score'
@@ -90,5 +91,18 @@ describe('RANDOM_PICK_SCORE', () => {
       expect([name, css(name, score.length)]).toEqual([name, css(name, 0)])
     // A whole number of turns
     expect(spin(score.length) % 360).toBe(spin(0))
+  })
+
+  it('eases with the design tokens, as src/styles.css defines them', () => {
+    // The camera cranes down to the drawn record on platter; Pick for me
+    // fades on fade
+    expect(lean('world', 1650)).toBeCloseTo(
+      -halfway(30, 13, easeToken('platter')),
+      2,
+    )
+    expect(opacity('pickFor', 1075)).toBeCloseTo(
+      halfway(1, 0, easeToken('fade')),
+      2,
+    )
   })
 })
