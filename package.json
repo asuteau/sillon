@@ -18,7 +18,8 @@
     "check": "prettier --write . && eslint --fix",
     "generate:pwa-assets": "tsx scripts/generate-pwa-assets.ts",
     "audit:covers": "tsx scripts/cover-audit.ts",
-    "audit:vinyl": "tsx --env-file-if-exists=.env scripts/vinyl-colour-audit.ts"
+    "audit:vinyl": "tsx --env-file-if-exists=.env scripts/vinyl-colour-audit.ts",
+    "spike:remotion": "remotion studio src/features/engine-spike/remotion/index.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -45,6 +46,9 @@
     "zxing-wasm": "3.1.3"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.545",
+    "@remotion/player": "^4.0.545",
+    "@remotion/tailwind-v4": "^4.0.545",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/typography": "^0.5.20",
     "@tanstack/devtools-vite": "^0.8.5",
@@ -60,7 +64,9 @@
     "eslint": "^10.0.3",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^28.1.0",
+    "motion": "^14.14.0",
     "prettier": "^3.9.9",
+    "remotion": "^4.0.545",
     "shadcn": "^4.21.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
