@@ -9,8 +9,9 @@ import { formatPressingDecade } from '#/shared/utils/list-filter'
 import { LANDING_PORTRAIT } from '../content/landing.content'
 import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
+import { SoftTwin } from '../film/SoftTwin'
 import { Tracked } from '../film/Tracked'
-import { PORTRAIT_SCORE } from '../portrait.score'
+import { PORTRAIT_SCORE, PORTRAIT_SOFT_BLUR } from '../portrait.score'
 import type { PortraitTrack } from '../portrait.score'
 
 const { currency, estimatedValue, topArtists, pressingDecades } =
@@ -65,12 +66,19 @@ export const PortraitFilm = () => (
     {({ looks }) => (
       <Tracked name="page" looks={looks} className="portrait-film-page">
         <div className="portrait-film-sheet relative flex min-w-0 flex-col gap-8 overflow-hidden rounded-(--radius) border border-border bg-background p-4 select-none sm:p-6 [&_section]:mt-0">
-          <Tracked name="figures" looks={looks}>
-            <PortraitFigures
-              recordCount={RECORD_COUNT.toLocaleString('en-GB')}
-              estimatedValue={ESTIMATE?.median}
-              valueRange={ESTIMATE?.range}
-            />
+          <Tracked name="figures" looks={looks} className="relative">
+            <SoftTwin
+              sharp="figures:sharp"
+              soft="figures:soft"
+              looks={looks}
+              blur={PORTRAIT_SOFT_BLUR}
+            >
+              <PortraitFigures
+                recordCount={RECORD_COUNT.toLocaleString('en-GB')}
+                estimatedValue={ESTIMATE?.median}
+                valueRange={ESTIMATE?.range}
+              />
+            </SoftTwin>
           </Tracked>
           <Tracked name="artists" looks={looks}>
             <BarTracks
@@ -87,27 +95,34 @@ export const PortraitFilm = () => (
               />
             </BarTracks>
           </Tracked>
-          <Tracked name="decades" looks={looks}>
-            <BarTracks
-              names={DECADE_BARS}
-              bar={(i) => `li:nth-child(${i + 1}) .portrait-column`}
+          <Tracked name="decades" looks={looks} className="relative">
+            <SoftTwin
+              sharp="decades:sharp"
+              soft="decades:soft"
+              looks={looks}
+              blur={PORTRAIT_SOFT_BLUR}
             >
               <BarTracks
-                names={DECADE_COUNTS}
-                bar={(i) =>
-                  `li:nth-child(${i + 1}) span:has(+ .portrait-column)`
-                }
+                names={DECADE_BARS}
+                bar={(i) => `li:nth-child(${i + 1}) .portrait-column`}
               >
-                <TimeChart
-                  title="Pressing decade"
-                  entries={pressingDecades.map(({ decade, copies }) => ({
-                    key: decade,
-                    label: formatPressingDecade(decade),
-                    count: copies,
-                  }))}
-                />
+                <BarTracks
+                  names={DECADE_COUNTS}
+                  bar={(i) =>
+                    `li:nth-child(${i + 1}) span:has(+ .portrait-column)`
+                  }
+                >
+                  <TimeChart
+                    title="Pressing decade"
+                    entries={pressingDecades.map(({ decade, copies }) => ({
+                      key: decade,
+                      label: formatPressingDecade(decade),
+                      count: copies,
+                    }))}
+                  />
+                </BarTracks>
               </BarTracks>
-            </BarTracks>
+            </SoftTwin>
           </Tracked>
           <Tracked
             name="shade"

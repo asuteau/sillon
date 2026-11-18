@@ -41,10 +41,7 @@ describe('transformCss', () => {
 describe('lookStyle', () => {
   it('sets only what the look has', () => {
     expect(lookStyle({ opacity: 0.5 })).toEqual({ opacity: 0.5 })
-    expect(lookStyle({ draw: 0.25, blur: 1.5 })).toEqual({
-      '--film-undrawn': 0.75,
-      filter: 'blur(1.5cqw)',
-    })
+    expect(lookStyle({ draw: 0.25 })).toEqual({ '--film-undrawn': 0.75 })
   })
 })
 
@@ -149,7 +146,7 @@ describe('withoutHolds', () => {
     expect(
       withoutHolds([0, 0.5, 1], {
         opacity: [1, 1, 1],
-        filter: ['x', 'x', 'x'],
+        transform: ['x', 'x', 'x'],
       }),
     ).toBeNull()
   })

@@ -156,6 +156,25 @@ describe('COLLECTION_SCORE', () => {
     }
   })
 
+  it('moves only transforms and opacity: never an animated blur', () => {
+    for (let ms = 0; ms <= COLLECTION_SCORE.length; ms += 50)
+      for (const part of Object.values(COLLECTION_SCORE.sample(ms)))
+        expect(part).not.toHaveProperty('blur')
+  })
+
+  it('sets the neighbours out of focus with a soft twin, the centre sharp', () => {
+    expect(opacity('slide:0:soft', 0)).toBe(0)
+    expect(opacity('slide:-1:soft', 0)).toBe(1)
+    expect(opacity('slide:1:soft', 0)).toBe(1)
+    // Half way along the advance, the coming slide is half in focus
+    expect(opacity('slide:1:soft', 2950)).toBeGreaterThan(0)
+    expect(opacity('slide:1:soft', 2950)).toBeLessThan(1)
+    expect(opacity('slide:1:soft', 3600)).toBe(0)
+    // The sharp face gives way, so no crisp edge shows round a soft one
+    expect(opacity('slide:-1:sharp', 0)).toBe(0)
+    expect(opacity('slide:0:sharp', 0)).toBe(1)
+  })
+
   it('holds the Sleeve pull as its still: disc out, caption shown', () => {
     const { still } = COLLECTION_SCORE
     expect(isCentred(0, still)).toBe(true)

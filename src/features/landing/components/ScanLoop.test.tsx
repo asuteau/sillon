@@ -50,7 +50,8 @@ describe('ScanLoop', () => {
   it('shows a barcode on each sleeve’s back, and generated Covers, never cover art', () => {
     const { container } = render(<ScanLoop />)
     expect(container.querySelectorAll('img')).toHaveLength(0)
-    expect(screen.getByText('5 021732 098143')).toBeTruthy()
+    // On the sleeve, and on its soft twin
+    expect(screen.getAllByText('5 021732 098143').length).toBeGreaterThan(0)
   })
 
   it('holds the matched sleeve with reduced motion: the panel up, the finder gone', () => {

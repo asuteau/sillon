@@ -10,7 +10,7 @@
 // leaves, the line the app says once it's added rises, and the camera eases
 // back to the crate, now one sleeve lighter at the front. The sleeve put
 // back fades in behind while the camera's focus is on the panel.
-import { CURVES, round3, track } from './film/film.model'
+import { CURVES, round3, sharpness, track } from './film/film.model'
 import type { Curve, Key, Look, Move, Score, Shot } from './film/film.model'
 
 // One pass: one sleeve scanned and sent
@@ -21,8 +21,12 @@ export const SCAN_PASS_MS = 6400
 const LENS = 900
 
 export const SCAN_TRACKS = [
-  // The camera on the crate: push in, pull focus
+  // The camera on the crate: push in, pull focus. The crate goes soft as
+  // the focus pulls to the panel: the sharp crate gives way to its soft
+  // twin
   'set',
+  'set:sharp',
+  'set:soft',
   // The two sleeves standing in the crate, Cover forward
   'crate:a',
   'crate:b',
@@ -56,10 +60,14 @@ export const SCAN_TRACKS = [
 export type ScanTrack = (typeof SCAN_TRACKS)[number]
 
 type Face = 'front:a' | 'front:b' | 'back:a' | 'back:b'
-type CuedTrack = Exclude<ScanTrack, Face>
+type Focus = 'set:sharp' | 'set:soft'
+type CuedTrack = Exclude<ScanTrack, Face | Focus>
 
-// Translate (stage units; z toward the viewer), turns and scale, opacity and
-// lens blur
+// The crate's soft twin's static blur, stage units
+export const SCAN_SOFT_BLUR = 0.5
+
+// Translate (stage units; z toward the viewer), turns and scale, opacity,
+// and how soft (out of focus, 0 to 1)
 interface Pose {
   x: number
   y: number
@@ -69,7 +77,7 @@ interface Pose {
   rz: number
   s: number
   opacity: number
-  blur: number
+  soft: number
 }
 
 const REST: Pose = {
@@ -81,7 +89,7 @@ const REST: Pose = {
   rz: 0,
   s: 1,
   opacity: 1,
-  blur: 0,
+  soft: 0,
 }
 
 // At `at` ms, this pose; `ease` curves the step to the next cue
@@ -206,8 +214,8 @@ const CUES: Record<CuedTrack, readonly Cue[]> = {
     [HELD_AT + 100, { s: 1.16 }, CURVES.out],
     [HELD_AT + 700, { s: 1.13 }],
     [MATCH, { s: 1.13 }, CURVES.platter],
-    [MATCH + 600, { y: -4, s: 1.05, blur: 0.5 }],
-    [SENT, { y: -4, s: 1.05, blur: 0.5 }, CURVES.platter],
+    [MATCH + 600, { y: -4, s: 1.05, soft: 1 }],
+    [SENT, { y: -4, s: 1.05, soft: 1 }, CURVES.platter],
     [BACK, {}],
   ]),
   'crate:a': crate(0, B, CRATE_A),
@@ -267,7 +275,7 @@ const FIELDS = [
   'rz',
   's',
   'opacity',
-  'blur',
+  'soft',
 ] as const satisfies readonly (keyof Pose)[]
 
 // Each field of a track over time, every cue a full pose
@@ -289,7 +297,9 @@ const compile = (cues: readonly Cue[]) => {
 
 const CUED = SCAN_TRACKS.filter(
   (name): name is CuedTrack =>
-    !name.startsWith('front:') && !name.startsWith('back:'),
+    !name.startsWith('front:') &&
+    !name.startsWith('back:') &&
+    !name.startsWith('set:'),
 )
 const POSES = new Map(CUED.map((name) => [name, compile(CUES[name])]))
 
@@ -326,7 +336,7 @@ const FADES: readonly ScanTrack[] = [
 ]
 
 const lookOf = (name: ScanTrack, pose: Pose): Look => {
-  if (name === 'set') return { transform: flatMoves(pose), blur: pose.blur }
+  if (name === 'set') return { transform: flatMoves(pose) }
   if (SLEEVES.includes(name))
     return { opacity: pose.opacity, transform: sleeveMoves(pose) }
   if (FADES.includes(name)) return { opacity: pose.opacity }
@@ -355,6 +365,9 @@ export const SCAN_SCORE: Score<ScanTrack> = {
   sample: (ms) => {
     const shot: Shot<ScanTrack> = {}
     for (const [name, pose] of POSES) shot[name] = lookOf(name, pose(ms))
+    const soft = POSES.get('set')?.(ms).soft ?? 0
+    shot['set:sharp'] = { opacity: round3(sharpness(soft)) }
+    shot['set:soft'] = { opacity: soft }
     for (const [front, back, inHand] of FACES) {
       const facing = facesLens(POSES.get(inHand)?.(ms).ry ?? 0)
       shot[front] = { opacity: facing ? 1 : 0 }

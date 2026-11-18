@@ -36,7 +36,8 @@ describe('WANTLIST_SCORE', () => {
   it('opens on the want, sharp on the wantlist, the Record screen not yet there', () => {
     const ms = beat('want') + 1200
     expect(isSeen('want', ms)).toBe(true)
-    expect(look('wantlist', ms).blur).toBe(0)
+    expect(opacity('wantlist:soft', ms)).toBe(0)
+    expect(opacity('wantlist:sharp', ms)).toBe(1)
     expect(opacity('screen', ms)).toBe(0)
   })
 
@@ -56,7 +57,7 @@ describe('WANTLIST_SCORE', () => {
     expect(isSeen('want', beat('removed'))).toBe(true)
     const after = beat('offWantlist') + 900
     expect(opacity('want', after)).toBe(0)
-    expect(look('wantlist', after).blur).toBe(0)
+    expect(opacity('wantlist:soft', after)).toBe(0)
     expect(opacity('count:2', after)).toBe(1)
     expect(opacity('count:3', after)).toBe(0)
     expect(opacity('count:3', beat('want') + 1200)).toBe(1)
@@ -76,9 +77,26 @@ describe('WANTLIST_SCORE', () => {
     expect(still).toBeLessThan(beat('removed'))
     expect(opacity('exposure', still)).toBe(1)
     expect(opacity('screen', still)).toBe(1)
-    expect(look('screen', still).blur).toBe(0)
+    expect(opacity('screen:soft', still)).toBe(0)
+    expect(opacity('screen:sharp', still)).toBe(1)
+    // The Wantlist soft behind it
+    expect(opacity('wantlist:soft', still)).toBe(1)
+    expect(opacity('wantlist:sharp', still)).toBe(0)
     expect(opacity('owned', still)).toBe(1)
     expect(opacity('prompt', still)).toBe(1)
+  })
+
+  it('moves only transforms and opacity: never an animated blur', () => {
+    for (let ms = 0; ms <= WANTLIST_SCORE.length; ms += 50)
+      for (const part of Object.values(WANTLIST_SCORE.sample(ms)))
+        expect(part).not.toHaveProperty('blur')
+  })
+
+  it('brings the Record screen out of its soft twin as the camera passes through', () => {
+    const pass = beat('want') + 2000
+    expect(opacity('screen:soft', pass)).toBeGreaterThan(0)
+    expect(opacity('screen:soft', pass)).toBeLessThan(1)
+    expect(opacity('screen:soft', 3500)).toBe(0)
   })
 
   it('cuts nowhere: every look moves on its curves', () => {

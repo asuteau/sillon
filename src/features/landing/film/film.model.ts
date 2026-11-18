@@ -96,15 +96,20 @@ export type Move =
   | { scaleY: number }
 
 // What one tracked element looks like at a moment; anything left out is
-// untouched by the film
+// untouched by the film. Transform and opacity, which the compositor plays,
+// and a stroke's draw: never a blur (a soft twin instead, ADR 0005)
 export interface Look {
   opacity?: number
   transform?: readonly Move[]
-  // Lens blur, stage units
-  blur?: number
   // How much of a stroke is drawn, 0 to 1
   draw?: number
 }
+
+// Out of focus is a soft twin (ADR 0005): a copy of a part under a static
+// blur, faded in by opacity over it, `soft` 0 sharp to 1 the twin alone.
+// The sharp part gives way as its twin comes in, so no crisp edge shows
+// round a soft one; a touch see-through mid-way, never more
+export const sharpness = (soft: number) => Math.sqrt(1 - soft)
 
 // Each tracked element's look at a moment; one left out is untouched
 export type Shot<TName extends string> = Partial<Record<TName, Look>>

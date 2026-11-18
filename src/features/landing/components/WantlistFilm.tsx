@@ -13,8 +13,13 @@ import {
 import { lookStyle } from '../film/film-css.utils'
 import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
+import { SoftTwin } from '../film/SoftTwin'
 import { Tracked } from '../film/Tracked'
-import { WANTLIST_DEPTH, WANTLIST_SCORE } from '../wantlist.score'
+import {
+  WANTLIST_DEPTH,
+  WANTLIST_SCORE,
+  WANTLIST_SOFT_BLUR,
+} from '../wantlist.score'
 
 // The want, and the two wants above it on the list, by LANDING_RECORDS index
 const WANT = 4
@@ -86,43 +91,51 @@ export const WantlistFilm = () => (
             <Tracked
               name="wantlist"
               looks={looks}
-              className="absolute inset-x-[12cqw] top-[34cqw] flex flex-col gap-[3cqw]"
+              className="absolute inset-x-[12cqw] top-[34cqw]"
             >
-              <div className="flex items-baseline justify-between">
-                <p className="type-display text-[8cqw] text-foreground">
-                  Wantlist
-                </p>
-                <div className="relative type-catalogue text-[11px] text-muted-foreground">
-                  <Tracked name="count:3" looks={looks}>
-                    3 records
-                  </Tracked>
-                  <Tracked
-                    name="count:2"
-                    looks={looks}
-                    className="absolute inset-0"
-                  >
-                    2 records
-                  </Tracked>
+              <SoftTwin
+                sharp="wantlist:sharp"
+                soft="wantlist:soft"
+                looks={looks}
+                blur={WANTLIST_SOFT_BLUR.wantlist}
+                className="flex flex-col gap-[3cqw]"
+              >
+                <div className="flex items-baseline justify-between">
+                  <p className="type-display text-[8cqw] text-foreground">
+                    Wantlist
+                  </p>
+                  <div className="relative type-catalogue text-[11px] text-muted-foreground">
+                    <Tracked name="count:3" looks={looks}>
+                      3 records
+                    </Tracked>
+                    <Tracked
+                      name="count:2"
+                      looks={looks}
+                      className="absolute inset-0"
+                    >
+                      2 records
+                    </Tracked>
+                  </div>
                 </div>
-              </div>
-              <RecordList className="bg-background">
-                {OTHERS.map((index) => (
+                <RecordList className="bg-background">
+                  {OTHERS.map((index) => (
+                    <li
+                      key={index}
+                      data-track="others"
+                      style={lookStyle(looks.others ?? {})}
+                    >
+                      <WantRow index={index} />
+                    </li>
+                  ))}
                   <li
-                    key={index}
-                    data-track="others"
-                    style={lookStyle(looks.others ?? {})}
+                    data-track="want"
+                    className="origin-top bg-background"
+                    style={lookStyle(looks.want ?? {})}
                   >
-                    <WantRow index={index} />
+                    <WantRow index={WANT} />
                   </li>
-                ))}
-                <li
-                  data-track="want"
-                  className="origin-top bg-background"
-                  style={lookStyle(looks.want ?? {})}
-                >
-                  <WantRow index={WANT} />
-                </li>
-              </RecordList>
+                </RecordList>
+              </SoftTwin>
             </Tracked>
           </div>
 
@@ -130,53 +143,69 @@ export const WantlistFilm = () => (
           <Tracked
             name="screen"
             looks={looks}
-            className="absolute inset-x-[5cqw] top-[5cqw] flex flex-col items-center gap-[3cqw]"
+            className="absolute inset-x-[5cqw] top-[5cqw]"
             style={{ '--cover-tint': WANT_TINT }}
           >
-            {/* The screen's ground: the page, lit by the Cover's tint, fading
+            <SoftTwin
+              sharp="screen:sharp"
+              soft="screen:soft"
+              looks={looks}
+              blur={WANTLIST_SOFT_BLUR.screen}
+              className="flex flex-col items-center gap-[3cqw]"
+            >
+              {/* The screen's ground: the page, lit by the Cover's tint, fading
                 out before the stage's edges so the Wantlist shows round it */}
-            <div className="absolute inset-x-[-5cqw] top-[-6cqw] bottom-[-4cqw] bg-[radial-gradient(closest-side_at_50%_40%,oklch(from_var(--cover-tint)_var(--cover-glow-lightness)_c_h/var(--cover-glow-alpha)),color-mix(in_oklab,var(--background)_70%,transparent)_45%,transparent_80%)]" />
-            <div className="relative w-[36cqw] overflow-hidden rounded-(--radius) shadow-[0_10px_30px_var(--pull-shadow)]">
-              <GeneratedCover
-                artist={WANTED.record.artist}
-                title={WANTED.record.title}
-                seed={WANTED.seed}
-                className="w-full"
-              />
-              <Tracked
-                name="sheen"
-                looks={looks}
-                className="absolute inset-y-[-30%] left-[30%] w-[40%] bg-[linear-gradient(90deg,transparent,oklch(1_0_0/0.28),transparent)] mix-blend-screen"
-              />
-            </div>
-            {/* The exact release: format, label and catalogue number (the
+              <div className="absolute inset-x-[-5cqw] top-[-6cqw] bottom-[-4cqw] bg-[radial-gradient(closest-side_at_50%_40%,oklch(from_var(--cover-tint)_var(--cover-glow-lightness)_c_h/var(--cover-glow-alpha)),color-mix(in_oklab,var(--background)_70%,transparent)_45%,transparent_80%)]" />
+              <div className="relative w-[36cqw] overflow-hidden rounded-(--radius) shadow-[0_10px_30px_var(--pull-shadow)]">
+                <GeneratedCover
+                  artist={WANTED.record.artist}
+                  title={WANTED.record.title}
+                  seed={WANTED.seed}
+                  className="w-full"
+                />
+                <Tracked
+                  name="sheen"
+                  looks={looks}
+                  className="absolute inset-y-[-30%] left-[30%] w-[40%] bg-[linear-gradient(90deg,transparent,oklch(1_0_0/0.28),transparent)] mix-blend-screen"
+                />
+              </div>
+              {/* The exact release: format, label and catalogue number (the
                 year left out, so the screen fits a phone's column) */}
-            <Tracked name="heading" looks={looks}>
-              <RecordHeading
-                artist={WANTED.record.artist}
-                title={WANTED.record.title}
-                catalogue={catalogueLines(WANTED.record).slice(1)}
-              />
-            </Tracked>
-            <div className="relative">
-              <Tracked name="unowned" looks={looks}>
-                <Tracked name="press" looks={looks} target="button:first-child">
-                  <ReleaseListButtons inCollection={false} inWantlist />
+              <Tracked name="heading" looks={looks}>
+                <RecordHeading
+                  artist={WANTED.record.artist}
+                  title={WANTED.record.title}
+                  catalogue={catalogueLines(WANTED.record).slice(1)}
+                />
+              </Tracked>
+              <div className="relative">
+                <Tracked name="unowned" looks={looks}>
+                  <Tracked
+                    name="press"
+                    looks={looks}
+                    target="button:first-child"
+                  >
+                    <ReleaseListButtons inCollection={false} inWantlist />
+                  </Tracked>
+                </Tracked>
+                <Tracked
+                  name="owned"
+                  looks={looks}
+                  className="absolute inset-0"
+                >
+                  <ReleaseListButtons inCollection inWantlist />
+                </Tracked>
+              </div>
+              <Tracked
+                name="prompt"
+                looks={looks}
+                className="w-full max-w-xs border-t border-border pt-[3cqw]"
+              >
+                <Tracked name="remove" looks={looks} target="button:last-child">
+                  <FulfilledWantPromptView onRemove={NOOP} onKeep={NOOP} />
                 </Tracked>
               </Tracked>
-              <Tracked name="owned" looks={looks} className="absolute inset-0">
-                <ReleaseListButtons inCollection inWantlist />
-              </Tracked>
-            </div>
-            <Tracked
-              name="prompt"
-              looks={looks}
-              className="w-full max-w-xs border-t border-border pt-[3cqw]"
-            >
-              <Tracked name="remove" looks={looks} target="button:last-child">
-                <FulfilledWantPromptView onRemove={NOOP} onKeep={NOOP} />
-              </Tracked>
-            </Tracked>
+            </SoftTwin>
           </Tracked>
         </Tracked>
       </Tracked>

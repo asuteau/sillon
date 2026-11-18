@@ -102,6 +102,21 @@ describe('SCAN_SCORE', () => {
     expect(SCAN_SCORE.cuts).toContain(on)
   })
 
+  it('moves only transforms and opacity: never an animated blur', () => {
+    for (let ms = 0; ms <= SCAN_SCORE.length; ms += 50)
+      for (const part of Object.values(SCAN_SCORE.sample(ms)))
+        expect(part).not.toHaveProperty('blur')
+  })
+
+  it('pulls focus off the sleeve to the panel with a soft twin of the crate', () => {
+    for (const { start } of PASSES) {
+      expect(opacity('set:soft', start + 1500)).toBe(0)
+      expect(opacity('set:sharp', start + 1500)).toBe(1)
+      expect(opacity('set:soft', start + 4000)).toBe(1)
+      expect(opacity('set:sharp', start + 4000)).toBe(0)
+    }
+  })
+
   it('animates only its own tracks', () => {
     for (const ms of [0, 2000, 7000])
       for (const name of Object.keys(SCAN_SCORE.sample(ms)))

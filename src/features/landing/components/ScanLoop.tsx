@@ -27,8 +27,14 @@ import { lookStyle } from '../film/film-css.utils'
 import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
 import type { Shot } from '../film/film.model'
+import { SoftTwin } from '../film/SoftTwin'
 import { Tracked } from '../film/Tracked'
-import { CRATE_REST, crateRestLook, SCAN_SCORE } from '../scan.score'
+import {
+  CRATE_REST,
+  crateRestLook,
+  SCAN_SCORE,
+  SCAN_SOFT_BLUR,
+} from '../scan.score'
 import type { ScanTrack } from '../scan.score'
 import { SleeveBack } from './SleeveBack'
 
@@ -233,6 +239,36 @@ const Sent = ({ pass, looks }: SentProps) => {
   )
 }
 
+interface CrateProps {
+  looks: Shot<ScanTrack>
+}
+
+// The crate, the front sleeves in it, and the one in hand
+const Crate = ({ looks }: CrateProps) => (
+  <>
+    {CRATE_REST.map((_, i) => (
+      <div
+        key={i}
+        className={SLEEVE_BOX}
+        style={lookStyle(crateRestLook(CRATE_REST.length - 1 - i))}
+      >
+        <Cover
+          index={SCAN_LOOP_CRATE[CRATE_REST.length - 1 - i]}
+          haze={0.55 - i * 0.2}
+        />
+      </div>
+    ))}
+    <Tracked name="crate:b" looks={looks} className={SLEEVE_BOX}>
+      <Cover index={SCAN_LOOP_SLEEVES[1].index} haze={0.15} />
+    </Tracked>
+    <Tracked name="crate:a" looks={looks} className={SLEEVE_BOX}>
+      <Cover index={SCAN_LOOP_SLEEVES[0].index} />
+    </Tracked>
+    <Held pass={0} looks={looks} />
+    <Held pass={1} looks={looks} />
+  </>
+)
+
 // On the paper sleeve, whichever the theme
 const FINDER_CORNER = 'absolute size-[5cqw] border-vinyl-black'
 
@@ -258,26 +294,16 @@ export const ScanLoop = () => (
             looks={looks}
             className="absolute inset-0 origin-[50cqw_40cqw]"
           >
-            {CRATE_REST.map((_, i) => (
-              <div
-                key={i}
-                className={SLEEVE_BOX}
-                style={lookStyle(crateRestLook(CRATE_REST.length - 1 - i))}
-              >
-                <Cover
-                  index={SCAN_LOOP_CRATE[CRATE_REST.length - 1 - i]}
-                  haze={0.55 - i * 0.2}
-                />
-              </div>
-            ))}
-            <Tracked name="crate:b" looks={looks} className={SLEEVE_BOX}>
-              <Cover index={SCAN_LOOP_SLEEVES[1].index} haze={0.15} />
-            </Tracked>
-            <Tracked name="crate:a" looks={looks} className={SLEEVE_BOX}>
-              <Cover index={SCAN_LOOP_SLEEVES[0].index} />
-            </Tracked>
-            <Held pass={0} looks={looks} />
-            <Held pass={1} looks={looks} />
+            {/* Soft once the focus pulls to the panel */}
+            <SoftTwin
+              sharp="set:sharp"
+              soft="set:soft"
+              looks={looks}
+              blur={SCAN_SOFT_BLUR}
+              className="absolute inset-0"
+            >
+              <Crate looks={looks} />
+            </SoftTwin>
           </Tracked>
         </div>
 

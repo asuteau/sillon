@@ -8,6 +8,7 @@ import {
   COLLECTION_BEATS,
   COLLECTION_SCORE,
   COLLECTION_SLOTS,
+  COLLECTION_SOFT_BLUR,
   COLLECTION_STAGE_VARS,
 } from '../collection.score'
 import type { CollectionScene, CollectionTrack } from '../collection.score'
@@ -20,6 +21,7 @@ import {
 } from '../content/landing.content'
 import { FilmStage } from '../film/FilmStage'
 import type { Shot } from '../film/film.model'
+import { SoftTwin } from '../film/SoftTwin'
 import { Tracked } from '../film/Tracked'
 import { GeneratedCover } from './GeneratedCover'
 
@@ -67,28 +69,18 @@ interface SlideProps {
   looks: Shot<CollectionTrack>
 }
 
-// One slide of the strip: a generated Cover and, for the two slides that
-// come to the centre, the disc that pulls out of it in its Vinyl colour
-const Slide = ({ slot, member, looks }: SlideProps) => {
+// What a slide shows: a generated Cover and, for the two slides that come
+// to the centre, the disc that pulls out of it in its Vinyl colour
+const SlideBody = ({ slot, member, looks }: SlideProps) => {
   if (slot !== 0 && slot !== 1)
     return (
-      <Tracked
-        name={`slide:${slot}`}
-        looks={looks}
-        className="collection-loop-slide"
-      >
-        <div className="collection-loop-sleeve absolute inset-0">
-          <Cover member={member} />
-        </div>
-      </Tracked>
+      <div className="collection-loop-sleeve absolute inset-0">
+        <Cover member={member} />
+      </div>
     )
 
   return (
-    <Tracked
-      name={`slide:${slot}`}
-      looks={looks}
-      className="collection-loop-slide"
-    >
+    <>
       <Tracked
         name={`disc:${slot}`}
         looks={looks}
@@ -113,9 +105,28 @@ const Slide = ({ slot, member, looks }: SlideProps) => {
       >
         <Cover member={member} />
       </Tracked>
-    </Tracked>
+    </>
   )
 }
+
+// One slide of the strip, out of focus (its soft twin) off the centre
+const Slide = ({ slot, member, looks }: SlideProps) => (
+  <Tracked
+    name={`slide:${slot}`}
+    looks={looks}
+    className="collection-loop-slide"
+  >
+    <SoftTwin
+      sharp={`slide:${slot}:sharp`}
+      soft={`slide:${slot}:soft`}
+      looks={looks}
+      blur={COLLECTION_SOFT_BLUR}
+      className="absolute inset-0"
+    >
+      <SlideBody slot={slot} member={member} looks={looks} />
+    </SoftTwin>
+  </Tracked>
+)
 
 interface CaptionProps {
   slot: 0 | 1

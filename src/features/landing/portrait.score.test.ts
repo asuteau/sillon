@@ -113,7 +113,10 @@ describe('PORTRAIT_SCORE', () => {
     expect(copper(decadeLeader, still)).toBe(1)
     for (const part of ['figures', 'artists', 'decades'] as const) {
       expect(look(part, still).opacity).toBe(1)
-      expect(look(part, still).blur ?? 0).toBe(0)
+    }
+    for (const part of ['figures', 'decades'] as const) {
+      expect(look(`${part}:soft`, still).opacity).toBe(0)
+      expect(look(`${part}:sharp`, still).opacity).toBe(1)
     }
   })
 
@@ -144,9 +147,19 @@ describe('PORTRAIT_SCORE', () => {
     }
   })
 
-  it('blurs only what holds still while soft: never Top artists', () => {
-    for (let ms = 0; ms <= length; ms += 100)
-      expect(look('artists', ms).blur).toBeUndefined()
+  it('racks focus with soft twins of the figures and Pressing decade, never Top artists', () => {
+    // Out of focus at the start, the twin over the sharp part
+    expect(look('decades:soft', 0).opacity).toBe(1)
+    expect(look('decades:sharp', 0).opacity).toBe(0)
+    expect(look('figures:soft', 0).opacity).toBe(1)
+    // Top artists' bars move while it's soft: a blur would repaint them
+    expect(PORTRAIT_SCORE.tracks).not.toContain('artists:soft')
+  })
+
+  it('moves only transforms and opacity: never an animated blur', () => {
+    for (let ms = 0; ms <= PORTRAIT_SCORE.length; ms += 50)
+      for (const part of Object.values(PORTRAIT_SCORE.sample(ms)))
+        expect(part).not.toHaveProperty('blur')
   })
 
   it('cuts where the bars jump back to undrawn', () => {
