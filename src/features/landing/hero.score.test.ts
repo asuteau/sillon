@@ -1,25 +1,25 @@
-import { readFileSync } from 'node:fs'
-
 import { describe, expect, it } from 'vitest'
 
+import { transformCss } from './film/film-css.utils'
+import { playheadAt } from './film/film.model'
 import {
+  HERO_BEATS,
+  HERO_SCORE,
   HERO_SLOTS,
-  HERO_STILL,
+  HERO_TRACK_NAMES,
   HERO_TRACKS,
   heroCast,
   LOOP_ENTRY_MS,
   LOOP_MS,
   OPENING_MS,
   frameAt,
-  heroClockAt,
   heroSceneAt,
-  keyframesOf,
   msUntilNextCue,
-  poseTransform,
-} from './landing.timeline'
-import type { Frame, HeroTrackName } from './landing.timeline'
+  poseMoves,
+} from './hero.score'
+import type { Frame, HeroTrackName } from './hero.score'
 
-const names = Object.keys(HERO_TRACKS.opening) as HeroTrackName[]
+const names = HERO_TRACK_NAMES
 // What shows at a moment, whichever frame it comes from
 const shown = ({ opacity, pose, draw }: Frame) => ({ opacity, pose, draw })
 const opening = (name: HeroTrackName, ms: number) =>
@@ -32,11 +32,9 @@ const inWorld = (name: HeroTrackName) => /^(slide|sleeve|disc)/.test(name)
 const inScreen = (name: HeroTrackName) => name.startsWith('screen')
 
 describe('heroSceneAt', () => {
-  it('plays the opening once, then the loop', () => {
-    expect(heroSceneAt(0)).toEqual({ part: 'opening', pass: 0, screen: 1 })
-    expect(heroSceneAt(6599).part).toBe('opening')
-    expect(heroSceneAt(6600).part).toBe('loop')
-    expect(heroSceneAt(60_000).part).toBe('loop')
+  it('opens on the first record, the second coming in', () => {
+    expect(heroSceneAt(0)).toEqual({ pass: 0, screen: 1 })
+    expect(heroSceneAt(6600)).toEqual({ pass: 0, screen: 1 })
   })
 
   it('advances the strip by one record each pass', () => {
@@ -56,11 +54,70 @@ describe('heroSceneAt', () => {
   })
 })
 
-describe('heroClockAt', () => {
-  it('runs the opening from 0, then the loop from where it joins', () => {
-    expect(heroClockAt(1234)).toEqual({ part: 'opening', ms: 1234 })
-    expect(heroClockAt(6600)).toEqual({ part: 'loop', ms: 1800 })
-    expect(heroClockAt(6600 + 5800)).toEqual({ part: 'loop', ms: 0 })
+describe('HERO_SCORE', () => {
+  const at = (name: HeroTrackName, ms: number) => HERO_SCORE.sample(ms)[name]
+  const look = (name: HeroTrackName, frame: Frame) =>
+    name === 'grooveDraw'
+      ? { draw: frame.draw }
+      : { opacity: frame.opacity, transform: poseMoves(frame.pose) }
+
+  it('plays the opening once, then the loop from where it joins', () => {
+    expect(playheadAt(HERO_SCORE, 1234)).toEqual({ part: 'intro', ms: 1234 })
+    expect(playheadAt(HERO_SCORE, 6600).part).toBe('loop')
+    for (const name of names) {
+      expect([name, at(name, 1234)]).toEqual([
+        name,
+        look(name, frameAt(HERO_TRACKS.opening[name], 1234)),
+      ])
+      // The loop's own 0 (the Record screen open), 5.8s after it joins
+      expect([name, at(name, 6600 + 5800)]).toEqual([
+        name,
+        look(name, frameAt(HERO_TRACKS.loop[name], 0)),
+      ])
+    }
+  })
+
+  it('comes round to where the loop joins, seamlessly', () => {
+    const { ending, length } = HERO_SCORE
+    expect(ending).toEqual({ kind: 'loop', from: OPENING_MS })
+    expect(length).toBe(OPENING_MS + LOOP_MS)
+    for (const name of names)
+      expect([name, at(name, length)]).toEqual([name, at(name, OPENING_MS)])
+  })
+
+  it('turns the discs once every 1.9s, a whole number of turns a pass', () => {
+    const turn = (ms: number) =>
+      HERO_SCORE.sample(ms).spin?.transform?.[0] ?? {}
+    expect(turn(950)).toEqual({ rotateZ: 180 })
+    expect(turn(1900)).toEqual({ rotateZ: 360 })
+    expect(LOOP_MS % 1900).toBe(0)
+  })
+
+  it('cuts exactly where a look jumps', () => {
+    // The sleeve appears off left; the flying Cover hides on its sleeve
+    // (loop 1600) and shows again (loop 4500)
+    expect(HERO_SCORE.cuts).toEqual(
+      expect.arrayContaining([
+        2900,
+        2901,
+        6600 + 2699,
+        6600 + 2700,
+        14_000,
+        14_001,
+      ]),
+    )
+  })
+
+  it('eases each cue on its curve, not in a straight line', () => {
+    // The wordmark rises on `out`: nearly in by half its time
+    expect(at('wordmark', 1150)?.opacity).toBeGreaterThan(0.9)
+  })
+})
+
+describe('HERO_BEATS', () => {
+  it('changes scene with heroSceneAt, waiting for each change', () => {
+    expect(HERO_BEATS.at(20_000)).toEqual(heroSceneAt(20_000))
+    expect(HERO_BEATS.next(20_000)).toBe(msUntilNextCue(20_000))
   })
 })
 
@@ -80,9 +137,9 @@ describe('msUntilNextCue', () => {
   })
 })
 
-describe('HERO_STILL', () => {
+describe('the still', () => {
   it("is the opening's last frame, where the loop joins on the strip", () => {
-    expect(HERO_STILL).toEqual({ part: 'opening', ms: OPENING_MS })
+    expect(HERO_SCORE.still).toBe(OPENING_MS)
   })
 })
 
@@ -122,7 +179,7 @@ describe('HERO_TRACKS', () => {
   })
 
   it('holds the full Sleeve pull pose in the still: the strip, disc out, neighbours dimmed, caption', () => {
-    const { ms } = HERO_STILL
+    const ms = HERO_SCORE.still
     expect(opening('world', ms)).toMatchObject({
       opacity: 1,
       pose: { y: -8, s: 0.58 },
@@ -152,8 +209,10 @@ describe('HERO_TRACKS', () => {
 
   it('draws the groove before the wordmark shows', () => {
     expect(opening('grooveDraw', 1350).draw).toBe(1)
-    expect(opening('wordmark', 1350).opacity).toBeLessThan(1)
-    expect(opening('wordmark', 1450).opacity).toBe(1)
+    // Its cue lands after the draw (its `out` curve is nearly there sooner)
+    const shows = HERO_TRACKS.opening.wordmark.find((f) => f.opacity === 1)
+    expect(shows?.at).toBe(1450)
+    expect(opening('wordmark', 1100).opacity).toBeLessThan(1)
   })
 
   it('lands the flying Cover on the centred sleeve in the strip', () => {
@@ -163,63 +222,6 @@ describe('HERO_TRACKS', () => {
       opacity: 1,
       pose: { x: -5.8, y: 20, s: 0.63 },
     })
-  })
-})
-
-describe('keyframesOf', () => {
-  const frame = (at: number, over: Partial<Frame> = {}): Frame => ({
-    at,
-    opacity: 1,
-    pose: { x: 0, y: 0, s: 1, r: 0, ry: 0 },
-    draw: 1,
-    ...over,
-  })
-
-  it('spreads the frames over the part, easing each step', () => {
-    const keyframes = keyframesOf(
-      [frame(0, { opacity: 0, ease: 'fade' }), frame(500), frame(1000)],
-      1000,
-    )
-    expect(keyframes.map((k) => [k.offset, k.opacity, k.easing])).toEqual([
-      [0, 0, 'cubic-bezier(0.2, 0, 0, 1)'],
-      [0.5, 1, 'linear'],
-      [1, 1, 'linear'],
-    ])
-  })
-
-  it('animates only what changes', () => {
-    const [still] = keyframesOf([frame(0, { opacity: 0 }), frame(10)], 10)
-    expect(still).not.toHaveProperty('transform')
-    expect(still).not.toHaveProperty('strokeDashoffset')
-  })
-
-  it('eases with the design tokens, as src/styles.css defines them', () => {
-    const css = readFileSync(
-      new URL('../../styles.css', import.meta.url),
-      'utf8',
-    )
-    const token = (name: string) =>
-      css
-        .match(new RegExp(`--ease-${name}:\\s*([^;]+);`))?.[1]
-        .replace(/,\s*/g, ', ')
-    const easing = (ease: Frame['ease']) =>
-      keyframesOf([frame(0, { opacity: 0, ease }), frame(1)], 1)[0].easing
-
-    expect(easing('platter')).toBe(token('platter'))
-    expect(easing('fade')).toBe(token('fade'))
-  })
-
-  it('holds the first and last frames to the part edges', () => {
-    const keyframes = keyframesOf(
-      [frame(200, { opacity: 0 }), frame(400)],
-      1000,
-    )
-    expect(keyframes.map((k) => [k.offset, k.opacity])).toEqual([
-      [0, 0],
-      [0.2, 0],
-      [0.4, 1],
-      [1, 1],
-    ])
   })
 })
 
@@ -243,9 +245,11 @@ describe('heroCast', () => {
   })
 })
 
-describe('poseTransform', () => {
+describe('poseMoves', () => {
   it('moves in container units, turns and scales', () => {
-    expect(poseTransform({ x: -10, y: 2, s: 0.82, r: -8, ry: 55 })).toBe(
+    expect(
+      transformCss(poseMoves({ x: -10, y: 2, s: 0.82, r: -8, ry: 55 })),
+    ).toBe(
       'perspective(1000px) translate(-10cqw, 2cqw) rotateY(55deg) rotate(-8deg) scale(0.82)',
     )
   })
