@@ -84,7 +84,6 @@ export interface SetSleeve {
   yaw: number
 }
 
-export const SLEEVE = { size: 1, depth: 0.018 }
 export const DISC = { diameter: 0.94, depth: 0.008 }
 export const FLOOR_Y = -0.5
 
@@ -118,11 +117,17 @@ export interface ShotPose {
   // Where the lens focuses (a world point) and how shallow (0..1)
   focus: Vec3
   aperture: number
-  // Key light, around the set: azimuth from the front (degrees, + = right),
-  // elevation, and a 0..1 strength
-  light: { azimuth: number; elevation: number; strength: number }
+  light: KeyLight
   // Fade up from the page ground
   exposure: number
+}
+
+// The key light, around the set: azimuth from the front (degrees, + =
+// right), elevation, and a 0..1 strength. A tall strip softbox centred there
+export interface KeyLight {
+  azimuth: number
+  elevation: number
+  strength: number
 }
 
 const RIG: Record<
@@ -316,6 +321,19 @@ export const sampleShot = (ms: number, framing: Framing): ShotPose => {
       strength: lightStrength(s),
     },
     exposure: exposure(s),
+  }
+}
+
+// Toward the key light
+export const lightDirection = ({
+  azimuth,
+  elevation,
+}: Pick<KeyLight, 'azimuth' | 'elevation'>): Vec3 => {
+  const [a, e] = [(azimuth * Math.PI) / 180, (elevation * Math.PI) / 180]
+  return {
+    x: Math.cos(e) * Math.sin(a),
+    y: Math.sin(e),
+    z: Math.cos(e) * Math.cos(a),
   }
 }
 

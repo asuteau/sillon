@@ -17,9 +17,10 @@ import {
 import { coverArt } from '#/features/landing/cover-art.utils'
 import { Disc } from '#/shared/components/brand/Disc'
 
-import { CRAFT_MS, DISC, SET, SLEEVE, SPIN_DEG_PER_S } from '../craft.score'
+import { CRAFT_MS, DISC, SET, SPIN_DEG_PER_S } from '../craft.score'
 import type { Framing, SetSleeve } from '../craft.score'
 import { bakeDom } from '../dom-bake'
+import { JACKET, jacketFaces } from '../jacket.utils'
 import { LOOP_MS } from '../shot-clock'
 import { STAGE_MASK } from '../stage-mask'
 import type { ShotClock } from '../shot-clock'
@@ -53,21 +54,33 @@ const box = (w: number, h: number): React.CSSProperties => ({
   height: h,
 })
 
+const FACES = jacketFaces(JACKET)
+
+// The mouth across its thickness: a paper wall either side of the dark
+// slot the disc leaves through, darkest at the back of it
+const mouthWall = (JACKET.wall / (JACKET.depth - JACKET.bevel)) * 100
+const MOUTH_SLOT = `linear-gradient(90deg, var(--edge) 0 ${mouthWall}%, oklch(0.16 0 0) ${mouthWall}%, oklch(0.04 0 0) 50%, oklch(0.16 0 0) ${100 - mouthWall}%, var(--edge) ${100 - mouthWall}%)`
+const MOUTH_LIPS = `linear-gradient(90deg, black 0 ${mouthWall}%, transparent ${mouthWall}% ${100 - mouthWall}%, black ${100 - mouthWall}%)`
+
 interface SleeveProps {
   sleeve: SetSleeve
   unit: number
 }
 
-// A sleeve with thickness: printed front, three edges (the right one is the
-// open mouth), each face shaded by the key light and blurred by the lens
+// The outer jacket as a solid: the printed front, the spine, the seams and
+// the mouth, the front's edges bevelled. Each face is shaded by the key and
+// blurred by the lens; the edges glint where the camera sees the key's
+// reflection
 const Sleeve = ({ sleeve, unit }: SleeveProps) => {
   const { record, pressing, ground } = castOf(sleeve.cast)
-  const depth = Math.max(2, SLEEVE.depth * unit)
-  const edge = {
-    '--edge-light': `color-mix(in oklab, ${ground.light} 82%, black)`,
-    '--edge-dark': `color-mix(in oklab, ${ground.dark} 70%, black)`,
-  }
   const k = sleeve.key
+  // The Cover's print wraps round the edges; the bevels show the board
+  const paint = {
+    '--edge-light': `color-mix(in oklab, ${ground.light} 78%, black)`,
+    '--edge-dark': `color-mix(in oklab, ${ground.dark} 80%, black)`,
+    '--bevel-light': `color-mix(in oklab, ${ground.light} 85%, white)`,
+    '--bevel-dark': `color-mix(in oklab, ${ground.dark} 82%, white)`,
+  }
   const shade = (face: string) => (
     <div
       data-part={`${k}-shade-${face}`}
@@ -75,71 +88,93 @@ const Sleeve = ({ sleeve, unit }: SleeveProps) => {
       style={{ opacity: 0.2 }}
     />
   )
+  const glint = (face: string, mask?: string) => (
+    <div
+      data-part={`${k}-glint-${face}`}
+      className="absolute inset-0"
+      style={{
+        // The softbox's warm white, never a pure white rim
+        background: 'oklch(0.97 0.02 80 / 0.7)',
+        opacity: 0,
+        mixBlendMode: 'plus-lighter',
+        maskImage: mask,
+      }}
+    />
+  )
   return (
     <>
-      <div
-        data-part={`${k}-dof`}
-        className="overflow-hidden rounded-[3px]"
-        style={{
-          ...box(unit, unit),
-          transform: `translateZ(${depth / 2}px)`,
+      {FACES.map((face) => {
+        const place: React.CSSProperties = {
+          ...box(face.width * unit, face.height * unit),
+          ...paint,
+          transform: face.transform(unit),
           backfaceVisibility: 'hidden',
-        }}
-      >
-        <GeneratedCover
-          artist={record.artist}
-          title={record.title}
-          seed={pressing.id}
-          className="size-full rounded-none"
-        />
-        {shade('front')}
-        <div
-          data-part={`${k}-gloss`}
-          style={{
-            ...abs,
-            top: 0,
-            height: unit,
-            width: unit * 1.1,
-            left: unit / 2 - unit * 0.55,
-            // The strip softbox's reflection: a hot core in a soft falloff
-            background:
-              'linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08) 25%, oklch(1 0 0 / 0.34) 47% 53%, oklch(1 0 0 / 0.08) 75%, transparent)',
-            mixBlendMode: 'plus-lighter',
-            opacity: 0,
-          }}
-        />
-      </div>
-      <div
-        data-part={`${k}-dof`}
-        className="bg-(--edge-light) dark:bg-(--edge-dark)"
-        style={{
-          ...box(depth, unit),
-          ...edge,
-          transform: `translateX(${-unit / 2}px) rotateY(-90deg)`,
-        }}
-      >
-        {shade('left')}
-      </div>
-      <div
-        data-part={`${k}-dof`}
-        className="bg-(--edge-light) dark:bg-(--edge-dark)"
-        style={{
-          ...box(unit, depth),
-          ...edge,
-          transform: `translateY(${-unit / 2}px) rotateX(90deg)`,
-        }}
-      >
-        {shade('top')}
-      </div>
-      {/* The mouth: the dark inside of the sleeve */}
-      <div
-        data-part={`${k}-dof`}
-        style={{
-          ...box(depth, unit * 0.995),
-          background: 'oklch(0.12 0 0)',
-          transform: `translateX(${unit / 2}px) rotateY(90deg)`,
-        }}
-      />
+        }
+        if (face.key === 'front') {
+          return (
+            <div
+              key={face.key}
+              data-part={`${k}-dof`}
+              className="overflow-hidden"
+              // Softened corners, where the bevels meet
+              style={{ ...place, borderRadius: JACKET.bevel * unit }}
+            >
+              <GeneratedCover
+                artist={record.artist}
+                title={record.title}
+                seed={pressing.id}
+                className="size-full rounded-none"
+              />
+              {shade('front')}
+              <div
+                data-part={`${k}-gloss`}
+                style={{
+                  ...abs,
+                  top: 0,
+                  height: unit,
+                  width: unit * 1.1,
+                  left: unit / 2 - unit * 0.55,
+                  // The strip softbox's reflection: a hot core in a soft
+                  // falloff
+                  background:
+                    'linear-gradient(90deg, transparent, oklch(1 0 0 / 0.08) 25%, oklch(1 0 0 / 0.34) 47% 53%, oklch(1 0 0 / 0.08) 75%, transparent)',
+                  mixBlendMode: 'plus-lighter',
+                  opacity: 0,
+                }}
+              />
+            </div>
+          )
+        }
+        if (face.key === 'mouth') {
+          return (
+            <div
+              key={face.key}
+              data-part={`${k}-dof`}
+              className="[--edge:var(--edge-light)] dark:[--edge:var(--edge-dark)]"
+              style={{ ...place, background: MOUTH_SLOT }}
+            >
+              {shade(face.key)}
+              {glint(face.key, MOUTH_LIPS)}
+            </div>
+          )
+        }
+        const bevel = face.key.startsWith('bevel')
+        return (
+          <div
+            key={face.key}
+            data-part={`${k}-dof`}
+            className={
+              bevel
+                ? 'bg-(--bevel-light) dark:bg-(--bevel-dark)'
+                : 'bg-(--edge-light) dark:bg-(--edge-dark)'
+            }
+            style={place}
+          >
+            {shade(face.key)}
+            {glint(face.key)}
+          </div>
+        )
+      })}
     </>
   )
 }

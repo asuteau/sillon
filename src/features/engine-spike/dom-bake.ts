@@ -7,15 +7,16 @@ import {
   DISC,
   HERO,
   SET,
-  SLEEVE,
   cameraPosition,
   confusion,
   heroToWorld,
+  lightDirection,
   sampleShot,
   viewDepth,
   yawed,
 } from './craft.score'
-import type { Framing, ShotPose, Vec3 } from './craft.score'
+import type { Framing, Vec3 } from './craft.score'
+import { JACKET, faceLight, jacketFaces } from './jacket.utils'
 
 export const BAKE_FPS = 30
 
@@ -32,19 +33,6 @@ const scale = (a: Vec3, k: number): Vec3 => ({
 })
 const r3 = (n: number) => Math.round(n * 1000) / 1000
 const r1 = (n: number) => Math.round(n * 10) / 10
-
-// Toward the key light
-export const lightDirection = ({
-  azimuth,
-  elevation,
-}: ShotPose['light']): Vec3 => {
-  const [a, e] = [(azimuth * Math.PI) / 180, (elevation * Math.PI) / 180]
-  return {
-    x: Math.cos(e) * Math.sin(a),
-    y: Math.sin(e),
-    z: Math.cos(e) * Math.cos(a),
-  }
-}
 
 // Where the key light's mirror image sits on a plane, seen from the eye, in
 // the plane's own (u right, v up) coordinates; null when the light is behind
@@ -83,18 +71,12 @@ export interface Keyframes {
   opacity?: number[]
 }
 
-// Faces whose light we shade, by their normal in the sleeve's frame
-const FACES = {
-  front: { x: 0, y: 0, z: 1 },
-  left: { x: -1, y: 0, z: 0 },
-  top: { x: 0, y: 1, z: 0 },
-} as const satisfies Record<string, Vec3>
+const FACES = jacketFaces(JACKET)
 
-export const FACE_KEYS = ['front', 'left', 'top'] as const
-
-// Light on a face: ambient plus Lambert, as an overlay of shade (0 = lit)
-const shadeOf = (normal: Vec3, light: Vec3, strength: number) =>
-  r3(0.34 * (1 - Math.max(0, dot(normal, light)) * strength) ** 1.6)
+const toward = (from: Vec3, to: Vec3): Vec3 => {
+  const v = sub(to, from)
+  return scale(v, 1 / (Math.hypot(v.x, v.y, v.z) || 1))
+}
 
 export const bakeDom = ({ height, framing }: Stage): Bake => {
   const fov = sampleShot(0, framing).camera.fov
@@ -151,15 +133,21 @@ export const bakeDom = ({ height, framing }: Stage): Bake => {
           ? heroToWorld({ x: local, y: 0, z: 0 })
           : { x: sleeve.x, y: 0, z: sleeve.z }
       push(`${sleeve.key}-dof`, 'filter', blurAt(centre))
-      for (const face of FACE_KEYS) {
-        push(
-          `${sleeve.key}-shade-${face}`,
-          'opacity',
-          shadeOf(yawed(FACES[face], sleeve.yaw), light, pose.light.strength),
+      // Each face shaded by the key; the edges and bevels glint where the
+      // camera sees the key's reflection, so it runs along them as it moves
+      const view = toward(centre, eye)
+      for (const face of FACES) {
+        const lit = faceLight(
+          face.normals.map((n) => yawed(n, sleeve.yaw)),
+          pose.light,
+          view,
         )
+        push(`${sleeve.key}-shade-${face.key}`, 'opacity', lit.shade)
+        if (face.key !== 'front')
+          push(`${sleeve.key}-glint-${face.key}`, 'opacity', lit.glint)
       }
       // The Cover's soft sheen, where the light's reflection lands
-      const lift = yawed({ x: 0, y: 0, z: SLEEVE.depth / 2 }, sleeve.yaw)
+      const lift = yawed({ x: 0, y: 0, z: JACKET.depth / 2 }, sleeve.yaw)
       const g = glint(
         eye,
         strip,
