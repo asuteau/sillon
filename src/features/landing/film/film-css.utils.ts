@@ -21,6 +21,8 @@ const moveCss = (move: Move): string => {
   if ('rotateX' in move) return `rotateX(${r3(move.rotateX)}deg)`
   if ('rotateY' in move) return `rotateY(${r3(move.rotateY)}deg)`
   if ('rotateZ' in move) return `rotate(${r3(move.rotateZ)}deg)`
+  if ('scaleX' in move) return `scaleX(${r3(move.scaleX)})`
+  if ('scaleY' in move) return `scaleY(${r3(move.scaleY)})`
   return `scale(${r3(move.scale)})`
 }
 

@@ -3,7 +3,7 @@ import { LandingChallenge } from './LandingChallenge'
 import { LandingHeader } from './LandingHeader'
 import { LandingKeyFacts } from './LandingKeyFacts'
 import { LinerNotes } from './LinerNotes'
-import { PortraitStill } from './PortraitStill'
+import { PortraitFilm } from './PortraitFilm'
 import { FeatureSection } from './FeatureSection'
 import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
@@ -89,7 +89,7 @@ export const LandingPage = () => (
         id="portrait"
         label="Portrait"
         title="Your collection, in numbers."
-        still={<PortraitStill />}
+        still={<PortraitFilm />}
         flip
       >
         <p>

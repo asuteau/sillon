@@ -23,6 +23,12 @@ describe('transformCss', () => {
       'translate3d(1cqw, 2cqw, -3cqw) rotateX(4deg)',
     )
   })
+
+  it('stretches along one axis, for a bar drawing in', () => {
+    expect(transformCss([{ scaleX: 0.5 }, { scaleY: 0 }])).toBe(
+      'scaleX(0.5) scaleY(0)',
+    )
+  })
 })
 
 describe('lookStyle', () => {
