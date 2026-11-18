@@ -9,7 +9,7 @@
 // next record behind the screen; the Cover shrinks back onto the centred
 // sleeve, its disc slides out again, and the camera swings back to where the
 // pass began.
-import { CURVES, mix, track } from './film/film.model'
+import { CURVES, mix, round3, sharpness, track } from './film/film.model'
 import type { Beats, Key, Look, Score, Shot } from './film/film.model'
 
 export const COLLECTION_LOOP_MS = 10_000
@@ -25,6 +25,9 @@ export const COLLECTION_TRACKS = [
   // The camera: the strip and everything on it
   'camera',
   ...COLLECTION_SLOTS.map((slot) => `slide:${slot}` as const),
+  // Each slide's sharp face, giving way to its soft twin off the centre
+  ...COLLECTION_SLOTS.map((slot) => `slide:${slot}:sharp` as const),
+  ...COLLECTION_SLOTS.map((slot) => `slide:${slot}:soft` as const),
   'sleeve:0',
   'disc:0',
   'sleeve:1',
@@ -66,7 +69,9 @@ const COVER = 52
 const COVER_Y = 33
 // A neighbour one slide off: smaller and dimmer as in the app, and set back
 // out of focus, for depth
-const NEIGHBOUR = { scale: 0.82, opacity: 0.5, z: -10, blur: 0.5 }
+const NEIGHBOUR = { scale: 0.82, opacity: 0.5, z: -10 }
+// A neighbour's soft twin's static blur
+export const COLLECTION_SOFT_BLUR = 0.5
 // The camera stepped back, while the Cover flies: the strip's scale
 const STEP_BACK = 0.78
 
@@ -81,9 +86,7 @@ export const COLLECTION_STAGE_VARS = {
 // ---------------------------------------------------------------------------
 // Keys. Two keys a millisecond apart are a cut, always out of sight
 
-const { platter, fade, out, inOut } = CURVES
-// A camera with weight: slow off the mark, long settle (the spike's dolly)
-const dolly = [0.55, 0, 0.12, 1] as const
+const { platter, fade, out, inOut, dolly } = CURVES
 
 const KEYS = {
   // The camera's swing about the centred slide, and its tilt
@@ -216,8 +219,6 @@ const TRACKS = new Map(
   Object.entries(KEYS).map(([name, keys]) => [name, track(keys)]),
 )
 
-const round3 = (n: number) => Math.round(n * 1000) / 1000
-
 // ---------------------------------------------------------------------------
 // Looks
 
@@ -226,7 +227,6 @@ const slideLook = (distance: number): Look => {
   const t = Math.min(Math.abs(distance), 1)
   return {
     opacity: round3(mix(1, NEIGHBOUR.opacity, t)),
-    blur: round3(mix(0, NEIGHBOUR.blur, t)),
     transform: [
       {
         translate: [round3(distance * GAP), 0, round3(mix(0, NEIGHBOUR.z, t))],
@@ -291,8 +291,12 @@ const sample = (film: number): Shot<CollectionTrack> => {
     glint: shift(at('glint')),
     spin: { transform: [{ rotateZ: round3((ms / SPIN_MS) * 360) }] },
   }
-  for (const slot of COLLECTION_SLOTS)
+  for (const slot of COLLECTION_SLOTS) {
+    const soft = round3(Math.min(Math.abs(slot - strip), 1))
     shot[`slide:${slot}`] = slideLook(slot - strip)
+    shot[`slide:${slot}:sharp`] = { opacity: round3(sharpness(soft)) }
+    shot[`slide:${slot}:soft`] = { opacity: soft }
+  }
   return shot
 }
 

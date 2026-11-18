@@ -26,8 +26,9 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+// The chart as drawn in focus (each part a sharp copy and a soft twin)
 const chart = (name: string) => {
-  const heading = screen.getByRole('heading', { name, hidden: true })
+  const [heading] = screen.getAllByRole('heading', { name, hidden: true })
   const section = heading.closest('section')
   if (!section) throw new Error(`No ${name} chart`)
   return section
@@ -47,7 +48,8 @@ describe('PortraitFilm', () => {
 
   it('shows the Estimated value as the app sets it, with its range', () => {
     render(<PortraitFilm />)
-    const value = screen.getByText('Estimated value').parentElement
+    const [label] = screen.getAllByText('Estimated value')
+    const value = label.parentElement
     expect(value?.textContent).toContain('≈ €2.1k')
     expect(value?.textContent).toContain('€1.4k – €3.1k')
   })

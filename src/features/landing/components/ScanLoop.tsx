@@ -1,5 +1,3 @@
-import type * as React from 'react'
-
 import {
   LIST_NAMES,
   plural,
@@ -26,35 +24,21 @@ import {
 } from '../content/landing-stack.content'
 import { LANDING_RECORDS, landingPressing } from '../content/landing.content'
 import { lookStyle } from '../film/film-css.utils'
+import { FilmStage } from '../film/FilmStage'
 import { NO_BEATS } from '../film/film.model'
 import type { Shot } from '../film/film.model'
-import { useFilmPlayer } from '../hooks/use-film-player'
-import { CRATE_REST, crateRestLook, SCAN_SCORE } from '../scan.score'
+import { SoftTwin } from '../film/SoftTwin'
+import { Tracked } from '../film/Tracked'
+import {
+  CRATE_REST,
+  crateRestLook,
+  SCAN_SCORE,
+  SCAN_SOFT_BLUR,
+} from '../scan.score'
 import type { ScanTrack } from '../scan.score'
 import { SleeveBack } from './SleeveBack'
 
 const noop = () => {}
-
-type Looks = Shot<ScanTrack>
-
-interface TrackedProps {
-  name: ScanTrack
-  looks: Looks
-  className?: string
-  style?: React.CSSProperties
-  children?: React.ReactNode
-}
-
-// One element the film moves (`data-track`, see useFilmPlayer)
-const Tracked = ({ name, looks, className, style, children }: TrackedProps) => (
-  <div
-    data-track={name}
-    className={className}
-    style={{ ...style, ...lookStyle(looks[name] ?? {}) }}
-  >
-    {children}
-  </div>
-)
 
 // Every sleeve shares one box, so they share the lens's vanishing point
 const SLEEVE_BOX =
@@ -100,7 +84,7 @@ const PASSES = [
 
 interface HeldProps {
   pass: 0 | 1
-  looks: Looks
+  looks: Shot<ScanTrack>
 }
 
 // A sleeve lifted out of the crate: its Cover, and on the other side its
@@ -184,7 +168,7 @@ const ListBar = ({ stack, list }: ListBarProps) => {
 
 interface PanelProps {
   pass: 0 | 1
-  looks: Looks
+  looks: Shot<ScanTrack>
 }
 
 // The Stack of one under the viewfinder once Discogs answers, as the
@@ -236,7 +220,7 @@ const Panel = ({ pass, looks }: PanelProps) => {
 
 interface SentProps {
   pass: 0 | 1
-  looks: Looks
+  looks: Shot<ScanTrack>
 }
 
 // What the scanner says once the Stack is added
@@ -255,6 +239,36 @@ const Sent = ({ pass, looks }: SentProps) => {
   )
 }
 
+interface CrateProps {
+  looks: Shot<ScanTrack>
+}
+
+// The crate, the front sleeves in it, and the one in hand
+const Crate = ({ looks }: CrateProps) => (
+  <>
+    {CRATE_REST.map((_, i) => (
+      <div
+        key={i}
+        className={SLEEVE_BOX}
+        style={lookStyle(crateRestLook(CRATE_REST.length - 1 - i))}
+      >
+        <Cover
+          index={SCAN_LOOP_CRATE[CRATE_REST.length - 1 - i]}
+          haze={0.55 - i * 0.2}
+        />
+      </div>
+    ))}
+    <Tracked name="crate:b" looks={looks} className={SLEEVE_BOX}>
+      <Cover index={SCAN_LOOP_SLEEVES[1].index} haze={0.15} />
+    </Tracked>
+    <Tracked name="crate:a" looks={looks} className={SLEEVE_BOX}>
+      <Cover index={SCAN_LOOP_SLEEVES[0].index} />
+    </Tracked>
+    <Held pass={0} looks={looks} />
+    <Held pass={1} looks={looks} />
+  </>
+)
+
 // On the paper sleeve, whichever the theme
 const FINDER_CORNER = 'absolute size-[5cqw] border-vinyl-black'
 
@@ -263,83 +277,71 @@ const FINDER_CORNER = 'absolute size-[5cqw] border-vinyl-black'
 // first to the Collection, the next to the Wantlist. Built from the app's
 // own pieces; decorative and inert; plays only on screen, and holds one
 // still frame with reduced motion.
-export const ScanLoop = () => {
-  const { stageRef, at } = useFilmPlayer(SCAN_SCORE, NO_BEATS)
-  const looks = SCAN_SCORE.sample(at)
-
-  return (
-    <div
-      ref={stageRef}
-      data-slot="scan-film"
-      inert
-      aria-hidden
-      className="@container relative aspect-4/5 w-full min-w-0 overflow-hidden select-none"
-    >
-      {/* The camera on the crate; its edges fade into the page, so the
+export const ScanLoop = () => (
+  <FilmStage
+    score={SCAN_SCORE}
+    beats={NO_BEATS}
+    slot="scan-film"
+    className="aspect-4/5 w-full min-w-0 overflow-hidden"
+  >
+    {({ looks }) => (
+      <>
+        {/* The camera on the crate; its edges fade into the page, so the
           crate's shadows never meet the frame */}
-      <div className="absolute inset-0 mask-[linear-gradient(#000_78%,transparent)]">
-        <Tracked
-          name="set"
-          looks={looks}
-          className="absolute inset-0 origin-[50cqw_40cqw]"
-        >
-          {CRATE_REST.map((_, i) => (
-            <div
-              key={i}
-              className={SLEEVE_BOX}
-              style={lookStyle(crateRestLook(CRATE_REST.length - 1 - i))}
+        <div className="absolute inset-0 mask-[linear-gradient(#000_78%,transparent)]">
+          <Tracked
+            name="set"
+            looks={looks}
+            className="absolute inset-0 origin-[50cqw_40cqw]"
+          >
+            {/* Soft once the focus pulls to the panel */}
+            <SoftTwin
+              sharp="set:sharp"
+              soft="set:soft"
+              looks={looks}
+              blur={SCAN_SOFT_BLUR}
+              className="absolute inset-0"
             >
-              <Cover
-                index={SCAN_LOOP_CRATE[CRATE_REST.length - 1 - i]}
-                haze={0.55 - i * 0.2}
-              />
-            </div>
-          ))}
-          <Tracked name="crate:b" looks={looks} className={SLEEVE_BOX}>
-            <Cover index={SCAN_LOOP_SLEEVES[1].index} haze={0.15} />
+              <Crate looks={looks} />
+            </SoftTwin>
           </Tracked>
-          <Tracked name="crate:a" looks={looks} className={SLEEVE_BOX}>
-            <Cover index={SCAN_LOOP_SLEEVES[0].index} />
-          </Tracked>
-          <Held pass={0} looks={looks} />
-          <Held pass={1} looks={looks} />
-        </Tracked>
-      </div>
+        </div>
 
-      {/* The viewfinder, locked on the barcode */}
-      <Tracked
-        name="finder"
-        looks={looks}
-        className="absolute top-[50.5cqw] left-[32.5cqw] h-[19cqw] w-[34cqw]"
-      >
-        <span
-          className={`${FINDER_CORNER} top-0 left-0 border-t-2 border-l-2`}
-        />
-        <span
-          className={`${FINDER_CORNER} top-0 right-0 border-t-2 border-r-2`}
-        />
-        <span
-          className={`${FINDER_CORNER} bottom-0 left-0 border-b-2 border-l-2`}
-        />
-        <span
-          className={`${FINDER_CORNER} right-0 bottom-0 border-b-2 border-r-2`}
-        />
+        {/* The viewfinder, locked on the barcode */}
         <Tracked
-          name="flash"
+          name="finder"
           looks={looks}
-          className="absolute inset-[1cqw] bg-white/70"
+          className="absolute top-[50.5cqw] left-[32.5cqw] h-[19cqw] w-[34cqw]"
+        >
+          <span
+            className={`${FINDER_CORNER} top-0 left-0 border-t-2 border-l-2`}
+          />
+          <span
+            className={`${FINDER_CORNER} top-0 right-0 border-t-2 border-r-2`}
+          />
+          <span
+            className={`${FINDER_CORNER} bottom-0 left-0 border-b-2 border-l-2`}
+          />
+          <span
+            className={`${FINDER_CORNER} right-0 bottom-0 border-b-2 border-r-2`}
+          />
+          <Tracked
+            name="flash"
+            looks={looks}
+            className="absolute inset-[1cqw] bg-white/70"
+          />
+        </Tracked>
+        <Tracked
+          name="scanline"
+          looks={looks}
+          className="absolute top-[52cqw] left-[calc(49.5cqw-1px)] h-[16cqw] w-0.5 bg-vinyl-black shadow-[0_0_6px_var(--color-vinyl-black)]"
         />
-      </Tracked>
-      <Tracked
-        name="scanline"
-        looks={looks}
-        className="absolute top-[52cqw] left-[calc(49.5cqw-1px)] h-[16cqw] w-0.5 bg-vinyl-black shadow-[0_0_6px_var(--color-vinyl-black)]"
-      />
 
-      <Panel pass={0} looks={looks} />
-      <Panel pass={1} looks={looks} />
-      <Sent pass={0} looks={looks} />
-      <Sent pass={1} looks={looks} />
-    </div>
-  )
-}
+        <Panel pass={0} looks={looks} />
+        <Panel pass={1} looks={looks} />
+        <Sent pass={0} looks={looks} />
+        <Sent pass={1} looks={looks} />
+      </>
+    )}
+  </FilmStage>
+)

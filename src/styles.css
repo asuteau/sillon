@@ -447,13 +447,16 @@
   }
 }
 
+/* A landing film waiting off-screen or in a hidden tab (FilmStage): the
+   app's own CSS animations inside it wait too */
+[data-slot$='-film'][data-paused] * {
+  animation-play-state: paused;
+}
+
 /* The landing's Collection loop (CollectionLoop): placed in cqw of its 4:5
    stage by the --loop-* properties the stage sets (COLLECTION_STAGE_VARS),
    moved by its score. The camera is a CSS 3D set: the strip turns under one
    lens about the centred slide; neighbours sit back, out of focus */
-[data-slot='collection-film'][data-paused] * {
-  animation-play-state: paused;
-}
 
 .collection-loop-slide,
 .collection-loop-flyer {
@@ -612,12 +615,6 @@
   from {
     transform: scaleY(0);
   }
-}
-
-/* Landing stills are static: the Portrait still shows its charts drawn */
-[data-slot='landing-still']
-  :is(.portrait-reveal, .portrait-bar, .portrait-column) {
-  animation: none;
 }
 
 /* The landing's Portrait loop (PortraitFilm): the sheet moved by its score.
@@ -958,37 +955,6 @@
 
 .sleeve-pull-body .disc-grooves {
   transform: rotate(calc(var(--pull-out) * 140deg));
-}
-
-/* The landing's Collection still: the Sleeve pull's settled pose, sized to
-   its column (an @container) and centred by layout, never scrolled */
-[data-slot='landing-still'] .sleeve-pull-strip {
-  /* Small enough that a neighbour shows either side */
-  --sleeve: min(36cqw, 200px);
-  justify-content: center;
-  overflow: hidden;
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 10%,
-    #000 90%,
-    transparent
-  );
-}
-
-[data-slot='landing-still'] .sleeve-pull-slide {
-  cursor: default;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* A still, not motion: its disc stays pulled out */
-  [data-slot='landing-still'] .sleeve-pull-body .disc {
-    display: block;
-  }
-
-  [data-slot='landing-still'] .sleeve-pull-sleeve {
-    transform: translateX(calc(var(--pull-out) * var(--sleeve) * -0.2));
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

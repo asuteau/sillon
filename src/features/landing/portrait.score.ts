@@ -7,8 +7,8 @@
 import { leaderCount } from '#/features/portrait/portrait.utils'
 
 import { LANDING_PORTRAIT } from './content/landing.content'
-import { CURVES, track } from './film/film.model'
-import type { Curve, Key, Look, Score, Shot } from './film/film.model'
+import { CURVES, round3, sharpness, track } from './film/film.model'
+import type { Key, Look, Score, Shot } from './film/film.model'
 
 export const PORTRAIT_LOOP_MS = 9600
 
@@ -25,10 +25,16 @@ export const PORTRAIT_TRACK_NAMES = [
   'page',
   // Light falling off as the sheet turns away
   'shade',
-  // The sheet's three parts, for the rack focus
+  // The sheet's three parts, for the rack focus: each dims while out of
+  // focus; the figures and Pressing decade go soft, the sharp part giving
+  // way to its soft twin
   'figures',
+  'figures:sharp',
+  'figures:soft',
   'artists',
   'decades',
+  'decades:sharp',
+  'decades:soft',
   ...topArtists.map((_, i) => `artistBar:${i}` as const),
   ...pressingDecades.map((_, i) => `decadeBar:${i}` as const),
   // Each column's count, over it
@@ -36,9 +42,6 @@ export const PORTRAIT_TRACK_NAMES = [
 ] as const
 
 export type PortraitTrack = (typeof PORTRAIT_TRACK_NAMES)[number]
-
-// A camera with weight: slow off the mark, long settle (the engine spike's)
-const DOLLY: Curve = [0.55, 0, 0.12, 1]
 
 // Beats, ms into the loop
 const DRAW_MS = 800
@@ -58,35 +61,35 @@ const UNDRAW_MS = 8800
 // as the focus moves down it; then back
 const CAMERA: Record<'rx' | 'ry' | 'y' | 's', readonly Key[]> = {
   rx: [
-    [0, 24, DOLLY],
-    [2600, 12, DOLLY],
-    [4800, 6, DOLLY],
+    [0, 24, CURVES.dolly],
+    [2600, 12, CURVES.dolly],
+    [4800, 6, CURVES.dolly],
     [6400, 3],
-    [8000, 3, DOLLY],
+    [8000, 3, CURVES.dolly],
     [PORTRAIT_LOOP_MS, 24],
   ],
   ry: [
-    [0, -18, DOLLY],
-    [2600, -8, DOLLY],
-    [4800, 5, DOLLY],
+    [0, -18, CURVES.dolly],
+    [2600, -8, CURVES.dolly],
+    [4800, 5, CURVES.dolly],
     [6400, 2],
-    [8000, 0, DOLLY],
+    [8000, 0, CURVES.dolly],
     [PORTRAIT_LOOP_MS, -18],
   ],
   y: [
-    [0, 3, DOLLY],
-    [2600, 2, DOLLY],
-    [4800, -1, DOLLY],
+    [0, 3, CURVES.dolly],
+    [2600, 2, CURVES.dolly],
+    [4800, -1, CURVES.dolly],
     [6400, 0],
-    [8000, 0, DOLLY],
+    [8000, 0, CURVES.dolly],
     [PORTRAIT_LOOP_MS, 3],
   ],
   s: [
-    [0, 0.86, DOLLY],
-    [2600, 0.91, DOLLY],
-    [4800, 0.94, DOLLY],
+    [0, 0.86, CURVES.dolly],
+    [2600, 0.91, CURVES.dolly],
+    [4800, 0.94, CURVES.dolly],
     [6400, 0.95],
-    [8000, 0.95, DOLLY],
+    [8000, 0.95, CURVES.dolly],
     [PORTRAIT_LOOP_MS, 0.86],
   ],
 }
@@ -96,17 +99,23 @@ const ry = track(CAMERA.ry)
 const camY = track(CAMERA.y)
 const camS = track(CAMERA.s)
 
-const round3 = (n: number) => Math.round(n * 1000) / 1000
+// The soft twins' static blur, stage units
+export const PORTRAIT_SOFT_BLUR = 0.3
 
-// Out of focus: how soft a part is over time (0 sharp, 1 softest), as lens
-// blur (stage units) and a dimming. A blur repaints whatever moves inside
-// it, every frame: only parts that hold still while soft get one
-const focus = (keys: readonly Key[], blur = 0.3) => {
+// Out of focus: how soft a part is over time (0 sharp, 1 softest), as a
+// dimming of the part and its soft twin faded in over it. A blur repaints
+// whatever moves inside it: only parts that hold still while soft get a
+// twin
+const focus = (keys: readonly Key[]) => {
   const softness = track(keys)
-  return (ms: number): Look => ({
-    ...(blur > 0 && { blur: round3(softness(ms) * blur) }),
-    opacity: round3(1 - softness(ms) * 0.3),
-  })
+  return (ms: number) => {
+    const soft = softness(ms)
+    return {
+      part: { opacity: round3(1 - soft * 0.3) },
+      sharp: { opacity: round3(sharpness(soft)) },
+      soft: { opacity: round3(soft) },
+    }
+  }
 }
 
 // The focus racks down the sheet: Top artists while its bars draw, Pressing
@@ -121,19 +130,16 @@ const FOCUS = {
     [8600, 0, CURVES.fade],
     [PORTRAIT_LOOP_MS, 1],
   ]),
-  artists: focus(
-    [
-      [0, 1, CURVES.inOut],
-      [600, 0],
-      [2800, 0, CURVES.inOut],
-      [3400, 0.8],
-      [4800, 0.8, CURVES.fade],
-      [5400, 0],
-      [8600, 0, CURVES.fade],
-      [PORTRAIT_LOOP_MS, 1],
-    ],
-    0,
-  ),
+  artists: focus([
+    [0, 1, CURVES.inOut],
+    [600, 0],
+    [2800, 0, CURVES.inOut],
+    [3400, 0.8],
+    [4800, 0.8, CURVES.fade],
+    [5400, 0],
+    [8600, 0, CURVES.fade],
+    [PORTRAIT_LOOP_MS, 1],
+  ]),
   decades: focus([
     [0, 1],
     [2600, 1, CURVES.inOut],
@@ -242,10 +248,14 @@ export const PORTRAIT_SCORE: Score<PortraitTrack> = {
         ],
       },
       shade: { opacity: round3(Math.min(1, tilt / 42)) },
-      figures: FOCUS.figures(ms),
-      artists: FOCUS.artists(ms),
-      decades: FOCUS.decades(ms),
     }
+    for (const part of ['figures', 'decades'] as const) {
+      const { part: dim, sharp, soft } = FOCUS[part](ms)
+      shot[part] = dim
+      shot[`${part}:sharp`] = sharp
+      shot[`${part}:soft`] = soft
+    }
+    shot.artists = FOCUS.artists(ms).part
     for (const [name, look] of CHART_TRACKS) shot[name] = look(ms)
     return shot
   },

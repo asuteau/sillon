@@ -11,6 +11,7 @@
 // main thread (it moves pixels, so the compositor can't), so the film only
 // ever moves transforms and opacity. Only the large faces have a twin (a
 // wall Cover, a sleeve's front and back): never an edge, a row or the disc.
+import { sharpness } from '../film/film.model'
 import type { Look, Move, Score, Shot } from '../film/film.model'
 import {
   cameraPosition,
@@ -235,9 +236,6 @@ const shotAt = (
     )
     return quantise(clamp01(screen / SOFT_RAMP))
   }
-  // The sharp face gives way as its twin comes in, so no crisp edge shows
-  // round a soft Cover; a touch see-through mid-way, never more
-  const sharpness = (soft: number) => Math.sqrt(1 - soft)
 
   // A shadow on the wall (z = 0) from something `z` in front of it
   const onWall = (x: number, y: number, z: number) => {

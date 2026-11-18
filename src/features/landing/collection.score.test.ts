@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { easeToken, halfway } from './film/ease-tokens.test-utils'
 import { playheadAt } from './film/film.model'
 import type { Look, Move } from './film/film.model'
 import {
@@ -154,6 +155,37 @@ describe('COLLECTION_SCORE', () => {
       // else jumps only behind the screen
       if (!flyerCut) expect([cut, screenOpen(cut)]).toEqual([cut, true])
     }
+  })
+
+  it('moves only transforms and opacity: never an animated blur', () => {
+    for (let ms = 0; ms <= COLLECTION_SCORE.length; ms += 50)
+      for (const part of Object.values(COLLECTION_SCORE.sample(ms)))
+        expect(part).not.toHaveProperty('blur')
+  })
+
+  it('sets the neighbours out of focus with a soft twin, the centre sharp', () => {
+    expect(opacity('slide:0:soft', 0)).toBe(0)
+    expect(opacity('slide:-1:soft', 0)).toBe(1)
+    expect(opacity('slide:1:soft', 0)).toBe(1)
+    // Half way along the advance, the coming slide is half in focus
+    expect(opacity('slide:1:soft', 2950)).toBeGreaterThan(0)
+    expect(opacity('slide:1:soft', 2950)).toBeLessThan(1)
+    expect(opacity('slide:1:soft', 3600)).toBe(0)
+    // The sharp face gives way, so no crisp edge shows round a soft one
+    expect(opacity('slide:-1:sharp', 0)).toBe(0)
+    expect(opacity('slide:0:sharp', 0)).toBe(1)
+  })
+
+  it('eases with the design tokens, as src/styles.css defines them', () => {
+    // The strip advances one slide on platter; the caption fades on fade
+    expect(shiftX('slide:0', 2950)).toBeCloseTo(
+      halfway(0, -64, easeToken('platter')),
+      2,
+    )
+    expect(opacity('caption:0', 1950)).toBeCloseTo(
+      halfway(1, 0, easeToken('fade')),
+      2,
+    )
   })
 
   it('holds the Sleeve pull as its still: disc out, caption shown', () => {

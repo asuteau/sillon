@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from '@testing-library/react'
+import { renderToString } from 'react-dom/server'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { HeroFilm } from './HeroFilm'
@@ -55,6 +56,14 @@ describe('HeroFilm', () => {
     expect(film(container)?.hasAttribute('inert')).toBe(true)
     expect(film(container)?.getAttribute('aria-hidden')).toBe('true')
     expect(container.querySelectorAll(FOCUSABLE)).toHaveLength(0)
+  })
+
+  it('is inert from the server on, before the screen is known', () => {
+    const html = document.createElement('div')
+    html.innerHTML = renderToString(<HeroFilm />)
+    const placeholder = film(html)
+    expect(placeholder?.hasAttribute('inert')).toBe(true)
+    expect(placeholder?.getAttribute('aria-hidden')).toBe('true')
   })
 
   it('opens on the page ground, before the Challenge fades up', () => {

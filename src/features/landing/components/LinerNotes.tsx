@@ -10,7 +10,7 @@ export const LinerNotes = () => (
   <section
     id="liner-notes"
     aria-labelledby="liner-notes-title"
-    className="scroll-mt-20 border-t border-border py-14 sm:py-20"
+    className="scroll-mt-24 sm:scroll-mt-20 border-t border-border py-14 sm:py-20"
   >
     <h2
       id="liner-notes-title"

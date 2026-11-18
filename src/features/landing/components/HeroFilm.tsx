@@ -1,26 +1,25 @@
 import { RotateCcw } from 'lucide-react'
-import { useMemo } from 'react'
 
 import { LIST_NAMES, plural } from '#/features/scan/components/StackBar'
 import { CollectionIcon } from '#/shared/components/icons/CollectionIcon'
 import { Button } from '#/shared/components/ui/button'
-import { usePrefersReducedMotion } from '#/shared/hooks/use-prefers-reduced-motion'
 
-import { HeroSet, Tracked } from './HeroSet'
-import type { HeroLooks } from './HeroSet'
-import { NO_BEATS } from '../film/film.model'
-import { useFilmPlayer } from '../hooks/use-film-player'
+import { HeroSet } from './HeroSet'
+import { FilmStage } from '../film/FilmStage'
+import { NO_BEATS, round3 } from '../film/film.model'
+import type { Shot } from '../film/film.model'
+import { Tracked } from '../film/Tracked'
 import { useHeroFraming } from '../hooks/use-hero-framing'
 import { LAYOUT } from '../hero/hero-cues.score'
 import { HERO_SCORES, HERO_STAGES, softBlur } from '../hero/hero.score'
-import type { HeroFraming } from '../hero/hero.score'
+import type { HeroFraming, HeroTrack } from '../hero/hero.score'
 
 // Frameless: every edge of the stage falls back into the page
 const STAGE_MASK =
   'linear-gradient(90deg, transparent, black 10%, black 90%, transparent), linear-gradient(transparent, black 8%, black 88%, transparent)'
 
 interface StackHudProps {
-  looks: HeroLooks
+  looks: Shot<HeroTrack>
   centre: number
 }
 
@@ -85,7 +84,7 @@ const StackHud = ({ looks, centre }: StackHudProps) => (
   </div>
 )
 
-const cqw = (n: number) => `${Math.round(n * 1000) / 1000}cqw`
+const cqw = (n: number) => `${round3(n)}cqw`
 
 // The frame the film is composed for, 16:9 or 4:5, as tall as the band and
 // centred in it: on a band wider than 16:9 (a short screen) the camera
@@ -100,80 +99,78 @@ interface HeroStageProps {
 
 // The film on its stage, and Replay once it has ended
 const HeroStage = ({ framing }: HeroStageProps) => {
-  const score = HERO_SCORES[framing]
-  const { stageRef, at, hasEnded, replay } = useFilmPlayer(score, NO_BEATS)
-  // Sampled once per rest pose: the set (hundreds of elements) re-renders
-  // only when it moves to a new one
-  const looks = useMemo(() => score.sample(at), [score, at])
   const { perspective, unit, centre } = HERO_STAGES[framing]
 
   return (
-    <>
-      {/* The band, the page's width: the frame's composition, and the set
-          on either side of it where the screen is wider */}
-      <div
-        ref={stageRef}
-        data-slot="hero-film"
-        inert
-        aria-hidden
-        className="absolute inset-0 overflow-hidden select-none"
-      >
-        {/* The page ground inside the mask: the grade blends over it */}
-        <div
-          className="absolute inset-0 bg-background"
-          style={{ maskImage: STAGE_MASK, maskComposite: 'intersect' }}
-        >
-          <div className={`@container ${FRAME}`}>
-            <div
-              className="absolute inset-0"
-              style={{
-                perspective: cqw(perspective),
-                perspectiveOrigin: `${centre * 100}% 50%`,
-              }}
-            >
-              <Tracked
-                name="world"
-                looks={looks}
-                className="absolute top-1/2 size-0 transform-3d"
-                style={{ left: `${centre * 100}%` }}
+    // The band, the page's width: the frame's composition, and the set on
+    // either side of it where the screen is wider
+    <FilmStage
+      score={HERO_SCORES[framing]}
+      beats={NO_BEATS}
+      slot="hero-film"
+      className="absolute inset-0 overflow-hidden"
+      controls={({ hasEnded, replay }) =>
+        hasEnded && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={replay}
+            className="absolute right-4 bottom-3 animate-in bg-background/70 fade-in sm:right-6 sm:bottom-5"
+          >
+            <RotateCcw />
+            Replay
+          </Button>
+        )
+      }
+    >
+      {({ looks }) => (
+        <>
+          {/* The page ground inside the mask: the grade blends over it */}
+          <div
+            className="absolute inset-0 bg-background"
+            style={{ maskImage: STAGE_MASK, maskComposite: 'intersect' }}
+          >
+            <div className={`@container ${FRAME}`}>
+              <div
+                className="absolute inset-0"
+                style={{
+                  perspective: cqw(perspective),
+                  perspectiveOrigin: `${centre * 100}% 50%`,
+                }}
               >
-                <HeroSet
-                  unit={unit}
-                  soft={softBlur(HERO_STAGES[framing])}
-                  layout={LAYOUT[framing]}
+                <Tracked
+                  name="world"
                   looks={looks}
-                />
-              </Tracked>
+                  className="absolute top-1/2 size-0 transform-3d"
+                  style={{ left: `${centre * 100}%` }}
+                >
+                  <HeroSet
+                    unit={unit}
+                    soft={softBlur(HERO_STAGES[framing])}
+                    layout={LAYOUT[framing]}
+                    looks={looks}
+                  />
+                </Tracked>
+              </div>
             </div>
+            {/* The Challenge's cold grade: colour drained */}
+            <Tracked
+              name="grade"
+              looks={looks}
+              className="pointer-events-none absolute inset-0 bg-[oklch(0.6_0_0)] mix-blend-saturation"
+            />
+            <Tracked
+              name="exposure"
+              looks={looks}
+              className="pointer-events-none absolute inset-0 bg-background"
+            />
           </div>
-          {/* The Challenge's cold grade: colour drained */}
-          <Tracked
-            name="grade"
-            looks={looks}
-            className="pointer-events-none absolute inset-0 bg-[oklch(0.6_0_0)] mix-blend-saturation"
-          />
-          <Tracked
-            name="exposure"
-            looks={looks}
-            className="pointer-events-none absolute inset-0 bg-background"
-          />
-        </div>
-        <div className={FRAME}>
-          <StackHud looks={looks} centre={centre} />
-        </div>
-      </div>
-      {hasEnded && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={replay}
-          className="absolute right-4 bottom-3 animate-in bg-background/70 fade-in sm:right-6 sm:bottom-5"
-        >
-          <RotateCcw />
-          Replay
-        </Button>
+          <div className={FRAME}>
+            <StackHud looks={looks} centre={centre} />
+          </div>
+        </>
       )}
-    </>
+    </FilmStage>
   )
 }
 
@@ -185,22 +182,22 @@ const HeroStage = ({ framing }: HeroStageProps) => {
 // hidden tab; one still with reduced motion.
 export const HeroFilm = () => {
   const framing = useHeroFraming()
-  const reducedMotion = usePrefersReducedMotion()
 
   return (
     <div className="relative mx-auto aspect-4/5 w-full max-w-360 md:aspect-auto">
       {/* Its first frame until the screen is known (the server, hydration):
           the page ground the film fades up from. Then the set, built once
-          for the screen. Remounted for a new framing, or when reduced
-          motion changes: the engine's leftovers never mix with the new set */}
+          for the screen, and rebuilt for a new framing (another score,
+          another set) */}
       {framing === null ? (
         <div
           data-slot="hero-film"
+          inert
           aria-hidden
           className="absolute inset-0 bg-background"
         />
       ) : (
-        <HeroStage key={`${framing}-${reducedMotion}`} framing={framing} />
+        <HeroStage key={framing} framing={framing} />
       )}
     </div>
   )

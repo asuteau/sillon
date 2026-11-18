@@ -1,29 +1,28 @@
 // A score baked for the DOM (ADR 0005): each part sampled 30 times a second,
 // and at every cut, into keyframes per tracked element (transform, opacity,
-// filter, the stroke drawn), linear between samples. The curves are the
+// the stroke drawn), linear between samples. The curves are the
 // score's own; the browser only plays them.
-import { partSpan } from './film.model'
+import { partSpan, round3 } from './film.model'
 import type { Look, Move, Part, Score } from './film.model'
 
 export const BAKE_FPS = 30
 
-const r3 = (n: number) => Math.round(n * 1000) / 1000
-const length = (n: number) => `${r3(n)}cqw`
+const length = (n: number) => `${round3(n)}cqw`
 
 const moveCss = (move: Move): string => {
-  if ('perspective' in move) return `perspective(${r3(move.perspective)}px)`
+  if ('perspective' in move) return `perspective(${round3(move.perspective)}px)`
   if ('translate' in move) {
     const [x, y, z] = move.translate
     return z === undefined
       ? `translate(${length(x)}, ${length(y)})`
       : `translate3d(${length(x)}, ${length(y)}, ${length(z)})`
   }
-  if ('rotateX' in move) return `rotateX(${r3(move.rotateX)}deg)`
-  if ('rotateY' in move) return `rotateY(${r3(move.rotateY)}deg)`
-  if ('rotateZ' in move) return `rotate(${r3(move.rotateZ)}deg)`
-  if ('scaleX' in move) return `scaleX(${r3(move.scaleX)})`
-  if ('scaleY' in move) return `scaleY(${r3(move.scaleY)})`
-  return `scale(${r3(move.scale)})`
+  if ('rotateX' in move) return `rotateX(${round3(move.rotateX)}deg)`
+  if ('rotateY' in move) return `rotateY(${round3(move.rotateY)}deg)`
+  if ('rotateZ' in move) return `rotate(${round3(move.rotateZ)}deg)`
+  if ('scaleX' in move) return `scaleX(${round3(move.scaleX)})`
+  if ('scaleY' in move) return `scaleY(${round3(move.scaleY)})`
+  return `scale(${round3(move.scale)})`
 }
 
 export const transformCss = (moves: readonly Move[]) =>
@@ -34,26 +33,18 @@ export const transformCss = (moves: readonly Move[]) =>
 export interface LookCss {
   opacity?: number
   transform?: string
-  filter?: string
   '--film-undrawn'?: number
 }
 
-export const lookStyle = ({
-  opacity,
-  transform,
-  blur,
-  draw,
-}: Look): LookCss => ({
-  ...(opacity !== undefined && { opacity: r3(opacity) }),
+export const lookStyle = ({ opacity, transform, draw }: Look): LookCss => ({
+  ...(opacity !== undefined && { opacity: round3(opacity) }),
   ...(transform && { transform: transformCss(transform) }),
-  ...(blur !== undefined && { filter: `blur(${length(blur)})` }),
-  ...(draw !== undefined && { '--film-undrawn': r3(1 - draw) }),
+  ...(draw !== undefined && { '--film-undrawn': round3(1 - draw) }),
 })
 
 export type Keyframes = {
   opacity?: number[]
   transform?: string[]
-  filter?: string[]
   '--film-undrawn'?: number[]
 }
 
@@ -87,7 +78,6 @@ const append = (keyframes: Keyframes, look: Look) => {
   if (css.opacity !== undefined) (keyframes.opacity ??= []).push(css.opacity)
   if (css.transform !== undefined)
     (keyframes.transform ??= []).push(css.transform)
-  if (css.filter !== undefined) (keyframes.filter ??= []).push(css.filter)
   if (css['--film-undrawn'] !== undefined)
     (keyframes['--film-undrawn'] ??= []).push(css['--film-undrawn'])
 }
@@ -157,7 +147,6 @@ export const withoutHolds = (
     keyframes: {
       ...(keyframes.opacity && { opacity: pick(keyframes.opacity) }),
       ...(keyframes.transform && { transform: pick(keyframes.transform) }),
-      ...(keyframes.filter && { filter: pick(keyframes.filter) }),
       ...(keyframes['--film-undrawn'] && {
         '--film-undrawn': pick(keyframes['--film-undrawn']),
       }),

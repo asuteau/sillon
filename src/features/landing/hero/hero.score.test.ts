@@ -207,7 +207,7 @@ describe('the hero film', () => {
         const shot = score.sample(ms)
         for (const name of score.tracks) {
           const look: Look = shot[name] ?? {}
-          expect(look.blur).toBeUndefined()
+          expect(look).not.toHaveProperty('blur')
           expect(look.draw).toBeUndefined()
         }
       }

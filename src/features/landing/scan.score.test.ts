@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { easeToken, halfway } from './film/ease-tokens.test-utils'
 import { playheadAt } from './film/film.model'
 import { SCAN_PASS_MS, SCAN_SCORE, SCAN_TRACKS } from './scan.score'
 import type { ScanTrack } from './scan.score'
@@ -100,6 +101,37 @@ describe('SCAN_SCORE', () => {
       (ms) => opacity('flash', ms) > 0,
     )
     expect(SCAN_SCORE.cuts).toContain(on)
+  })
+
+  it('moves only transforms and opacity: never an animated blur', () => {
+    for (let ms = 0; ms <= SCAN_SCORE.length; ms += 50)
+      for (const part of Object.values(SCAN_SCORE.sample(ms)))
+        expect(part).not.toHaveProperty('blur')
+  })
+
+  it('pulls focus off the sleeve to the panel with a soft twin of the crate', () => {
+    for (const { start } of PASSES) {
+      expect(opacity('set:soft', start + 1500)).toBe(0)
+      expect(opacity('set:sharp', start + 1500)).toBe(1)
+      expect(opacity('set:soft', start + 4000)).toBe(1)
+      expect(opacity('set:sharp', start + 4000)).toBe(0)
+    }
+  })
+
+  it('eases with the design tokens, as src/styles.css defines them', () => {
+    // The viewfinder fades on fade; the camera eases back on platter as
+    // the focus pulls to the panel
+    expect(opacity('finder', 2750)).toBeCloseTo(
+      halfway(1, 0, easeToken('fade')),
+      2,
+    )
+    const scale = SCAN_SCORE.sample(2900).set?.transform?.find(
+      (move) => 'scale' in move,
+    )
+    expect(scale && 'scale' in scale ? scale.scale : NaN).toBeCloseTo(
+      halfway(1.13, 1.05, easeToken('platter')),
+      2,
+    )
   })
 
   it('animates only its own tracks', () => {
