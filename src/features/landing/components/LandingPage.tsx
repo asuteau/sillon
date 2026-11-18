@@ -7,7 +7,7 @@ import { PortraitStill } from './PortraitStill'
 import { FeatureSection } from './FeatureSection'
 import { LandingCta } from './LandingCta'
 import { LandingHero } from './LandingHero'
-import { RandomPickStill } from './RandomPickStill'
+import { RandomPickFilm } from './RandomPickFilm'
 import { ScanStill } from './ScanStill'
 import { WantlistStill } from './WantlistStill'
 
@@ -77,7 +77,7 @@ export const LandingPage = () => (
         id="random-pick"
         label="Random pick"
         title="Nothing to spin?"
-        still={<RandomPickStill />}
+        still={<RandomPickFilm />}
       >
         <p>
           Random pick draws one record from your whole collection. Not the mood?

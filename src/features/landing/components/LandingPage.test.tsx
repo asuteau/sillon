@@ -195,7 +195,9 @@ describe('LandingPage', () => {
     const { container } = renderLanding()
     expect(container.querySelectorAll('img')).toHaveLength(0)
     expect(
-      container.querySelectorAll('[data-layout]').length,
+      // House sleeves, and generated Covers (one per Cover, its light art)
+      container.querySelectorAll('[data-layout], [data-theme-art="light"]')
+        .length,
     ).toBeGreaterThanOrEqual(8)
   })
 
