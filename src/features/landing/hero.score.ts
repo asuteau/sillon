@@ -1,5 +1,5 @@
-// The landing hero film, Pull, as timed cues. Times are playing time: the
-// clock stops while paused.
+// The landing hero film, Pull, as a score (film/film.model.ts): timed cues
+// per tracked element in two parts, played as one film.
 //
 // The opening plays once: the groove draws in, the wordmark shows, the groove
 // becomes a disc, the House sleeve slides in, the disc tucks in and pulls out,
@@ -7,6 +7,8 @@
 // strip advances, the next disc pulls out, its Cover grows into the Record
 // screen, back to the strip. The loop starts with the Record screen open, so
 // the strip turns over (each slot to the next record) while it's hidden.
+import { CURVES, bezier, mix } from './film/film.model'
+import type { Beats, Look, Move, Score, Shot } from './film/film.model'
 
 export const OPENING_MS = 6600
 export const LOOP_MS = 7600
@@ -17,40 +19,23 @@ const SCREEN_SWAP_MS = 1700
 
 export type HeroPart = 'opening' | 'loop'
 
-export interface HeroClock {
-  part: HeroPart
-  // Into the part
-  ms: number
-}
-
-// What React renders: which part's tracks run, which records sit where
+// What React renders: which records sit where
 export interface HeroScene {
-  part: HeroPart
   // Passes so far: the strip's slot 0 shows record `pass`, slot j `pass + j`
   pass: number
   // The record on the Record screen and the flying Cover
   screen: number
 }
 
-// Reduced motion: the opening's last frame, the strip in the Sleeve pull
-// pose: the centred disc pulled out, neighbours dimmed, caption shown
-export const HERO_STILL: HeroClock = { part: 'opening', ms: OPENING_MS }
-
 // Loop time since the loop's own 0, counting passes
 const loopTime = (elapsed: number) => elapsed - OPENING_MS + LOOP_ENTRY_MS
 
-export const heroClockAt = (elapsed: number): HeroClock =>
-  elapsed < OPENING_MS
-    ? { part: 'opening', ms: elapsed }
-    : { part: 'loop', ms: loopTime(elapsed) % LOOP_MS }
-
 export const heroSceneAt = (elapsed: number): HeroScene => {
-  if (elapsed < OPENING_MS) return { part: 'opening', pass: 0, screen: 1 }
-  const time = loopTime(elapsed)
+  const time = loopTime(Math.max(elapsed, OPENING_MS))
   const pass = Math.floor(time / LOOP_MS)
   const ms = time % LOOP_MS
   // Until hidden, the screen keeps the record the last pass brought in
-  return { part: 'loop', pass, screen: ms < SCREEN_SWAP_MS ? pass : pass + 1 }
+  return { pass, screen: ms < SCREEN_SWAP_MS ? pass : pass + 1 }
 }
 
 // Records that take turns across passes
@@ -61,30 +46,33 @@ export const HERO_CAST_SIZE = 4
 export const heroCast = (pass: number, slot: number): number =>
   (((pass + slot) % HERO_CAST_SIZE) + HERO_CAST_SIZE) % HERO_CAST_SIZE
 
-// Time to the next change of scene
+// Time to the next change of scene; none during the opening
 export const msUntilNextCue = (elapsed: number): number => {
-  if (elapsed < OPENING_MS) return OPENING_MS - elapsed
-  const { ms } = heroClockAt(elapsed)
+  if (elapsed < OPENING_MS)
+    return OPENING_MS - elapsed + msUntilNextCue(OPENING_MS)
+  const ms = loopTime(elapsed) % LOOP_MS
   return ms < SCREEN_SWAP_MS ? SCREEN_SWAP_MS - ms : LOOP_MS - ms
+}
+
+export const HERO_BEATS: Beats<HeroScene> = {
+  at: heroSceneAt,
+  next: msUntilNextCue,
 }
 
 // ---------------------------------------------------------------------------
 // Tracks: each animated element's keyframes, per part. Positions in cqw of the
 // 4:5 stage (width 100), so the film scales with its column.
 
-// Web Animations can't read var(), so the tokens are copied here
-const EASINGS = {
-  // --ease-platter
-  platter: 'cubic-bezier(0.65, 0, 0.15, 1)',
-  // --ease-fade
-  fade: 'cubic-bezier(0.2, 0, 0, 1)',
-  // The film's own, no token: a soft landing, and the disc tucking in
-  out: 'cubic-bezier(0.16, 1, 0.3, 1)',
-  inout: 'cubic-bezier(0.45, 0, 0.1, 1)',
-  linear: 'linear',
-} as const
+// Each cue's curve into the next
+const EASE = {
+  platter: bezier(CURVES.platter),
+  fade: bezier(CURVES.fade),
+  out: bezier(CURVES.out),
+  inout: bezier(CURVES.inOut),
+  linear: bezier(CURVES.linear),
+}
 
-export type Easing = keyof typeof EASINGS
+export type Easing = keyof typeof EASE
 
 // Translate (cqw), turn and scale; in this order
 export interface Pose {
@@ -112,31 +100,34 @@ export type Track = readonly Frame[]
 export const HERO_SLOTS = [-2, -1, 0, 1, 2, 3] as const
 export type HeroSlot = (typeof HERO_SLOTS)[number]
 
-export type HeroTrackName =
-  | 'groove'
-  | 'grooveDraw'
-  | 'wordmark'
+export const HERO_TRACK_NAMES = [
+  'groove',
+  'grooveDraw',
+  'wordmark',
   // The camera: the strip and everything on it
-  | 'world'
-  | `slide:${HeroSlot}`
+  'world',
+  ...HERO_SLOTS.map((slot) => `slide:${slot}` as const),
   // Only the centred slide and the next have their disc out
-  | 'sleeve:0'
-  | 'disc:0'
-  | 'sleeve:1'
-  | 'disc:1'
-  | 'caption:0'
-  | 'caption:1'
-  | 'pick'
-  | 'screen'
-  | 'screenHeading'
-  | 'screenDiscs'
+  'sleeve:0',
+  'disc:0',
+  'sleeve:1',
+  'disc:1',
+  'caption:0',
+  'caption:1',
+  'pick',
+  'screen',
+  'screenHeading',
+  'screenDiscs',
   // The Cover that grows from the strip into the Record screen
-  | 'flyer'
+  'flyer',
+] as const
+
+export type HeroTrackName = (typeof HERO_TRACK_NAMES)[number]
 
 const IDENTITY: Pose = { x: 0, y: 0, s: 1, r: 0, ry: 0 }
 
 // A frame's look; anything left out is at rest
-interface Look extends Partial<Pose> {
+interface Cue extends Partial<Pose> {
   opacity?: number
   draw?: number
 }
@@ -144,7 +135,7 @@ interface Look extends Partial<Pose> {
 // The track's frame at `at` ms, eased into the next
 const cue = (
   at: number,
-  { opacity = 1, draw = 1, ...pose }: Look = {},
+  { opacity = 1, draw = 1, ...pose }: Cue = {},
   ease?: Easing,
 ): Frame => ({ at, opacity, pose: { ...IDENTITY, ...pose }, draw, ease })
 
@@ -179,18 +170,18 @@ export const HERO_STAGE_VARS = {
 } as const
 
 // The flying Cover over the centred sleeve in the strip, pulled out
-const FLYER_FROM: Look = {
+const FLYER_FROM: Cue = {
   x: round2(-PULL * CAMERA.s),
   y: round2(HERO_GEOMETRY.slideY + CAMERA.y - HERO_GEOMETRY.coverY),
   s: round2((SLEEVE * CAMERA.s) / HERO_GEOMETRY.cover),
 }
 
 // Where the sleeve slides in from: off left, turned
-const SLEEVE_OFF: Look = { x: -130, ry: 55, r: -8 }
-const WORLD_STRIP: Look = CAMERA
-const RISE: Look = { opacity: 0, y: 2 }
+const SLEEVE_OFF: Cue = { x: -130, ry: 55, r: -8 }
+const WORLD_STRIP: Cue = CAMERA
+const RISE: Cue = { opacity: 0, y: 2 }
 
-const neighbourAt = (slot: number): Look => ({
+const neighbourAt = (slot: number): Cue => ({
   x: slot * GAP,
   s: NEIGHBOUR.s,
   opacity: NEIGHBOUR.opacity,
@@ -356,71 +347,84 @@ export const HERO_TRACKS: Record<HeroPart, Record<HeroTrackName, Track>> = {
   loop: LOOP,
 }
 
-export const HERO_PART_MS: Record<HeroPart, number> = {
-  opening: OPENING_MS,
-  loop: LOOP_MS,
-}
-
-const mix = (a: number, b: number, t: number) => round2(a + (b - a) * t)
-
-// The track's values at `ms`, linear between frames: for a still frame, or
-// the start before the Web Animations take over (exact on holds)
+// The track's values at `ms`, each step on its curve
 export const frameAt = (track: Track, ms: number): Frame => {
   const nextIndex = track.findIndex((frame) => frame.at > ms)
   if (nextIndex === -1) return track[track.length - 1]
   if (nextIndex === 0) return track[0]
   const from = track[nextIndex - 1]
   const to = track[nextIndex]
-  const t = (ms - from.at) / (to.at - from.at)
+  const t = EASE[from.ease ?? 'linear']((ms - from.at) / (to.at - from.at))
+  const step = (a: number, b: number) => round2(mix(a, b, t))
   return {
     at: ms,
-    opacity: mix(from.opacity, to.opacity, t),
+    opacity: step(from.opacity, to.opacity),
     pose: {
-      x: mix(from.pose.x, to.pose.x, t),
-      y: mix(from.pose.y, to.pose.y, t),
-      s: mix(from.pose.s, to.pose.s, t),
-      r: mix(from.pose.r, to.pose.r, t),
-      ry: mix(from.pose.ry, to.pose.ry, t),
+      x: step(from.pose.x, to.pose.x),
+      y: step(from.pose.y, to.pose.y),
+      s: step(from.pose.s, to.pose.s),
+      r: step(from.pose.r, to.pose.r),
+      ry: step(from.pose.ry, to.pose.ry),
     },
-    draw: mix(from.draw, to.draw, t),
+    draw: step(from.draw, to.draw),
     ease: from.ease,
   }
 }
 
-export const poseTransform = ({ x, y, s, r, ry }: Pose): string =>
-  `perspective(1000px) translate(${x}cqw, ${y}cqw) rotateY(${ry}deg) rotate(${r}deg) scale(${s})`
+// Translate, turn and scale, through a fixed 1000px lens
+export const poseMoves = ({ x, y, s, r, ry }: Pose): Move[] => [
+  { perspective: 1000 },
+  { translate: [x, y] },
+  { rotateY: ry },
+  { rotateZ: r },
+  { scale: s },
+]
 
-const isIdentity = ({ x, y, s, r, ry }: Pose) =>
-  x === 0 && y === 0 && s === 1 && r === 0 && ry === 0
+// A disc out of its sleeve turns, slow like a platter spinning down: four
+// turns a pass, so the loop comes round on the same angle
+const SPIN_MS = 1900
 
-// A Web Animations Keyframe, narrowed to what the film sets
-export interface HeroKeyframe extends Keyframe {
-  offset: number
-  easing: string
-  opacity?: number
-  transform?: string
-  strokeDashoffset?: number
-}
+// Every disc's grooves turn together (`spin`), whichever slot they're in
+export type HeroFilmTrack = HeroTrackName | 'spin'
 
-// Web Animations keyframes over the part's length; only what changes
-export const keyframesOf = (track: Track, length: number): HeroKeyframe[] => {
-  const fades = track.some((frame) => frame.opacity !== 1)
-  const moves = track.some((frame) => !isIdentity(frame.pose))
-  const draws = track.some((frame) => frame.draw !== 1)
+const lookOf = (name: HeroTrackName, frame: Frame): Look =>
+  name === 'grooveDraw'
+    ? { draw: frame.draw }
+    : { opacity: frame.opacity, transform: poseMoves(frame.pose) }
 
-  const keyframeOf = (frame: Frame, offset: number): HeroKeyframe => ({
-    offset,
-    easing: EASINGS[frame.ease ?? 'linear'],
-    ...(fades && { opacity: frame.opacity }),
-    ...(moves && { transform: poseTransform(frame.pose) }),
-    ...(draws && { strokeDashoffset: 1 - frame.draw }),
-  })
+// Film time of a loop time: the loop joins at LOOP_ENTRY_MS and comes round
+const fromLoop = (ms: number) =>
+  OPENING_MS + ((ms - LOOP_ENTRY_MS + LOOP_MS) % LOOP_MS)
 
-  const first = track[0]
-  const last = track[track.length - 1]
-  return [
-    ...(first.at > 0 ? [keyframeOf({ ...first, ease: undefined }, 0)] : []),
-    ...track.map((frame) => keyframeOf(frame, frame.at / length)),
-    ...(last.at < length ? [keyframeOf({ ...last, ease: undefined }, 1)] : []),
-  ]
+// The two parts as one film: the opening once, then the loop from where it
+// joins, round and round
+export const HERO_SCORE: Score<HeroFilmTrack> = {
+  tracks: [...HERO_TRACK_NAMES, 'spin'],
+  length: OPENING_MS + LOOP_MS,
+  ending: { kind: 'loop', from: OPENING_MS },
+  // Reduced motion: the opening's last frame, the strip in the Sleeve pull
+  // pose: the centred disc pulled out, neighbours dimmed, caption shown
+  still: OPENING_MS,
+  cuts: [
+    ...new Set([
+      ...Object.values(OPENING).flatMap((track) =>
+        track.map(({ at }) => at).filter((at) => at < OPENING_MS),
+      ),
+      ...Object.values(LOOP).flatMap((track) =>
+        track.map(({ at }) => fromLoop(at)),
+      ),
+    ]),
+  ].sort((a, b) => a - b),
+  sample: (ms) => {
+    const [part, at] =
+      ms < OPENING_MS
+        ? (['opening', ms] as const)
+        : (['loop', loopTime(ms) % LOOP_MS] as const)
+    const shot: Shot<HeroFilmTrack> = {
+      spin: { transform: [{ rotateZ: round2((ms / SPIN_MS) * 360) }] },
+    }
+    for (const name of HERO_TRACK_NAMES)
+      shot[name] = lookOf(name, frameAt(HERO_TRACKS[part][name], at))
+    return shot
+  },
 }

@@ -454,8 +454,9 @@
 
 /* The landing hero film, Pull (HeroAnimation): placed in cqw of its 4:5
    stage by the --hero-* properties the stage sets (HERO_STAGE_VARS), moved
-   by Web Animations (transform and opacity). The strip's edges fade into the
-   page; the camera scales about the centred slide */
+   by its score (transform and opacity; the groove's draw by --film-undrawn).
+   The strip's edges fade into the page; the camera scales about the centred
+   slide */
 .hero-film-slide,
 .hero-film-mark,
 .hero-film-flyer {
@@ -496,7 +497,7 @@
 
 .hero-film-groove path {
   stroke-dasharray: 1;
-  stroke-dashoffset: var(--groove-undrawn, 0);
+  stroke-dashoffset: var(--film-undrawn, 0);
 }
 
 .hero-film-sleeve {
