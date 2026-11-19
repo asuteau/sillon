@@ -19,12 +19,24 @@ interface Roll {
 interface CountRoll {
   // Nothing to show: no count, or a zero that has finished fading out
   isHidden: boolean
+  // The number on screen (still the last one while a zero fades out)
+  shown: number | undefined
   columns: CountDigit[]
   rootRef: React.RefObject<HTMLSpanElement | null>
 }
 
+// Runs onDone once every animation finishes; the returned stop drops it
 const settle = (animations: Animation[], onDone: () => void) => {
-  void Promise.all(animations.map((a) => a.finished)).then(onDone, () => {})
+  let isStopped = false
+  void Promise.all(animations.map((a) => a.finished)).then(
+    () => {
+      if (!isStopped) onDone()
+    },
+    () => {},
+  )
+  return () => {
+    isStopped = true
+  }
 }
 
 // A count's odometer: changed digits slide (up on add, down on remove), and
@@ -80,8 +92,11 @@ export const useCountRoll = (
           ),
       ),
     )
-    settle(animations, () => setRoll(null))
-    return () => animations.forEach((a) => a.cancel())
+    const stop = settle(animations, () => setRoll(null))
+    return () => {
+      stop()
+      animations.forEach((a) => a.cancel())
+    }
   }, [roll])
 
   // 1 → 0: fade out, then unmount
@@ -93,8 +108,11 @@ export const useCountRoll = (
       easing: EASE_FADE,
       fill: 'forwards',
     })
-    settle([fade], () => setIsLeaving(false))
-    return () => fade.cancel()
+    const stop = settle([fade], () => setIsLeaving(false))
+    return () => {
+      stop()
+      fade.cancel()
+    }
   }, [isLeaving])
 
   // 0 → 1: fade in
@@ -116,5 +134,5 @@ export const useCountRoll = (
       ? countDigits(roll.from, roll.to)
       : countDigits(shown, shown)
     : []
-  return { isHidden: !shown, columns, rootRef }
+  return { isHidden: !shown, shown, columns, rootRef }
 }

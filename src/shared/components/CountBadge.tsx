@@ -8,7 +8,7 @@ interface CountBadgeProps {
 
 // Catalogue data → Martian Mono; hidden when there is nothing to count
 export const CountBadge = ({ count, animated = true }: CountBadgeProps) => {
-  const { isHidden, columns, rootRef } = useCountRoll(count, animated)
+  const { isHidden, shown, columns, rootRef } = useCountRoll(count, animated)
 
   if (isHidden) return null
 
@@ -16,7 +16,7 @@ export const CountBadge = ({ count, animated = true }: CountBadgeProps) => {
     <span
       ref={rootRef}
       role="img"
-      aria-label={String(count)}
+      aria-label={String(shown)}
       className="flex min-w-4 items-center justify-center rounded-full bg-foreground px-1 py-0.5 font-mono text-[9px] leading-none font-medium text-background tabular-nums [font-stretch:87.5%]"
     >
       <span aria-hidden className="flex">
