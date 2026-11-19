@@ -148,6 +148,7 @@ Fast and quiet: fades by default, three signatures, nothing else.
 | Groove draw-in (landing)    | ~800ms draw-in, once, closing mark               | platter                                                         |
 | Groove draw-in (Portrait)   | ~800ms draw-in, once, on reveal                  | platter                                                         |
 | Reading state, groove fill  | 600ms glide per request; count rolls ~300ms      | platter                                                         |
+| Count badge (nav, Scan)     | changed digits slide 300ms; 0↔1 fades 160ms      | platter; `ease-fade`                                            |
 | Sleeve pull                 | scroll-driven; timed moves 320ms                 | platter                                                         |
 | Hero film (landing)         | 16s, once; then a 10.8s ambient hold, looped     | platter, fade; its own: out, in-out, dolly, toss `(.3,.1,.1,1)` |
 | Collection loop (landing)   | 10s pass, looped; plays only on screen           | platter, fade, out, in-out; dolly `(.55,0,.12,1)`               |
@@ -155,6 +156,8 @@ Fast and quiet: fades by default, three signatures, nothing else.
 | Random pick loop (landing)  | 11.2s loop, in view only                         | platter, fade, out, in-out                                      |
 | Scan loop (landing)         | 12.8s loop (two 6.4s passes), in view only       | platter, fade, out, in-out; its own: dolly `(.55,0,.12,1)`      |
 | Portrait loop (landing)     | 9.6s loop, in view only                          | platter, fade, in-out; its own: dolly `(.55,0,.12,1)`           |
+
+**The count badge** (`CountBadge`, `useCountRoll`). Nav and Scan counts roll like an odometer: only the changed digits slide, up on add, down on remove (transform and opacity, WAAPI, 300ms platter); 0↔1 fades 160ms. Nothing plays on first show or when the profile first loads; reduced motion swaps instantly. The landing's Scan loop opts out (`animated={false}`): its score drives the count. Screen readers get the plain number.
 
 **Signature 1 — cover → detail** (`src/shared/utils/cover-transition.ts`). The tapped Cover grows into the record screen's Cover and shrinks back on close. `setCoverOrigin` on tap, then `flyCover` animates a copy of the Cover above the sheet with the Web Animations API (transform only, no layout work) while the sheet just fades (`.sheet-fade`). The landing's Collection loop plays the same move as one of its own tracks.
 

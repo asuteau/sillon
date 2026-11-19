@@ -184,7 +184,7 @@ const Panel = ({ pass, looks }: PanelProps) => {
     >
       <p className="type-caps flex items-center gap-2 text-[11px] text-muted-foreground">
         <span>Stack</span>
-        <CountBadge count={stack.records.length} />
+        <CountBadge count={stack.records.length} animated={false} />
       </p>
       <RecordList>
         {stack.records.map((record) => (
